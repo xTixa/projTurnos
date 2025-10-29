@@ -1,5 +1,4 @@
-
-from django.http import HttpResponse
+from django.shortcuts import render
 
 def index(request):
-    return HttpResponse("<h1>Bem-vindo ao projeto Django!</h1><p>Página principal básica de teste.</p>")
+    return render(request, "horarios/index.html")

@@ -1,12 +1,11 @@
 from django.contrib import admin
 from django.urls import path, include
 from django.http import HttpResponse
+from horarios.views import index
 
-def index(request):
-    return HttpResponse("Bem-vindo ao projeto!")
 
 urlpatterns = [
-    path('', index),  # Define a rota principal
+    path('', index, name='home'),
     path('ei/horarios/', include('horarios.urls')),
     path('admin/', admin.site.urls),
 ]
