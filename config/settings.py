@@ -95,8 +95,8 @@ DATABASES = {
 MONGO = {
     "HOST": "localhost",
     "PORT": 27017,
-    "DB_NAME": "ei_logs",
-    "COLLECTION": "acessos"
+    "DB_NAME": "",
+    "COLLECTION": ""
 }
 
 
