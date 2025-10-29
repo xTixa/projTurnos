@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{% block title %}Horários (EI){% endblock %}
+{% block content %}
+  <h1 class="mb-3">Horários — Engenharia Informática (EI)</h1>
+
+  <form method="get" class="row g-2 align-items-end mb-4">
+    <div class="col-auto">
+      <label for="ano_letivo" class="form-label">Ano letivo</label>
+      <select id="ano_letivo" name="ano_letivo" class="form-select" onchange="this.form.submit()" aria-label="Ano letivo">
+        <option value="">Todos</option>
+        {% for y in academic_years %}
+          <option value="{{ y }}" {% if selected_year == y %}selected{% endif %}>{{ y }}</option>
+        {% endfor %}
+      </select>
+    </div>
+  </form>
+
+  {% for cy, sem in grouped.keys %}
+  {% endfor %}
+
+  {% for key, data in grouped.items %}
+    <div class="mb-4">
+      <h2 class="h5">
+        {{ key.0.label }} — {{ key.1.label }}
+      </h2>
+
+      <div class="row g-2">
+        <div class="col-12 col-md-6">
+          <div class="card h-100">
+            <div class="card-body">
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <strong>Horário</strong>
+              </div>
+              {% if data.normal %}
+                <ul class="list-unstyled mb-0">
+                  {% for sch in data.normal %}
+                    <li class="mb-1">
+                      {% if sch.external_url %}
+                        <a href="{{ sch.external_url }}" target="_blank" rel="noopener">Ver ({{ sch.shift|default:"—" }})</a>
+                      {% elif sch.file %}
+                        <a href="{{ sch.file.url }}" target="_blank" rel="noopener">Ver ({{ sch.shift|default:"—" }})</a>
+                      {% else %}
+                        <span class="text-muted">Sem ficheiro</span>
+                      {% endif %}
+                      {% if sch.last_changed %}<small class="text-muted"> — alterado {{ sch.last_changed }}</small>{% endif %}
+                    </li>
+                  {% endfor %}
+                </ul>
+              {% else %}
+                <p class="text-muted mb-0">Sem registos.</p>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+
+        <div class="col-12 col-md-6">
+          <div class="card h-100">
+            <div class="card-body">
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <strong>Compensação</strong>
+              </div>
+              {% if data.comp %}
+                <ul class="list-unstyled mb-0">
+                  {% for sch in data.comp %}
+                    <li class="mb-1">
+                      {% if sch.external_url %}
+                        <a href="{{ sch.external_url }}" target="_blank" rel="noopener">Ver ({{ sch.shift|default:"—" }})</a>
+                      {% elif sch.file %}
+                        <a href="{{ sch.file.url }}" target="_blank" rel="noopener">Ver ({{ sch.shift|default:"—" }})</a>
+                      {% else %}
+                        <span class="text-muted">Sem ficheiro</span>
+                      {% endif %}
+                      {% if sch.last_changed %}<small class="text-muted"> — alterado {{ sch.last_changed }}</small>{% endif %}
+                    </li>
+                  {% endfor %}
+                </ul>
+              {% else %}
+                <p class="text-muted mb-0">Sem registos.</p>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  {% endfor %}
+{% endblock %}
