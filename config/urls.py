@@ -8,4 +8,5 @@ def index(request):
 urlpatterns = [
     path('', index),  # Define a rota principal
     path('ei/horarios/', include('horarios.urls')),
+    path('admin/', admin.site.urls),
 ]
