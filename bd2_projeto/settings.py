@@ -76,14 +76,16 @@ WSGI_APPLICATION = 'bd2_projeto.wsgi.application'
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
-        "NAME": "BD2_Projeto",   
-        "USER": "postgres",     
-        "PASSWORD": "1234",
-        "HOST": "localhost",
+        "NAME": "neondb",
+        "USER": "neondb_owner",
+        "PASSWORD": "npg_JG6K1jrybkXV",
+        "HOST": "ep-lively-pond-a956w6sx-pooler.gwc.azure.neon.tech",
         "PORT": "5432",
+        "OPTIONS": {
+            "sslmode": "require",
+        }
     }
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
