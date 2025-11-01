@@ -1,10 +1,43 @@
-{% extends 'home/base.html' %}
-
-{% block title %}Contactos — Horários EI{% endblock %}
-
-{% block sb_contactos_active %}is-active{% endblock %}
+{% extends "home/base.html" %}
+{% load static %}
+{% block title %}Contactos — DI ESTGV{% endblock %}
 
 {% block content %}
-  <h1>Contactos</h1>
-  <p>Aqui podes encontrar todas as informações relevantes sobre os contactos do curso de Engenharia Informática.</p>
+<section class="contact-header">
+  <div class="contact-info">
+    <h1>Contactos — Departamento de Informática</h1>
+    <p>Escola Superior de Tecnologia e Gestão de Viseu</p>
+    <p>Campus Politécnico de Repeses, 3504-510 Viseu</p>
+    <p><i class="fa-solid fa-envelope"></i> sec-di@estgv.ipv.pt | <i class="fa-solid fa-phone"></i> +351 232 480 533</p>
+    <a href="https://maps.google.com/?q=ESTGV%20Viseu" target="_blank" class="map-link">
+      <i class="fa-solid fa-map-location-dot"></i> Ver no mapa
+    </a>
+  </div>
+  <iframe
+    class="contact-map"
+    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3047.912728949598!2d-7.920985!3d40.648194!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0xd235ce00a0f63d9%3A0x5e35e9c52a7e0e0c!2sESTGV%20-%20Escola%20Superior%20de%20Tecnologia%20e%20Gest%C3%A3o%20de%20Viseu!5e0!3m2!1spt-PT!2spt!4v1715433568730!5m2!1spt-PT!2spt"
+    loading="lazy"
+    referrerpolicy="no-referrer-when-downgrade"
+  ></iframe>
+</section>
+
+<div class="contact-controls">
+  <input id="searchInput" type="text" placeholder="Pesquisar por nome, função ou email..." />
+  <div class="filters">
+    <button class="filter-btn active" data-group="all">Todos</button>
+    <button class="filter-btn" data-group="direcao">Direção</button>
+    <button class="filter-btn" data-group="docentes">Docentes</button>
+    <button class="filter-btn" data-group="tecnicos">Técnicos</button>
+    <button class="filter-btn" data-group="delegados">Delegados</button>
+  </div>
+</div>
+
+<section id="contactsContainer" class="contacts-grid">
+  <!-- os contactos serão carregados por JS -->
+</section>
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="{% static 'js/contactos.js' %}"></script>
 {% endblock %}
