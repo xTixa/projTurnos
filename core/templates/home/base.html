@@ -1,42 +1,106 @@
 <!DOCTYPE html>
 <html lang="pt">
 <head>
-    {% load static %}
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Horários EI - IPV</title>
-    <link rel="stylesheet" href="{% static 'css/style.css' %}">
-    <style>
-        body { font-family: Arial, sans-serif; margin:0; }
-        .container-flex { display: flex; height: 100vh; }
-        .sidebar {
-            width: 250px;
-            background: #f4f4f4;
-            padding: 20px;
-            border-right: 1px solid #ddd;
-        }
-        .main-content {
-            flex: 1;
-            padding: 40px;
-        }
-        .menu-header { font-weight:bold; margin-bottom:20px; }
-        .menu-list li { margin:15px 0; }
-        .menu-list a { text-decoration: none; color: #2371a7; }
-        .menu-list a:hover { text-decoration: underline; }
-    </style>
+  {% load static %}
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{% block title %}Horários EI - IPV{% endblock %}</title>
+
+  <!-- Estilos -->
+  <link rel="stylesheet" href="{% static 'css/style.css' %}">
+  <!-- Ícones -->
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+    referrerpolicy="no-referrer"
+  />
 </head>
 <body>
-    <div class="container-flex">
-        <div class="sidebar">
-            {% block sidebar %}
-            <!-- Conteúdo sidebar -->
-            {% endblock %}
-        </div>
-        <div class="main-content">
-            {% block content %}
-            <!-- Conteúdo principal -->
-            {% endblock %}
-        </div>
+  <!-- TOP NAVBAR -->
+  <header class="topbar">
+    <div class="topbar__left">
+      <a class="logo" href="{% url 'home:index' %}">
+        <span class="logo__mark">Home</span>
+      </a>
+
+      <nav class="toplinks">
+        <a href="#" class="toplinks__link">E.I</a>
+        <a href="#" class="toplinks__link">TDM</a>
+        <a href="#" class="toplinks__link">EISI</a>
+        <a href="#" class="toplinks__link">RSI</a>
+        <a href="#" class="toplinks__link">DWDM</a>
+        <a href="#" class="toplinks__link">DI</a>
+      </nav>
     </div>
+
+    <div class="topbar__right">
+      <a href="{% url 'auth:login' %}" class="btn btn-ghost">
+        <i class="fa-regular fa-user"></i> <span class="hide-sm">Login</span>
+      </a>
+    </div>
+  </header>
+
+  <div class="container-flex">
+    <aside class="sidebar">
+      {% block sidebar %}
+      <div class="menu-header">Escolhe o teu horário</div>
+      <ul class="menu">
+
+        <li class="menu__item {% if request.resolver_match.url_name == 'index' %}is-active{% endif %}">
+          <a href="{% url 'home:index' %}">
+            <i class="fa-solid fa-house"></i> Home
+          </a>
+        </li>
+
+        <li class="menu__item {% if request.resolver_match.url_name == 'ingresso' %}is-active{% endif %}">
+          <a href="{% url 'home:ingresso' %}">
+            <i class="fa-solid fa-graduation-cap"></i> Ingresso
+          </a>
+        </li>
+
+        <li class="menu__item {% if request.resolver_match.url_name == 'plano' %}is-active{% endif %}">
+          <a href="{% url 'home:plano' %}">
+            <i class="fa-regular fa-rectangle-list"></i> Plano Curricular
+          </a>
+        </li>
+
+        <li class="menu__item {% if request.resolver_match.url_name == 'horarios' %}is-active{% endif %}">
+          <a href="{% url 'home:horarios' %}">
+            <i class="fa-regular fa-calendar"></i> Horários
+          </a>
+        </li>
+
+        <li class="menu__item {% if request.resolver_match.url_name == 'avaliacoes' %}is-active{% endif %}">
+          <a href="{% url 'home:avaliacoes' %}">
+            <i class="fa-regular fa-clipboard"></i> Avaliações
+          </a>
+        </li>
+
+        <li class="menu__item {% if request.resolver_match.url_name == 'contactos' %}is-active{% endif %}">
+          <a href="{% url 'home:contactos' %}">
+            <i class="fa-regular fa-address-card"></i> Contactos
+          </a>
+        </li>
+
+        <li class="menu__item {% if request.resolver_match.url_name == 'informacoes' %}is-active{% endif %}">
+          <a href="{% url 'home:informacoes' %}">
+            <i class="fa-solid fa-circle-info"></i> Informações
+          </a>
+        </li>
+
+      </ul>
+      {% endblock %}
+    </aside>
+
+    <main class="main-content">
+      {% block content %}{% endblock %}
+    </main>
+  </div>
+
+  <!-- Botão flutuante -->
+  <a class="fab" href="#">
+    <i class="fa-regular fa-square-plus"></i>
+    Inscrição Turnos
+  </a>
 </body>
 </html>
