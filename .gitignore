@@ -1,47 +1,97 @@
-# .gitignore
-# Binaries for programs and plugins
-*.exe
-*.exe~
-*.dll
-*.so
-*.so.*
-*.dylib
-
-# Test binary, built with `go test -c`
-*.test
-
-# Output of the go coverage tool
-*.out
-.coverage
-
-# Go workspace file
-go.work
-
-# Dependency directories
-vendor/
-
-# Env files
-.env
-.env.local
-.env.*.local
-
-# IDE
-.vscode/
-.idea/
-*.swp
-*.swo
-*~
-.DS_Store
-
-# Logs
-*.log
-
-# Python cache
+# Byte-compiled / optimized / DLL files (Python caches - essencial para .pyc conflitos)
 __pycache__/
 *.py[cod]
 *$py.class
 *.so
 .Python
+build/
+develop-eggs/
+dist/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+*.egg-info/
+.installed.cfg
+*.egg
 
-# macOS
+# Virtual environments
+venv/
+env/
+ENV/
+
+# Environment variables and secrets (NeonDB credenciais)
+.env
+.env.local
+.env.*.local
+secrets/
+
+# Django-specific
+db.sqlite3  # Base local SQLite; NeonDB é remota
+media/      # Uploads de utilizadores
+staticfiles/  # Gerado por collectstatic
+*.log       # Logs Django
+local_settings.py  # Configs locais
+.migrate    # Arquivos de migração custom se houver
+
+# Coverage e testes
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+.hypothesis
+
+# Translations
+*.pot
+*.mo
+
+# Django migrations cache (específico para o seu 0001_initial.py)
+core/migrations/__pycache__/
+bd2_projeto/__pycache__/
+
+# IDEs e editores
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.spyderproject
+.ropeproject
+
+# OS-specific
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Binaries e outros
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+.coverage
+
+# Go (se aplicável, remova se não usar)
+vendor/
+go.work
+
+# Logs e backups locais (NeonDB dumps)
+*.log
+*.backup
+*.sql  # Dumps PostgreSQL locais; não commite dados sensíveis
+
+# macOS e outros
 .DS_Store
