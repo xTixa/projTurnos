@@ -1,12 +1,14 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
+from django.contrib.auth import logout as auth_logout
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from django.shortcuts import redirect
 
 def index(request):
     return render(request, "home/index.html")
 
 def ingresso(request):
     return render(request, "home/ingresso.html")
-
-from django.shortcuts import render
 
 def plano(request):
     plano_curricular = [
@@ -86,5 +88,19 @@ def contactos(request):
 def informacoes(request):
     return render(request, "home/informacoes.html")
 
-def login_view(request):
-    return render(request, "auth/login.html")
+def perfil(request):
+    return render(request, "profile/perfil.html")
+
+def do_logout(request):
+    auth_logout(request)                 # termina a sessão
+    return redirect("home:index")        # redireciona para a home
+
+@login_required
+def inscrever_turno(request, turno_id):
+    if request.method != "POST":
+        messages.error(request, "Método inválido. Usa o botão para te inscreveres.")
+        return redirect("home:perfil")
+
+    # (futuro) lógica real de BD; por agora só feedback
+    messages.success(request, f"Inscrição no turno #{turno_id} concluída com sucesso")
+    return redirect("home:perfil")
