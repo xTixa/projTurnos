@@ -170,3 +170,97 @@ body{
   transition: transform 0.2s ease;
 }
 .btn-icon:hover { transform: scale(1.1); color: #0a4b7a; }
+
+.plano-header { margin-bottom: 20px; }
+.tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+.tab-btn {
+  border: 1px solid var(--border);
+  background: #fff;
+  border-radius: 8px;
+  padding: 8px 14px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+.tab-btn:hover { background: var(--blue-100); }
+.tab-btn.active {
+  background: var(--blue);
+  color: #fff;
+}
+
+.plano-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 16px;
+}
+.uc-card {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px;
+  cursor: pointer;
+  box-shadow: var(--shadow);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.uc-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 18px rgba(0,0,0,0.1);
+}
+.uc-card h3 { margin: 0 0 6px; color: var(--blue); }
+.uc-card p { margin: 0; color: var(--muted); }
+.ects {
+  display: inline-block;
+  margin-top: 8px;
+  background: var(--blue-100);
+  color: var(--blue);
+  padding: 4px 8px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+/* Modal */
+.modal {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.5);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 100;
+  animation: fadeIn .3s ease;
+}
+.modal.hidden { display: none; }
+.modal-content {
+  background: #fff;
+  padding: 24px;
+  border-radius: 14px;
+  width: 90%;
+  max-width: 450px;
+  box-shadow: var(--shadow);
+  animation: slideUp .3s ease;
+}
+.modal-content h2 { margin-top: 0; color: var(--blue); }
+.close {
+  position: absolute; top: 12px; right: 16px;
+  font-size: 20px; cursor: pointer;
+}
+@keyframes fadeIn { from {opacity:0;} to {opacity:1;} }
+@keyframes slideUp { from {transform:translateY(20px);} to {transform:translateY(0);} }
+
+.placeholder {
+  text-align: center;
+  color: var(--muted);
+  font-style: italic;
+}
+
+.animate {
+  animation: fadeIn 0.4s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}

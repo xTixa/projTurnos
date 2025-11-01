@@ -1,10 +1,44 @@
-{% extends 'home/base.html' %}
-
-{% block title %}Plano Curricular — Horários EI{% endblock %}
-
-{% block sb_plano_active %}is-active{% endblock %}
+{% extends "home/base.html" %}
+{% load static %}
+{% block title %}Plano Curricular — Engenharia Informática{% endblock %}
 
 {% block content %}
-  <h1>Plano Curricular</h1>
-  <p>Aqui podes encontrar todas as informações relevantes sobre o plano curricular do curso de Engenharia Informática.</p>
+<section class="plano-header">
+  <h1>Plano Curricular — Engenharia Informática</h1>
+  <p>Explora as Unidades Curriculares por ano e semestre. Clica numa disciplina para veres detalhes como docente, ECTS e tipo.</p>
+</section>
+
+<div class="tabs" id="tabsContainer">
+  {% for a in plano %}
+    <button class="tab-btn" data-ano="{{ a.ano }}" data-sem="{{ a.semestre }}">
+      {{ a.ano }}º Ano — {{ a.semestre }}º Semestre
+    </button>
+  {% endfor %}
+</div>
+
+<section id="planoContainer" class="plano-grid">
+  <p class="placeholder">Seleciona um ano/semestre acima para ver as disciplinas.</p>
+</section>
+
+<!-- Modal -->
+<div id="ucModal" class="modal hidden">
+  <div class="modal-content">
+    <span class="close">&times;</span>
+    <h2 id="ucNome"></h2>
+    <p id="ucDesc"></p>
+    <ul>
+      <li><strong>ECTS:</strong> <span id="ucEcts"></span></li>
+      <li><strong>Tipo:</strong> <span id="ucTipo"></span></li>
+      <li><strong>Docente:</strong> <span id="ucDocente"></span></li>
+    </ul>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+  // Passar dados do Django para JS
+  window.planoData = {{ plano|safe }};
+</script>
+<script src="{% static 'js/plano.js' %}"></script>
 {% endblock %}
