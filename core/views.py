@@ -78,7 +78,12 @@ def horarios(request):
     return render(request, "home/horarios.html")
 
 def avaliacoes(request):
-    return render(request, "home/avaliacoes.html")
+    avaliacoes_docs = [
+        {"ano": "1º Ano", "ficheiro": "avaliacoes_1ano.pdf"},
+        {"ano": "2º Ano", "ficheiro": "avaliacoes_2ano.pdf"},
+        {"ano": "3º Ano", "ficheiro": "avaliacoes_3ano.pdf"},
+    ]
+    return render(request, "home/avaliacoes.html", {"avaliacoes_docs": avaliacoes_docs})
 
 def contactos(request):
     return render(request, "home/contactos.html")
