@@ -1,10 +1,65 @@
-{% extends 'home/base.html' %}
-
-{% block title %}Ingresso — Horários EI{% endblock %}
-
-{% block sb_ingresso_active %}is-active{% endblock %}
+{% extends "home/base.html" %}
+{% load static %}
+{% block title %}Ingresso — Engenharia Informática{% endblock %}
 
 {% block content %}
-  <h1>Informações de Ingresso</h1>
-  <p>Aqui podes encontrar todas as informações relevantes sobre o processo de ingresso no curso de Engenharia Informática.</p>
+<section class="ingresso-hero">
+  <div class="hero-inner">
+    <div class="hero-text">
+      <h1>Engenharia Informática<br><span>O futuro começa aqui</span></h1>
+      <p>Forma-te numa área com empregabilidade garantida, espírito inovador e impacto real na sociedade.  
+      Junta-te à comunidade de Engenharia Informática da ESTGV.</p>
+      <div class="hero-actions">
+        <a href="https://www.ipv.pt/di/enginf" target="_blank" class="btn btn-primary">Candidatar-me</a>
+      </div>
+    </div>
+    <div class="hero-img">
+      <img src="{% static 'images/hero_ingresso.svg' %}" alt="Estudante de Engenharia Informática">
+    </div>
+  </div>
+</section>
+
+<section id="info" class="ingresso-tabs">
+  <div class="tab-buttons">
+    <button class="tab-btn active" data-tab="acesso">Condições de Acesso</button>
+    <button class="tab-btn" data-tab="competencias">Competências</button>
+    <button class="tab-btn" data-tab="saidas">Saídas Profissionais</button>
+  </div>
+
+  <div class="tab-content active" id="acesso">
+    <p>O ingresso realiza-se através do concurso nacional de acesso ao ensino superior.  
+       São aceites as provas de Matemática ou Física e Química.  
+       Candidatos de cursos profissionais podem aceder via concurso especial.</p>
+  </div>
+
+  <div class="tab-content" id="competencias">
+    <p>Ao longo do curso irás desenvolver competências em programação, engenharia de software, redes,  
+       bases de dados, inteligência artificial e segurança informática.  
+       Terás também formação em gestão, comunicação e inovação tecnológica.</p>
+  </div>
+
+  <div class="tab-content" id="saidas">
+    <p>Os diplomados em Engenharia Informática encontram colocação em empresas tecnológicas,  
+       startups, administração pública e consultoras, exercendo funções como:</p>
+    <ul class="career-list">
+      <li><i class="fa-solid fa-laptop-code"></i> Programador / Engenheiro de Software</li>
+      <li><i class="fa-solid fa-database"></i> Analista ou Administrador de Bases de Dados</li>
+      <li><i class="fa-solid fa-network-wired"></i> Gestor de Sistemas e Redes</li>
+      <li><i class="fa-solid fa-robot"></i> Especialista em IA e Automação</li>
+    </ul>
+  </div>
+</section>
+
+<section class="ingresso-cta">
+  <h2>Prepara a tua candidatura e vem aprender connosco!</h2>
+  <p>Curso de 3 anos (180 ECTS), lecionado na Escola Superior de Tecnologia e Gestão de Viseu.</p>
+  <div class="cta-buttons">
+    <a href="https://www.estgv.ipv.pt" target="_blank" class="btn btn-primary">Ver Regulamento</a>
+    <a href="{% url 'home:contactos' %}" class="btn btn-ghost">Contactar Departamento</a>
+  </div>
+</section>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="{% static 'js/ingresso.js' %}"></script>
 {% endblock %}

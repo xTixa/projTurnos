@@ -1,10 +1,34 @@
-{% extends 'home/base.html' %}
-
-{% block title %}Avaliações — Horários EI{% endblock %}
-
-{% block sb_avaliacoes_active %}is-active{% endblock %}
+{% extends "home/base.html" %}
+{% load static %}
+{% block title %}Avaliações — Engenharia Informática{% endblock %}
 
 {% block content %}
-  <h1>Avaliações</h1>
-  <p>Aqui podes encontrar todas as informações relevantes sobre as avaliações do curso de Engenharia Informática.</p>
+<section class="avaliacoes-header">
+  <h1>Avaliações — Engenharia Informática</h1>
+  <p>Consulta os documentos de avaliação organizados por ano letivo.  
+     Cada ficheiro inclui as datas e critérios definidos para o respetivo ano.</p>
+</section>
+
+<section class="avaliacoes-lista">
+  {% for doc in avaliacoes_docs %}
+  <div class="avaliacao-card">
+    <div class="avaliacao-info">
+      <i class="fa-solid fa-file-pdf"></i>
+      <div>
+        <h3>{{ doc.ano }}</h3>
+        <p>Calendário e regulamento das avaliações</p>
+      </div>
+    </div>
+    <a href="{% static 'docs/'|add:doc.ficheiro %}" class="btn btn-primary" download>
+      <i class="fa-solid fa-download"></i> Descarregar
+    </a>
+  </div>
+  {% endfor %}
+</section>
+
+<section class="avaliacoes-cta">
+  <h2>Dúvidas sobre avaliações?</h2>
+  <p>Contacta o teu docente responsável ou consulta o regulamento geral do curso.</p>
+  <a href="{% url 'home:contactos' %}" class="btn btn-ghost">Contactar Departamento</a>
+</section>
 {% endblock %}

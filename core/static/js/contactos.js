@@ -3,19 +3,25 @@ document.addEventListener("DOMContentLoaded", () => {
     { nome: "Filipe Caldeira", funcao: "Diretor Departamento de Informática", email: "caldeira@estgv.ipv.pt", grupo: "direcao" },
     { nome: "Steven Abrantes", funcao: "Diretor de Curso", email: "steven@estgv.ipv.pt", grupo: "direcao" },
 
-
     { nome: "Nuno Costa", funcao: "Técnico Superior", email: "ncosta@estgv.ipv.pt", grupo: "tecnicos" },
     { nome: "Silvia Moreira", funcao: "Técnica Superior", email: "smoreira@estgv.ipv.pt", grupo: "tecnicos" },
 
-    
-
+    { nome: "Ana Cristina Wanzeller Guedes de Lacerda", funcao: "Docente", email: "@estgv.ipv.pt", grupo: "docentes" },
+    { nome: "Ana Raquel Ferreira de Almeida Sebastião", funcao: "Docente", email: "@estgv.ipv.pt", grupo: "docentes" },
+    { nome: "Artur Jorge Afonso de Sousa", funcao: "Docente", email: "@estgv.ipv.pt", grupo: "docentes" },
+    { nome: "Carlos Alberto Tomás Simões", funcao: "Docente", email: "@estgv.ipv.pt", grupo: "docentes" },
+    { nome: "Carlos Augusto da Silva Cunha", funcao: "Docente", email: "@estgv.ipv.pt", grupo: "docentes" },
+    { nome: "Francisco Ferreira Francisco", funcao: "Docente", email: "@estgv.ipv.pt", grupo: "docentes" },
+    { nome: "João Pedro Menoita Henriques", funcao: "Docente", email: "@estgv.ipv.pt", grupo: "docentes" },
+    { nome: "Paulo Costa", funcao: "Docente", email: "@estgv.ipv.pt", grupo: "docentes" },
+    { nome: "Paulo Rogério Perfeito Tomé", funcao: "Docente", email: "@estgv.ipv.pt", grupo: "docentes" },
 
     { nome: "XXXXXXXX", funcao: "Delegado 1.º ano", email: "xxxxxxx@alunos.estgv.ipv.pt", grupo: "delegados" },
     { nome: "XXXXXXXX", funcao: "Delegado 1.º ano", email: "xxxxxxx@alunos.estgv.ipv.pt", grupo: "delegados" },
     { nome: "XXXXXXXX", funcao: "Delegado 2.º ano", email: "xxxxxxx@alunos.estgv.ipv.pt", grupo: "delegados" },
     { nome: "XXXXXXXX", funcao: "Delegado 3.º ano", email: "xxxxxxx@alunos.estgv.ipv.pt", grupo: "delegados" },
     { nome: "Rodrigo Pereira", funcao: "Delegado 3.º ano", email: "xxxxxxx@alunos.estgv.ipv.pt", grupo: "delegados" },
-    { nome: "XXXXXXXX", funcao: "Delegado 3.º ano", email: "xxxxxxx@alunos.estgv.ipv.pt", grupo: "delegados" },
+    { nome: "Francisco Pereira", funcao: "Delegado 3.º ano", email: "xxxxxxx@alunos.estgv.ipv.pt", grupo: "delegados" },
   ];
 
   const container = document.getElementById("contactsContainer");
