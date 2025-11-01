@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Login</title>
+  <style>
+    :root { --card-w: 360px; }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; font-family: system-ui, Arial, sans-serif;
+      min-height: 100vh; display: grid; place-items: center;
+      background: #f6f7f9;
+    }
+    .card {
+      width: min(90vw, var(--card-w));
+      background: #fff; border: 1px solid #e6e8eb; border-radius: 14px;
+      padding: 28px; box-shadow: 0 6px 24px rgba(0,0,0,.06);
+    }
+    h1 { font-size: 1.25rem; margin: 0 0 18px; }
+    .field { margin-bottom: 14px; }
+    label { display: block; font-size: .9rem; margin-bottom: 6px; color: #2a2f3a; }
+    input[type="text"], input[type="email"], input[type="password"] {
+      width: 100%; padding: 12px 12px; border: 1px solid #cfd6de; border-radius: 10px;
+      font-size: 1rem; outline: none; transition: border-color .2s, box-shadow .2s;
+    }
+    input:focus { border-color: #2274e0; box-shadow: 0 0 0 3px rgba(34,116,224,.15); }
+    .row { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+    .checkbox { display: inline-flex; align-items: center; gap: 8px; font-size: .9rem; }
+    .btn {
+      width: 100%; border: 0; background: #2274e0; color: #fff; padding: 12px 14px;
+      border-radius: 10px; font-weight: 600; font-size: 1rem; cursor: pointer;
+      transition: filter .2s, transform .02s;
+    }
+    .btn:hover { filter: brightness(1.05); }
+    .btn:active { transform: translateY(1px); }
+    .muted { font-size: .9rem; color: #5f6b7a; text-align: center; margin-top: 12px; }
+    .toggle {
+      border: 0; background: none; font: inherit; color: #2274e0; cursor: pointer;
+      padding: 0; margin-left: 6px;
+    }
+  </style>
+</head>
+<body>
+  <main class="card" role="main" aria-labelledby="login-title">
+    <h1 id="login-title">Entrar</h1>
+
+    <form action="/login" method="post" novalidate>
+      <div class="field">
+        <label for="email">Email ou utilizador</label>
+        <input id="email" name="email" type="text" autocomplete="username" required />
+      </div>
+
+      <div class="field">
+        <label for="password">Palavra-passe
+          <button type="button" class="toggle" aria-controls="password" aria-pressed="false" onclick="togglePw(this)">mostrar</button>
+        </label>
+        <input id="password" name="password" type="password" autocomplete="current-password" required minlength="6" />
+      </div>
+
+      <div class="row" style="margin:10px 0 16px;">
+        <label class="checkbox"><input type="checkbox" name="remember" /> Lembrar-me</label>
+        <a href="/recuperar" style="font-size:.9rem; color:#2274e0; text-decoration:none;">Esqueci-me da palavra-passe</a>
+      </div>
+
+      <button class="btn" type="submit">Entrar</button>
+      <p class="muted">Ainda não tens conta? <a href="/registar" style="color:#2274e0; text-decoration:none;">Regista-te</a></p>
+    </form>
+  </main>
+
+  <script>
+    function togglePw(btn){
+      const input = document.getElementById(btn.getAttribute('aria-controls'));
+      const isText = input.type === 'text';
+      input.type = isText ? 'password' : 'text';
+      btn.textContent = isText ? 'mostrar' : 'ocultar';
+      btn.setAttribute('aria-pressed', String(!isText));
+    }
+  </script>
+</body>
+</html>
