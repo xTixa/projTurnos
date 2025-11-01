@@ -1,10 +1,41 @@
-{% extends 'home/base.html' %}
-
-{% block title %}Horários — Horários EI{% endblock %}
-
-{% block sb_horarios_active %}is-active{% endblock %}
+{% extends "home/base.html" %}
+{% load static %}
+{% block title %}Horários — Engenharia Informática{% endblock %}
 
 {% block content %}
-  <h1>Horários</h1>
-  <p>Aqui podes encontrar todas as informações relevantes sobre os horários do curso de Engenharia Informática.</p>
+<section class="horarios-hero">
+  <h1>Horários — Engenharia Informática</h1>
+  <p>Consulta aqui os horários organizados por dia e turno.  
+     Turnos sobrepostos são destacados a vermelho.</p>
+</section>
+
+<section class="horarios-tabela">
+  <table>
+    <thead>
+      <tr>
+        <th>Dia</th>
+        <th>Hora</th>
+        <th>Unidade Curricular</th>
+        <th>Turno</th>
+        <th>Sala</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for h in horarios %}
+      <tr class="{% if h.conflito %}conflito{% endif %}">
+        <td>{{ h.dia }}</td>
+        <td>{{ h.hora }}</td>
+        <td>{{ h.uc }}</td>
+        <td>{{ h.turno }}</td>
+        <td>{{ h.sala }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+
+<a href="{% url 'home:inscricao_turno' %}" class="fab">
+  <i class="fa-solid fa-user-plus"></i>
+  Inscrição em Turnos
+</a>
 {% endblock %}

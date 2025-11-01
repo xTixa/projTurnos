@@ -1,0 +1,43 @@
+{% extends "home/base.html" %}
+{% load static %}
+{% block title %}Inscrição em Turnos{% endblock %}
+
+{% block content %}
+<section class="turno-header">
+  <h1>Inscrição em Turnos</h1>
+  <p>Seleciona a unidade curricular e o turno que pretendes frequentar.  
+     As vagas são atualizadas em tempo real.</p>
+</section>
+
+<section class="turnos-lista">
+  {% for uc in unidades %}
+  <div class="uc-card">
+    <h3>{{ uc.nome }}</h3>
+    <div class="uc-turnos">
+      <label for="turno{{ forloop.counter }}">Selecionar Turno:</label>
+      <select id="turno{{ forloop.counter }}" class="turno-select">
+        <option disabled selected>Escolhe um turno...</option>
+        {% for t in uc.turnos %}
+          <option {% if t.vagas == 0 %}disabled{% endif %}>
+            {{ t.nome }} — {{ t.horario }} ({{ t.vagas }} vaga{{ t.vagas|pluralize:"s" }})
+          </option>
+        {% endfor %}
+      </select>
+      <button class="btn btn-primary btn-inscrever" {% if uc.turnos|length == 0 %}disabled{% endif %}>
+        <i class="fa-solid fa-check"></i> Inscrever
+      </button>
+    </div>
+  </div>
+  {% endfor %}
+</section>
+
+<!-- Mensagem de sucesso -->
+<div id="mensagem" class="mensagem hidden">
+  <i class="fa-solid fa-circle-check"></i>
+  Inscrição efetuada com sucesso!
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="{% static 'js/inscricao_turno.js' %}"></script>
+{% endblock %}
