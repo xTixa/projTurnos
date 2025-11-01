@@ -36,38 +36,45 @@ def plano(request):
             "ano": 2,
             "semestre": 1,
             "ucs": [
-                {"nome": "Bases de Dados I", "ects": 6, "tipo": "Obrigatória", "docente": "Fernando Silva", "descricao": "Modelo relacional e SQL."},
-                {"nome": "Engenharia de Software", "ects": 6, "tipo": "Obrigatória", "docente": "Paulo Correia", "descricao": "Requisitos, UML e metodologias ágeis."},
-                {"nome": "Sistemas Digitais", "ects": 5, "tipo": "Obrigatória", "docente": "", "descricao": "Circuitos combinatórios e sequenciais."},
-                {"nome": "Sistemas Digitais", "ects": 5, "tipo": "Obrigatória", "docente": "", "descricao": "Circuitos combinatórios e sequenciais."},
-                {"nome": "Sistemas Digitais", "ects": 5, "tipo": "Obrigatória", "docente": "", "descricao": "Circuitos combinatórios e sequenciais."},
+                {"nome": "Programação Orientada a Objetos", "ects": 6.5, "tipo": "Obrigatória", "docente": "Fernando Silva", "descricao": "Modelo relacional e SQL."},
+                {"nome": "Análise de Sistemas", "ects": 6.5, "tipo": "Obrigatória", "docente": "Paulo Correia", "descricao": "Requisitos, UML e metodologias ágeis."},
+                {"nome": "Sistemas Operativos", "ects": 5.5, "tipo": "Obrigatória", "docente": "", "descricao": "Circuitos combinatórios e sequenciais."},
+                {"nome": "Aplicações para a Internet I", "ects": 6.5, "tipo": "Obrigatória", "docente": "", "descricao": "Circuitos combinatórios e sequenciais."},
+                {"nome": "Usabilidade", "ects": 5, "tipo": "Obrigatória", "docente": "", "descricao": "Circuitos combinatórios e sequenciais."},
             ],
         },
         {
             "ano": 2,
             "semestre": 2,
             "ucs": [
-                {"nome": "Bases de Dados I", "ects": 6, "tipo": "Obrigatória", "docente": "Fernando Silva", "descricao": "Modelo relacional e SQL."},
-                {"nome": "Engenharia de Software", "ects": 6, "tipo": "Obrigatória", "docente": "Paulo Correia", "descricao": "Requisitos, UML e metodologias ágeis."},
-                {"nome": "Sistemas Digitais", "ects": 5, "tipo": "Obrigatória", "docente": "", "descricao": "Circuitos combinatórios e sequenciais."},
-                {"nome": "Sistemas Digitais", "ects": 5, "tipo": "Obrigatória", "docente": "", "descricao": "Circuitos combinatórios e sequenciais."},
-                {"nome": "Sistemas Digitais", "ects": 5, "tipo": "Obrigatória", "docente": "", "descricao": "Circuitos combinatórios e sequenciais."},
+                {"nome": "Engenharia de Software I", "ects": 4.5, "tipo": "Obrigatória", "docente": "Fernando Silva", "descricao": "Modelo relacional e SQL."},
+                {"nome": "Bases de Dados I", "ects": 6, "tipo": "Obrigatória", "docente": "Paulo Correia", "descricao": "Requisitos, UML e metodologias ágeis."},
+                {"nome": "Aplicações para a Internet II", "ects": 5, "tipo": "Obrigatória", "docente": "", "descricao": "Circuitos combinatórios e sequenciais."},
+                {"nome": "Redes de Comunicação II", "ects": 4.5, "tipo": "Obrigatória", "docente": "", "descricao": "Circuitos combinatórios e sequenciais."},
+                {"nome": "Programação para Dispositivos Móveis", "ects": 5, "tipo": "Obrigatória", "docente": "", "descricao": "Circuitos combinatórios e sequenciais."},
+                {"nome": "Projeto Integrado", "ects": 5, "tipo": "Obrigatória", "docente": "", "descricao": "Circuitos combinatórios e sequenciais."},
             ],
         },
         {
             "ano": 3,
             "semestre": 1,
             "ucs": [
-                {"nome": "Bases de Dados I", "ects": 6, "tipo": "Obrigatória", "docente": "Fernando Silva", "descricao": "Modelo relacional e SQL."},
-                {"nome": "Engenharia de Software", "ects": 6, "tipo": "Obrigatória", "docente": "Paulo Correia", "descricao": "Requisitos, UML e metodologias ágeis."},
+                {"nome": "Segurança Informática", "ects": 4.5, "tipo": "Obrigatória", "docente": "Fernando Silva", "descricao": "Modelo relacional e SQL."},
+                {"nome": "Redes de Comunicação III", "ects": 4.5, "tipo": "Obrigatória", "docente": "Paulo Correia", "descricao": "Requisitos, UML e metodologias ágeis."},
+                {"nome": "Complementos de Sistemas Operativos", "ects": 5, "tipo": "Obrigatória", "docente": "Fernando Silva", "descricao": "Modelo relacional e SQL."},
+                {"nome": "Bases de Dados II", "ects": 6, "tipo": "Obrigatória", "docente": "Paulo Correia", "descricao": "Requisitos, UML e metodologias ágeis."},
+                {"nome": "Sistemas Embebidos", "ects": 5, "tipo": "Obrigatória", "docente": "Fernando Silva", "descricao": "Modelo relacional e SQL."},
+                {"nome": "Sistemas Distribuídos", "ects": 5, "tipo": "Obrigatória", "docente": "Paulo Correia", "descricao": "Requisitos, UML e metodologias ágeis."},
             ],
         },
         {
             "ano": 3,
             "semestre": 2,
             "ucs": [
-                {"nome": "Bases de Dados I", "ects": 6, "tipo": "Obrigatória", "docente": "Fernando Silva", "descricao": "Modelo relacional e SQL."},
-                {"nome": "Engenharia de Software", "ects": 6, "tipo": "Obrigatória", "docente": "Paulo Correia", "descricao": "Requisitos, UML e metodologias ágeis."},
+                {"nome": "Inteligência Artificial", "ects": 5, "tipo": "Obrigatória", "docente": "Fernando Silva", "descricao": "Modelo relacional e SQL."},
+                {"nome": "Engenharia de Software II", "ects": 6, "tipo": "Obrigatória", "docente": "Paulo Correia", "descricao": "Requisitos, UML e metodologias ágeis."},
+                {"nome": "Empreendedorismo e Gestão de Empresas", "ects": 3, "tipo": "Obrigatória", "docente": "Fernando Silva", "descricao": "Modelo relacional e SQL."},
+                {"nome": "Projeto", "ects": 16, "tipo": "Obrigatória", "docente": "Paulo Correia", "descricao": "Requisitos, UML e metodologias ágeis."},
             ],
         },
     ]
@@ -111,7 +118,7 @@ def login_view(request):
 def inscricao_turno(request):
     unidades = [
         {
-            "nome": "Programação I",
+            "nome": "Programação Orientada a Objetos",
             "turnos": [
                 {"nome": "Turno 1", "horario": "Segunda 08:30 - 10:00", "vagas": 5},
                 {"nome": "Turno 2", "horario": "Quarta 10:00 - 11:30", "vagas": 2},
