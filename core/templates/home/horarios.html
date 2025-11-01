@@ -1,10 +1,57 @@
-{% extends 'home/base.html' %}
-
-{% block title %}Horários — Horários EI{% endblock %}
-
-{% block sb_horarios_active %}is-active{% endblock %}
+{% extends "home/base.html" %}
+{% load static %}
+{% block title %}Horários — Engenharia Informática{% endblock %}
 
 {% block content %}
-  <h1>Horários</h1>
-  <p>Aqui podes encontrar todas as informações relevantes sobre os horários do curso de Engenharia Informática.</p>
+<section class="horarios-header">
+  <h1>Horários — Engenharia Informática</h1>
+  <p>Consulta o horário das tuas aulas por ano letivo e inscreve-te no turno correspondente.</p>
+</section>
+
+<div class="tabs-anos">
+  {% for ano, tabela in horarios.items %}
+    <button class="tab-btn {% if forloop.first %}active{% endif %}" data-ano="{{ forloop.counter }}">
+      {{ ano }}
+    </button>
+  {% endfor %}
+</div>
+
+{% for ano, tabela in horarios.items %}
+<div class="horario-table {% if forloop.first %}active{% endif %}" id="ano{{ forloop.counter }}">
+  <table>
+    <thead>
+      <tr>
+        <th>Hora</th>
+        <th>Segunda</th>
+        <th>Terça</th>
+        <th>Quarta</th>
+        <th>Quinta</th>
+        <th>Sexta</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for linha in tabela %}
+      <tr>
+        <td>{{ linha.hora }}</td>
+        <td>{{ linha.segunda }}</td>
+        <td>{{ linha.terca }}</td>
+        <td>{{ linha.quarta }}</td>
+        <td>{{ linha.quinta }}</td>
+        <td>{{ linha.sexta }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endfor %}
+
+<!-- Botão flutuante -->
+<a class="fab" href="{% url 'home:inscricao_turno' %}">
+  <i class="fa-regular fa-square-plus"></i>
+  Inscrição Turnos
+</a>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="{% static 'js/horarios.js' %}"></script>
 {% endblock %}
