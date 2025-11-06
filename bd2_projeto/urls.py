@@ -16,14 +16,8 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from django.http import HttpResponse
-from core import views
-
 
 urlpatterns = [
-    path('', include('core.urls')),
-    path('admin/', admin.site.urls),
+    path("admin/", admin.site.urls),
     path("", include(("core.urls", "home"), namespace="home")),
-    path("accounts/", include(("django.contrib.auth.urls", "auth"), namespace="auth")),
 ]
-

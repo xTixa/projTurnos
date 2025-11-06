@@ -1,0 +1,9 @@
+{% extends "home/base.html" %}
+{% load static %}
+
+{% block content %}
+<div style="text-align:center;padding:60px;">
+  <h2>Terminaste sessão com sucesso</h2>
+  <p>Podes voltar à <a href="{% url 'home:index' %}" style="color:#3b82f6;text-decoration:none;">página inicial</a>.</p>
+</div>
+{% endblock %}

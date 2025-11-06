@@ -1,0 +1,57 @@
+{% extends "home/base.html" %}
+{% load static %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/perfil.css' %}">
+
+<section class="profile">
+  <h1 class="profile__title">O Meu Perfil</h1>
+
+  {% if user.is_authenticated %}
+    <div class="card card--soft">
+      <p class="card__row"><span class="label">Utilizador:</span> {{ user.username }}</p>
+      <p class="card__row"><span class="label">Email:</span> {{ user.email|default:"(não definido)" }}</p>
+    </div>
+
+    <div class="section">
+      <h3 class="section__title">Gestão de Turnos</h3>
+      <p class="section__subtitle">Seleciona o turno em que te queres inscrever:</p>
+
+      <ul class="shift-list">
+        <li class="shift">
+          <div class="shift__info">
+            <strong class="shift__name">Turno A</strong>
+            <span class="shift__meta">2ª feira, 10:00–12:00 · Sala B1</span>
+          </div>
+          <form method="post" action="{% url 'home:inscrever_turno' turno_id=1 %}">
+            {% csrf_token %}
+            <button type="submit" class="btn btn--success">Inscrever</button>
+          </form>
+        </li>
+
+        <li class="shift">
+          <div class="shift__info">
+            <strong class="shift__name">Turno B</strong>
+            <span class="shift__meta">4ª feira, 14:00–16:00 · Sala C3</span>
+          </div>
+          <form method="post" action="{% url 'home:inscrever_turno' turno_id=2 %}">
+            {% csrf_token %}
+            <button type="submit" class="btn btn--success">Inscrever</button>
+          </form>
+        </li>
+      </ul>
+    </div>
+
+    <a href="{% url 'home:logout' %}" class="btn btn--danger btn--ghost">Terminar Sessão</a>
+  {% else %}
+    <div class="card card--soft">
+      <p class="card__text">
+        Para acederes ao teu perfil e gerir os teus turnos, tens de iniciar sessão.
+      </p>
+      <a href="{% url 'home:login' %}?next={{ request.get_full_path|urlencode }}" class="btn btn--primary">
+        Iniciar Sessão
+      </a>
+    </div>
+  {% endif %}
+</section>
+{% endblock %}
