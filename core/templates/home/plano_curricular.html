@@ -1,0 +1,40 @@
+{% extends "home/base.html" %}
+{% load static %}
+{% block title %}Plano Curricular — Engenharia Informática{% endblock %}
+
+{% block content %}
+<section class="plano-hero">
+  <h1>Plano Curricular</h1>
+  <p>Consulta as Unidades Curriculares organizadas por ano e semestre.</p>
+</section>
+
+{% for ano, semestres in plano.items %}
+  <div class="ano-bloco">
+    <h2>{{ ano }}</h2>
+
+    {% for semestre, unidades in semestres.items %}
+    <div class="semestre-bloco">
+      <h3>{{ semestre }}</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Unidade Curricular</th>
+            <th>ECTS</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for uc in unidades %}
+          <tr>
+            <td>{{ uc.nome }}</td>
+            <td>{{ uc.ects }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% endfor %}
+  </div>
+{% empty %}
+  <p>Não existem unidades curriculares registadas na base de dados.</p>
+{% endfor %}
+{% endblock %}

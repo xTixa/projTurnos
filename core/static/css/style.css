@@ -551,3 +551,44 @@ body{
   opacity: 0;
   pointer-events: none;
 }
+
+.plano-hero {
+  background: linear-gradient(135deg, #eaf4ff, #ffffff);
+  padding: 30px;
+  border-radius: 16px;
+  margin-bottom: 24px;
+  box-shadow: var(--shadow);
+}
+.ano-bloco {
+  margin-bottom: 40px;
+}
+.ano-bloco h2 {
+  color: var(--blue);
+  margin-bottom: 12px;
+  border-bottom: 2px solid var(--blue-100);
+  padding-bottom: 6px;
+}
+.semestre-bloco {
+  margin-bottom: 24px;
+}
+.semestre-bloco h3 {
+  color: var(--muted);
+  margin-bottom: 8px;
+}
+.semestre-bloco table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: var(--shadow);
+}
+.semestre-bloco th {
+  background: var(--blue);
+  color: white;
+  text-align: left;
+  padding: 8px;
+}
+.semestre-bloco td {
+  padding: 8px;
+  border-bottom: 1px solid var(--border);
+}
