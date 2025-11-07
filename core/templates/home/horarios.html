@@ -1,6 +1,9 @@
 {% extends "home/base.html" %}
 {% load static %}
 {% block title %}Horários — Engenharia Informática{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/horarios.css' %}">
+{% endblock %}
 
 {% block content %}
 <section class="horarios-hero">

@@ -1,40 +1,40 @@
 {% extends "home/base.html" %}
 {% load static %}
 {% block title %}Plano Curricular — Engenharia Informática{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/plano_curricular.css' %}">
+{% endblock %}
 
 {% block content %}
 <section class="plano-hero">
   <h1>Plano Curricular</h1>
-  <p>Consulta as Unidades Curriculares organizadas por ano e semestre.</p>
+  <p>Consulta as Unidades Curriculares de cada ano e semestre do curso.</p>
 </section>
 
-{% for ano, semestres in plano.items %}
-  <div class="ano-bloco">
+<section class="plano-section">
+  {% for ano, semestres in plano.items %}
+  <div class="ano-bloco animate">
     <h2>{{ ano }}</h2>
 
-    {% for semestre, unidades in semestres.items %}
-    <div class="semestre-bloco">
-      <h3>{{ semestre }}</h3>
-      <table>
-        <thead>
-          <tr>
-            <th>Unidade Curricular</th>
-            <th>ECTS</th>
-          </tr>
-        </thead>
-        <tbody>
+    <div class="semestres-lado-a-lado">
+      {% for semestre, unidades in semestres.items %}
+      <div class="semestre-coluna">
+        <h3>{{ semestre }}</h3>
+        <div class="uc-grid">
           {% for uc in unidades %}
-          <tr>
-            <td>{{ uc.nome }}</td>
-            <td>{{ uc.ects }}</td>
-          </tr>
+          <div class="uc-card">
+            <h4>{{ uc.nome }}</h4>
+            <span class="ects">{{ uc.ects }} ECTS</span>
+          </div>
           {% endfor %}
-        </tbody>
-      </table>
+        </div>
+      </div>
+      {% endfor %}
     </div>
-    {% endfor %}
+
   </div>
-{% empty %}
-  <p>Não existem unidades curriculares registadas na base de dados.</p>
-{% endfor %}
+  {% empty %}
+    <p class="placeholder">Nenhuma unidade curricular disponível.</p>
+  {% endfor %}
+</section>
 {% endblock %}

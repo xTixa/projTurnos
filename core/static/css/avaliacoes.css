@@ -1,0 +1,129 @@
+/* ===== AVALIAÇÕES ===== */
+
+/* --- Cabeçalho principal --- */
+.avaliacoes-header {
+  background: linear-gradient(135deg, #eaf4ff, #ffffff);
+  border-radius: 20px;
+  box-shadow: var(--shadow);
+  padding: 40px;
+  margin-bottom: 40px;
+  text-align: center;
+  animation: fadeIn 0.6s ease;
+}
+
+.avaliacoes-header h1 {
+  color: var(--blue);
+  font-size: 2rem;
+  margin-bottom: 10px;
+}
+.avaliacoes-header p {
+  color: var(--muted);
+  font-size: 1rem;
+  line-height: 1.6;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+/* --- Lista de avaliações (cards) --- */
+.avaliacoes-lista {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  max-width: 900px;
+  margin: 0 auto 60px;
+  padding: 0 20px;
+  animation: fadeIn 0.8s ease;
+}
+
+.avaliacao-card {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  box-shadow: var(--shadow);
+  padding: 18px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.avaliacao-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.08);
+}
+
+.avaliacao-info {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.avaliacao-info i {
+  font-size: 1.8rem;
+  color: var(--blue);
+}
+.avaliacao-info h3 {
+  margin: 0;
+  font-size: 1.1rem;
+  color: var(--text);
+}
+.avaliacao-info p {
+  margin: 4px 0 0;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+/* --- Botão de download --- */
+.avaliacao-card .btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+  border-radius: 8px;
+  padding: 8px 14px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+.btn-primary {
+  background: var(--blue);
+  color: #fff;
+  border: none;
+}
+.btn-primary:hover {
+  filter: brightness(0.9);
+  transform: scale(1.03);
+}
+
+/* --- Call to Action final --- */
+.avaliacoes-cta {
+  background: var(--blue-100);
+  border-radius: 20px;
+  box-shadow: var(--shadow);
+  text-align: center;
+  padding: 60px 20px;
+  margin-bottom: 40px;
+  animation: fadeIn 1s ease;
+}
+.avaliacoes-cta h2 {
+  color: var(--blue);
+  margin-bottom: 10px;
+  font-size: 1.6rem;
+}
+.avaliacoes-cta p {
+  color: #334155;
+  margin-bottom: 20px;
+  font-size: 1rem;
+}
+.avaliacoes-cta .btn-ghost {
+  background: #fff;
+  border: 1px solid var(--border);
+  color: var(--text);
+}
+.avaliacoes-cta .btn-ghost:hover {
+  background: #eef2f7;
+}
+
+/* --- Animações --- */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}

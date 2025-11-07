@@ -1,0 +1,52 @@
+/* ===== HORÁRIOS ===== */
+.horarios-hero {
+  background: linear-gradient(135deg, #eaf4ff, #ffffff);
+  border-radius: 16px;
+  padding: 30px;
+  margin-bottom: 20px;
+  box-shadow: var(--shadow);
+}
+.horarios-hero h1 {
+  color: var(--blue);
+}
+
+.horarios-tabela table {
+  width: 100%;
+  border-collapse: collapse;
+  box-shadow: var(--shadow);
+  border-radius: 10px;
+  overflow: hidden;
+}
+.horarios-tabela th {
+  background: var(--blue);
+  color: white;
+  text-align: left;
+  padding: 10px;
+}
+.horarios-tabela td {
+  padding: 10px;
+  border-bottom: 1px solid var(--border);
+}
+.horarios-tabela tr:nth-child(even) {
+  background: #f9fafb;
+}
+.horarios-tabela tr.conflito {
+  background: #fee2e2;
+  color: #b91c1c;
+  font-weight: 600;
+}
+
+/* ===== INSCRIÇÕES EM TURNOS ===== */
+.turno-header {
+  background: linear-gradient(135deg, #eaf4ff, #ffffff);
+  border-radius: 16px; padding: 30px; margin-bottom: 30px;
+  box-shadow: var(--shadow);
+}
+.turno-header h1 { color: var(--blue); margin-bottom: 8px; }
+.uc-card {
+  background: #fff; border: 1px solid var(--border);
+  border-radius: 14px; padding: 20px;
+  box-shadow: var(--shadow); transition: 0.2s ease;
+}
+.uc-card:hover { transform: translateY(-3px); box-shadow: 0 8px 16px rgba(0,0,0,0.1); }
+
