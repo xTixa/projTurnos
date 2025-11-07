@@ -79,8 +79,8 @@ DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
         "NAME": "neondb",
-        "USER": config('DB_USER', default='neondb_owner'),  # Lê do .env ou usa utilizador admin default
-        "PASSWORD": config('DB_PASSWORD', default='npg_JG6K1jrybkXV'),  # Lê senha do .env
+        "USER": "neondb_owner",
+        "PASSWORD": "npg_JG6K1jrybkXV",
         "HOST": "ep-lively-pond-a956w6sx-pooler.gwc.azure.neon.tech",
         "PORT": "5432",
         "OPTIONS": {
