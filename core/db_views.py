@@ -26,4 +26,28 @@ class CadeirasSemestre(models.Model):
         db_table = 'cadeirassemestre'
         verbose_name = 'Cadeira (2º semestre)'
         verbose_name_plural = 'Cadeiras (2º semestre)'
+        
+class AlunosMatriculadosPorDia(models.Model):
+    id_matricula = models.IntegerField(primary_key=True)
+    n_mecanografico = models.IntegerField()
+    nome = models.CharField(max_length=255)
+    email = models.CharField(max_length=255)
+    estado = models.CharField(max_length=50)
+    data_matricula = models.DateTimeField()
+    dia_matricula = models.DateField()
+    ano_matricula = models.IntegerField()
+
+    class Meta:
+        managed = False
+        db_table = 'vw_alunos_matriculados_por_dia'
+        
+class AlunosPorOrdemAlfabetica(models.Model):
+    n_mecanografico = models.IntegerField(primary_key=True)
+    nome = models.CharField(max_length=255)
+    email = models.CharField(max_length=255)
+    id_anocurricular = models.IntegerField()
+
+    class Meta:
+        managed = False
+        db_table = 'vw_alunos_por_ordem_alfabetica'
 
