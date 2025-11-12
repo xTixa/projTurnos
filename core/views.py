@@ -4,6 +4,8 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.shortcuts import redirect
 from .models import UnidadeCurricular, Docente, Curso
+from .db_views import UCMais4Ects, CadeirasSemestre
+from django.http import JsonResponse
 
 def index(request):
     return render(request, "home/index.html")
@@ -98,3 +100,20 @@ def inscrever_turno(request, turno_id):
     # (futuro) lógica real de BD; por agora só feedback
     messages.success(request, f"Inscrição no turno #{turno_id} concluída com sucesso")
     return redirect("home:perfil")
+
+#ficha 12
+def uc_mais_4_ects(request):
+    data = list(
+        UCMais4Ects.objects
+        .order_by('id_anocurricular', 'id_semestre', 'nome')
+        .values('id_unidadecurricular', 'nome', 'ects', 'id_anocurricular', 'id_semestre')
+    )
+    return JsonResponse(data, safe=False)
+
+def cadeiras_semestre(request):
+    data = list(
+        CadeirasSemestre.objects
+        .order_by('semestre_id', 'nome')
+        .values('id_unidadecurricular', 'nome', 'ects', 'semestre_id', 'semestre_nome')
+    )
+    return JsonResponse(data, safe=False)
