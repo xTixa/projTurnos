@@ -155,3 +155,27 @@ class UnidadeCurricular(models.Model):
     class Meta:
         managed = False
         db_table = 'unidade_curricular'
+
+class VwTopDocenteUcAnoCorrente(models.Model):
+    id_docente = models.IntegerField()
+    nome = models.CharField(max_length=255)
+    email = models.CharField(max_length=255)
+    total_ucs = models.IntegerField()
+
+    class Meta:
+        managed = False
+        db_table = 'vw_top_docente_uc_ano_corrente'
+
+class VwAlunosInscricoes2025(models.Model):
+    id_inscricao = models.IntegerField()
+    data_inscricao = models.DateField()
+    n_mecanografico = models.IntegerField()
+    aluno_nome = models.CharField(max_length=255)
+    aluno_email = models.CharField(max_length=255)
+    id_unidadecurricular = models.IntegerField()
+    uc_nome = models.CharField(max_length=255)
+    id_turno = models.IntegerField()
+
+    class Meta:
+        managed = False
+        db_table = 'vw_alunos_inscricoes_2025'

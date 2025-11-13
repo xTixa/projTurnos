@@ -6,6 +6,8 @@ from django.shortcuts import redirect
 from .models import UnidadeCurricular, Docente, Curso
 from .db_views import UCMais4Ects, CadeirasSemestre, AlunosMatriculadosPorDia, AlunosPorOrdemAlfabetica, Turnos, Cursos
 from django.http import JsonResponse
+from .models import VwTopDocenteUcAnoCorrente
+from .models import VwAlunosInscricoes2025
 
 def index(request):
     return render(request, "home/index.html")
@@ -152,5 +154,31 @@ def cursos_list(request):
         Cursos.objects
         .order_by('id_curso')
         .values('id_curso', 'nome', 'grau')
+    )
+    return JsonResponse(data, safe=False)
+
+
+def top_docente_uc_ano_corrente(request):
+    data = list(
+        VwTopDocenteUcAnoCorrente.objects
+        .all()
+        .values('id_docente', 'nome', 'email', 'total_ucs')
+    )
+    return JsonResponse(data, safe=False)
+
+def alunos_inscricoes_2025(request):
+    data = list(
+        VwAlunosInscricoes2025.objects
+        .all()
+        .values(
+            'id_inscricao',
+            'data_inscricao',
+            'n_mecanografico',
+            'aluno_nome',
+            'aluno_email',
+            'id_unidadecurricular',
+            'uc_nome',
+            'id_turno'
+        )
     )
     return JsonResponse(data, safe=False)

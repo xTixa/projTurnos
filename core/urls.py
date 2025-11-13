@@ -28,4 +28,7 @@ urlpatterns = [
     path("vw_alunos_por_ordem_alfabetica/", views.alunos_por_ordem_alfabetica, name="vw_alunos_por_ordem_alfabetica"),
     path("turnos_list/", views.turnos_list, name="turnos_list"),
     path("cursos_list/", views.cursos_list, name="cursos_list"),
+    path("top_docente_uc_ano_corrente/", views.top_docente_uc_ano_corrente, name="top_docente_uc_ano_corrente"),
+    path("alunos_inscricoes_2025/", views.alunos_inscricoes_2025, name="alunos_inscricoes_2025"),
+
 ]
