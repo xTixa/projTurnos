@@ -1,31 +1,59 @@
 {% extends "home/base.html" %}
 {% load static %}
 {% block title %}Contactos — Engenharia Informática{% endblock %}
+
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/contactos.css' %}">
 {% endblock %}
 
 {% block content %}
-<section class="contactos-hero">
-  <h1>Contactos</h1>
-  {% if curso %}
-    <p><strong>{{ curso.nome }}</strong> — {{ curso.grau }}</p>
-  {% endif %}
-  <p>Consulta abaixo os contactos do corpo docente e da coordenação do curso.</p>
+
+<section class="contact-header">
+  <div class="contact-info">
+    <h1>Contactos</h1>
+
+    {% if curso %}
+      <p class="curso-info"><strong>{{ curso.nome }}</strong> — {{ curso.grau }}</p>
+    {% endif %}
+
+    <p class="descricao">Fala connosco! Consulta abaixo os contactos da coordenação e do corpo docente do curso.</p>
+
+    <a href="https://maps.google.com/?q=Instituto+Politécnico+de+Viseu"
+       target="_blank"
+       class="map-link">
+      <i class="fa-solid fa-location-dot"></i>
+      Ver no Google Maps
+    </a>
+  </div>
+
+  <iframe
+    class="contact-map"
+    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2999.2201410576503!2d-7.9135!3d40.6565!2m3!1f0!2f0!3f0!
+      3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0xd23367657e9b8db%3A0x3adaf227ddc7ba2!
+      2sInstituto%20Polit%C3%A9cnico%20de%20Viseu!5e0!3m2!1spt-PT!2spt!4v00000000000"
+    allowfullscreen=""
+    loading="lazy">
+  </iframe>
 </section>
 
-<section class="contactos-grid">
+<h2 class="subtitulo">Corpo Docente</h2>
+
+<section class="contacts-grid">
   {% for d in docentes %}
   <div class="contact-card">
-    <h2><i class="fa-solid fa-user-tie"></i> {{ d.nome }}</h2>
+    <h3><i class="fa-solid fa-user-tie"></i> {{ d.nome }}</h3>
+
     {% if d.email %}
-    <p><i class="fa-solid fa-envelope"></i> <a href="mailto:{{ d.email }}">{{ d.email }}</a></p>
+      <p><i class="fa-solid fa-envelope"></i> 
+         <a href="mailto:{{ d.email }}">{{ d.email }}</a>
+      </p>
     {% else %}
-    <p><em>Sem email registado</em></p>
+      <p><em>Sem email registado</em></p>
     {% endif %}
   </div>
   {% empty %}
-  <p>Não existem docentes registados na base de dados.</p>
+  <p>Não existem docentes registados.</p>
   {% endfor %}
 </section>
+
 {% endblock %}

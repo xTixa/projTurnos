@@ -15,7 +15,11 @@ urlpatterns = [
     path("perfil/", views.perfil, name="perfil"),
     path("login/",  auth_views.LoginView.as_view(template_name="auth/login.html"), name="login"),
     path("logout/", views.do_logout, name="logout"),
+
+    path("inscricao_turno/", views.inscricao_turno, name="inscricao_turno"),
     path("turnos/inscrever/<int:turno_id>/", views.inscrever_turno, name="inscrever_turno"),
+
+
 
     #ficha 12
     path("4etcs/", views.uc_mais_4_ects, name="uc_mais_4_ects"),

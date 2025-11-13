@@ -81,6 +81,11 @@ def contactos(request):
     }
     return render(request, "home/contactos.html", contexto)
 
+def inscricao_turno(request):
+    # Aqui podes colocar a lógica, por agora só mostra o template
+    unidades = []  # Se tiveres dados, mete-os aqui
+    return render(request, "home/inscricao_turno.html", {"unidades": unidades})
+
 def informacoes(request):
     return render(request, "home/informacoes.html")
 
