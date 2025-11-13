@@ -141,3 +141,11 @@ def turnos_list(request):
         .values('id_turno', 'n_turno', 'capacidade', 'tipo')
     )
     return JsonResponse(data, safe=False)
+
+def cursos_list(request):
+    data = list(
+        Cursos.objects
+        .order_by('id_curso')
+        .values('id_curso', 'nome', 'grau')
+    )
+    return JsonResponse(data, safe=False)

@@ -64,7 +64,7 @@ class Turnos(models.Model):
 class Cursos(models.Model):
     id_curso = models.AutoField(primary_key=True)
     nome = models.CharField(max_length=255)
-    grau = models.CharField(max_length=100)
+    grau = models.IntegerField()
 
     class Meta:
         managed = False
