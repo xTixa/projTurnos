@@ -4,7 +4,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.shortcuts import redirect
 from .models import UnidadeCurricular, Docente, Curso
-from .db_views import UCMais4Ects, CadeirasSemestre, AlunosMatriculadosPorDia, AlunosPorOrdemAlfabetica
+from .db_views import UCMais4Ects, CadeirasSemestre, AlunosMatriculadosPorDia, AlunosPorOrdemAlfabetica, Turnos, Cursos
 from django.http import JsonResponse
 
 def index(request):
@@ -131,5 +131,13 @@ def alunos_por_ordem_alfabetica(request):
         AlunosPorOrdemAlfabetica.objects
         .order_by('nome')
         .values('n_mecanografico', 'nome', 'email', 'id_anocurricular')
+    )
+    return JsonResponse(data, safe=False)
+
+def turnos_list(request):
+    data = list(
+        Turnos.objects
+        .order_by('id_turno')
+        .values('id_turno', 'n_turno', 'capacidade', 'tipo')
     )
     return JsonResponse(data, safe=False)

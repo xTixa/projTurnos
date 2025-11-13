@@ -51,3 +51,21 @@ class AlunosPorOrdemAlfabetica(models.Model):
         managed = False
         db_table = 'vw_alunos_por_ordem_alfabetica'
 
+class Turnos(models.Model):
+    id_turno = models.AutoField(primary_key=True)
+    n_turno = models.IntegerField()
+    capacidade = models.IntegerField()
+    tipo = models.CharField(max_length=255)
+
+    class Meta:
+        managed = False
+        db_table = 'vw_turnos'
+
+class Cursos(models.Model):
+    id_curso = models.AutoField(primary_key=True)
+    nome = models.CharField(max_length=255)
+    grau = models.CharField(max_length=100)
+
+    class Meta:
+        managed = False
+        db_table = 'vw_cursos'

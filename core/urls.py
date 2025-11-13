@@ -22,4 +22,5 @@ urlpatterns = [
     path("cadeiras_semestre/", views.cadeiras_semestre, name="cadeiras_semestre"),
     path("vw_alunos_matriculas_por_dia/", views.alunos_matriculados_por_dia, name="vw_alunos_matriculados_por_dia"),
     path("vw_alunos_por_ordem_alfabetica/", views.alunos_por_ordem_alfabetica, name="vw_alunos_por_ordem_alfabetica"),
+    path("turnos_list/", views.turnos_list, name="turnos_list"),
 ]
