@@ -1,0 +1,131 @@
+/* ===========================
+   HERO SECTION
+   =========================== */
+
+.hero-ei {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2rem;
+  margin-bottom: 2.5rem;
+}
+
+.hero-ei__text {
+  max-width: 640px;
+}
+
+.hero-ei h1 {
+  font-size: 2.2rem;
+  margin-bottom: 0.75rem;
+  font-weight: 700;
+}
+
+.hero-ei p {
+  line-height: 1.6;
+  margin-bottom: 1.25rem;
+  color: #333;
+}
+
+.hero-ei__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.btn.btn-primary {
+  background: #191970;
+  color: #fff !important;
+  border-radius: 999px;
+  padding: 0.6rem 1.3rem;
+  transition: background 0.2s ease;
+}
+
+.btn.btn-primary:hover {
+  background: #10104a;
+}
+
+/* ===========================
+   GRID
+   =========================== */
+
+.ei-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2.5rem;
+}
+
+.card {
+  background: #fff;
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+}
+
+.ei-card h2 {
+  margin-bottom: 0.75rem;
+  color: #111;
+}
+
+.ei-card ul {
+  padding-left: 1.2rem;
+  margin: 0;
+  color: #333;
+}
+
+/* ===========================
+   SHORTCUTS
+   =========================== */
+
+.ei-shortcuts {
+  margin-bottom: 2.5rem;
+}
+
+.ei-shortcuts__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1.25rem;
+  margin-top: 1rem;
+}
+
+.shortcut-card {
+  text-decoration: none;
+  color: inherit;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.shortcut-card__icon {
+  font-size: 1.6rem;
+  margin-bottom: 0.5rem;
+  color: #191970;
+}
+
+.shortcut-card h3 {
+  margin: 0.3rem 0;
+  font-weight: 600;
+}
+
+.shortcut-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 30px rgba(0,0,0,0.08);
+}
+
+/* ===========================
+   HOW-TO SECTION
+   =========================== */
+
+.ei-howto {
+  margin-bottom: 2rem;
+}
+
+.ei-howto ol {
+  padding-left: 1.2rem;
+  color: #333;
+}
+
+.ei-howto__note {
+  margin-top: 0.75rem;
+  font-size: 0.95rem;
+  opacity: 0.85;
+}

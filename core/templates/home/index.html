@@ -1,10 +1,97 @@
 {% extends 'home/base.html' %}
+{% load static %}
 
-{% block title %}Início — Horários EI{% endblock %}
+{% block title %}Início — Engenharia Informática{% endblock %}
 
-{% block sb_ingresso_active %}is-active{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/index.css' %}">
+{% endblock %}
 
 {% block content %}
-  <h1>Bem-vindo aos Horários de Engenharia Informática</h1>
-  <p>Consulta e seleciona a opção na barra lateral para aceder ao horário pretendido.</p>
+<section class="hero-ei">
+  <div class="hero-ei__text">
+    <h1>Engenharia Informática — ESTGV</h1>
+    <p>
+      O curso de Engenharia Informática privilegia um modelo de ensino
+      predominantemente prático, com forte componente de laboratório e
+      projeto/estágio curricular. Aqui preparas-te para responder à constante
+      evolução das TIC e aos desafios de um mercado competitivo e global.
+    </p>
+
+    <div class="hero-ei__actions">
+      <a href="{% url 'home:horarios' %}" class="btn btn-primary">
+        <i class="fa-regular fa-calendar"></i> Ver horários
+      </a>
+      <a href="{% url 'home:plano' %}" class="btn btn-ghost">
+        <i class="fa-regular fa-rectangle-list"></i> Plano curricular
+      </a>
+    </div>
+  </div>
+</section>
+
+<section class="ei-grid">
+  <article class="card ei-card">
+    <h2>O que vais encontrar no curso</h2>
+    <ul>
+      <li>Ensino prático com forte componente laboratorial;</li>
+      <li>Projetos reais e estágio curricular;</li>
+      <li>Trabalho em equipa e desenvolvimento de competências humanas;</li>
+      <li>Preparação para desafios tecnológicos e organizacionais.</li>
+    </ul>
+  </article>
+
+  <article class="card ei-card">
+    <h2>Saídas profissionais</h2>
+    <ul>
+      <li>Desenvolvimento de software e análise de sistemas;</li>
+      <li>Administração de bases de dados;</li>
+      <li>Gestão de redes e comunicação;</li>
+      <li>Administração e manutenção de sistemas;</li>
+      <li>Integração de sistemas informáticos.</li>
+    </ul>
+  </article>
+</section>
+
+<section class="ei-shortcuts">
+  <h2>Acede rapidamente</h2>
+  <div class="ei-shortcuts__grid">
+
+    <a href="{% url 'home:ingresso' %}" class="card shortcut-card">
+      <div class="shortcut-card__icon"><i class="fa-solid fa-graduation-cap"></i></div>
+      <h3>Ingresso</h3>
+      <p>Informação para futuros estudantes.</p>
+    </a>
+
+    <a href="{% url 'home:horarios' %}" class="card shortcut-card">
+      <div class="shortcut-card__icon"><i class="fa-regular fa-calendar"></i></div>
+      <h3>Horários</h3>
+      <p>Consulta os horários por ano e turno.</p>
+    </a>
+
+    <a href="{% url 'home:avaliacoes' %}" class="card shortcut-card">
+      <div class="shortcut-card__icon"><i class="fa-regular fa-clipboard"></i></div>
+      <h3>Avaliações</h3>
+      <p>Datas de testes, frequências e exames.</p>
+    </a>
+
+    <a href="{% url 'home:contactos' %}" class="card shortcut-card">
+      <div class="shortcut-card__icon"><i class="fa-regular fa-address-card"></i></div>
+      <h3>Contactos</h3>
+      <p>Departamento, secretaria e apoio ao estudante.</p>
+    </a>
+
+  </div>
+</section>
+
+<section class="ei-howto">
+  <h2>Como usar esta página</h2>
+  <ol>
+    <li>Escolhe uma secção na barra lateral.</li>
+    <li>Consulta horários, avaliações ou informações do curso.</li>
+    <li>Volta a esta página para atalhos rápidos.</li>
+  </ol>
+  <p class="ei-howto__note">
+    Dica: guarda esta página nos favoritos para acesso rápido durante o semestre.
+  </p>
+</section>
 {% endblock %}
