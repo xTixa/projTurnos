@@ -1,0 +1,23 @@
+{% extends "admin/base_admin.html" %}
+
+{% block content %}
+<h1>{% if horario_id %}Editar Horário{% else %}Novo Horário{% endif %}</h1>
+
+<form method="post">
+    {% csrf_token %}
+
+    <label>Unidade Curricular:</label>
+    <input type="text" name="uc" required>
+
+    <label>Dia:</label>
+    <input type="text" name="dia" required>
+
+    <label>Hora:</label>
+    <input type="text" name="hora" required>
+
+    <label>Turno:</label>
+    <input type="text" name="turno" required>
+
+    <button class="btn-save">Guardar</button>
+</form>
+{% endblock %}

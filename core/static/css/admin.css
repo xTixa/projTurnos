@@ -1,0 +1,205 @@
+/* IMPORTA A MESMA PALETA */
+:root {
+    --blue: #2371a7;
+    --blue-100: #eaf4ff;
+    --border: #e5e7eb;
+    --text: #0f172a;
+    --muted: #64748b;
+    --bg: #ffffff;
+    --sidebar-bg: #f7f8fa;
+    --shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+}
+
+/* RESET */
+body {
+    margin: 0;
+    font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
+    background: var(--bg);
+    color: var(--text);
+}
+
+/* ===== CONTAINER LATERAL + CONTEÚDO ===== */
+.admin-container {
+    display: flex;
+    min-height: 100vh;
+}
+
+/* ===== SIDEBAR (igual ao site) ===== */
+.sidebar {
+    width: 260px;
+    background: var(--sidebar-bg);
+    border-right: 1px solid var(--border);
+    padding: 20px 14px;
+}
+
+.logo {
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 24px;
+    color: var(--blue);
+}
+
+/* MENU */
+.menu {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.menu li {
+    margin: 6px 0;
+}
+
+.menu li a {
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 14px;
+    border-radius: 10px;
+    color: var(--text);
+    font-weight: 500;
+    transition: 0.2s ease;
+}
+
+.menu li a i {
+    color: var(--muted);
+}
+
+.menu li a:hover {
+    background: #eef2f7;
+}
+
+.menu li.active > a,
+.menu li.is-active > a {
+    background: var(--blue-100);
+    color: var(--blue);
+}
+
+.menu li.is-active > a i {
+    color: var(--blue);
+}
+
+/* ===== CONTEÚDO PRINCIPAL ===== */
+.content {
+    flex: 1;
+    padding: 32px 40px;
+}
+
+/* ===== CARDS DO DASHBOARD ===== */
+.admin-cards {
+    display: flex;
+    gap: 20px;
+}
+
+.card {
+    background: #fff;
+    padding: 28px;
+    width: 240px;
+    border-radius: 14px;
+    box-shadow: var(--shadow);
+    text-align: center;
+    transition: 0.2s ease;
+}
+
+.card i {
+    font-size: 28px;
+    color: var(--blue);
+    margin-bottom: 12px;
+}
+
+.card:hover {
+    transform: translateY(-4px);
+}
+
+/* ===== TABELAS ===== */
+.admin-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #fff;
+    box-shadow: var(--shadow);
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.admin-table thead {
+    background: var(--blue);
+    color: white;
+}
+
+.admin-table th,
+.admin-table td {
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--border);
+    text-align: left;
+}
+
+.admin-table tbody tr:hover {
+    background: #f9fafb;
+}
+
+/* ===== BOTÕES ===== */
+.btn-create,
+.btn-save {
+    background: var(--blue);
+    color: white;
+    padding: 10px 16px;
+    border-radius: 10px;
+    text-decoration: none;
+    display: inline-block;
+    margin-bottom: 20px;
+    font-size: 14px;
+    box-shadow: var(--shadow);
+    transition: 0.2s ease;
+}
+
+.btn-create:hover,
+.btn-save:hover {
+    filter: brightness(0.95);
+}
+
+.edit-btn,
+.delete-btn {
+    padding: 6px 10px;
+    border-radius: 8px;
+    text-decoration: none;
+    color: white;
+    font-size: 13px;
+}
+
+.edit-btn {
+    background: #fbbf24; /* amarelo suave */
+}
+
+.delete-btn {
+    background: #ef4444; /* vermelho */
+}
+
+.edit-btn:hover { filter: brightness(0.9); }
+.delete-btn:hover { filter: brightness(0.9); }
+
+/* ===== FORMULÁRIOS ===== */
+form label {
+    display: block;
+    font-weight: 600;
+    margin-top: 18px;
+    margin-bottom: 6px;
+    color: var(--text);
+}
+
+form input,
+form select {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 14px;
+    margin-bottom: 8px;
+}
+
+form input:focus,
+form select:focus {
+    outline: none;
+    border-color: var(--blue);
+    box-shadow: 0 0 0 2px var(--blue-100);
+}

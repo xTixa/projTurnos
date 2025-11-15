@@ -1,0 +1,40 @@
+{% extends "admin/base_admin.html" %}
+
+{% block content %}
+<h1>Gerir Horários</h1>
+
+<a href="{% url 'home:admin_horarios_create' %}" class="btn-create">+ Novo Horário</a>
+
+{% if horarios %}
+<table class="admin-table">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>UC</th>
+            <th>Dia</th>
+            <th>Hora</th>
+            <th>Turno</th>
+            <th>Ações</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        {% for h in horarios %}
+        <tr>
+            <td>{{ h.id }}</td>
+            <td>{{ h.uc }}</td>
+            <td>{{ h.dia }}</td>
+            <td>{{ h.hora }}</td>
+            <td>{{ h.turno }}</td>
+            <td>
+                <a href="{% url 'home:admin_horarios_edit' h.id %}" class="edit-btn">✏️</a>
+                <a href="{% url 'home:admin_horarios_delete' h.id %}" class="delete-btn">❌</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p>Nenhum horário encontrado.</p>
+{% endif %}
+{% endblock %}

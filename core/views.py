@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import logout as auth_logout
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
@@ -8,6 +8,7 @@ from .db_views import UCMais4Ects, CadeirasSemestre, AlunosMatriculadosPorDia, A
 from django.http import JsonResponse
 from .models import VwTopDocenteUcAnoCorrente
 from .models import VwAlunosInscricoes2025
+from django.contrib.auth.models import User
 
 def index(request):
     return render(request, "home/index.html")
@@ -182,3 +183,113 @@ def alunos_inscricoes_2025(request):
         )
     )
     return JsonResponse(data, safe=False)
+
+
+# Dashboard
+def admin_dashboard(request):
+    return render(request, "admin/dashboard.html")
+
+def admin_users_list(request):
+    users = User.objects.all().order_by("id")
+    return render(request, "admin/users_list.html", {"users": users})
+
+def admin_users_create(request):
+    if request.method == "POST":
+        username = request.POST.get("username")
+        email = request.POST.get("email")
+        password = request.POST.get("password")
+
+        if not username or not password:
+            messages.error(request, "Username e password são obrigatórios.")
+            return redirect("admin_users_create")
+
+        User.objects.create_user(username=username, email=email, password=password)
+        messages.success(request, "Utilizador criado com sucesso!")
+        return redirect("admin_users_list")
+
+    return render(request, "admin/users_form.html")
+
+def admin_users_edit(request, id):
+    user = get_object_or_404(User, id=id)
+
+    if request.method == "POST":
+        user.username = request.POST.get("username")
+        user.email = request.POST.get("email")
+        user.save()
+        messages.success(request, "Utilizador atualizado!")
+        return redirect("admin_users_list")
+
+    return render(request, "admin/users_form.html", {"user": user})
+
+def admin_users_delete(request, id):
+    user = get_object_or_404(User, id=id)
+    user.delete()
+    messages.success(request, "Utilizador apagado!")
+    return redirect("admin_users_list")
+
+# ==========================
+# ADMIN — TURNOS CRUD
+# ==========================
+
+def admin_turnos_list(request):
+    turnos = Turnos.objects.all().order_by("id_turno")
+    return render(request, "admin/turnos_list.html", {"turnos": turnos})
+
+def admin_turnos_create(request):
+    if request.method == "POST":
+        n_turno = request.POST.get("n_turno")
+        capacidade = request.POST.get("capacidade")
+        tipo = request.POST.get("tipo")
+
+        Turnos.objects.create(
+            n_turno=n_turno,
+            capacidade=capacidade,
+            tipo=tipo,
+        )
+        messages.success(request, "Turno criado com sucesso!")
+        return redirect("admin_turnos_list")
+
+    return render(request, "admin/turnos_form.html")
+
+def admin_turnos_edit(request, id):
+    turno = get_object_or_404(Turnos, id_turno=id)
+
+    if request.method == "POST":
+        turno.n_turno = request.POST.get("n_turno")
+        turno.capacidade = request.POST.get("capacidade")
+        turno.tipo = request.POST.get("tipo")
+        turno.save()
+
+        messages.success(request, "Turno atualizado!")
+        return redirect("admin_turnos_list")
+
+    return render(request, "admin/turnos_form.html", {"turno": turno})
+
+def admin_turnos_delete(request, id):
+    turno = get_object_or_404(Turnos, id_turno=id)
+    turno.delete()
+    messages.success(request, "Turno apagado!")
+    return redirect("admin_turnos_list")
+
+# ==========================
+# ADMIN — HORÁRIOS CRUD
+# ==========================
+
+def admin_horarios_list(request):
+    # TEMPORÁRIO: lista vazia só para não quebrar
+    horarios = []
+    return render(request, "admin/horarios_list.html", {"horarios": horarios})
+
+
+def admin_horarios_create(request):
+    return render(request, "admin/horarios_form.html")
+
+
+def admin_horarios_edit(request, id):
+    # Sem BD real, por agora apenas passa o ID para o template
+    return render(request, "admin/horarios_form.html", {"horario_id": id})
+
+
+def admin_horarios_delete(request, id):
+    messages.success(request, "Horário apagado (mock).")
+    return redirect("admin_horarios_list")

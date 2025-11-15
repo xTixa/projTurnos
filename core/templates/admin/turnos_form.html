@@ -1,0 +1,20 @@
+{% extends "admin/base_admin.html" %}
+
+{% block content %}
+<h1>{% if turno %}Editar Turno{% else %}Novo Turno{% endif %}</h1>
+
+<form method="post">
+    {% csrf_token %}
+
+    <label>Nº Turno:</label>
+    <input type="text" name="n_turno" value="{{ turno.n_turno|default:'' }}" required>
+
+    <label>Capacidade:</label>
+    <input type="number" name="capacidade" value="{{ turno.capacidade|default:'' }}" required>
+
+    <label>Tipo:</label>
+    <input type="text" name="tipo" value="{{ turno.tipo|default:'' }}" required>
+
+    <button class="btn-save">Guardar</button>
+</form>
+{% endblock %}

@@ -19,6 +19,26 @@ urlpatterns = [
     path("inscricao_turno/", views.inscricao_turno, name="inscricao_turno"),
     path("turnos/inscrever/<int:turno_id>/", views.inscrever_turno, name="inscrever_turno"),
 
+    # Painel Admin
+    path("admin-panel/", views.admin_dashboard, name="admin_dashboard"),
+
+    # Users
+    path("admin-panel/users/", views.admin_users_list, name="admin_users_list"),
+    path("admin-panel/users/create/", views.admin_users_create, name="admin_users_create"),
+    path("admin-panel/users/<int:id>/edit/", views.admin_users_edit, name="admin_users_edit"),
+    path("admin-panel/users/<int:id>/delete/", views.admin_users_delete, name="admin_users_delete"),
+
+    # Turnos
+    path("admin-panel/turnos/", views.admin_turnos_list, name="admin_turnos_list"),
+    path("admin-panel/turnos/create/", views.admin_turnos_create, name="admin_turnos_create"),
+    path("admin-panel/turnos/<int:id>/edit/", views.admin_turnos_edit, name="admin_turnos_edit"),
+    path("admin-panel/turnos/<int:id>/delete/", views.admin_turnos_delete, name="admin_turnos_delete"),
+
+    # Horários
+    path("admin-panel/horarios/", views.admin_horarios_list, name="admin_horarios_list"),
+    path("admin-panel/horarios/create/", views.admin_horarios_create, name="admin_horarios_create"),
+    path("admin-panel/horarios/<int:id>/edit/", views.admin_horarios_edit, name="admin_horarios_edit"),
+    path("admin-panel/horarios/<int:id>/delete/", views.admin_horarios_delete, name="admin_horarios_delete"),
 
 
     #ficha 12

@@ -1,0 +1,35 @@
+{% extends "admin/base_admin.html" %}
+
+{% block content %}
+<h1>Gerir Turnos</h1>
+
+<a href="{% url 'home:admin_turnos_create' %}" class="btn-create">+ Novo Turno</a>
+
+<table class="admin-table">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Nº Turno</th>
+            <th>Capacidade</th>
+            <th>Tipo</th>
+            <th>Ações</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        {% for t in turnos %}
+        <tr>
+            <td>{{ t.id_turno }}</td>
+            <td>{{ t.n_turno }}</td>
+            <td>{{ t.capacidade }}</td>
+            <td>{{ t.tipo }}</td>
+
+            <td>
+                <a href="{% url 'home:admin_turnos_edit' t.id_turno %}" class="edit-btn">✏️</a>
+                <a href="{% url 'home:admin_turnos_delete' t.id_turno %}" class="delete-btn" onclick="return confirm('Apagar turno?');">❌</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

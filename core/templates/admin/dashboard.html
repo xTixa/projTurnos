@@ -1,0 +1,24 @@
+{% extends "admin/base_admin.html" %}
+
+{% block content %}
+<h1>Painel de Administração</h1>
+
+<div class="admin-cards">
+
+    <a href="{% url 'home:admin_users_list' %}" class="card">
+        <i class="fa-solid fa-users"></i>
+        <p>Gerir Utilizadores</p>
+    </a>
+
+    <a href="{% url 'home:admin_turnos_list' %}" class="card">
+        <i class="fa-solid fa-clock"></i>
+        <p>Gerir Turnos</p>
+    </a>
+
+    <a href="{% url 'home:admin_horarios_list' %}" class="card">
+        <i class="fa-regular fa-calendar"></i>
+        <p>Gerir Horários</p>
+    </a>
+
+</div>
+{% endblock %}

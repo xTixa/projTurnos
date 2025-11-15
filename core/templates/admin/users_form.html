@@ -1,0 +1,22 @@
+{% extends 'admin/base_admin.html' %}
+
+{% block content %}
+<h1>{% if user %}Editar Utilizador{% else %}Novo Utilizador{% endif %}</h1>
+
+<form method="post">
+    {% csrf_token %}
+
+    <label>Username:</label>
+    <input type="text" name="username" value="{{ user.username|default:'' }}" required>
+
+    <label>Email:</label>
+    <input type="email" name="email" value="{{ user.email|default:'' }}">
+
+    {% if not user %}
+        <label>Password:</label>
+        <input type="password" name="password" required>
+    {% endif %}
+
+    <button class="btn-save">Guardar</button>
+</form>
+{% endblock %}
