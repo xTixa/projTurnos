@@ -4,7 +4,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.shortcuts import redirect
 from huggingface_hub import logout
-from .models import UnidadeCurricular, Docente, Curso, HorarioPDF
+from .models import UnidadeCurricular, Docente, Curso, HorarioPDF, Aluno
 from .db_views import UCMais4Ects, CadeirasSemestre, AlunosMatriculadosPorDia, AlunosPorOrdemAlfabetica, Turnos, Cursos
 from django.http import JsonResponse
 from .models import VwTopDocenteUcAnoCorrente
@@ -13,6 +13,52 @@ from django.contrib.auth.models import User
 
 def index(request):
     return render(request, "home/index.html")
+
+def login_view(request):
+    if request.method == "POST":
+        email = request.POST.get("username")
+        password = request.POST.get("password")
+
+        # 1) Tentar autenticar ALUNO
+        try:
+            aluno = Aluno.objects.get(email=email)
+
+            if aluno.password == password:
+                request.session["user_tipo"] = "aluno"
+                request.session["user_id"] = aluno.n_mecanografico
+                request.session["user_nome"] = aluno.nome
+                request.session["user_email"] = aluno.email
+                return redirect("home:index")
+            else:
+                messages.error(request, "Password incorreta.")
+                return redirect("home:login")
+
+        except Aluno.DoesNotExist:
+            pass
+
+        # 2) Tentar autenticar DOCENTE
+        try:
+            docente = Docente.objects.get(email=email)
+
+            if hasattr(docente, "password") and docente.password == password:
+                request.session["user_tipo"] = "docente"
+                request.session["user_id"] = docente.id_docente
+                request.session["user_nome"] = docente.nome
+                request.session["user_email"] = docente.email
+                return redirect("home:index")
+
+            else:
+                messages.error(request, "Password incorreta.")
+                return redirect("home:login")
+
+        except Docente.DoesNotExist:
+            pass
+
+        # Se não encontrou em lado nenhum
+        messages.error(request, "Utilizador não encontrado.")
+        return redirect("home:login")
+
+    return render(request, "auth/login.html")
 
 def ingresso(request):
     return render(request, "home/ingresso.html")
@@ -86,9 +132,22 @@ def contactos(request):
     return render(request, "home/contactos.html", contexto)
 
 def inscricao_turno(request):
-    # Aqui podes colocar a lógica, por agora só mostra o template
-    unidades = []  # Se tiveres dados, mete-os aqui
-    return render(request, "home/inscricao_turno.html", {"unidades": unidades})
+    unidades = []
+    horas = ["08:00", "08:30", "09:00", "09:30",
+             "10:00", "10:30", "11:00", "11:30",
+             "12:00", "12:30", "13:00", "13:30",
+             "14:00", "14:30", "15:00", "15:30",
+             "16:00", "16:30", "17:00", "17:30",
+             "18:00", "18:30", "19:00", "19:30",
+             "20:00", "20:30", "21:00", "21:30",
+             "22:00", "22:30", "23:00", "23:30"]
+    dias = ["Segunda", "Terça", "Quarta", "Quinta", "Sexta"]
+
+    return render(request, "home/inscricao_turno.html", {
+        "unidades": unidades,
+        "horas": horas,
+        "dias": dias
+    })
 
 def informacoes(request):
     return render(request, "home/informacoes.html")

@@ -1,20 +1,32 @@
 document.addEventListener("DOMContentLoaded", () => {
-  const botoes = document.querySelectorAll(".btn-inscrever");
-  const mensagem = document.getElementById("mensagem");
+    const cards = document.querySelectorAll(".uc-card");
 
-  botoes.forEach(btn => {
-    btn.addEventListener("click", () => {
-      const select = btn.parentElement.querySelector(".turno-select");
-      const escolha = select.value;
+    cards.forEach((card) => {
+        const select = card.querySelector(".turno-select");
+        const button = card.querySelector(".btn-inscrever");
 
-      if (!escolha || escolha === "Escolhe um turno...") {
-        alert("Por favor, seleciona um turno antes de inscrever.");
-        return;
-      }
+        button.addEventListener("click", () => {
+            const valorEscolhido = select.value;
 
-      // Simulação de inscrição
-      mensagem.classList.remove("hidden");
-      setTimeout(() => mensagem.classList.add("hidden"), 2500);
+            if (!valorEscolhido || valorEscolhido.startsWith("Escolhe")) {
+                alert("Escolhe um turno primeiro!");
+                return;
+            }
+
+            // "T1 — Segunda 09:00 (25 vagas)"
+            const [turnoNome, resto] = valorEscolhido.split("—");
+            const [dia, horaRaw] = resto.trim().split(" ");
+            const hora = horaRaw.replace("(", "").trim();
+
+            const uc = card.querySelector("h3").innerText;
+
+            // Preenche a célula correspondente
+            adicionarAula(dia, hora, uc);
+
+            // Mostra mensagem de sucesso
+            const mensagem = document.getElementById("mensagem");
+            mensagem.classList.remove("hidden");
+            setTimeout(() => mensagem.classList.add("hidden"), 2000);
+        });
     });
-  });
 });

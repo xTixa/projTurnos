@@ -50,3 +50,83 @@
 }
 .uc-card:hover { transform: translateY(-3px); box-shadow: 0 8px 16px rgba(0,0,0,0.1); }
 
+/* ===== HORÁRIO PERSONALIZADO ===== */
+.horario-wrapper {
+  margin-top: 30px;
+  padding: 20px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: white;
+  box-shadow: var(--shadow);
+}
+
+.tabela-horario {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: center;
+  font-size: 14px;
+}
+
+.tabela-horario th {
+  padding: 10px;
+  background: var(--blue);
+  color: white;
+  position: sticky;
+  top: 0;
+}
+
+.tabela-horario td {
+  border: 1px solid #d3d3d3;
+  height: 60px;
+  vertical-align: middle;
+}
+
+.slot-ocupado {
+  background: #dbeafe;
+  font-weight: 600;
+  color: #1e3a8a;
+}
+
+.export-btn {
+  margin-top: 20px;
+  padding: 12px 20px;
+  background: #dc2626;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 16px;
+  box-shadow: var(--shadow);
+}
+
+.export-btn:hover {
+  background: #b91c1c;
+}
+
+.inscricao-btn-wrapper {
+    margin: 20px 0;
+    text-align: left;
+}
+
+.btn-inscricao {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--blue);
+    color: white;
+    padding: 12px 18px;
+    border-radius: 10px;
+    font-weight: 600;
+    box-shadow: var(--shadow);
+    transition: background .2s ease, transform .1s ease;
+    text-decoration: none;
+}
+
+.btn-inscricao:hover {
+    background: #1e40af;
+    transform: translateY(-2px);
+}
+
+.btn-inscricao i {
+    font-size: 15px;
+}

@@ -36,8 +36,82 @@
   <i class="fa-solid fa-circle-check"></i>
   Inscrição efetuada com sucesso!
 </div>
+
+<h2>O teu horário</h2>
+
+<div id="horarioContainer" class="horario-wrapper">
+<table class="tabela-horario">
+    <thead>
+        <tr>
+            <th>Hora</th>
+            <th>Segunda</th>
+            <th>Terça</th>
+            <th>Quarta</th>
+            <th>Quinta</th>
+            <th>Sexta</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for hora in horas %}
+        <tr>
+            <td>{{ hora }}</td>
+
+            {% for dia in dias %}
+            <td id="{{ dia }}-{{ hora }}" class="slot"></td>
+            {% endfor %}
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+</div>
+
+<button id="exportPDF" class="export-btn">
+    <i class="fa-solid fa-file-pdf"></i> Exportar horário em PDF
+</button>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
 {% endblock %}
 
 {% block extra_scripts %}
 <script src="{% static 'js/inscricao_turno.js' %}"></script>
+<script>
+function adicionarAula(dia, hora, uc) {
+    const cellId = `${dia}-${hora}`;
+    const cell = document.getElementById(cellId);
+
+    if (cell) {
+        cell.innerHTML = `<strong>${uc}</strong>`;
+        cell.classList.add("slot-ocupado");
+    }
+}
+</script>
+
+<script>
+document.getElementById("exportPDF").addEventListener("click", async () => {
+    const { jsPDF } = window.jspdf;
+
+    const container = document.getElementById("horarioContainer");
+
+    // Renderiza o horário como imagem
+    const canvas = await html2canvas(container, {
+        scale: 3,
+        backgroundColor: "#FFFFFF",
+    });
+
+    const imgData = canvas.toDataURL("image/png");
+
+    // Cria PDF A4
+    const pdf = new jsPDF("p", "mm", "a4");
+
+    const pdfWidth = pdf.internal.pageSize.getWidth();
+    const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+
+    pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
+
+    pdf.save("horario_personalizado.pdf");
+});
+</script>
+
 {% endblock %}

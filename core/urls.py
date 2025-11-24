@@ -13,7 +13,8 @@ urlpatterns = [
     path("contactos/", views.contactos, name="contactos"),
     path("informacoes/", views.informacoes, name="informacoes"),
     path("perfil/", views.perfil, name="perfil"),
-    path("login/",  auth_views.LoginView.as_view(template_name="auth/login.html"), name="login"),
+   # path("login/",  auth_views.LoginView.as_view(template_name="auth/login.html"), name="login"),
+   path("login/", views.login_view, name="login"),
     path("logout/", views.do_logout, name="logout"),
 
     path("inscricao_turno/", views.inscricao_turno, name="inscricao_turno"),

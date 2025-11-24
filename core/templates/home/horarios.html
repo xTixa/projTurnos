@@ -5,6 +5,14 @@
 <section class="horarios-hero">
   <h1>Horários — Engenharia Informática</h1>
   <p>Consulta aqui o horário oficial publicado pela coordenação.</p>
+
+  {% if request.session.user_id %}
+    <div class="inscricao-btn-wrapper">
+      <a href="{% url 'home:inscricao_turno' %}" class="btn-inscricao">
+        <i class="fa-solid fa-check"></i> Inscrever-me nos Turnos
+      </a>
+    </div>
+  {% endif %}
 </section>
 
 {% if pdf %}
