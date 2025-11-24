@@ -3,6 +3,7 @@ from django.contrib.auth import logout as auth_logout
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.shortcuts import redirect
+from huggingface_hub import logout
 from .models import UnidadeCurricular, Docente, Curso, HorarioPDF
 from .db_views import UCMais4Ects, CadeirasSemestre, AlunosMatriculadosPorDia, AlunosPorOrdemAlfabetica, Turnos, Cursos
 from django.http import JsonResponse
@@ -333,3 +334,22 @@ def admin_horarios_list(request):
 def horarios(request):
     pdf = HorarioPDF.objects.order_by("-atualizado_em").first()
     return render(request, "home/horarios.html", {"pdf": pdf})
+
+def admin_users_docentes(request):
+    docentes = User.objects.filter(tipo="docente")
+    return render(request, "admin/users_filter.html", {
+        "titulo": "Docentes",
+        "users": docentes
+    })
+
+
+def admin_users_alunos(request):
+    alunos = User.objects.filter(tipo="aluno")
+    return render(request, "admin/users_filter.html", {
+        "titulo": "Alunos",
+        "users": alunos
+    })
+
+def admin_logout(request):
+    logout(request)
+    return redirect("home:admin_login")

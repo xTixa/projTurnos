@@ -8,7 +8,6 @@
     <link rel="stylesheet" href="{% static 'css/admin.css' %}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
-    <!-- Chart.js para gráficos -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 
@@ -18,26 +17,68 @@
 
     <!-- SIDEBAR -->
     <aside class="sidebar">
+
         <h2 class="logo">Admin EI</h2>
 
         <ul class="menu">
-            <li><a href="{% url 'home:admin_dashboard' %}">
-                <i class="fa-solid fa-gauge"></i> Dashboard
-            </a></li>
 
-            <li><a href="{% url 'home:admin_users_list' %}">
-                <i class="fa-solid fa-users"></i> Utilizadores
-            </a></li>
+            <!-- DASHBOARD -->
+            <li class="{% if request.resolver_match.url_name == 'admin_dashboard' %}active{% endif %}">
+                <a href="{% url 'home:admin_dashboard' %}">
+                    <i class="fa-solid fa-gauge"></i> Dashboard
+                </a>
+            </li>
 
-            <li><a href="{% url 'home:admin_turnos_list' %}">
-                <i class="fa-solid fa-clock"></i> Turnos
-            </a></li>
+            <!-- UTILIZADORES DROPDOWN -->
+            <li class="menu-item {% if request.resolver_match.url_name in 'admin_users_list admin_users_docentes admin_users_alunos' %}open{% endif %}">
+                
+                <button class="submenu-btn">
+                    <i class="fa-solid fa-users"></i> Utilizadores
+                    <i class="fa-solid fa-chevron-down arrow"></i>
+                </button>
 
-            <li><a href="{% url 'home:admin_horarios_list' %}">
-                <i class="fa-regular fa-calendar"></i> Horários
-            </a></li>
+                <ul class="submenu">
+                    <li><a href="{% url 'home:admin_users_list' %}" 
+                        class="{% if request.resolver_match.url_name == 'admin_users_list' %}active-sub{% endif %}">
+                        Todos
+                    </a></li>
+
+                    <li><a href="{% url 'home:admin_users_docentes' %}"
+                        class="{% if request.resolver_match.url_name == 'admin_users_docentes' %}active-sub{% endif %}">
+                        Docentes
+                    </a></li>
+
+                    <li><a href="{% url 'home:admin_users_alunos' %}"
+                        class="{% if request.resolver_match.url_name == 'admin_users_alunos' %}active-sub{% endif %}">
+                        Alunos
+                    </a></li>
+                </ul>
+            </li>
+
+            <!-- TURNOS -->
+            <li class="{% if request.resolver_match.url_name == 'admin_turnos_list' %}active{% endif %}">
+                <a href="{% url 'home:admin_turnos_list' %}">
+                    <i class="fa-solid fa-clock"></i> Turnos
+                </a>
+            </li>
+
+            <!-- HORÁRIOS -->
+            <li class="{% if request.resolver_match.url_name == 'admin_horarios_list' %}active{% endif %}">
+                <a href="{% url 'home:admin_horarios_list' %}">
+                    <i class="fa-regular fa-calendar"></i> Horários
+                </a>
+            </li>
         </ul>
+
+        <!-- LOGOUT -->
+        <div class="logout-container">
+            <a href="{% url 'home:admin_logout' %}" class="logout-btn">
+                <i class="fa-solid fa-right-from-bracket"></i> Logout
+            </a>
+        </div>
+
     </aside>
+
 
     <!-- CONTEÚDO -->
     <main class="content">
@@ -47,6 +88,20 @@
     </main>
 
 </div>
+
+<!-- SCRIPT PARA DROPDOWN -->
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    const buttons = document.querySelectorAll(".submenu-btn");
+
+    buttons.forEach(btn => {
+        btn.addEventListener("click", () => {
+            btn.parentElement.classList.toggle("open");
+        });
+    });
+});
+</script>
+
 
 </body>
 </html>

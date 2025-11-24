@@ -21,12 +21,15 @@ urlpatterns = [
 
     # Painel Admin
     path("admin-panel/", views.admin_dashboard, name="admin_dashboard"),
+    path("admin-panel/logout/", views.admin_logout, name="admin_logout"),
 
     # Users
     path("admin-panel/users/", views.admin_users_list, name="admin_users_list"),
     path("admin-panel/users/create/", views.admin_users_create, name="admin_users_create"),
     path("admin-panel/users/<int:id>/edit/", views.admin_users_edit, name="admin_users_edit"),
     path("admin-panel/users/<int:id>/delete/", views.admin_users_delete, name="admin_users_delete"),
+    path("admin-panel/users/docentes/", views.admin_users_docentes, name="admin_users_docentes"),
+    path("admin-panel/users/alunos/", views.admin_users_alunos, name="admin_users_alunos"),
 
     # Turnos
     path("admin-panel/turnos/", views.admin_turnos_list, name="admin_turnos_list"),

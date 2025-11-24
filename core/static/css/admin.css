@@ -1,4 +1,4 @@
-/* IMPORTA A MESMA PALETA */
+/* ========= PALETA ========= */
 :root {
     --blue: #2371a7;
     --blue-100: #eaf4ff;
@@ -10,7 +10,7 @@
     --shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
 }
 
-/* RESET */
+/* ========= RESET ========= */
 body {
     margin: 0;
     font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
@@ -18,209 +18,165 @@ body {
     color: var(--text);
 }
 
-/* ===== CONTAINER LATERAL + CONTEÚDO ===== */
+/* ========= LAYOUT PRINCIPAL ========= */
 .admin-container {
     display: flex;
     min-height: 100vh;
 }
 
-/* ===== SIDEBAR (igual ao site) ===== */
+/* ========= SIDEBAR ========= */
 .sidebar {
-    width: 260px;
+    width: 250px;
+    height: 100vh;
     background: var(--sidebar-bg);
     border-right: 1px solid var(--border);
-    padding: 20px 14px;
+    padding: 24px 20px;
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    left: 0;
+    top: 0;
+    bottom: 0;
 }
 
 .logo {
-    font-size: 20px;
+    font-size: 22px;
     font-weight: 700;
-    margin-bottom: 24px;
+    margin-bottom: 20px;
     color: var(--blue);
 }
 
-/* MENU */
+/* ========= MENU PRINCIPAL ========= */
 .menu {
     list-style: none;
-    padding: 0;
     margin: 0;
+    padding: 0;
 }
 
 .menu li {
-    margin: 6px 0;
+    margin-bottom: 6px;
 }
 
-.menu li a {
-    text-decoration: none;
+.menu li > a,
+.submenu-btn {
+    width: 100%;
     display: flex;
     align-items: center;
     gap: 10px;
-    padding: 12px 14px;
-    border-radius: 10px;
-    color: var(--text);
-    font-weight: 500;
-    transition: 0.2s ease;
-}
-
-.menu li a i {
-    color: var(--muted);
-}
-
-.menu li a:hover {
-    background: #eef2f7;
-}
-
-.menu li.active > a,
-.menu li.is-active > a {
-    background: var(--blue-100);
-    color: var(--blue);
-}
-
-.menu li.is-active > a i {
-    color: var(--blue);
-}
-
-/* ===== CONTEÚDO PRINCIPAL ===== */
-.content {
-    flex: 1;
-    padding: 32px 40px;
-}
-
-/* ===== CARDS DO DASHBOARD ===== */
-/* Admin cards */
-.admin-cards {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 22px;
-    margin-bottom: 40px;
-}
-.card {
-    background: white;
-    padding: 32px 24px;
-    border-radius: 14px;
-    box-shadow: var(--shadow);
-    text-align: center;
-    border: 1px solid var(--border);
-    transition: 0.25s ease;
-}
-
-.card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 12px 24px rgba(15, 23, 42, 0.12);
-}
-
-.card i {
-    font-size: 32px;
-    color: var(--blue);
-    margin-bottom: 18px;
-}
-
-.card p {
-    margin: 0;
+    padding: 10px 12px;
+    border-radius: 8px;
+    text-decoration: none;
+    background: none;
+    border: none;
     font-size: 15px;
-    font-weight: 600;
     color: var(--text);
-}
-
-/* ===== TABELAS ===== */
-.admin-table {
-    width: 100%;
-    border-collapse: collapse;
-    background: #fff;
-    box-shadow: var(--shadow);
-    border-radius: 12px;
-    overflow: hidden;
-}
-
-.admin-table thead {
-    background: var(--blue);
-    color: white;
-}
-
-.admin-table th,
-.admin-table td {
-    padding: 14px 16px;
-    border-bottom: 1px solid var(--border);
+    cursor: pointer;
     text-align: left;
 }
 
-.admin-table tbody tr:hover {
-    background: #f9fafb;
+.menu li > a:hover,
+.submenu-btn:hover {
+    background: #e7eef5;
 }
 
-/* ===== BOTÕES ===== */
-.btn-create,
-.btn-save {
-    background: var(--blue);
-    color: white;
-    padding: 10px 16px;
-    border-radius: 10px;
-    text-decoration: none;
-    display: inline-block;
-    margin-bottom: 20px;
+.menu li a i,
+.submenu-btn i {
+    color: var(--muted);
+}
+
+/* Ativo */
+.menu li.active > a {
+    background: var(--blue-100);
+    color: var(--blue);
+    font-weight: bold;
+}
+
+.menu li.active a i {
+    color: var(--blue);
+}
+
+/* ========= SUBMENU ========= */
+.submenu {
+    display: none;
+    flex-direction: column;
+    padding-left: 18px;
+    margin-top: 4px;
+}
+
+.menu-item.open .submenu {
+    display: flex;
+}
+
+.submenu a {
+    padding: 8px 12px;
+    color: var(--muted);
+    border-radius: 6px;
     font-size: 14px;
-    box-shadow: var(--shadow);
-    transition: 0.2s ease;
 }
 
-.btn-create:hover,
-.btn-save:hover {
-    filter: brightness(0.95);
+.submenu a:hover {
+    background: #dde7f2;
+    color: var(--blue);
 }
 
-.edit-btn,
-.delete-btn {
-    padding: 6px 10px;
-    border-radius: 8px;
-    text-decoration: none;
-    color: white;
-    font-size: 13px;
-}
-
-.edit-btn {
-    background: #fbbf24; /* amarelo suave */
-}
-
-.delete-btn {
-    background: #ef4444; /* vermelho */
-}
-
-.edit-btn:hover { filter: brightness(0.9); }
-.delete-btn:hover { filter: brightness(0.9); }
-
-/* ===== FORMULÁRIOS ===== */
-form label {
-    display: block;
+.submenu .active-sub {
+    background: var(--blue-100);
+    color: var(--blue);
     font-weight: 600;
-    margin-top: 18px;
-    margin-bottom: 6px;
-    color: var(--text);
 }
 
-form input,
-form select {
+/* Seta */
+.arrow {
+    margin-left: auto;
+    transition: transform .25s;
+}
+
+.menu-item.open .arrow {
+    transform: rotate(180deg);
+}
+
+/* ========= LOGOUT ========= */
+.logout-container {
+    margin-top: auto;
+    padding-top: 20px;
+}
+
+.logout-btn {
+    display: block;
+    padding: 12px 0;
     width: 100%;
-    padding: 10px 12px;
-    border: 1px solid var(--border);
+    text-align: center;
+    background: #b02a37;
+    color: #fff;
     border-radius: 8px;
-    font-size: 14px;
-    margin-bottom: 8px;
+    font-weight: bold;
+    text-decoration: none;
 }
 
-form input:focus,
-form select:focus {
-    outline: none;
-    border-color: var(--blue);
-    box-shadow: 0 0 0 2px var(--blue-100);
+.logout-btn:hover {
+    background: #c84752;
 }
 
-/* SEARCH BAR */
+/* ========= ÁREA DE CONTEÚDO ========= */
+.content {
+    flex: 1;
+    padding: 32px 40px;
+    margin-left: 260px;
+}
+
+.content-wrapper {
+    max-width: 1100px;
+    margin: 0 auto;
+}
+
+/* ========= SEARCH BAR ========= */
 .admin-search form {
     display: flex;
     align-items: center;
     gap: 10px;
     width: 100%;
     max-width: 500px;
+    margin-bottom: 30px;
 }
 
 .admin-search input {
@@ -238,11 +194,11 @@ form select:focus {
     border: none;
 }
 
-
-/* STAT CARDS */
+/* ========= STAT CARDS ========= */
 .stats-section {
     margin: 30px 0;
 }
+
 .stats-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
@@ -275,39 +231,11 @@ form select:focus {
     font-weight: bold;
 }
 
-
-/* QUICK ACTIONS */
-.quick-actions {
-    margin-top: 20px;
-    display: flex;
-    gap: 15px;
-}
-/* Quick Actions */
-.quick-actions a {
-    font-size: 14px;
-    padding: 8px 12px;
-}
-
-h1 {
-    margin-bottom: 20px;
-    font-size: 32px;
-}
-
-h2 {
-    margin: 40px 0 15px;
-    font-size: 22px;
-}
-
-/* Content wrapper centralizado */
-.content-wrapper {
-    max-width: 1100px;
-    margin: 0 auto;
-}
-
-/* Gráficos organizados */
+/* ========= CHARTS ========= */
 .charts-section {
     margin: 40px 0;
 }
+
 .chart-card {
     background: #fff;
     padding: 25px;
@@ -316,21 +244,90 @@ h2 {
     box-shadow: var(--shadow);
     margin-bottom: 35px;
 }
+
 .chart-card canvas {
     width: 100% !important;
     max-height: 350px !important;
 }
 
-/* ACTIVITY BOX */
-.activity-box {
-    background: white;
-    padding: 20px;
-    border-radius: 12px;
-    border: 1px solid var(--border);
-    box-shadow: var(--shadow);
+/* ========= ADMIN CARDS (Links grandes) ========= */
+.admin-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 22px;
     margin-bottom: 40px;
 }
-.activity-box p {
-    margin: 8px 0;
+
+.card {
+    background: white;
+    padding: 32px 24px;
+    border-radius: 14px;
+    box-shadow: var(--shadow);
+    text-align: center;
+    border: 1px solid var(--border);
+    transition: 0.25s ease;
+    text-decoration: none;
+    color: var(--text);
 }
 
+.card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 24px rgba(15, 23, 42, 0.12);
+}
+
+.card i {
+    font-size: 32px;
+    color: var(--blue);
+    margin-bottom: 18px;
+}
+
+.card p {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 600;
+}
+
+/* ========= QUICK ACTIONS ========= */
+.quick-actions {
+    margin-top: 20px;
+    display: flex;
+    gap: 15px;
+}
+
+.quick-actions a {
+    font-size: 14px;
+    padding: 8px 12px;
+    background: var(--blue);
+    color: #fff;
+    border-radius: 8px;
+    text-decoration: none;
+}
+
+.quick-actions a:hover {
+    filter: brightness(0.9);
+}
+
+/* ========= TABELAS ========= */
+.admin-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #fff;
+    box-shadow: var(--shadow);
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.admin-table thead {
+    background: var(--blue);
+    color: white;
+}
+
+.admin-table th,
+.admin-table td {
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--border);
+}
+
+.admin-table tbody tr:hover {
+    background: #f9fafb;
+}
