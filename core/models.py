@@ -179,3 +179,12 @@ class VwAlunosInscricoes2025(models.Model):
     class Meta:
         managed = False
         db_table = 'vw_alunos_inscricoes_2025'
+
+
+class HorarioPDF(models.Model):
+    nome = models.CharField(max_length=200, default="Horário Oficial")
+    ficheiro = models.FileField(upload_to="horarios/")
+    atualizado_em = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.nome} ({self.atualizado_em.date()})"

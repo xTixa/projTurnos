@@ -1,8 +1,69 @@
 {% extends "admin/base_admin.html" %}
 
 {% block content %}
+
 <h1>Painel de Administração</h1>
 
+<!-- SEARCH BAR -->
+<div class="admin-search">
+    <form method="GET">
+        <input type="text" placeholder="Pesquisar utilizadores, turnos, UCs..." name="q">
+        <button><i class="fa-solid fa-search"></i></button>
+    </form>
+</div>
+
+<!-- STATISTICS -->
+<section class="stats-section">
+    <div class="stats-grid">
+
+        <div class="stat-card">
+            <i class="fa-solid fa-users"></i>
+            <h3>{{ total_users }}</h3>
+            <p>Utilizadores</p>
+        </div>
+
+        <div class="stat-card">
+            <i class="fa-solid fa-clock"></i>
+            <h3>{{ total_turnos }}</h3>
+            <p>Turnos</p>
+        </div>
+
+        <div class="stat-card">
+            <i class="fa-solid fa-book"></i>
+            <h3>{{ total_ucs }}</h3>
+            <p>Unidades Curriculares</p>
+        </div>
+
+        <div class="stat-card">
+            <i class="fa-solid fa-calendar"></i>
+            <h3>{{ total_horarios }}</h3>
+            <p>Horários PDF</p>
+        </div>
+
+    </div>
+</section>
+
+
+<!-- GRÁFICOS -->
+<section class="charts-section">
+
+    <h2>Estatísticas</h2>
+
+    <div class="chart-card">
+        <h3>Alunos inscritos por UC</h3>
+        <canvas id="chartAlunos"></canvas>
+    </div>
+
+    <div class="chart-card">
+        <h3>Turnos disponíveis vs ocupados</h3>
+        <canvas id="chartTurnos"></canvas>
+    </div>
+
+</section>
+
+
+<!-- MANAGEMENT -->
+<h2>Gestão</h2>
 <div class="admin-cards">
 
     <a href="{% url 'home:admin_users_list' %}" class="card">
@@ -16,9 +77,28 @@
     </a>
 
     <a href="{% url 'home:admin_horarios_list' %}" class="card">
-        <i class="fa-regular fa-calendar"></i>
+        <i class="fa-solid fa-calendar-days"></i>
         <p>Gerir Horários</p>
     </a>
 
+    <a href="#" class="card">
+        <i class="fa-solid fa-book"></i>
+        <p>Gerir UCs</p>
+    </a>
+
+    <a href="#" class="card">
+        <i class="fa-solid fa-chalkboard-teacher"></i>
+        <p>Gerir Docentes</p>
+    </a>
+
 </div>
+
+<!-- QUICK ACTIONS -->
+<h2>Ações Rápidas</h2>
+<div class="quick-actions">
+    <a href="{% url 'home:admin_users_create' %}">+ Criar Utilizador</a>
+    <a href="{% url 'home:admin_turnos_create' %}">+ Criar Turno</a>
+    <a href="{% url 'home:admin_horarios_create' %}">+ Carregar Horário PDF</a>
+</div>
+
 {% endblock %}

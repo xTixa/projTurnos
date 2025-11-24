@@ -1,48 +1,20 @@
 {% extends "home/base.html" %}
 {% load static %}
-{% block title %}Horários — Engenharia Informática{% endblock %}
-{% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/horarios.css' %}">
-{% endblock %}
 
 {% block content %}
 <section class="horarios-hero">
   <h1>Horários — Engenharia Informática</h1>
-  <p>Consulta aqui os horários organizados por dia e turno.  
-     Turnos sobrepostos são destacados a vermelho.</p>
-</section>
-<section class="horarios-tabela">
-  {% for ano, lista in horarios_por_ano.items %}
-  <div class="horario-ano">
-    <h2>{{ ano }}</h2>
-    <table>
-      <thead>
-        <tr>
-          <th>Dia</th>
-          <th>Hora</th>
-          <th>Unidade Curricular</th>
-          <th>Turno</th>
-          <th>Sala</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for h in lista %}
-        <tr class="{% if h.conflito %}conflito{% endif %}">
-          <td>{{ h.dia }}</td>
-          <td>{{ h.hora }}</td>
-          <td>{{ h.uc }}</td>
-          <td>{{ h.turno }}</td>
-          <td>{{ h.sala }}</td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  </div>
-  {% endfor %}
+  <p>Consulta aqui o horário oficial publicado pela coordenação.</p>
 </section>
 
-<a href="{% url 'home:inscricao_turno' %}" class="fab">
-  <i class="fa-solid fa-user-plus"></i>
-  Inscrição em Turnos
-</a>
+{% if pdf %}
+  <a href="{{ pdf.ficheiro.url }}" class="download-btn" download>📥 Descarregar PDF</a>
+
+  <div class="pdf-container">
+      <iframe src="{{ pdf.ficheiro.url }}" width="100%" height="100%"></iframe>
+  </div>
+{% else %}
+  <p>Nenhum horário disponível.</p>
+{% endif %}
+
 {% endblock %}

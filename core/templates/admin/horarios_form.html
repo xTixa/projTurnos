@@ -1,23 +1,20 @@
 {% extends "admin/base_admin.html" %}
 
 {% block content %}
-<h1>{% if horario_id %}Editar Horário{% else %}Novo Horário{% endif %}</h1>
+<h1>{{ horario|default:"Novo Horário" }}</h1>
 
-<form method="post">
+<form method="POST" enctype="multipart/form-data">
     {% csrf_token %}
 
-    <label>Unidade Curricular:</label>
-    <input type="text" name="uc" required>
+    <label>Nome:</label>
+    <input type="text" name="nome" value="{{ horario.nome|default:'' }}">
 
-    <label>Dia:</label>
-    <input type="text" name="dia" required>
+    <label>Ficheiro PDF:</label>
+    {% if horario %}
+        <p>Ficheiro atual: <a href="{{ horario.ficheiro.url }}">Ver PDF</a></p>
+    {% endif %}
+    <input type="file" name="ficheiro" accept="application/pdf">
 
-    <label>Hora:</label>
-    <input type="text" name="hora" required>
-
-    <label>Turno:</label>
-    <input type="text" name="turno" required>
-
-    <button class="btn-save">Guardar</button>
+    <button type="submit" class="btn-create">Guardar</button>
 </form>
 {% endblock %}

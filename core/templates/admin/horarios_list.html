@@ -1,19 +1,18 @@
 {% extends "admin/base_admin.html" %}
 
 {% block content %}
-<h1>Gerir Horários</h1>
+<h1>Gerir Horários (PDF)</h1>
 
-<a href="{% url 'home:admin_horarios_create' %}" class="btn-create">+ Novo Horário</a>
+<a href="{% url 'home:admin_horarios_create' %}" class="btn-create">+ Novo PDF</a>
 
 {% if horarios %}
 <table class="admin-table">
     <thead>
         <tr>
             <th>ID</th>
-            <th>UC</th>
-            <th>Dia</th>
-            <th>Hora</th>
-            <th>Turno</th>
+            <th>Nome</th>
+            <th>Ficheiro</th>
+            <th>Atualizado em</th>
             <th>Ações</th>
         </tr>
     </thead>
@@ -22,19 +21,19 @@
         {% for h in horarios %}
         <tr>
             <td>{{ h.id }}</td>
-            <td>{{ h.uc }}</td>
-            <td>{{ h.dia }}</td>
-            <td>{{ h.hora }}</td>
-            <td>{{ h.turno }}</td>
+            <td>{{ h.nome }}</td>
+            <td><a href="{{ h.ficheiro.url }}" target="_blank">Abrir</a></td>
+            <td>{{ h.atualizado_em|date:"d/m/Y H:i" }}</td>
             <td>
                 <a href="{% url 'home:admin_horarios_edit' h.id %}" class="edit-btn">✏️</a>
-                <a href="{% url 'home:admin_horarios_delete' h.id %}" class="delete-btn">❌</a>
+                <a href="{% url 'home:admin_horarios_delete' h.id %}" class="delete-btn"
+                   onclick="return confirm('Apagar horário?');">❌</a>
             </td>
         </tr>
         {% endfor %}
     </tbody>
 </table>
 {% else %}
-<p>Nenhum horário encontrado.</p>
+<p>Nenhum horário foi carregado ainda.</p>
 {% endif %}
 {% endblock %}

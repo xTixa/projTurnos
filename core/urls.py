@@ -34,12 +34,11 @@ urlpatterns = [
     path("admin-panel/turnos/<int:id>/edit/", views.admin_turnos_edit, name="admin_turnos_edit"),
     path("admin-panel/turnos/<int:id>/delete/", views.admin_turnos_delete, name="admin_turnos_delete"),
 
-    # Horários
+    # HORARIOS ADMIN (AJUSTADO)
     path("admin-panel/horarios/", views.admin_horarios_list, name="admin_horarios_list"),
-    path("admin-panel/horarios/create/", views.admin_horarios_create, name="admin_horarios_create"),
-    path("admin-panel/horarios/<int:id>/edit/", views.admin_horarios_edit, name="admin_horarios_edit"),
-    path("admin-panel/horarios/<int:id>/delete/", views.admin_horarios_delete, name="admin_horarios_delete"),
-
+    path("admin-panel/horarios/novo/", views.admin_horarios_create, name="admin_horarios_create"),
+    path("admin-panel/horarios/<int:id>/editar/", views.admin_horarios_edit, name="admin_horarios_edit"),
+    path("admin-panel/horarios/<int:id>/apagar/", views.admin_horarios_delete, name="admin_horarios_delete"),
 
     #ficha 12
     path("4etcs/", views.uc_mais_4_ects, name="uc_mais_4_ects"),

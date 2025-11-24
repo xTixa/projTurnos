@@ -3,7 +3,7 @@ from django.contrib.auth import logout as auth_logout
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.shortcuts import redirect
-from .models import UnidadeCurricular, Docente, Curso
+from .models import UnidadeCurricular, Docente, Curso, HorarioPDF
 from .db_views import UCMais4Ects, CadeirasSemestre, AlunosMatriculadosPorDia, AlunosPorOrdemAlfabetica, Turnos, Cursos
 from django.http import JsonResponse
 from .models import VwTopDocenteUcAnoCorrente
@@ -187,7 +187,17 @@ def alunos_inscricoes_2025(request):
 
 # Dashboard
 def admin_dashboard(request):
-    return render(request, "admin/dashboard.html")
+    total_users = User.objects.count()
+    total_turnos = Turnos.objects.count()
+    total_ucs = UnidadeCurricular.objects.count()
+    total_horarios = HorarioPDF.objects.count()
+
+    return render(request, "admin/dashboard.html", {
+        "total_users": total_users,
+        "total_turnos": total_turnos,
+        "total_ucs": total_ucs,
+        "total_horarios": total_horarios,
+    })
 
 def admin_users_list(request):
     users = User.objects.all().order_by("id")
@@ -275,21 +285,51 @@ def admin_turnos_delete(request, id):
 # ADMIN — HORÁRIOS CRUD
 # ==========================
 
-def admin_horarios_list(request):
-    # TEMPORÁRIO: lista vazia só para não quebrar
-    horarios = []
-    return render(request, "admin/horarios_list.html", {"horarios": horarios})
-
-
 def admin_horarios_create(request):
+    if request.method == "POST":
+        nome = request.POST.get("nome")
+        ficheiro = request.FILES.get("ficheiro")
+
+        if not ficheiro:
+            messages.error(request, "É necessário enviar um ficheiro PDF.")
+            return redirect("home:admin_horarios_create")
+
+        HorarioPDF.objects.create(
+            nome=nome,
+            ficheiro=ficheiro
+        )
+
+        messages.success(request, "Horário carregado com sucesso!")
+        return redirect("home:admin_horarios_list")
+
     return render(request, "admin/horarios_form.html")
 
-
 def admin_horarios_edit(request, id):
-    # Sem BD real, por agora apenas passa o ID para o template
-    return render(request, "admin/horarios_form.html", {"horario_id": id})
+    horario = get_object_or_404(HorarioPDF, id=id)
 
+    if request.method == "POST":
+        horario.nome = request.POST.get("nome")
+
+        if "ficheiro" in request.FILES:
+            horario.ficheiro = request.FILES["ficheiro"]
+
+        horario.save()
+        messages.success(request, "Horário atualizado!")
+        return redirect("home:admin_horarios_list")
+
+    return render(request, "admin/horarios_form.html", {"horario": horario})
 
 def admin_horarios_delete(request, id):
-    messages.success(request, "Horário apagado (mock).")
-    return redirect("admin_horarios_list")
+    horario = get_object_or_404(HorarioPDF, id=id)
+    horario.delete()
+    messages.success(request, "Horário apagado!")
+    return redirect("home:admin_horarios_list")
+
+
+def admin_horarios_list(request):
+    horarios = HorarioPDF.objects.all().order_by("-atualizado_em")
+    return render(request, "admin/horarios_list.html", {"horarios": horarios})
+
+def horarios(request):
+    pdf = HorarioPDF.objects.order_by("-atualizado_em").first()
+    return render(request, "home/horarios.html", {"pdf": pdf})

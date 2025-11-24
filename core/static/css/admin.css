@@ -87,29 +87,39 @@ body {
 }
 
 /* ===== CARDS DO DASHBOARD ===== */
+/* Admin cards */
 .admin-cards {
-    display: flex;
-    gap: 20px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 22px;
+    margin-bottom: 40px;
 }
-
 .card {
-    background: #fff;
-    padding: 28px;
-    width: 240px;
+    background: white;
+    padding: 32px 24px;
     border-radius: 14px;
     box-shadow: var(--shadow);
     text-align: center;
-    transition: 0.2s ease;
-}
-
-.card i {
-    font-size: 28px;
-    color: var(--blue);
-    margin-bottom: 12px;
+    border: 1px solid var(--border);
+    transition: 0.25s ease;
 }
 
 .card:hover {
     transform: translateY(-4px);
+    box-shadow: 0 12px 24px rgba(15, 23, 42, 0.12);
+}
+
+.card i {
+    font-size: 32px;
+    color: var(--blue);
+    margin-bottom: 18px;
+}
+
+.card p {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text);
 }
 
 /* ===== TABELAS ===== */
@@ -203,3 +213,124 @@ form select:focus {
     border-color: var(--blue);
     box-shadow: 0 0 0 2px var(--blue-100);
 }
+
+/* SEARCH BAR */
+.admin-search form {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    max-width: 500px;
+}
+
+.admin-search input {
+    flex: 1;
+    padding: 10px 14px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+}
+
+.admin-search button {
+    padding: 10px 14px;
+    background: var(--blue);
+    color: white;
+    border-radius: 8px;
+    border: none;
+}
+
+
+/* STAT CARDS */
+.stats-section {
+    margin: 30px 0;
+}
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 25px;
+}
+
+.stat-card {
+    background: white;
+    padding: 25px;
+    border-radius: 14px;
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow);
+    text-align: center;
+    transition: 0.25s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-4px);
+}
+
+.stat-card i {
+    font-size: 34px;
+    color: var(--blue);
+    margin-bottom: 12px;
+}
+
+.stat-card h3 {
+    margin: 8px 0;
+    font-size: 26px;
+    font-weight: bold;
+}
+
+
+/* QUICK ACTIONS */
+.quick-actions {
+    margin-top: 20px;
+    display: flex;
+    gap: 15px;
+}
+/* Quick Actions */
+.quick-actions a {
+    font-size: 14px;
+    padding: 8px 12px;
+}
+
+h1 {
+    margin-bottom: 20px;
+    font-size: 32px;
+}
+
+h2 {
+    margin: 40px 0 15px;
+    font-size: 22px;
+}
+
+/* Content wrapper centralizado */
+.content-wrapper {
+    max-width: 1100px;
+    margin: 0 auto;
+}
+
+/* Gráficos organizados */
+.charts-section {
+    margin: 40px 0;
+}
+.chart-card {
+    background: #fff;
+    padding: 25px;
+    border-radius: 14px;
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow);
+    margin-bottom: 35px;
+}
+.chart-card canvas {
+    width: 100% !important;
+    max-height: 350px !important;
+}
+
+/* ACTIVITY BOX */
+.activity-box {
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow);
+    margin-bottom: 40px;
+}
+.activity-box p {
+    margin: 8px 0;
+}
+
