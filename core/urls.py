@@ -1,6 +1,7 @@
 from django.urls import path
 from django.contrib.auth import views as auth_views
 from . import views
+from core.views import testar_mongo
 
 app_name = "home"
 
@@ -53,5 +54,9 @@ urlpatterns = [
     path("cursos_list/", views.cursos_list, name="cursos_list"),
     path("top_docente_uc_ano_corrente/", views.top_docente_uc_ano_corrente, name="top_docente_uc_ano_corrente"),
     path("alunos_inscricoes_2025/", views.alunos_inscricoes_2025, name="alunos_inscricoes_2025"),
+
+    # MONGO TESTE
+    path("testar-mongo/", testar_mongo, name="testar_mongo"),
+
 
 ]

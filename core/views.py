@@ -10,6 +10,7 @@ from django.http import JsonResponse
 from .models import VwTopDocenteUcAnoCorrente
 from .models import VwAlunosInscricoes2025
 from django.contrib.auth.models import User
+from bd2_projeto.services.mongo_service import adicionar_log, listar_logs
 
 def index(request):
     return render(request, "home/index.html")
@@ -412,3 +413,24 @@ def admin_users_alunos(request):
 def admin_logout(request):
     logout(request)
     return redirect("home:admin_login")
+
+def testar_mongo(request):
+    # Adicionar um log no MongoDB
+    adicionar_log("teste_ligacao", {"user": "teste_django"})
+
+    # Ler todos os logs existentes
+    logs = listar_logs()
+
+    return JsonResponse({"estado": "ok", "logs": logs})
+
+def admin_horarios_delete(request, id):
+    horario = get_object_or_404(HorarioPDF, id=id)
+    horario.delete()
+    messages.success(request, "Horário apagado!")
+    return redirect("home:admin_horarios_list")
+
+# NOVA VIEW PARA TESTAR MONGO
+def testar_mongo(request):
+    adicionar_log("teste_ligacao", {"user": "teste_django"})
+    logs = listar_logs()
+    return JsonResponse({"estado": "ok", "logs": logs})
