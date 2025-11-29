@@ -1,0 +1,91 @@
+/* ======== Cabeçalho ======== */
+.header-section {
+    margin-bottom: 25px;
+}
+
+.header-section h1 {
+    font-size: 32px;
+    color: #1f2937;
+    margin-bottom: 5px;
+}
+
+.header-section p {
+    color: #6b7280;
+}
+
+/* ======== Card da tabela ======== */
+.card {
+    background: #ffffff;
+    padding: 25px;
+    border-radius: 14px;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.08);
+    margin-bottom: 40px;
+}
+
+/* ======== Título + Pesquisa ======== */
+.table-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 18px;
+}
+
+.table-header h2 {
+    font-size: 20px;
+    color: #374151;
+}
+
+.table-header input {
+    padding: 8px 14px;
+    border-radius: 8px;
+    border: 1px solid #d1d5db;
+    width: 220px;
+    transition: 0.2s;
+    font-size: 14px;
+}
+
+.table-header input:focus {
+    outline: none;
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37,99,235,0.2);
+}
+
+/* ======== Tabela ======== */
+.tabela-users {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.tabela-users thead {
+    background: #2563eb;
+    color: white;
+}
+
+.tabela-users th {
+    text-align: left;
+    padding: 12px;
+    font-weight: 500;
+    font-size: 15px;
+}
+
+.tabela-users tbody tr {
+    border-bottom: 1px solid #e5e7eb;
+    transition: background 0.2s;
+}
+
+.tabela-users tbody tr:hover {
+    background: #f3f4f6;
+}
+
+.tabela-users td {
+    padding: 12px;
+    font-size: 14px;
+}
+
+/* Linha vazia */
+.empty-row {
+    text-align: center;
+    padding: 25px !important;
+    color: #6b7280;
+    font-style: italic;
+}

@@ -443,14 +443,14 @@ def horarios(request):
     return render(request, "home/horarios.html", {"pdf": pdf})
 
 def admin_users_docentes(request):
-    docentes = User.objects.filter(tipo="docente")
+    docentes = Docente.objects.all().order_by("id_docente")
     return render(request, "admin/users_filter.html", {
         "titulo": "Docentes",
         "users": docentes
     })
 
 def admin_users_alunos(request):
-    alunos = User.objects.filter(tipo="aluno")
+    alunos = Aluno.objects.all().order_by("n_mecanografico")
     return render(request, "admin/users_filter.html", {
         "titulo": "Alunos",
         "users": alunos

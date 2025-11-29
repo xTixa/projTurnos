@@ -1,34 +1,76 @@
 {% extends "admin/base_admin.html" %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/admin/admin_users.css' %}">
+{% endblock %}
 
 {% block content %}
 
-<h1>{{ titulo }}</h1>
-<p class="subtitulo">Lista de {{ titulo|lower }}</p>
+<div class="header-section">
+    <h1>{{ titulo }}</h1>
+    <p>Gestão de {{ titulo|lower }}</p>
+</div>
 
-<table class="tabela-users">
-    <thead>
-        <tr>
-            <th>ID</th>
-            <th>Nome</th>
-            <th>Email</th>
-            <th>Tipo</th>
-        </tr>
-    </thead>
+<div class="card">
+    <div class="table-header">
+        <h2>Lista de {{ titulo|lower }}</h2>
+        <input type="text" id="searchInput" placeholder="Pesquisar..." onkeyup="filtrarTabela()">
+    </div>
 
-    <tbody>
-        {% for u in users %}
-        <tr>
-            <td>{{ u.id }}</td>
-            <td>{{ u.nome }}</td>
-            <td>{{ u.email }}</td>
-            <td>{{ u.tipo }}</td>
-        </tr>
-        {% empty %}
-        <tr>
-            <td colspan="4">Nenhum utilizador encontrado.</td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
+    <table class="tabela-users" id="usersTable">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Nome</th>
+                <th>Email</th>
+                {% if titulo == "Docentes" %}
+                <th>Função</th>
+                {% else %}
+                <th>Ano</th>
+                {% endif %}
+            </tr>
+        </thead>
+
+        <tbody>
+            {% for u in users %}
+            <tr>
+
+                {% if titulo == "Docentes" %}
+                    <!-- DOCENTES -->
+                    <td>{{ u.id_docente }}</td>
+                    <td>{{ u.nome }}</td>
+                    <td>{{ u.email }}</td>
+                    <td>Docente</td>
+
+                {% else %}
+                    <!-- ALUNOS -->
+                    <td>{{ u.n_mecanografico }}</td>
+                    <td>{{ u.nome }}</td>
+                    <td>{{ u.email }}</td>
+                    <td>{{ u.id_anocurricular.ano_curricular }}</td>
+                {% endif %}
+
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="4" class="empty-row">Nenhum utilizador encontrado.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<script>
+function filtrarTabela() {
+    const filtro = document.getElementById("searchInput").value.toLowerCase();
+    const linhas = document.querySelectorAll("#usersTable tbody tr");
+
+    linhas.forEach(row => {
+        const texto = row.textContent.toLowerCase();
+        row.style.display = texto.includes(filtro) ? "" : "none";
+    });
+}
+</script>
 
 {% endblock %}
