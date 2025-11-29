@@ -134,16 +134,14 @@ class Turno(models.Model):
         managed = False
         db_table = 'turno'
 
-
 class TurnoUc(models.Model):
-    id_turno = models.ForeignKey(Turno, models.DO_NOTHING, db_column='id_turno')
+    id_turno = models.ForeignKey(Turno, models.DO_NOTHING, db_column='id_turno', primary_key=True)
     id_unidadecurricular = models.ForeignKey('UnidadeCurricular', models.DO_NOTHING, db_column='id_unidadecurricular')
 
     class Meta:
         managed = False
         db_table = 'turno_uc'
         unique_together = (('id_turno', 'id_unidadecurricular'),)
-
 
 class UnidadeCurricular(models.Model):
     id_unidadecurricular = models.AutoField(primary_key=True)

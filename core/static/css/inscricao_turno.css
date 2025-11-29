@@ -1,0 +1,208 @@
+/* ============================
+   ESTILOS GERAIS
+============================ */
+body {
+  background: #f5f7fa;
+  font-family: "Inter", sans-serif;
+  color: #1a1a1a;
+}
+
+/* Header */
+.turno-header {
+  background: linear-gradient(135deg, #e8f2ff, #f5faff);
+  padding: 35px;
+  border-radius: 14px;
+  margin-bottom: 30px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+}
+
+.turno-header h1 {
+  font-size: 32px;
+  color: #2365d8;
+  margin-bottom: 10px;
+}
+
+.turno-header p {
+  font-size: 16px;
+  color: #444;
+}
+
+/* ============================
+   LISTA DE UC + TURNOS
+============================ */
+.turnos-lista {
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+}
+
+.uc-card {
+  background: white;
+  padding: 25px;
+  border-radius: 14px;
+  box-shadow: 0 3px 12px rgba(0,0,0,0.07);
+  border-left: 6px solid #2365d8;
+}
+
+.uc-card h3 {
+  margin-bottom: 15px;
+  color: #2365d8;
+  font-size: 22px;
+}
+
+.uc-turnos {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+/* Dropdown de turnos */
+.turno-select {
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid #d0d7e0;
+  background: #fafbfc;
+  color: #333;
+  font-size: 15px;
+  min-width: 250px;
+  transition: border 0.2s, box-shadow 0.2s;
+}
+
+.turno-select:focus {
+  outline: none;
+  border-color: #2365d8;
+  box-shadow: 0 0 0 3px rgba(35, 101, 216, 0.2);
+}
+
+/* Opções */
+.option-esgotado {
+  color: #b91c1c;
+  background: #fee2e2;
+}
+
+.option-vagas {
+  color: #065f46;
+  background: #d1fae5;
+}
+
+/* Botão de inscrever */
+.btn-inscrever {
+  padding: 10px 18px;
+  font-size: 15px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: 0.2s;
+}
+
+.btn-inscrever:not(:disabled):hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+}
+
+.btn-inscrever:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* ============================
+   MENSAGEM SUCESSO
+============================ */
+.mensagem {
+  margin-top: 25px;
+  padding: 14px 20px;
+  background: #d1fae5;
+  color: #065f46;
+  border-left: 5px solid #10b981;
+  border-radius: 10px;
+  font-weight: 600;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  width: fit-content;
+  animation: fadeIn 0.4s ease-out;
+}
+
+.hidden {
+  display: none;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ============================
+   HORÁRIO
+============================ */
+h2 {
+  margin-top: 40px;
+  margin-bottom: 15px;
+  color: #1f2937;
+}
+
+.horario-wrapper {
+  padding: 20px;
+  background: white;
+  border-radius: 14px;
+  box-shadow: 0 3px 12px rgba(0,0,0,0.07);
+  overflow-x: auto;
+}
+
+/* Tabela */
+.tabela-horario {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.tabela-horario th {
+  background: #2365d8;
+  color: white;
+  padding: 12px;
+  text-align: center;
+}
+
+.tabela-horario td {
+  padding: 12px;
+  border: 1px solid #e5e7eb;
+  height: 45px;
+  text-align: center;
+}
+
+.slot {
+  background: #fafbfc;
+}
+
+.slot-ocupado {
+  background: #dbeafe;
+  color: #1e40af;
+  font-weight: 600;
+  border: 1px solid #93c5fd;
+  border-radius: 4px;
+}
+
+/* ============================
+   BOTÃO EXPORTAR PDF
+============================ */
+.export-btn {
+  margin-top: 20px;
+  padding: 12px 20px;
+  background: #e11d48;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  transition: 0.2s;
+}
+
+.export-btn:hover {
+  background: #be123c;
+  transform: translateY(-2px);
+}

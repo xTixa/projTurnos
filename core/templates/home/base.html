@@ -58,55 +58,110 @@
 
   <div class="container-flex">
     <aside class="sidebar">
-      {% block sidebar %}
-      <div class="menu-header"></div>
-      <ul class="menu">
+        {% if request.session.user_tipo == "admin" %}
 
-        <li class="menu__item {% if request.resolver_match.url_name == 'index' %}is-active{% endif %}">
-          <a href="{% url 'home:index' %}">
-            <i class="fa-solid fa-house"></i> Home
-          </a>
-        </li>
+            <!-- SIDEBAR ADMIN -->
+            <h2 class="logo">Admin EI</h2>
 
-        <li class="menu__item {% if request.resolver_match.url_name == 'ingresso' %}is-active{% endif %}">
-          <a href="{% url 'home:ingresso' %}">
-            <i class="fa-solid fa-graduation-cap"></i> Ingresso
-          </a>
-        </li>
+            <ul class="menu">
+                <li class="{% if request.resolver_match.url_name == 'admin_dashboard' %}active{% endif %}">
+                    <a href="{% url 'home:admin_dashboard' %}">
+                        <i class="fa-solid fa-gauge"></i> Dashboard
+                    </a>
+                </li>
 
-        <li class="menu__item {% if request.resolver_match.url_name == 'plano' %}is-active{% endif %}">
-          <a href="{% url 'home:plano' %}">
-            <i class="fa-regular fa-rectangle-list"></i> Plano Curricular
-          </a>
-        </li>
+                <li class="menu-item {% if request.resolver_match.url_name in 'admin_users_list admin_users_docentes admin_users_alunos' %}open{% endif %}">
+                    <button class="submenu-btn">
+                        <i class="fa-solid fa-users"></i> Utilizadores
+                        <i class="fa-solid fa-chevron-down arrow"></i>
+                    </button>
 
-        <li class="menu__item {% if request.resolver_match.url_name == 'horarios' %}is-active{% endif %}">
-          <a href="{% url 'home:horarios' %}">
-            <i class="fa-regular fa-calendar"></i> Horários
-          </a>
-        </li>
+                    <ul class="submenu">
+                        <li><a href="{% url 'home:admin_users_list' %}"
+                            class="{% if request.resolver_match.url_name == 'admin_users_list' %}active-sub{% endif %}">
+                            Todos
+                        </a></li>
+                        <li><a href="{% url 'home:admin_users_docentes' %}"
+                            class="{% if request.resolver_match.url_name == 'admin_users_docentes' %}active-sub{% endif %}">
+                            Docentes
+                        </a></li>
+                        <li><a href="{% url 'home:admin_users_alunos' %}"
+                            class="{% if request.resolver_match.url_name == 'admin_users_alunos' %}active-sub{% endif %}">
+                            Alunos
+                        </a></li>
+                    </ul>
+                </li>
 
-        <li class="menu__item {% if request.resolver_match.url_name == 'avaliacoes' %}is-active{% endif %}">
-          <a href="{% url 'home:avaliacoes' %}">
-            <i class="fa-regular fa-clipboard"></i> Avaliações
-          </a>
-        </li>
+                <li class="{% if request.resolver_match.url_name == 'admin_turnos_list' %}active{% endif %}">
+                    <a href="{% url 'home:admin_turnos_list' %}">
+                        <i class="fa-solid fa-clock"></i> Turnos
+                    </a>
+                </li>
 
-        <li class="menu__item {% if request.resolver_match.url_name == 'contactos' %}is-active{% endif %}">
-          <a href="{% url 'home:contactos' %}">
-            <i class="fa-regular fa-address-card"></i> Contactos
-          </a>
-        </li>
+                <li class="{% if request.resolver_match.url_name == 'admin_horarios_list' %}active{% endif %}">
+                    <a href="{% url 'home:admin_horarios_list' %}">
+                        <i class="fa-regular fa-calendar"></i> Horários
+                    </a>
+                </li>
+            </ul>
 
-        <li class="menu__item {% if request.resolver_match.url_name == 'informacoes' %}is-active{% endif %}">
-          <a href="{% url 'home:informacoes' %}">
-            <i class="fa-solid fa-circle-info"></i> Informações
-          </a>
-        </li>
+            <div class="logout-container">
+                <a href="{% url 'home:admin_logout' %}" class="logout-btn">
+                    <i class="fa-solid fa-right-from-bracket"></i> Logout
+                </a>
+            </div>
 
-      </ul>
-      {% endblock %}
-    </aside>
+        {% else %}
+            <!-- SIDEBAR NORMAL -->
+            <div class="menu-header"></div>
+            <ul class="menu">
+
+                <li class="menu__item {% if request.resolver_match.url_name == 'index' %}is-active{% endif %}">
+                    <a href="{% url 'home:index' %}">
+                        <i class="fa-solid fa-house"></i> Home
+                    </a>
+                </li>
+
+                <li class="menu__item {% if request.resolver_match.url_name == 'ingresso' %}is-active{% endif %}">
+                    <a href="{% url 'home:ingresso' %}">
+                        <i class="fa-solid fa-graduation-cap"></i> Ingresso
+                    </a>
+                </li>
+
+                <li class="menu__item {% if request.resolver_match.url_name == 'plano' %}is-active{% endif %}">
+                    <a href="{% url 'home:plano' %}">
+                        <i class="fa-regular fa-rectangle-list"></i> Plano Curricular
+                    </a>
+                </li>
+
+                <li class="menu__item {% if request.resolver_match.url_name == 'horarios' %}is-active{% endif %}">
+                    <a href="{% url 'home:horarios' %}">
+                        <i class="fa-regular fa-calendar"></i> Horários
+                    </a>
+                </li>
+
+                <li class="menu__item {% if request.resolver_match.url_name == 'avaliacoes' %}is-active{% endif %}">
+                    <a href="{% url 'home:avaliacoes' %}">
+                        <i class="fa-regular fa-clipboard"></i> Avaliações
+                    </a>
+                </li>
+
+                <li class="menu__item {% if request.resolver_match.url_name == 'contactos' %}is-active{% endif %}">
+                    <a href="{% url 'home:contactos' %}">
+                        <i class="fa-regular fa-address-card"></i> Contactos
+                    </a>
+                </li>
+
+                <li class="menu__item {% if request.resolver_match.url_name == 'informacoes' %}is-active{% endif %}">
+                    <a href="{% url 'home:informacoes' %}">
+                        <i class="fa-solid fa-circle-info"></i> Informações
+                    </a>
+                </li>
+
+            </ul>
+        {% endif %}
+      </aside>
+
 
     <main class="main-content">
       {% block content %}{% endblock %}
@@ -136,6 +191,18 @@
         }
     });
   </script>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const buttons = document.querySelectorAll(".submenu-btn");
+        buttons.forEach(btn => {
+            btn.addEventListener("click", () => {
+                btn.parentElement.classList.toggle("open");
+            });
+        });
+    });
+  </script>
+
   {% endblock %}
 </body>
 

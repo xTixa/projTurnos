@@ -43,12 +43,51 @@
   box-shadow: var(--shadow);
 }
 .turno-header h1 { color: var(--blue); margin-bottom: 8px; }
-.uc-card {
-  background: #fff; border: 1px solid var(--border);
-  border-radius: 14px; padding: 20px;
-  box-shadow: var(--shadow); transition: 0.2s ease;
+/* ============================
+   INSCRIÇÃO EM TURNOS — ESTILOS
+   ============================ */
+
+.turnos-lista {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 25px;
+    margin-bottom: 40px;
 }
-.uc-card:hover { transform: translateY(-3px); box-shadow: 0 8px 16px rgba(0,0,0,0.1); }
+
+.uc-card {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.uc-card h3 {
+    font-size: 20px;
+    color: var(--blue);
+    margin-bottom: 5px;
+}
+
+/* Seletores de turnos */
+.uc-turnos {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.turno-select {
+    padding: 10px 14px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    font-size: 15px;
+    min-width: 250px;
+    background: #f9fafb;
+    transition: border 0.2s ease, box-shadow 0.2s ease;
+}
+
+.turno-select:focus {
+    border-color: var(--blue);
+    box-shadow: 0 0 0 3px rgba(37,99,235,0.2);
+}
 
 /* ===== HORÁRIO PERSONALIZADO ===== */
 .horario-wrapper {
@@ -108,25 +147,39 @@
     text-align: left;
 }
 
-.btn-inscricao {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
+/* Botão Inscrever */
+.btn-inscrever {
     background: var(--blue);
     color: white;
-    padding: 12px 18px;
+    padding: 10px 16px;
     border-radius: 10px;
+    border: none;
+    cursor: pointer;
     font-weight: 600;
-    box-shadow: var(--shadow);
     transition: background .2s ease, transform .1s ease;
-    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: var(--shadow);
 }
 
-.btn-inscricao:hover {
+.btn-inscrever:hover {
     background: #1e40af;
     transform: translateY(-2px);
 }
 
-.btn-inscricao i {
-    font-size: 15px;
+.btn-inscrever:disabled {
+    background: #9ca3af;
+    cursor: not-allowed;
+}
+
+/* Badge de vagas */
+.option-vagas {
+    font-weight: 600;
+    color: var(--blue);
+}
+
+.option-esgotado {
+    color: #b91c1c;
+    font-weight: 600;
 }

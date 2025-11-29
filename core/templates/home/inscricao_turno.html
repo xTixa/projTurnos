@@ -2,6 +2,10 @@
 {% load static %}
 {% block title %}Inscrição em Turnos{% endblock %}
 
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/inscricao_turno.css' %}">
+{% endblock %}
+
 {% block content %}
 <section class="turno-header">
   <h1>Inscrição em Turnos</h1>
@@ -16,13 +20,26 @@
     <div class="uc-turnos">
       <label for="turno{{ forloop.counter }}">Selecionar Turno:</label>
       <select id="turno{{ forloop.counter }}" class="turno-select">
-        <option disabled selected>Escolhe um turno...</option>
-        {% for t in uc.turnos %}
-          <option {% if t.vagas == 0 %}disabled{% endif %}>
-            {{ t.nome }} — {{ t.horario }} ({{ t.vagas }} vaga{{ t.vagas|pluralize:"s" }})
+          <option disabled selected>Escolhe um turno...</option>
+
+          {% for t in uc.turnos %}
+          <option 
+              value="{{ t.id }}" 
+              {% if t.vagas == 0 %}disabled{% endif %}
+              class="{% if t.vagas == 0 %}option-esgotado{% else %}option-vagas{% endif %}"
+          >
+              {{ t.nome }}
+              — {{ t.horario }}
+              —
+              {% if t.vagas == 0 %}
+                  Esgotado
+              {% else %}
+                  {{ t.vagas }} vaga{{ t.vagas|pluralize:"s" }}
+              {% endif %}
           </option>
-        {% endfor %}
+          {% endfor %}
       </select>
+
       <button class="btn btn-primary btn-inscrever" {% if uc.turnos|length == 0 %}disabled{% endif %}>
         <i class="fa-solid fa-check"></i> Inscrever
       </button>

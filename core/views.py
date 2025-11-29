@@ -10,6 +10,7 @@ from django.http import JsonResponse
 from .models import VwTopDocenteUcAnoCorrente
 from .models import VwAlunosInscricoes2025
 from django.contrib.auth.models import User
+from .models import UnidadeCurricular, TurnoUc, Turno
 
 def index(request):
     return render(request, "home/index.html")
@@ -132,22 +133,50 @@ def contactos(request):
     return render(request, "home/contactos.html", contexto)
 
 def inscricao_turno(request):
-    unidades = []
-    horas = ["08:00", "08:30", "09:00", "09:30",
-             "10:00", "10:30", "11:00", "11:30",
-             "12:00", "12:30", "13:00", "13:30",
-             "14:00", "14:30", "15:00", "15:30",
-             "16:00", "16:30", "17:00", "17:30",
-             "18:00", "18:30", "19:00", "19:30",
-             "20:00", "20:30", "21:00", "21:30",
-             "22:00", "22:30", "23:00", "23:30"]
+
+    # Buscar todas as UC
+    unidades = UnidadeCurricular.objects.all().order_by("nome")
+
+    # Construir estrutura UC → turnos
+    lista_uc = []
+
+    for uc in unidades:
+        # Buscar IDs dos turnos dessa UC
+        relacoes = TurnoUc.objects.filter(id_unidadecurricular=uc.id_unidadecurricular)
+
+        turnos = []
+        for r in relacoes:
+            # Buscar turno real
+            turno = Turno.objects.get(id_turno=r.id_turno.id_turno)
+            turnos.append({
+                "id": turno.id_turno,
+                "nome": f"T{turno.n_turno}",
+                "tipo": turno.tipo,
+                "capacidade": turno.capacidade,
+                "vagas": turno.capacidade,  # se no futuro quiseres decrementar
+                "horario": "A definir"       # se tiveres campo horário podes usar turno.horario
+            })
+
+        lista_uc.append({
+            "id": uc.id_unidadecurricular,
+            "nome": uc.nome,
+            "turnos": turnos,
+        })
+
+    horas = [
+        "08:00","08:30","09:00","09:30","10:00","10:30","11:00","11:30",
+        "12:00","12:30","13:00","13:30","14:00","14:30","15:00","15:30",
+        "16:00","16:30","17:00","17:30","18:00","18:30","19:00","19:30",
+        "20:00","20:30","21:00","21:30","22:00","22:30","23:00","23:30"
+    ]
     dias = ["Segunda", "Terça", "Quarta", "Quinta", "Sexta"]
 
     return render(request, "home/inscricao_turno.html", {
-        "unidades": unidades,
+        "unidades": lista_uc,
         "horas": horas,
         "dias": dias
     })
+
 
 def informacoes(request):
     return render(request, "home/informacoes.html")
@@ -385,7 +414,6 @@ def admin_horarios_delete(request, id):
     messages.success(request, "Horário apagado!")
     return redirect("home:admin_horarios_list")
 
-
 def admin_horarios_list(request):
     horarios = HorarioPDF.objects.all().order_by("-atualizado_em")
     return render(request, "admin/horarios_list.html", {"horarios": horarios})
@@ -400,7 +428,6 @@ def admin_users_docentes(request):
         "titulo": "Docentes",
         "users": docentes
     })
-
 
 def admin_users_alunos(request):
     alunos = User.objects.filter(tipo="aluno")
