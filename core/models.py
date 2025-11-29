@@ -91,7 +91,9 @@ class InscritoUc(models.Model):
         managed = False
         db_table = 'inscrito_uc'
         unique_together = (('n_mecanografico', 'id_unidadecurricular'),)
-
+    
+    def __str__(self):
+        return f"{self.n_mecanografico} - {self.id_unidadecurricular}"
 
 class LecionaUc(models.Model):
     id_unidadecurricular = models.ForeignKey('UnidadeCurricular', models.DO_NOTHING, db_column='id_unidadecurricular')

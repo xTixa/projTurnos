@@ -4,13 +4,12 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.shortcuts import redirect
 from huggingface_hub import logout
-from .models import UnidadeCurricular, Docente, Curso, HorarioPDF, Aluno
+from .models import UnidadeCurricular, Docente, Curso, HorarioPDF, Aluno, TurnoUc, Turno, InscricaoTurno, InscritoUc
 from .db_views import UCMais4Ects, CadeirasSemestre, AlunosMatriculadosPorDia, AlunosPorOrdemAlfabetica, Turnos, Cursos
 from django.http import JsonResponse
 from .models import VwTopDocenteUcAnoCorrente
 from .models import VwAlunosInscricoes2025
 from django.contrib.auth.models import User
-from .models import UnidadeCurricular, TurnoUc, Turno
 from bd2_projeto.services.mongo_service import adicionar_log, listar_logs
 
 def index(request):
@@ -135,27 +134,46 @@ def contactos(request):
 
 def inscricao_turno(request):
 
-    # Buscar todas as UC
-    unidades = UnidadeCurricular.objects.all().order_by("nome")
+    # --- 1) Obter aluno autenticado ---
+    if "user_tipo" not in request.session or request.session["user_tipo"] != "aluno":
+        messages.error(request, "É necessário iniciar sessão como aluno.")
+        return redirect("home:login")
 
-    # Construir estrutura UC → turnos
+    n_meca = request.session["user_id"]
+    aluno = Aluno.objects.get(n_mecanografico=n_meca)
+
+    # --- 2) Buscar APENAS as UCs em que o aluno está inscrito ---
+    inscricoes = InscritoUc.objects.filter(
+        n_mecanografico=aluno,
+        estado=True
+    ).values('id_unidadecurricular')
+
     lista_uc = []
 
-    for uc in unidades:
-        # Buscar IDs dos turnos dessa UC
-        relacoes = TurnoUc.objects.filter(id_unidadecurricular=uc.id_unidadecurricular)
+    for inscricao in inscricoes:
+        uc_id = inscricao['id_unidadecurricular']
+        uc = UnidadeCurricular.objects.get(id_unidadecurricular=uc_id)
+
+        # --- 3) Buscar os turnos dessa UC ---
+        relacoes = TurnoUc.objects.filter(id_unidadecurricular=uc)
 
         turnos = []
         for r in relacoes:
-            # Buscar turno real
-            turno = Turno.objects.get(id_turno=r.id_turno.id_turno)
+            turno = r.id_turno  # Turno real
+
+            # 4) Calcular vagas ocupadas
+            ocupados = InscricaoTurno.objects.filter(id_turno=r).count()
+            vagas = turno.capacidade - ocupados
+            if vagas < 0:
+                vagas = 0
+
             turnos.append({
                 "id": turno.id_turno,
                 "nome": f"T{turno.n_turno}",
                 "tipo": turno.tipo,
                 "capacidade": turno.capacidade,
-                "vagas": turno.capacidade,  # se no futuro quiseres decrementar
-                "horario": "A definir"       # se tiveres campo horário podes usar turno.horario
+                "vagas": vagas,
+                "horario": "A definir"
             })
 
         lista_uc.append({
@@ -164,12 +182,14 @@ def inscricao_turno(request):
             "turnos": turnos,
         })
 
+    # --- Horário e dias ---
     horas = [
         "08:00","08:30","09:00","09:30","10:00","10:30","11:00","11:30",
         "12:00","12:30","13:00","13:30","14:00","14:30","15:00","15:30",
         "16:00","16:30","17:00","17:30","18:00","18:30","19:00","19:30",
         "20:00","20:30","21:00","21:30","22:00","22:30","23:00","23:30"
     ]
+
     dias = ["Segunda", "Terça", "Quarta", "Quinta", "Sexta"]
 
     return render(request, "home/inscricao_turno.html", {
@@ -177,7 +197,6 @@ def inscricao_turno(request):
         "horas": horas,
         "dias": dias
     })
-
 
 def informacoes(request):
     return render(request, "home/informacoes.html")
