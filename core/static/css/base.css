@@ -210,3 +210,22 @@ body {
 .dropdown-item:hover {
     background: #f3f4f6;
 }
+
+/* Logótipos do submenu EI / DI */
+/* Correção: links com logótipos não devem ter padding de botões */
+.toplinks__link {
+    padding: 0 !important;   /* remove o padding gigante do link */
+    display: flex;
+    align-items: center;
+}
+
+/* Ajustar tamanho real dos logos */
+.toplink-logo {
+    height: 26px;   /* Ajusta como preferires: 18px, 22px, 26px… */
+    width: auto;
+    display: block;
+}
+
+.toplink-logo:hover {
+    opacity: 1;
+}

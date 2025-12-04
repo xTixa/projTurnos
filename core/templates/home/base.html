@@ -7,7 +7,7 @@
   {% block extra_css %}{% endblock %}
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>{% block title %}Horários EI - IPV{% endblock %}</title>
+  <title>{% block title %}Departamento de Informática{% endblock %}</title>
   <!-- Ícones -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
     referrerpolicy="no-referrer" />
@@ -21,10 +21,29 @@
       <i class="fa-solid fa-house"></i>
       </a>
 
-      <nav class="toplinks">
-        <a href="#" class="toplinks__link">E.I</a>
-        <a href="#" class="toplinks__link">DI</a>
-      </nav>
+        <nav class="toplinks">
+            <a href="/ei/index.html" class="toplinks__link">
+                <img src="{% static 'img/ei.png' %}" alt="EI" class="toplink-logo">
+            </a>
+
+            <a href="/tdm/index_tdm.html" class="toplinks__link">
+                <img src="{% static 'img/tdm.png' %}" alt="TDM" class="toplink-logo">
+            </a>
+
+            <a href="/eisi/index_mestrado.html" class="toplinks__link">
+                <img src="{% static 'img/eisi.png' %}" alt="EISI" class="toplink-logo">
+            </a>
+
+            <a href="/rsi/index_rsi.html" class="toplinks__link">
+                <img src="{% static 'img/rsi.png' %}" alt="RSI" class="toplink-logo">
+            </a>
+
+            <a href="/di/index_di.html" class="toplinks__link">
+                <img src="{% static 'img/di.png' %}" alt="DI" class="toplink-logo">
+            </a>
+
+        </nav>
+
     </div>
 
     <div class="topbar__right">
