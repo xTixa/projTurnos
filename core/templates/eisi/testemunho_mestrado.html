@@ -1,0 +1,35 @@
+{% extends "home/base.html" %}
+{% load static %}
+
+{% block title %}Testemunhos — EISI{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/eisi/testemunhos.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<div class="page-container">
+
+    <h1 class="page-title">Testemunhos de Estudantes e Diplomados</h1>
+    <p class="intro-text">Algumas experiências de quem passou pelo Mestrado EISI.</p>
+
+    <div class="testemunho-card">
+        <p class="quote">
+            “O EISI permitiu-me aprofundar conhecimentos em engenharia informática e ganhar competências
+            aplicadas ao mercado de trabalho. A ligação com empresas foi essencial para o meu percurso.”
+        </p>
+        <span class="author">— Ana Sousa, Eng. Software</span>
+    </div>
+
+    <div class="testemunho-card">
+        <p class="quote">
+            “Destaco o corpo docente altamente qualificado e os projetos práticos que fiz durante o curso.
+            Saí do mestrado muito mais preparado para desafios reais.”
+        </p>
+        <span class="author">— João Martins, Developer</span>
+    </div>
+
+</div>
+
+{% endblock %}

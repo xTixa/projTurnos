@@ -1,0 +1,42 @@
+{% extends "home/base.html" %}
+{% load static %}
+
+{% block title %}Acesso ao Mestrado EISI{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/eisi/ingresso_mestrado.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="page-container">
+
+    <h1 class="page-title">Acesso ao Mestrado</h1>
+
+    <p class="intro-text">
+        O ingresso no Mestrado em Engenharia Informática e Sistemas de Informação pode ser realizado por titulares de cursos superiores 
+        na área da Informática, Computação e áreas afins.
+    </p>
+
+    <hr>
+
+    <section class="info-block">
+        <h2>Condições de Acesso</h2>
+        <ul>
+            <li>Licenciatura na área de Informática, Engenharia Informática ou similar;</li>
+            <li>Outros licenciados podem ser admitidos mediante análise curricular;</li>
+            <li>Preferência a candidatos com experiência profissional na área.</li>
+        </ul>
+    </section>
+
+    <section class="info-block">
+        <h2>Documentos Necessários</h2>
+        <ul>
+            <li>Certificado de habilitações</li>
+            <li>Curriculum Vitae</li>
+            <li>Documento de identificação</li>
+            <li>Ficha de candidatura</li>
+        </ul>
+    </section>
+
+</div>
+{% endblock %}

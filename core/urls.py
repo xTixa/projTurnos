@@ -84,5 +84,12 @@ urlpatterns = [
 
     #EISI
     path("eisi/", views.index_mestrado, name="index_mestrado"),
+    path("eisi/testemunhos/", views.testemunho_mestrado, name="testemunho_mestrado"),
+    path("eisi/ingresso/", views.ingresso_mestrado, name="ingresso_mestrado"),
+    path("eisi/destinatarios/", views.destinatarios_mestrado, name="destinatarios_mestrado"),
+    path("eisi/plano/", views.plano_curric_mestrado, name="plano_curric_mestrado"),
+    path("eisi/horarios/", views.horarios_mestrado, name="horarios_mestrado"),
+    path("eisi/avaliacoes/", views.avaliacoes_mestrado, name="avaliacoes_mestrado"),
+    path("eisi/contactos/", views.contactos_mestrado, name="contactos_mestrado"),
 
 ]

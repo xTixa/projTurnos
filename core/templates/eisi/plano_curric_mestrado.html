@@ -1,0 +1,66 @@
+{% extends "home/base.html" %}
+{% load static %}
+
+{% block title %}Plano Curricular — EISI{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/eisi/plano.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="page-container">
+
+    <h1 class="page-title">Plano Curricular</h1>
+
+    <p class="intro-text">
+        O plano curricular está organizado em quatro semestres, integrando unidades curriculares teóricas,
+        práticas e um projeto final / dissertação.
+    </p>
+
+    <section class="year-block">
+        <h2>1.º Ano</h2>
+
+        <div class="semester">
+            <h3>1.º Semestre</h3>
+            <ul>
+                <li>Engenharia de Software Avançada</li>
+                <li>Sistemas Distribuídos</li>
+                <li>Inteligência Artificial</li>
+                <li>Gestão de Projetos</li>
+            </ul>
+        </div>
+
+        <div class="semester">
+            <h3>2.º Semestre</h3>
+            <ul>
+                <li>Arquiteturas de Software</li>
+                <li>Ciência de Dados</li>
+                <li>Segurança Informática</li>
+                <li>Laboratório de Sistemas</li>
+            </ul>
+        </div>
+    </section>
+
+    <hr>
+
+    <section class="year-block">
+        <h2>2.º Ano</h2>
+
+        <div class="semester">
+            <h3>3.º Semestre</h3>
+            <ul>
+                <li>Seminário de Investigação</li>
+                <li>Projeto / Dissertação I</li>
+            </ul>
+        </div>
+
+        <div class="semester">
+            <h3>4.º Semestre</h3>
+            <ul>
+                <li>Projeto / Dissertação II</li>
+            </ul>
+        </div>
+    </section>
+
+</div>
+{% endblock %}

@@ -1,0 +1,47 @@
+.page-container {
+    padding: 25px;
+    max-width: 900px;
+    margin: auto;
+}
+
+.page-title {
+    font-size: 32px;
+    margin-bottom: 10px;
+}
+
+.intro-text {
+    font-size: 18px;
+    margin-bottom: 20px;
+}
+
+.info-block {
+    margin: 25px 0;
+}
+
+.info-block h2 {
+    color: #0055aa;
+    margin-bottom: 8px;
+}
+
+.info-block ul {
+    padding-left: 20px;
+}
+
+.info-block li {
+    margin: 6px 0;
+}
+
+.btn-download {
+    display: inline-block;
+    padding: 10px 18px;
+    background: #004488;
+    color: white;
+    border-radius: 6px;
+    margin-top: 10px;
+    font-size: 16px;
+    text-decoration: none;
+}
+
+.btn-download:hover {
+    background: #003366;
+}

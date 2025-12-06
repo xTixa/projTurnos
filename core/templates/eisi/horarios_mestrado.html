@@ -1,0 +1,33 @@
+{% extends "home/base.html" %}
+{% load static %}
+
+{% block title %}Horários — Mestrado EISI{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/eisi/horarios.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="page-container">
+
+    <h1 class="page-title">Horários</h1>
+
+    <p class="intro-text">
+        Os horários das unidades curriculares do Mestrado EISI são organizados por semestre
+        e disponibilizados anualmente.  
+        Abaixo encontras os horários mais recentes, conforme publicados pelo DI.
+    </p>
+
+    <div class="info-box">
+        <i class="fa-regular fa-file-pdf"></i>
+        <span>Os horários completos podem ser consultados no PDF oficial disponibilizado pelo Departamento.</span>
+    </div>
+
+    <div class="download-section">
+        <a class="btn-download" href="#" target="_blank">
+            <i class="fa-solid fa-download"></i> Descarregar Horário (PDF)
+        </a>
+    </div>
+
+</div>
+{% endblock %}

@@ -13,7 +13,7 @@ from django.contrib.auth.models import User
 from bd2_projeto.services.mongo_service import adicionar_log, listar_logs
 
 def index(request):
-    return render(request, "home/index.html")
+    return render(request, "di/index_di.html")
 
 def login_view(request):
     if request.method == "POST":
@@ -539,4 +539,26 @@ def index_rsi(request):
 #MESTRADO
 def index_mestrado(request):
     return render(request, "eisi/index_mestrado.html", { "area": "eisi" })
+
+def testemunho_mestrado(request):
+    return render(request, "eisi/testemunho_mestrado.html", { "area": "eisi" })
+
+def ingresso_mestrado(request):
+    return render(request, "eisi/ingresso_mestrado.html", { "area": "eisi" })
+
+def destinatarios_mestrado(request):
+    return render(request, "eisi/destinatarios_mestrado.html", { "area": "eisi" })
+
+def plano_curric_mestrado(request):
+    return render(request, "eisi/plano_curric_mestrado.html", { "area": "eisi" })
+
+def horarios_mestrado(request):
+    return render(request, "eisi/horarios_mestrado.html", { "area": "eisi" })
+
+def avaliacoes_mestrado(request):
+    return render(request, "eisi/avaliacoes_mestrado.html", { "area": "eisi" })
+
+def contactos_mestrado(request):
+    return render(request, "eisi/contactos_mestrado.html", { "area": "eisi" })
+
 

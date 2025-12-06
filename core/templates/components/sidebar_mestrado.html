@@ -1,0 +1,51 @@
+<ul class="menu">
+
+    <li class="menu__item {% if request.resolver_match.url_name == 'index_mestrado' %}is-active{% endif %}">
+        <a href="{% url 'home:index_mestrado' %}">
+            <i class="fa-solid fa-house"></i> Home
+        </a>
+    </li>
+
+    <li class="menu__item {% if request.resolver_match.url_name == 'testemunho_mestrado' %}is-active{% endif %}">
+        <a href="{% url 'home:testemunho_mestrado' %}">
+            <i class="fa-solid fa-graduation-cap"></i> Testemunhos
+        </a>
+    </li>
+
+    <li class="menu__item {% if request.resolver_match.url_name == 'ingresso_mestrado' %}is-active{% endif %}">
+        <a href="{% url 'home:ingresso_mestrado' %}">
+            <i class="fa-solid fa-graduation-cap"></i> Acesso e Ingresso
+        </a>
+    </li>
+
+    <li class="menu__item {% if request.resolver_match.url_name == 'destinatarios_mestrado' %}is-active{% endif %}">
+        <a href="{% url 'home:destinatarios_mestrado' %}">
+            <i class="fa-regular fa-rectangle-list"></i> Destinatários
+        </a>
+    </li>
+
+    <li class="menu__item {% if request.resolver_match.url_name == 'plano_curric_mestrado' %}is-active{% endif %}">
+        <a href="{% url 'home:plano_curric_mestrado' %}">
+            <i class="fa-regular fa-calendar"></i> Plano Curricular
+        </a>
+    </li>
+
+    <li class="menu__item {% if request.resolver_match.url_name == 'horarios_mestrado' %}is-active{% endif %}">
+        <a href="{% url 'home:horarios_mestrado' %}">
+            <i class="fa-regular fa-clipboard"></i> Horários
+        </a>
+    </li>
+
+    <li class="menu__item {% if request.resolver_match.url_name == 'avaliacoes_mestrado' %}is-active{% endif %}">
+        <a href="{% url 'home:avaliacoes_mestrado' %}">
+            <i class="fa-solid fa-graduation-cap"></i> Avaliações
+        </a>
+    </li>
+
+    <li class="menu__item {% if request.resolver_match.url_name == 'contactos_mestrado' %}is-active{% endif %}">
+        <a href="{% url 'home:contactos_mestrado' %}">
+            <i class="fa-regular fa-address-card"></i> Contactos
+        </a>
+    </li>
+
+</ul>

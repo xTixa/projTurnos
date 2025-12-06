@@ -1,0 +1,36 @@
+.page-container {
+    padding: 25px;
+    max-width: 900px;
+    margin: auto;
+}
+
+.page-title {
+    font-size: 32px;
+    margin-bottom: 10px;
+}
+
+.intro-text {
+    font-size: 18px;
+    margin-bottom: 20px;
+}
+
+.year-block {
+    margin: 40px 0;
+}
+
+.year-block h2 {
+    color: #004488;
+}
+
+.semester h3 {
+    margin-top: 15px;
+    color: #0060aa;
+}
+
+.semester ul {
+    padding-left: 20px;
+}
+
+.semester li {
+    margin: 6px 0;
+}

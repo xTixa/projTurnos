@@ -1,0 +1,41 @@
+{% extends "home/base.html" %}
+{% load static %}
+
+{% block title %}Avaliações — Mestrado EISI{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/eisi/avaliacoes.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="page-container">
+
+    <h1 class="page-title">Avaliações</h1>
+
+    <p class="intro-text">
+        Os métodos de avaliação incluem exames, trabalhos práticos, projetos laboratoriais
+        e apresentação/discussão pública de trabalho desenvolvido.
+    </p>
+
+    <section class="info-block">
+        <h2>Componentes de Avaliação</h2>
+        <ul>
+            <li>Trabalhos de investigação;</li>
+            <li>Projetos práticos;</li>
+            <li>Apresentações técnicas;</li>
+            <li>Avaliação contínua nas unidades curriculares;</li>
+            <li>Defesa pública do Projeto / Dissertação.</li>
+        </ul>
+    </section>
+
+    <section class="info-block">
+        <h2>Documentos Oficiais</h2>
+        <p>Consulta o regulamento completo de avaliação do Mestrado.</p>
+
+        <a class="btn-download" href="#" target="_blank">
+            <i class="fa-solid fa-download"></i> Regulamento de Avaliação (PDF)
+        </a>
+    </section>
+
+</div>
+{% endblock %}

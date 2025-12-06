@@ -1,0 +1,35 @@
+.page-container {
+    padding: 25px;
+    max-width: 900px;
+    margin: auto;
+}
+
+.page-title {
+    font-size: 32px;
+    margin-bottom: 10px;
+}
+
+.intro-text {
+    font-size: 18px;
+    color: #444;
+    margin-bottom: 25px;
+}
+
+.testemunho-card {
+    background: #f8fbff;
+    padding: 20px;
+    border-left: 4px solid #0055aa;
+    margin-bottom: 20px;
+    border-radius: 6px;
+}
+
+.quote {
+    font-size: 18px;
+    margin-bottom: 8px;
+    font-style: italic;
+}
+
+.author {
+    color: #003e7a;
+    font-weight: bold;
+}
