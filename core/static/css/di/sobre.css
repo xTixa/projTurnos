@@ -1,0 +1,61 @@
+/* ANIMAÇÃO */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* CONTAINER */
+.sobre-container {
+    padding: 25px 35px;
+    animation: fadeIn .4s ease-in-out;
+}
+
+/* TÍTULO PRINCIPAL */
+.sobre-title {
+    font-size: 34px;
+    font-weight: bold;
+    margin-bottom: 10px;
+    color: #002d5e;
+}
+
+.sobre-intro {
+    font-size: 18px;
+    color: #444;
+    margin-bottom: 30px;
+}
+
+/* SECÇÕES */
+.sobre-section {
+    background: white;
+    padding: 25px;
+    border-radius: 10px;
+    margin-bottom: 25px;
+    border: 1px solid #e5e5e5;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+    transition: transform .2s ease, box-shadow .2s ease;
+}
+
+.sobre-section:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 18px rgba(0,0,0,0.10);
+}
+
+/* TÍTULOS DE SECÇÃO */
+.section-title {
+    font-size: 24px;
+    color: #003366;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* LISTAS */
+.sobre-list {
+    padding-left: 22px;
+    color: #333;
+}
+
+.sobre-list li {
+    margin-bottom: 6px;
+}

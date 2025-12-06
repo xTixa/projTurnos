@@ -8,221 +8,205 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>{% block title %}Departamento de Informática{% endblock %}</title>
+
   <!-- Ícones -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
     referrerpolicy="no-referrer" />
 </head>
 
 <body>
+
   <!-- TOP NAVBAR -->
   <header class="topbar">
     <div class="topbar__left">
-      <a class="logo" href="{% url 'home:index' %}">
-      <i class="fa-solid fa-house"></i>
+
+      <a class="logo" href="{% url 'home:index_di' %}">
+        <i class="fa-solid fa-house"></i>
       </a>
 
-        <nav class="toplinks">
-            <a href="/ei/index.html" class="toplinks__link">
-                <img src="{% static 'img/ei.png' %}" alt="EI" class="toplink-logo">
-            </a>
+      <nav class="toplinks">
+        <a href="{% url 'home:index' %}" class="toplinks__link">
+          <img src="{% static 'img/ei.png' %}" alt="EI" class="toplink-logo">
+        </a>
 
-            <a href="/tdm/index_tdm.html" class="toplinks__link">
-                <img src="{% static 'img/tdm.png' %}" alt="TDM" class="toplink-logo">
-            </a>
+        <a href="{% url 'home:index_tdm' %}" class="toplinks__link">
+          <img src="{% static 'img/tdm.png' %}" alt="TDM" class="toplink-logo">
+        </a>
 
-            <a href="/eisi/index_mestrado.html" class="toplinks__link">
-                <img src="{% static 'img/eisi.png' %}" alt="EISI" class="toplink-logo">
-            </a>
+        <a href="{% url 'home:index_mestrado' %}" class="toplinks__link">
+          <img src="{% static 'img/eisi.png' %}" alt="EISI" class="toplink-logo">
+        </a>
 
-            <a href="/rsi/index_rsi.html" class="toplinks__link">
-                <img src="{% static 'img/rsi.png' %}" alt="RSI" class="toplink-logo">
-            </a>
+        <a href="{% url 'home:index_rsi' %}" class="toplinks__link">
+          <img src="{% static 'img/rsi.png' %}" alt="RSI" class="toplink-logo">
+        </a>
 
-            <a href="/di/index_di.html" class="toplinks__link">
-                <img src="{% static 'img/di.png' %}" alt="DI" class="toplink-logo">
-            </a>
-
-        </nav>
+        <a href="{% url 'home:index_di' %}" class="toplinks__link">
+          <img src="{% static 'img/di.png' %}" alt="DI" class="toplink-logo">
+        </a>
+      </nav>
 
     </div>
 
     <div class="topbar__right">
       {% if request.session.user_id %}
-        <div class="user-dropdown">
-            <button class="user-btn">
-                <i class="fa-regular fa-user"></i>
-                <span class="user-name">{{ request.session.user_nome }}</span>
-                <i class="fa-solid fa-chevron-down dropdown-icon"></i>
-            </button>
+      <div class="user-dropdown">
+        <button class="user-btn">
+          <i class="fa-regular fa-user"></i>
+          <span class="user-name">{{ request.session.user_nome }}</span>
+          <i class="fa-solid fa-chevron-down dropdown-icon"></i>
+        </button>
 
-            <div class="dropdown-menu hidden">
-                <a href="{% url 'home:perfil' %}" class="dropdown-item">
-                    <i class="fa-regular fa-id-card"></i> Perfil
-                </a>
+        <div class="dropdown-menu hidden">
+          <a href="{% url 'home:perfil' %}" class="dropdown-item">
+            <i class="fa-regular fa-id-card"></i> Perfil
+          </a>
 
-                <a href="{% url 'home:logout' %}" class="dropdown-item">
-                    <i class="fa-solid fa-right-from-bracket"></i> Terminar Sessão
-                </a>
-            </div>
+          <a href="{% url 'home:logout' %}" class="dropdown-item">
+            <i class="fa-solid fa-right-from-bracket"></i> Terminar Sessão
+          </a>
         </div>
-        {% else %}
-        <a href="{% url 'home:login' %}?next={{ request.get_full_path|urlencode }}" class="btn btn-ghost">
-            <i class="fa-regular fa-user"></i>
-            <span class="hide-sm">Login</span>
-        </a>
+      </div>
+      {% else %}
+      <a href="{% url 'home:login' %}?next={{ request.get_full_path|urlencode }}" class="btn btn-ghost">
+        <i class="fa-regular fa-user"></i>
+        <span class="hide-sm">Login</span>
+      </a>
       {% endif %}
-
     </div>
   </header>
 
+  <!-- LAYOUT GERAL -->
   <div class="container-flex">
+
     <aside class="sidebar">
-        {% if request.session.user_tipo == "admin" %}
 
-            <!-- SIDEBAR ADMIN -->
-            <h2 class="logo">Admin EI</h2>
+      {% if request.session.user_tipo == "admin" %}
 
-            <ul class="menu">
-                <li class="{% if request.resolver_match.url_name == 'admin_dashboard' %}active{% endif %}">
-                    <a href="{% url 'home:admin_dashboard' %}">
-                        <i class="fa-solid fa-gauge"></i> Dashboard
-                    </a>
-                </li>
+        {# ========================= #
+           SIDEBAR ADMIN (igual ao teu)
+        # ========================= #}
 
-                <li class="menu-item {% if request.resolver_match.url_name in 'admin_users_list admin_users_docentes admin_users_alunos' %}open{% endif %}">
-                    <button class="submenu-btn">
-                        <i class="fa-solid fa-users"></i> Utilizadores
-                        <i class="fa-solid fa-chevron-down arrow"></i>
-                    </button>
+        <h2 class="logo">Admin EI</h2>
 
-                    <ul class="submenu">
-                        <li><a href="{% url 'home:admin_users_list' %}"
-                            class="{% if request.resolver_match.url_name == 'admin_users_list' %}active-sub{% endif %}">
-                            Todos
-                        </a></li>
-                        <li><a href="{% url 'home:admin_users_docentes' %}"
-                            class="{% if request.resolver_match.url_name == 'admin_users_docentes' %}active-sub{% endif %}">
-                            Docentes
-                        </a></li>
-                        <li><a href="{% url 'home:admin_users_alunos' %}"
-                            class="{% if request.resolver_match.url_name == 'admin_users_alunos' %}active-sub{% endif %}">
-                            Alunos
-                        </a></li>
-                    </ul>
-                </li>
+        <ul class="menu">
+          <li class="{% if request.resolver_match.url_name == 'admin_dashboard' %}active{% endif %}">
+            <a href="{% url 'home:admin_dashboard' %}">
+              <i class="fa-solid fa-gauge"></i> Dashboard
+            </a>
+          </li>
 
-                <li class="{% if request.resolver_match.url_name == 'admin_turnos_list' %}active{% endif %}">
-                    <a href="{% url 'home:admin_turnos_list' %}">
-                        <i class="fa-solid fa-clock"></i> Turnos
-                    </a>
-                </li>
+          <li class="menu-item {% if request.resolver_match.url_name in 'admin_users_list admin_users_docentes admin_users_alunos' %}open{% endif %}">
+            <button class="submenu-btn">
+              <i class="fa-solid fa-users"></i> Utilizadores
+              <i class="fa-solid fa-chevron-down arrow"></i>
+            </button>
 
-                <li class="{% if request.resolver_match.url_name == 'admin_horarios_list' %}active{% endif %}">
-                    <a href="{% url 'home:admin_horarios_list' %}">
-                        <i class="fa-regular fa-calendar"></i> Horários
-                    </a>
-                </li>
+            <ul class="submenu">
+              <li><a href="{% url 'home:admin_users_list' %}"
+                  class="{% if request.resolver_match.url_name == 'admin_users_list' %}active-sub{% endif %}">
+                  Todos
+                </a></li>
+
+              <li><a href="{% url 'home:admin_users_docentes' %}"
+                  class="{% if request.resolver_match.url_name == 'admin_users_docentes' %}active-sub{% endif %}">
+                  Docentes
+                </a></li>
+
+              <li><a href="{% url 'home:admin_users_alunos' %}"
+                  class="{% if request.resolver_match.url_name == 'admin_users_alunos' %}active-sub{% endif %}">
+                  Alunos
+                </a></li>
             </ul>
+          </li>
 
-            <div class="logout-container">
-                <a href="{% url 'home:admin_logout' %}" class="logout-btn">
-                    <i class="fa-solid fa-right-from-bracket"></i> Logout
-                </a>
-            </div>
+          <li class="{% if request.resolver_match.url_name == 'admin_turnos_list' %}active{% endif %}">
+            <a href="{% url 'home:admin_turnos_list' %}">
+              <i class="fa-solid fa-clock"></i> Turnos
+            </a>
+          </li>
+
+          <li class="{% if request.resolver_match.url_name == 'admin_horarios_list' %}active{% endif %}">
+            <a href="{% url 'home:admin_horarios_list' %}">
+              <i class="fa-regular fa-calendar"></i> Horários
+            </a>
+          </li>
+        </ul>
+
+        <div class="logout-container">
+          <a href="{% url 'home:admin_logout' %}" class="logout-btn">
+            <i class="fa-solid fa-right-from-bracket"></i> Logout
+          </a>
+        </div>
+
+      {% else %}
+
+        {% if area == "di" %}
+          {% include "components/sidebar_di.html" %}
+
+        {% elif area == "ei" %}
+          {% include "components/sidebar_ei.html" %}
+
+        {% elif area == "tdm" %}
+          {% include "components/sidebar_tdm.html" %}
+
+        {% elif area == "rsi" %}
+          {% include "components/sidebar_rsi.html" %}
+
+        {% elif area == "eisi" %}
+          {% include "components/sidebar_mestrado.html" %}
+
+        {% elif area == "dwdm" %}
+          {% include "components/sidebar_dwdm.html" %}
 
         {% else %}
-            <!-- SIDEBAR NORMAL -->
-            <div class="menu-header"></div>
-            <ul class="menu">
-
-                <li class="menu__item {% if request.resolver_match.url_name == 'index' %}is-active{% endif %}">
-                    <a href="{% url 'home:index' %}">
-                        <i class="fa-solid fa-house"></i> Home
-                    </a>
-                </li>
-
-                <li class="menu__item {% if request.resolver_match.url_name == 'ingresso' %}is-active{% endif %}">
-                    <a href="{% url 'home:ingresso' %}">
-                        <i class="fa-solid fa-graduation-cap"></i> Ingresso
-                    </a>
-                </li>
-
-                <li class="menu__item {% if request.resolver_match.url_name == 'plano' %}is-active{% endif %}">
-                    <a href="{% url 'home:plano' %}">
-                        <i class="fa-regular fa-rectangle-list"></i> Plano Curricular
-                    </a>
-                </li>
-
-                <li class="menu__item {% if request.resolver_match.url_name == 'horarios' %}is-active{% endif %}">
-                    <a href="{% url 'home:horarios' %}">
-                        <i class="fa-regular fa-calendar"></i> Horários
-                    </a>
-                </li>
-
-                <li class="menu__item {% if request.resolver_match.url_name == 'avaliacoes' %}is-active{% endif %}">
-                    <a href="{% url 'home:avaliacoes' %}">
-                        <i class="fa-regular fa-clipboard"></i> Avaliações
-                    </a>
-                </li>
-
-                <li class="menu__item {% if request.resolver_match.url_name == 'contactos' %}is-active{% endif %}">
-                    <a href="{% url 'home:contactos' %}">
-                        <i class="fa-regular fa-address-card"></i> Contactos
-                    </a>
-                </li>
-
-                <li class="menu__item {% if request.resolver_match.url_name == 'informacoes' %}is-active{% endif %}">
-                    <a href="{% url 'home:informacoes' %}">
-                        <i class="fa-solid fa-circle-info"></i> Informações
-                    </a>
-                </li>
-
-            </ul>
+          {% include "components/sidebar_di.html" %}
         {% endif %}
-      </aside>
 
+      {% endif %}
+    </aside>
 
     <main class="main-content">
       {% block content %}{% endblock %}
     </main>
+
   </div>
 
   {% block extra_scripts %}
   <script>
     document.addEventListener("DOMContentLoaded", () => {
-        const btn = document.querySelector(".user-btn");
-        const menu = document.querySelector(".dropdown-menu");
-        const icon = document.querySelector(".dropdown-icon");
+      const btn = document.querySelector(".user-btn");
+      const menu = document.querySelector(".dropdown-menu");
+      const icon = document.querySelector(".dropdown-icon");
 
-        if (btn) {
-            btn.addEventListener("click", () => {
-                menu.classList.toggle("hidden");
-                icon.style.transform = menu.classList.contains("hidden") ? "rotate(0deg)" : "rotate(180deg)";
-            });
+      if (btn) {
+        btn.addEventListener("click", () => {
+          menu.classList.toggle("hidden");
+          icon.style.transform = menu.classList.contains("hidden") ? "rotate(0deg)" : "rotate(180deg)";
+        });
 
-            // Fechar ao clicar fora
-            document.addEventListener("click", (e) => {
-                if (!btn.contains(e.target) && !menu.contains(e.target)) {
-                    menu.classList.add("hidden");
-                    icon.style.transform = "rotate(0deg)";
-                }
-            });
-        }
+        document.addEventListener("click", (e) => {
+          if (!btn.contains(e.target) && !menu.contains(e.target)) {
+            menu.classList.add("hidden");
+            icon.style.transform = "rotate(0deg)";
+          }
+        });
+      }
     });
   </script>
 
   <script>
     document.addEventListener("DOMContentLoaded", () => {
-        const buttons = document.querySelectorAll(".submenu-btn");
-        buttons.forEach(btn => {
-            btn.addEventListener("click", () => {
-                btn.parentElement.classList.toggle("open");
-            });
+      const buttons = document.querySelectorAll(".submenu-btn");
+      buttons.forEach(btn => {
+        btn.addEventListener("click", () => {
+          btn.parentElement.classList.toggle("open");
         });
+      });
     });
   </script>
-
   {% endblock %}
+
 </body>
 
 </html>

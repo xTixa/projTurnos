@@ -1,0 +1,88 @@
+/* ANIMAÇÃO */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* CONTAINER GERAL */
+.recursos-container {
+    padding: 25px 35px;
+    animation: fadeIn .4s ease-in-out;
+}
+
+/* TÍTULOS */
+.recursos-title {
+    font-size: 34px;
+    font-weight: 700;
+    margin-bottom: 5px;
+    color: #002d5e;
+}
+
+.recursos-subtitle {
+    font-size: 18px;
+    color: #444;
+    margin-bottom: 25px;
+}
+
+/* GRID DE CARTÕES */
+.recursos-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 25px;
+}
+
+/* CARTÃO */
+.recurso-card {
+    background: white;
+    border-radius: 10px;
+    padding: 25px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    border: 1px solid #e5e5e5;
+    transition: transform .2s ease, box-shadow .2s ease;
+}
+
+.recurso-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 6px 18px rgba(0,0,0,0.12);
+}
+
+/* ÍCONES */
+.card-icon {
+    width: 55px;
+    height: 55px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 12px;
+    font-size: 26px;
+    color: white;
+    margin-bottom: 15px;
+}
+
+.card-icon.blue { background: #0057c2; }
+.card-icon.green { background: #007c5a; }
+.card-icon.orange { background: #d46b00; }
+
+/* TÍTULO DO CARTÃO */
+.card-title {
+    font-size: 22px;
+    margin-bottom: 10px;
+    color: #003366;
+}
+
+/* TEXTO DO CARTÃO */
+.card-text {
+    font-size: 15px;
+    margin-bottom: 12px;
+    color: #555;
+}
+
+/* LISTAS */
+.card-list {
+    padding-left: 18px;
+}
+
+.card-list li {
+    margin-bottom: 6px;
+    color: #333;
+}

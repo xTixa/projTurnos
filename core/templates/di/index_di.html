@@ -1,0 +1,150 @@
+{% extends 'home/base.html' %}
+{% load static %}
+
+{% block title %}Departamento de Informática — ESTGV{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/di/index_di.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<!-- HERO -->
+<section class="di-hero">
+  <div class="di-hero__text">
+    <h1>Departamento de Informática</h1>
+    <p>
+      O DI da Escola Superior de Tecnologia e Gestão de Viseu é uma referência no ensino,
+      investigação e inovação tecnológica nas áreas da Engenharia Informática, Sistemas
+      Inteligentes, Redes e Computação.
+    </p>
+
+    <div class="di-hero__actions">
+      <a href="{% url 'home:horarios' %}" class="btn btn-primary">
+        <i class="fa-regular fa-calendar"></i> Horários dos Cursos
+      </a>
+      <a href="{% url 'home:plano' %}" class="btn btn-ghost">
+        <i class="fa-regular fa-rectangle-list"></i> Oferta Formativa
+      </a>
+    </div>
+  </div>
+
+  <div class="di-hero__illustration">
+    <img src="{% static 'img/di_hero.svg' %}" alt="Departamento de Informática">
+  </div>
+</section>
+
+
+
+<!-- SOBRE O DI -->
+<section class="di-section">
+  <h2 class="section-title">O que é o Departamento de Informática?</h2>
+
+  <div class="di-cards">
+    <article class="di-card">
+      <div class="di-card__icon blue"><i class="fa-solid fa-graduation-cap"></i></div>
+      <h3>Excelência no Ensino</h3>
+      <p>
+        Cursos atualizados, prática intensiva em laboratório e acompanhamento próximo por parte de um corpo docente especializado.
+      </p>
+    </article>
+
+    <article class="di-card">
+      <div class="di-card__icon green"><i class="fa-solid fa-flask"></i></div>
+      <h3>Investigação Ativa</h3>
+      <p>
+        Projetos nas áreas de IA, redes, sistemas inteligentes, realidade virtual, segurança e engenharia de software.
+      </p>
+    </article>
+
+    <article class="di-card">
+      <div class="di-card__icon orange"><i class="fa-solid fa-network-wired"></i></div>
+      <h3>Ligação à Indústria</h3>
+      <p>
+        Parcerias com empresas, atividades práticas, estágios e colaboração em projetos reais.
+      </p>
+    </article>
+  </div>
+</section>
+
+
+
+<!-- ÁREAS CIENTÍFICAS -->
+<section class="di-section">
+  <h2 class="section-title">Áreas Científicas do DI</h2>
+
+  <div class="di-list-cards">
+    <div class="list-card">
+      <i class="fa-solid fa-code"></i> Engenharia de Software e Sistemas
+    </div>
+    <div class="list-card">
+      <i class="fa-solid fa-lock"></i> Redes, Segurança e Sistemas Distribuídos
+    </div>
+    <div class="list-card">
+      <i class="fa-solid fa-brain"></i> Inteligência Artificial e Ciência de Dados
+    </div>
+    <div class="list-card">
+      <i class="fa-solid fa-photo-film"></i> Multimédia e Interação Humano-Computador
+    </div>
+    <div class="list-card">
+      <i class="fa-solid fa-database"></i> Sistemas de Informação e Bases de Dados
+    </div>
+  </div>
+</section>
+
+
+
+<!-- ATALHOS RÁPIDOS -->
+<section class="di-section">
+  <h2 class="section-title">Acede rapidamente</h2>
+
+  <div class="di-shortcuts__grid">
+
+    <a href="https://www.di.estgv.ipv.pt/Dep/di/web/?opt=MTE4LjYxLjQ2Lg==" 
+       class="shortcut-card" target="_blank">
+      <div class="shortcut-card__icon"><i class="fa-solid fa-user-group"></i></div>
+      <h3>Corpo Docente</h3>
+      <p>Consulta todos os docentes e investigadores.</p>
+    </a>
+
+    <a href="https://www.di.estgv.ipv.ipv.pt/Dep/di/web/?opt=MTE4LjYxLjUxLg==" 
+       class="shortcut-card" target="_blank">
+      <div class="shortcut-card__icon"><i class="fa-solid fa-flask"></i></div>
+      <h3>Investigação</h3>
+      <p>Grupos, projetos e publicações científicas.</p>
+    </a>
+
+    <a href="https://www.di.estgv.ipv.pt/Dep/di/web/?opt=MTE4LjYxLjQ5Lg==" 
+       class="shortcut-card" target="_blank">
+      <div class="shortcut-card__icon"><i class="fa-solid fa-diagram-project"></i></div>
+      <h3>Projetos</h3>
+      <p>Conhece os projetos tecnológicos do DI.</p>
+    </a>
+
+    <a href="{% url 'home:contactos' %}" class="shortcut-card">
+      <div class="shortcut-card__icon"><i class="fa-regular fa-address-card"></i></div>
+      <h3>Contactos</h3>
+      <p>Informações gerais, secretaria e direção.</p>
+    </a>
+
+  </div>
+</section>
+
+
+
+<!-- COMO NAVEGAR -->
+<section class="di-section">
+  <h2 class="section-title">Como navegar esta página?</h2>
+
+  <ol class="di-howto">
+    <li>Explora os atalhos rápidos para aceder a conteúdo essencial.</li>
+    <li>Consulta a oferta formativa e as atividades de investigação.</li>
+    <li>Verifica horários, contactos e informações institucionais.</li>
+  </ol>
+
+  <p class="di-note">
+    💡 Dica: adiciona esta página aos favoritos para acesso rápido durante o ano letivo.
+  </p>
+</section>
+
+{% endblock %}

@@ -59,4 +59,22 @@ urlpatterns = [
     path("testar-mongo/", testar_mongo, name="testar_mongo"),
 
 
+    #DI
+    path("di/", views.index_di, name="index_di"),
+    path("di/recursos/", views.recursos_di, name="recursos_di"),
+    path("di/sobre/", views.sobre_di, name="sobre_di"),
+    path("di/contactos/", views.contacto_di, name="contacto_di"),
+
+    #EI
+    path("ei/", views.index_ei, name="index"),
+
+    #TDM
+    path("tdm/", views.index_tdm, name="index_tdm"),
+
+    #RSI
+    path("rsi/", views.index_rsi, name="index_rsi"),
+
+    #EISI
+    path("eisi/", views.index_mestrado, name="index_mestrado"),
+
 ]

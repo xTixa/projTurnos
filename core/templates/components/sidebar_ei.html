@@ -1,0 +1,45 @@
+<ul class="menu">
+
+    <li class="menu__item {% if request.resolver_match.url_name == 'index' %}is-active{% endif %}">
+        <a href="{% url 'home:index' %}">
+            <i class="fa-solid fa-house"></i> Home
+        </a>
+    </li>
+
+    <li class="menu__item {% if request.resolver_match.url_name == 'ingresso' %}is-active{% endif %}">
+        <a href="{% url 'home:ingresso' %}">
+            <i class="fa-solid fa-graduation-cap"></i> Ingresso
+        </a>
+    </li>
+
+    <li class="menu__item {% if request.resolver_match.url_name == 'plano' %}is-active{% endif %}">
+        <a href="{% url 'home:plano' %}">
+            <i class="fa-regular fa-rectangle-list"></i> Plano Curricular
+        </a>
+    </li>
+
+    <li class="menu__item {% if request.resolver_match.url_name == 'horarios' %}is-active{% endif %}">
+        <a href="{% url 'home:horarios' %}">
+            <i class="fa-regular fa-calendar"></i> Horários
+        </a>
+    </li>
+
+    <li class="menu__item {% if request.resolver_match.url_name == 'avaliacoes' %}is-active{% endif %}">
+        <a href="{% url 'home:avaliacoes' %}">
+            <i class="fa-regular fa-clipboard"></i> Avaliações
+        </a>
+    </li>
+
+    <li class="menu__item {% if request.resolver_match.url_name == 'contactos' %}is-active{% endif %}">
+        <a href="{% url 'home:contactos' %}">
+            <i class="fa-regular fa-address-card"></i> Contactos
+        </a>
+    </li>
+
+    <li class="menu__item {% if request.resolver_match.url_name == 'informacoes' %}is-active{% endif %}">
+        <a href="{% url 'home:informacoes' %}">
+            <i class="fa-solid fa-circle-info"></i> Informações
+        </a>
+    </li>
+
+</ul>

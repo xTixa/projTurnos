@@ -480,3 +480,39 @@ def testar_mongo(request):
     adicionar_log("teste_ligacao", {"user": "teste_django"})
     logs = listar_logs()
     return JsonResponse({"estado": "ok", "logs": logs})
+
+
+#DEPARTAMENTO INFORMATICA
+def index_di(request):
+    return render(request, "di/index_di.html", { "area": "di" })
+
+def recursos_di(request):
+    return render(request, "di/recursos.html", { "area": "di" })
+
+def sobre_di(request):
+    return render(request, "di/sobre.html", { "area": "di" })
+
+def contacto_di(request):
+    return render(request, "di/contactos.html", { "area": "di" })
+
+
+#ENG INFORMATICA
+def index_ei(request):
+    return render(request, "ei/index.html", { "area": "ei" })
+
+
+#TDM
+def index_tdm(request):
+    return render(request, "tdm/index_tdm.html", { "area": "tdm" })
+
+
+#RSI
+def index_rsi(request):
+    return render(request, "rsi/index_rsi.html", { "area": "rsi" })
+
+
+
+#MESTRADO
+def index_mestrado(request):
+    return render(request, "eisi/index_mestrado.html", { "area": "eisi" })
+

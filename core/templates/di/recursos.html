@@ -1,0 +1,82 @@
+{% extends "home/base.html" %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/di/recursos.css' %}">
+{% endblock %}
+
+{% block title %}Recursos — Departamento de Informática{% endblock %}
+
+{% block content %}
+<div class="recursos-container">
+
+    <h1 class="recursos-title">Recursos do Departamento de Informática</h1>
+    <p class="recursos-subtitle">
+        Conhece os espaços, equipamentos e serviços que apoiam o ensino, investigação e desenvolvimento tecnológico no DI.
+    </p>
+
+    <div class="recursos-grid">
+
+        <!-- LABORATÓRIOS -->
+        <div class="recurso-card">
+            <div class="card-icon blue"><i class="fa-solid fa-computer"></i></div>
+            <h2 class="card-title">Laboratórios de Informática</h2>
+
+            <p class="card-text">
+                O DI dispõe de vários laboratórios totalmente equipados para aulas práticas, projetos
+                e investigação aplicada.
+            </p>
+
+            <ul class="card-list">
+                <li>Laboratório 1 (Lab1)</li>
+                <li>Laboratório 2 (Lab2)</li>
+                <li>Laboratório 3 (Lab3)</li>
+                <li>Laboratório 4 (Lab4)</li>
+                <li>Laboratório 5 (Lab5)</li>
+                <li>Laboratório 6 (Lab6)</li>
+                <li>Laboratório 7 (Lab7)</li>
+            </ul>
+        </div>
+
+        <!-- EQUIPAMENTOS -->
+        <div class="recurso-card">
+            <div class="card-icon green"><i class="fa-solid fa-microchip"></i></div>
+            <h2 class="card-title">Equipamentos</h2>
+
+            <p class="card-text">
+                Cada laboratório está preparado com recursos modernos que suportam o ensino prático
+                em diversas áreas da informática.
+            </p>
+
+            <ul class="card-list">
+                <li>Computadores atualizados</li>
+                <li>Projetores multimédia</li>
+                <li>Internet de alta velocidade</li>
+                <li>Ambientes de desenvolvimento (IDE)</li>
+                <li>Software académico e profissional</li>
+                <li>Equipamentos de redes e sistemas</li>
+                <li>Servidores de apoio ao ensino</li>
+            </ul>
+        </div>
+
+        <!-- SERVIÇOS -->
+        <div class="recurso-card">
+            <div class="card-icon orange"><i class="fa-solid fa-wifi"></i></div>
+            <h2 class="card-title">Serviços de Apoio</h2>
+
+            <p class="card-text">
+                O DI e o IPV fornecem plataformas e serviços que facilitam o estudo, comunicação e
+                trabalho académico.
+            </p>
+
+            <ul class="card-list">
+                <li>Plataforma Moodle</li>
+                <li>Correio eletrónico institucional</li>
+                <li>Rede sem fios IPV (Wi-Fi)</li>
+                <li>Serviços de impressão</li>
+            </ul>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

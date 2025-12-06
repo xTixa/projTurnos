@@ -1,0 +1,157 @@
+/* HERO */
+.di-hero {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 40px 30px;
+    background: linear-gradient(135deg, #003366, #005a99);
+    color: white;
+    border-radius: 12px;
+    margin-bottom: 40px;
+}
+
+.di-hero__text {
+    max-width: 55%;
+}
+
+.di-hero__text h1 {
+    font-size: 42px;
+    margin-bottom: 15px;
+    font-weight: 700;
+}
+
+.di-hero__text p {
+    font-size: 18px;
+    line-height: 1.6;
+}
+
+.di-hero__actions {
+    margin-top: 20px;
+    display: flex;
+    gap: 15px;
+}
+
+.di-hero__illustration img {
+    width: 330px;
+    opacity: 0.95;
+}
+
+
+/* SEÇÕES GERAIS */
+.di-section {
+    margin-bottom: 45px;
+}
+
+.section-title {
+    font-size: 28px;
+    color: #002d5e;
+    margin-bottom: 20px;
+    font-weight: 700;
+}
+
+
+/* CARTÕES PRINCIPAIS */
+.di-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 25px;
+}
+
+.di-card {
+    background: white;
+    padding: 25px;
+    border-radius: 12px;
+    border: 1px solid #e5e5e5;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    transition: transform .2s ease, box-shadow .2s ease;
+}
+
+.di-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 18px rgba(0,0,0,0.12);
+}
+
+.di-card__icon {
+    width: 55px;
+    height: 55px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 15px;
+    color: white;
+    font-size: 25px;
+}
+
+.di-card__icon.blue { background: #0057c2; }
+.di-card__icon.green { background: #007c5a; }
+.di-card__icon.orange { background: #d46b00; }
+
+
+
+/* ÁREAS CIENTÍFICAS - LIST CARDS */
+.di-list-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 15px;
+}
+
+.list-card {
+    background: #f3f6fa;
+    padding: 14px 18px;
+    border-radius: 8px;
+    border: 1px solid #dce3ec;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 16px;
+    transition: background .2s ease;
+}
+
+.list-card:hover {
+    background: #e7eef7;
+}
+
+
+
+/* ATALHOS */
+.di-shortcuts__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 25px;
+}
+
+.shortcut-card {
+    padding: 22px;
+    background: white;
+    border-radius: 12px;
+    border: 1px solid #eaeaea;
+    text-decoration: none;
+    color: #333;
+    transition: transform .2s ease, box-shadow .2s ease;
+}
+
+.shortcut-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 18px rgba(0,0,0,0.15);
+}
+
+.shortcut-card__icon {
+    font-size: 28px;
+    margin-bottom: 10px;
+    color: #003366;
+}
+
+
+
+/* HOW TO */
+.di-howto {
+    margin-left: 20px;
+    margin-bottom: 10px;
+}
+
+.di-note {
+    font-size: 15px;
+    color: #555;
+    margin-top: 10px;
+}
