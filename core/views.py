@@ -62,7 +62,7 @@ def login_view(request):
     return render(request, "auth/login.html")
 
 def ingresso(request):
-    return render(request, "home/ingresso.html")
+    return render(request, "ei/ingresso.html", { "area": "ei" })
 
 def plano_curricular(request):
     # Busca todas as unidades, com joins automáticos
@@ -81,7 +81,7 @@ def plano_curricular(request):
             plano[ano][semestre] = []
         plano[ano][semestre].append(uc)
 
-    return render(request, "home/plano_curricular.html", {"plano": plano})
+    return render(request, "ei/plano_curricular.html", {"plano": plano, "area": "ei"})
 
 def horarios(request):
     horarios = {
@@ -108,7 +108,7 @@ def horarios(request):
                 for j, o in enumerate(lista)
             )
 
-    return render(request, "home/horarios.html", {"horarios_por_ano": horarios})
+    return render(request, "ei/horarios.html", {"horarios_por_ano": horarios, "area": "ei"})
 
 
 def avaliacoes(request):
@@ -117,7 +117,7 @@ def avaliacoes(request):
         {"ano": "2º Ano", "ficheiro": "avaliacoes_2ano.pdf"},
         {"ano": "3º Ano", "ficheiro": "avaliacoes_3ano.pdf"},
     ]
-    return render(request, "home/avaliacoes.html", {"avaliacoes_docs": avaliacoes_docs})
+    return render(request, "ei/avaliacoes.html", {"avaliacoes_docs": avaliacoes_docs, "area": "ei"})
 
 def contactos(request):
     # Buscar todos os docentes
@@ -130,7 +130,8 @@ def contactos(request):
         "curso": curso,
         "docentes": docentes
     }
-    return render(request, "home/contactos.html", contexto)
+    return render(request, "ei/contactos.html", {"curso": curso, "docentes": docentes, "area": "ei"})
+
 
 def inscricao_turno(request):
 
@@ -199,7 +200,7 @@ def inscricao_turno(request):
     })
 
 def informacoes(request):
-    return render(request, "home/informacoes.html")
+    return render(request, "ei/informacoes.html", { "area": "ei" })
 
 def perfil(request):
     return render(request, "profile/perfil.html")
@@ -438,9 +439,10 @@ def admin_horarios_list(request):
     horarios = HorarioPDF.objects.all().order_by("-atualizado_em")
     return render(request, "admin/horarios_list.html", {"horarios": horarios})
 
-def horarios(request):
+def horarios_admin(request):
     pdf = HorarioPDF.objects.order_by("-atualizado_em").first()
     return render(request, "home/horarios.html", {"pdf": pdf})
+
 
 def admin_users_docentes(request):
     docentes = Docente.objects.all().order_by("id_docente")
