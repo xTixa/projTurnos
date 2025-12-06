@@ -91,6 +91,14 @@ urlpatterns = [
 
     #DWDM
     path("dwdm/", views.index_dwdm, name="index_dwdm"),
+    path("dwdm/ingresso/", views.ingresso_dwdm, name="ingresso_dwdm"),
+    path("dwdm/plano/", views.plano_dwdm, name="plano_dwdm"),
+    path("dwdm/horarios/", views.horarios_dwdm, name="horarios_dwdm"),
+    path("dwdm/avaliacoes/", views.avaliacoes_dwdm, name="avaliacoes_dwdm"),
+    path("dwdm/contactos/", views.contactos_dwdm, name="contactos_dwdm"),
+    path("dwdm/estagio/", views.estagio_dwdm, name="estagio_dwdm"),
+    path("dwdm/saidas/", views.saidas_dwdm, name="saidas_dwdm"),
+    path("dwdm/brightstart/", views.brightstart, name="brightstart"),
 
     #EISI
     path("eisi/", views.index_mestrado, name="index_mestrado"),

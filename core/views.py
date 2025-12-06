@@ -560,6 +560,30 @@ def horarios_rsi(request):
 def index_dwdm(request):
     return render(request, "dwdm/index_dwdm.html", { "area": "dwdm" })
 
+def ingresso_dwdm(request):
+    return render(request, "dwdm/ingresso_dwdm.html", { "area": "dwdm" })
+
+def plano_dwdm(request):
+    return render(request, "dwdm/plano_dwdm.html", { "area": "dwdm" })
+
+def horarios_dwdm(request):
+    return render(request, "dwdm/horarios_dwdm.html", { "area": "dwdm" })
+
+def avaliacoes_dwdm(request):
+    return render(request, "dwdm/avaliacoes_dwdm.html", { "area": "dwdm" })
+
+def contactos_dwdm(request):
+    return render(request, "dwdm/contactos_dwdm.html", { "area": "dwdm" })
+
+def estagio_dwdm(request):
+    return render(request, "dwdm/estagio_dwdm.html", { "area": "dwdm" })
+
+def saidas_dwdm(request):
+    return render(request, "dwdm/saidas_dwdm.html", { "area": "dwdm" })
+
+def brightstart(request):
+    return render(request, "dwdm/brightstart.html", { "area": "dwdm" })
+
 
 
 #MESTRADO
