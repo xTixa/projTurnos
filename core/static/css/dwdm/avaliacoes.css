@@ -1,0 +1,45 @@
+.page-container {
+    max-width: 900px;
+    padding: 25px;
+    margin: auto;
+}
+
+.page-title {
+    font-size: 34px;
+    font-weight: 700;
+    color: #003366;
+    margin-bottom: 10px;
+}
+
+.intro-text {
+    font-size: 18px;
+    margin-bottom: 25px;
+    color: #444;
+}
+
+.pdf-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.pdf-item {
+    background: #f5f8ff;
+    padding: 18px;
+    border-left: 4px solid #0057b8;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.pdf-item i {
+    color: #d60000;
+    font-size: 28px;
+    margin-right: 10px;
+}
+
+.pdf-item a {
+    font-weight: 600;
+    color: #0057b8;
+}

@@ -1,0 +1,55 @@
+{% extends "home/base.html" %}
+{% load static %}
+
+{% block title %}Plano Curricular — DWDM{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/dwdm/plano.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="page-container">
+
+    <h1 class="page-title">Plano Curricular</h1>
+
+    <p class="intro-text">
+        O plano curricular do curso de <strong>DWDM</strong> integra formação técnica
+        em programação web e mobile, bases de dados, computação na cloud,
+        interfaces digitais e desenvolvimento de software.
+    </p>
+
+    <section class="plan-block">
+        <h2>1º Ano</h2>
+        <ul>
+            <li>Programação I</li>
+            <li>Fundamentos de Web</li>
+            <li>Bases de Dados I</li>
+            <li>Matemática Discreta</li>
+            <li>Design de Interfaces I</li>
+            <li>Algoritmos e Estruturas de Dados</li>
+        </ul>
+    </section>
+
+    <section class="plan-block">
+        <h2>2º Ano</h2>
+        <ul>
+            <li>Programação Web Avançada</li>
+            <li>Desenvolvimento Mobile</li>
+            <li>Bases de Dados II</li>
+            <li>Cloud Computing</li>
+            <li>Design de Interfaces II</li>
+            <li>APIs e Microserviços</li>
+        </ul>
+    </section>
+
+    <section class="plan-block">
+        <h2>3º Ano</h2>
+        <ul>
+            <li>Projeto de Desenvolvimento</li>
+            <li>Tópicos Avançados em TI</li>
+            <li>Estágio em Empresa</li>
+        </ul>
+    </section>
+
+</div>
+{% endblock %}

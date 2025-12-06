@@ -1,0 +1,49 @@
+.page-container {
+    padding: 25px;
+    max-width: 900px;
+    margin: auto;
+}
+
+.page-title {
+    font-size: 34px;
+    margin-bottom: 10px;
+}
+
+.intro-text {
+    font-size: 18px;
+    margin-bottom: 25px;
+}
+
+.highlight-box {
+    background: #eef5ff;
+    padding: 20px;
+    border-left: 4px solid #0057b8;
+    border-radius: 6px;
+    margin-bottom: 25px;
+}
+
+.highlight-box h2 {
+    margin-bottom: 10px;
+}
+
+.highlight-box ul {
+    padding-left: 20px;
+}
+
+.quick-links {
+    margin-top: 20px;
+}
+
+.btn-link {
+    display: inline-block;
+    padding: 12px 20px;
+    background: #0057b8;
+    color: white;
+    margin-right: 10px;
+    border-radius: 6px;
+    text-decoration: none;
+}
+
+.btn-link:hover {
+    background: #003f8a;
+}

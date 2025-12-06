@@ -534,6 +534,32 @@ def moodle(request):
 def index_rsi(request):
     return render(request, "rsi/index_rsi.html", { "area": "rsi" })
 
+def ingresso_rsi(request):
+    return render(request, "rsi/ingresso_rsi.html", { "area": "rsi" })
+
+def plano_curric_rsi(request):
+    return render(request, "rsi/plano_curric_rsi.html", { "area": "rsi" })
+
+def estagio_rsi(request):
+    return render(request, "rsi/estagio_rsi.html", { "area": "rsi" })
+
+def contactos_rsi(request):
+    return render(request, "rsi/contactos_rsi.html", { "area": "rsi" })
+
+def avaliacoes_rsi(request):
+    return render(request, "rsi/avaliacoes_rsi.html", { "area": "rsi" })
+
+def saidas_rsi(request):
+    return render(request, "rsi/saidas_rsi.html", { "area": "rsi" })
+
+def horarios_rsi(request):
+    return render(request, "rsi/horarios_rsi.html", { "area": "rsi" })
+
+
+#DWDM
+def index_dwdm(request):
+    return render(request, "dwdm/index_dwdm.html", { "area": "dwdm" })
+
 
 
 #MESTRADO

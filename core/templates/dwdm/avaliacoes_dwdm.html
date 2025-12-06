@@ -1,0 +1,43 @@
+{% extends "home/base.html" %}
+{% load static %}
+
+{% block title %}Avaliações — DWDM{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/dwdm/avaliacoes.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="page-container">
+
+    <h1 class="page-title">Avaliações</h1>
+
+    <p class="intro-text">
+        Aqui encontras os documentos oficiais com as avaliações previstas
+        para cada unidade curricular do curso de <strong>DWDM</strong>.
+    </p>
+
+    <div class="pdf-list">
+
+        <div class="pdf-item">
+            <i class="fa-solid fa-file-pdf"></i>
+            <span>Avaliações — 1º Ano</span>
+            <a href="#" download>📄 Download PDF</a>
+        </div>
+
+        <div class="pdf-item">
+            <i class="fa-solid fa-file-pdf"></i>
+            <span>Avaliações — 2º Ano</span>
+            <a href="#" download>📄 Download PDF</a>
+        </div>
+
+        <div class="pdf-item">
+            <i class="fa-solid fa-file-pdf"></i>
+            <span>Avaliações — 3º Ano</span>
+            <a href="#" download>📄 Download PDF</a>
+        </div>
+
+    </div>
+
+</div>
+{% endblock %}

@@ -1,0 +1,40 @@
+{% extends "home/base.html" %}
+{% load static %}
+
+{% block title %}Contactos — DWDM{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/dwdm/contactos.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="page-container">
+
+    <h1 class="page-title">Contactos</h1>
+
+    <p class="intro-text">
+        Para mais informações sobre o curso de <strong>Desenvolvimento Web e Dispositivos Móveis</strong>,
+        podes contactar os serviços académicos, a coordenação ou o departamento responsável.
+    </p>
+
+    <section class="info-block">
+        <h2>📞 Coordenação do Curso</h2>
+        <p><strong>Coordenador:</strong> Prof. Doutor João Pedro Moreira</p>
+        <p><strong>Email:</strong> <a href="mailto:jmoreira@estgv.ipv.pt">jmoreira@estgv.ipv.pt</a></p>
+    </section>
+
+    <section class="info-block">
+        <h2>🏛️ Secretaria da ESTGV</h2>
+        <p><strong>Telefone:</strong> 232 419 100</p>
+        <p><strong>Email:</strong> <a href="mailto:secretaria@estgv.ipv.pt">secretaria@estgv.ipv.pt</a></p>
+        <p><strong>Horário:</strong> Dias úteis — 9h00 às 12h30 e 14h00 às 17h30</p>
+    </section>
+
+    <section class="info-block">
+        <h2>📍 Localização</h2>
+        <p>Escola Superior de Tecnologia e Gestão de Viseu</p>
+        <p>Campus Politécnico • 3504-510 Viseu</p>
+    </section>
+
+</div>
+{% endblock %}

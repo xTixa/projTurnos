@@ -1,0 +1,48 @@
+{% extends "home/base.html" %}
+{% load static %}
+
+{% block title %}Ingresso — Redes e Sistemas Informáticos{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/rsi/ingresso.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="page-container">
+
+    <h1 class="page-title">Ingresso</h1>
+
+    <p class="intro-text">
+        O curso de RSI admite estudantes através dos regimes gerais e especiais de acesso
+        ao ensino superior, seguindo as normas da ESTGV.
+    </p>
+
+    <section class="info-block">
+        <h2>Condições de Acesso</h2>
+        <ul>
+            <li>Concurso Nacional de Acesso ao Ensino Superior;</li>
+            <li>Maiores de 23 anos;</li>
+            <li>Titulares de cursos profissionais ou superiores;</li>
+            <li>Transferência, mudança de curso ou reingresso.</li>
+        </ul>
+    </section>
+
+    <section class="info-block">
+        <h2>Provas de Ingresso</h2>
+        <ul>
+            <li>Matemática A;</li>
+            <li>Física e Química A;</li>
+            <li>Matemática Aplicada às Ciências Sociais.</li>
+        </ul>
+    </section>
+
+    <section class="info-block">
+        <h2>Classificações Mínimas</h2>
+        <ul>
+            <li>Prova de ingresso: <strong>95 pontos</strong></li>
+            <li>Nota de candidatura: <strong>95 pontos</strong></li>
+        </ul>
+    </section>
+
+</div>
+{% endblock %}

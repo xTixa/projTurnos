@@ -1,0 +1,67 @@
+.page-container {
+    padding: 25px;
+}
+
+.hero h1 {
+    font-size: 36px;
+    color: #003366;
+    margin-bottom: 10px;
+}
+
+.hero p {
+    font-size: 18px;
+    color: #444;
+    max-width: 800px;
+}
+
+.info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 25px;
+    margin: 40px 0;
+}
+
+.card {
+    background: #f6f9ff;
+    padding: 25px;
+    border-left: 4px solid #0057b8;
+    border-radius: 6px;
+}
+
+.card h2 {
+    margin-bottom: 12px;
+}
+
+.card ul {
+    padding-left: 20px;
+}
+
+.shortcuts h2 {
+    margin-bottom: 15px;
+}
+
+.shortcut-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 20px;
+}
+
+.shortcut-card {
+    background: #eef4ff;
+    padding: 20px;
+    border-radius: 6px;
+    text-decoration: none;
+    color: inherit;
+    border-left: 4px solid #003366;
+    transition: 0.2s;
+}
+
+.shortcut-card:hover {
+    background: #dce9ff;
+}
+
+.shortcut-card i {
+    font-size: 28px;
+    margin-bottom: 8px;
+    color: #003366;
+}

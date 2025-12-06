@@ -1,0 +1,57 @@
+<ul class="menu">
+
+    <li class="menu__item {% if request.resolver_match.url_name == 'index_dwdm' %}is-active{% endif %}">
+        <a href="{% url 'home:index_dwdm' %}">
+            <i class="fa-solid fa-house"></i> Home
+        </a>
+    </li>
+
+    <li class="menu__item {% if request.resolver_match.url_name == 'ingresso_dwdm' %}is-active{% endif %}">
+        <a href="{% url 'home:ingresso_dwdm' %}">
+            <i class="fa-solid fa-graduation-cap"></i> Ingresso
+        </a>
+    </li>
+
+    <li class="menu__item {% if request.resolver_match.url_name == 'saidas_dwdm' %}is-active{% endif %}">
+        <a href="{% url 'home:saidas_dwdm' %}">
+            <i class="fa-regular fa-rectangle-list"></i> Saidas Profissionais
+        </a>
+    </li>
+
+    <li class="menu__item {% if request.resolver_match.url_name == 'plano_dwdm' %}is-active{% endif %}">
+        <a href="{% url 'home:plano_dwdm' %}">
+            <i class="fa-regular fa-rectangle-list"></i> Plano Curricular
+        </a>
+    </li>
+
+    <li class="menu__item {% if request.resolver_match.url_name == 'horarios_dwdm' %}is-active{% endif %}">
+        <a href="{% url 'home:horarios_dwdm' %}">
+            <i class="fa-regular fa-calendar"></i> Horários
+        </a>
+    </li>
+
+    <li class="menu__item {% if request.resolver_match.url_name == 'avaliacoes_dwdm' %}is-active{% endif %}">
+        <a href="{% url 'home:avaliacoes_dwdm' %}">
+            <i class="fa-regular fa-clipboard"></i> Avaliações
+        </a>
+    </li>
+
+    <li class="menu__item {% if request.resolver_match.url_name == 'brightstart' %}is-active{% endif %}">
+        <a href="{% url 'home:brightstart' %}">
+            <i class="fa-solid fa-circle-info"></i> BrightStart
+        </a>
+    </li>
+
+    <li class="menu__item {% if request.resolver_match.url_name == 'estagio_dwdm' %}is-active{% endif %}">
+        <a href="{% url 'home:estagio_dwdm' %}">
+            <i class="fa-solid fa-circle-info"></i> Estágio
+        </a>
+    </li>
+
+    <li class="menu__item {% if request.resolver_match.url_name == 'contactos_dwdm' %}is-active{% endif %}">
+        <a href="{% url 'home:contactos_dwdm' %}">
+            <i class="fa-regular fa-address-card"></i> Contactos
+        </a>
+    </li>
+
+</ul>

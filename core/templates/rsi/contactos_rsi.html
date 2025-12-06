@@ -1,0 +1,41 @@
+{% extends "home/base.html" %}
+{% load static %}
+
+{% block title %}Contactos — Redes e Sistemas Informáticos{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/rsi/contactos.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="page-container">
+
+    <h1 class="page-title">Contactos</h1>
+
+    <p class="intro-text">
+        Para esclarecimentos, apoio académico ou informações gerais sobre o curso
+        de <strong>Redes e Sistemas Informáticos</strong>, utiliza os contactos abaixo.
+    </p>
+
+    <section class="contact-box">
+        <h2>Coordenador do Curso</h2>
+        <p><strong>Nome:</strong> Eng. João Silva</p>
+        <p><strong>Email:</strong> <a href="mailto:joao.silva@estgv.ipv.pt">joao.silva@estgv.ipv.pt</a></p>
+    </section>
+
+    <section class="contact-box">
+        <h2>Secretaria — ESTGV</h2>
+        <p><strong>Email:</strong> <a href="mailto:secretaria@estgv.ipv.pt">secretaria@estgv.ipv.pt</a></p>
+        <p><strong>Telefone:</strong> 232 480 563</p>
+        <p><strong>Horário:</strong> Dias úteis, 9h00 — 17h30</p>
+    </section>
+
+    <section class="contact-box">
+        <h2>Website Oficial</h2>
+        <a href="https://www.di.estgv.ipv.pt" target="_blank" class="btn-site">
+            <i class="fa-solid fa-globe"></i> Aceder ao Site do DI
+        </a>
+    </section>
+
+</div>
+{% endblock %}

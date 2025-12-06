@@ -1,0 +1,37 @@
+.page-container {
+    max-width: 900px;
+    padding: 25px;
+    margin: auto;
+}
+
+.page-title {
+    font-size: 34px;
+    font-weight: 700;
+    color: #003366;
+}
+
+.intro-text {
+    font-size: 18px;
+    margin: 15px 0 30px;
+}
+
+.info-block {
+    background: #f4f7ff;
+    padding: 20px;
+    border-left: 4px solid #0057b8;
+    border-radius: 6px;
+    margin-bottom: 25px;
+}
+
+.info-block h2 {
+    margin-bottom: 10px;
+    color: #003366;
+}
+
+.info-block ul {
+    padding-left: 20px;
+}
+
+.info-block li {
+    margin-bottom: 6px;
+}

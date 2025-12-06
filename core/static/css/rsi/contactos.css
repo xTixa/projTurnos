@@ -1,0 +1,57 @@
+.page-container {
+    padding: 25px;
+    max-width: 900px;
+    margin: auto;
+}
+
+.page-title {
+    font-size: 34px;
+    font-weight: 700;
+    color: #003b66;
+    margin-bottom: 15px;
+}
+
+.intro-text {
+    font-size: 18px;
+    margin-bottom: 25px;
+    color: #444;
+}
+
+.contact-box {
+    background: #f1f6ff;
+    padding: 25px;
+    border-left: 4px solid #0057b8;
+    border-radius: 6px;
+    margin-bottom: 25px;
+}
+
+.contact-box h2 {
+    font-size: 24px;
+    margin-bottom: 10px;
+    color: #003366;
+}
+
+.contact-box a {
+    color: #0057b8;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.contact-box a:hover {
+    text-decoration: underline;
+}
+
+.btn-site {
+    display: inline-block;
+    margin-top: 10px;
+    background: #0057b8;
+    color: white;
+    padding: 12px 20px;
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.btn-site:hover {
+    background: #003f87;
+}

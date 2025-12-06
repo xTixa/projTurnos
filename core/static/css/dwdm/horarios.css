@@ -1,0 +1,39 @@
+.page-container {
+    max-width: 900px;
+    padding: 25px;
+    margin: auto;
+}
+
+.page-title {
+    font-size: 34px;
+    font-weight: 700;
+    color: #003366;
+    margin-bottom: 15px;
+}
+
+.intro-text {
+    font-size: 18px;
+    margin-bottom: 25px;
+    color: #444;
+}
+
+.pdf-box {
+    background: #eef4ff;
+    padding: 25px;
+    border-radius: 6px;
+    border-left: 4px solid #0057b8;
+    text-align: left;
+}
+
+.pdf-box i {
+    font-size: 36px;
+    color: #d60000;
+}
+
+.pdf-link {
+    display: inline-block;
+    margin-top: 10px;
+    font-size: 18px;
+    font-weight: 600;
+    color: #0057b8;
+}

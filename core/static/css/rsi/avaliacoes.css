@@ -1,0 +1,50 @@
+.page-container {
+    padding: 25px;
+    max-width: 900px;
+    margin: auto;
+}
+
+.page-title {
+    font-size: 34px;
+    font-weight: 700;
+    color: #004a80;
+    margin-bottom: 10px;
+}
+
+.intro-text {
+    font-size: 18px;
+    margin-bottom: 25px;
+    color: #444;
+}
+
+.avaliacoes-box {
+    background: #f5f8ff;
+    padding: 25px;
+    border-left: 4px solid #0057b8;
+    border-radius: 6px;
+}
+
+.avaliacoes-box h2 {
+    margin-bottom: 15px;
+    color: #003366;
+}
+
+.avaliacoes-list {
+    list-style: none;
+    padding-left: 0;
+}
+
+.avaliacoes-list li {
+    margin-bottom: 12px;
+}
+
+.avaliacoes-list a {
+    text-decoration: none;
+    color: #0057b8;
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.avaliacoes-list a:hover {
+    text-decoration: underline;
+}

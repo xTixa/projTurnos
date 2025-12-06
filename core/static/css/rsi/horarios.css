@@ -1,0 +1,46 @@
+.page-container {
+    padding: 25px;
+    max-width: 900px;
+    margin: auto;
+}
+
+.page-title {
+    font-size: 34px;
+    font-weight: 700;
+    color: #004a80;
+    margin-bottom: 10px;
+}
+
+.intro-text {
+    font-size: 18px;
+    margin-bottom: 25px;
+    color: #444;
+    line-height: 1.6;
+}
+
+.horarios-box {
+    background: #f5f8ff;
+    padding: 25px;
+    border-left: 4px solid #0057b8;
+    border-radius: 6px;
+}
+
+.horarios-box h2 {
+    color: #003366;
+    margin-bottom: 15px;
+}
+
+.btn-horarios {
+    display: inline-block;
+    background: #0057b8;
+    color: white;
+    padding: 12px 18px;
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: 600;
+    margin-top: 10px;
+}
+
+.btn-horarios:hover {
+    background: #003f87;
+}

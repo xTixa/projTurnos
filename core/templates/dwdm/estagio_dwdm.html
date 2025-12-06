@@ -1,0 +1,49 @@
+{% extends "home/base.html" %}
+{% load static %}
+
+{% block title %}Estágio — DWDM{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/dwdm/estagio.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="page-container">
+
+    <h1 class="page-title">Estágio em Empresa</h1>
+
+    <p class="intro-text">
+        O estágio curricular do curso de <strong>Desenvolvimento Web e Dispositivos Móveis</strong>
+        permite aos estudantes aplicar os conhecimentos adquiridos em contexto real de trabalho.
+    </p>
+
+    <section class="info-block">
+        <h2>🎓 Objetivos do Estágio</h2>
+        <ul>
+            <li>Aplicar conhecimentos adquiridos ao longo do curso;</li>
+            <li>Participar em projetos reais de desenvolvimento Web e Mobile;</li>
+            <li>Desenvolver competências profissionais e de equipa;</li>
+            <li>Promover a inserção no mercado de trabalho.</li>
+        </ul>
+    </section>
+
+    <section class="info-block">
+        <h2>🏢 Onde pode ser realizado?</h2>
+        <p>
+            O estágio pode ser realizado em empresas tecnológicas, gabinetes de desenvolvimento,
+            startups ou instituições que necessitem de soluções digitais.
+        </p>
+    </section>
+
+    <section class="info-block">
+        <h2>📝 Documentação Necessária</h2>
+        <ul>
+            <li>Plano de estágio;</li>
+            <li>Declaração de acolhimento da empresa;</li>
+            <li>Relatório final de estágio;</li>
+            <li>Avaliação da entidade de acolhimento.</li>
+        </ul>
+    </section>
+
+</div>
+{% endblock %}

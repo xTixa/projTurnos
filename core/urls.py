@@ -81,6 +81,16 @@ urlpatterns = [
 
     #RSI
     path("rsi/", views.index_rsi, name="index_rsi"),
+    path("rsi/estagio/", views.estagio_rsi, name="estagio_rsi"),
+    path("rsi/contactos/", views.contactos_rsi, name="contactos_rsi"),
+    path("rsi/ingresso/", views.ingresso_rsi, name="ingresso_rsi"),
+    path("rsi/plano/", views.plano_curric_rsi, name="plano_curric_rsi"),
+    path("rsi/horarios/", views.horarios_rsi, name="horarios_rsi"),
+    path("rsi/avaliacoes/", views.avaliacoes_rsi, name="avaliacoes_rsi"),
+    path("rsi/saidas/", views.saidas_rsi, name="saidas_rsi"),
+
+    #DWDM
+    path("dwdm/", views.index_dwdm, name="index_dwdm"),
 
     #EISI
     path("eisi/", views.index_mestrado, name="index_mestrado"),

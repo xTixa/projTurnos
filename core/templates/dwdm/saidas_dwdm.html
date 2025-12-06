@@ -1,0 +1,47 @@
+{% extends "home/base.html" %}
+{% load static %}
+
+{% block title %}Saídas Profissionais — DWDM{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/dwdm/saidas.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="page-container">
+
+    <h1 class="page-title">Saídas Profissionais</h1>
+
+    <p class="intro-text">
+        Os diplomados do curso de <strong>Desenvolvimento Web e Dispositivos Móveis (DWDM)</strong>
+        possuem competências para integrar equipas de desenvolvimento de software,
+        produzir aplicações modernas e atuar no setor tecnológico em constante evolução.
+    </p>
+
+    <section class="info-box">
+        <h2>Principais Funções</h2>
+        <ul>
+            <li>Desenvolvedor Web (Frontend, Backend ou Full Stack)</li>
+            <li>Programador de Aplicações Móveis (Android / iOS)</li>
+            <li>Gestor e Programador de Bases de Dados</li>
+            <li>Técnico de Sistemas e Infraestruturas na Cloud</li>
+            <li>Desenvolvedor de APIs e Microserviços</li>
+            <li>Gestor de Projetos Digitais</li>
+            <li>UI/UX Designer de aplicações web e móveis</li>
+        </ul>
+    </section>
+
+    <section class="info-box">
+        <h2>Onde Podem Trabalhar</h2>
+        <ul>
+            <li>Empresas de desenvolvimento de software</li>
+            <li>Agências de Marketing Digital</li>
+            <li>Startups tecnológicas</li>
+            <li>Empresas de consultoria e outsourcing</li>
+            <li>Equipas de IT de qualquer organização</li>
+            <li>Empresas internacionais de tecnologia e e-commerce</li>
+        </ul>
+    </section>
+
+</div>
+{% endblock %}

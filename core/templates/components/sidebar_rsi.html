@@ -1,0 +1,51 @@
+<ul class="menu">
+
+    <li class="menu__item {% if request.resolver_match.url_name == 'index_rsi' %}is-active{% endif %}">
+        <a href="{% url 'home:index_rsi' %}">
+            <i class="fa-solid fa-house"></i> Home
+        </a>
+    </li>
+
+    <li class="menu__item {% if request.resolver_match.url_name == 'ingresso_rsi' %}is-active{% endif %}">
+        <a href="{% url 'home:ingresso_rsi' %}">
+            <i class="fa-solid fa-graduation-cap"></i> Ingresso
+        </a>
+    </li>
+
+    <li class="menu__item {% if request.resolver_match.url_name == 'saidas_rsi' %}is-active{% endif %}">
+        <a href="{% url 'home:saidas_rsi' %}">
+            <i class="fa-regular fa-rectangle-list"></i> Saidas Profissionais
+        </a>
+    </li>
+
+    <li class="menu__item {% if request.resolver_match.url_name == 'plano_curric_rsi' %}is-active{% endif %}">
+        <a href="{% url 'home:plano_curric_rsi' %}">
+            <i class="fa-regular fa-rectangle-list"></i> Plano Curricular
+        </a>
+    </li>
+
+    <li class="menu__item {% if request.resolver_match.url_name == 'horarios_rsi' %}is-active{% endif %}">
+        <a href="{% url 'home:horarios_rsi' %}">
+            <i class="fa-regular fa-calendar"></i> Horários
+        </a>
+    </li>
+
+    <li class="menu__item {% if request.resolver_match.url_name == 'avaliacoes_rsi' %}is-active{% endif %}">
+        <a href="{% url 'home:avaliacoes_rsi' %}">
+            <i class="fa-regular fa-clipboard"></i> Avaliações
+        </a>
+    </li>
+
+    <li class="menu__item {% if request.resolver_match.url_name == 'estagio_rsi' %}is-active{% endif %}">
+        <a href="{% url 'home:estagio_rsi' %}">
+            <i class="fa-solid fa-circle-info"></i> Estágio
+        </a>
+    </li>
+
+    <li class="menu__item {% if request.resolver_match.url_name == 'contactos_rsi' %}is-active{% endif %}">
+        <a href="{% url 'home:contactos_rsi' %}">
+            <i class="fa-regular fa-address-card"></i> Contactos
+        </a>
+    </li>
+
+</ul>

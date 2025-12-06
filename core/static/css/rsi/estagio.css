@@ -1,0 +1,41 @@
+.page-container {
+    padding: 25px;
+    max-width: 1000px;
+    margin: auto;
+}
+
+.page-title {
+    font-size: 34px;
+    font-weight: 700;
+    color: #003b66;
+    margin-bottom: 15px;
+}
+
+.intro-text {
+    font-size: 18px;
+    margin-bottom: 30px;
+    color: #444;
+    line-height: 1.6;
+}
+
+.info-box {
+    background: #f1f6ff;
+    padding: 25px;
+    border-left: 4px solid #0057b8;
+    margin-bottom: 25px;
+    border-radius: 6px;
+}
+
+.info-box h2 {
+    font-size: 24px;
+    color: #003366;
+    margin-bottom: 10px;
+}
+
+.info-box ul {
+    padding-left: 22px;
+}
+
+.info-box li {
+    margin-bottom: 8px;
+}

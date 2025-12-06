@@ -1,0 +1,50 @@
+{% extends "home/base.html" %}
+{% load static %}
+
+{% block title %}Ingresso — DWDM{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/dwdm/ingresso.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="page-container">
+
+    <h1 class="page-title">Ingresso</h1>
+
+    <p class="intro-text">
+        O acesso ao curso de <strong>Desenvolvimento Web e Dispositivos Móveis</strong>
+        pode ser realizado através de diferentes vias de ingresso definidas pelo IPV.
+    </p>
+
+    <section class="info-block">
+        <h2>Vias de Acesso</h2>
+        <ul>
+            <li>Concurso Nacional de Acesso ao Ensino Superior</li>
+            <li>Concursos Especiais</li>
+            <li>Maiores de 23</li>
+            <li>Reingresso, Mudança de Curso e Transferência</li>
+        </ul>
+    </section>
+
+    <section class="info-block">
+        <h2>Documentação Necessária</h2>
+        <p>Consoante a via de ingresso, podem ser exigidos os seguintes documentos:</p>
+        <ul>
+            <li>Certificado de habilitações</li>
+            <li>Documento de identificação</li>
+            <li>Currículo académico e profissional</li>
+            <li>Provas específicas ou entrevistas, quando aplicável</li>
+        </ul>
+    </section>
+
+    <section class="info-block">
+        <h2>Mais Informações</h2>
+        <p>
+            Para procedimentos de candidatura, prazos e regulamentos,
+            consulta o site do IPV ou os serviços académicos.
+        </p>
+    </section>
+
+</div>
+{% endblock %}

@@ -1,0 +1,33 @@
+{% extends "home/base.html" %}
+{% load static %}
+
+{% block title %}Avaliações — Redes e Sistemas Informáticos{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/rsi/avaliacoes.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="page-container">
+
+    <h1 class="page-title">Avaliações</h1>
+
+    <p class="intro-text">
+        Consulta a documentação oficial relativa às avaliações da licenciatura em
+        <strong>Redes e Sistemas Informáticos</strong>.
+    </p>
+
+    <div class="avaliacoes-box">
+        <h2>Documentos de Avaliação</h2>
+
+        <ul class="avaliacoes-list">
+            <li>
+                <a href="https://www.di.estgv.ipv.pt/Dep/di/web/docs/RSI_Avaliacoes.pdf" target="_blank">
+                    <i class="fa-regular fa-file-pdf"></i> Regulamento de Avaliação — RSI
+                </a>
+            </li>
+        </ul>
+    </div>
+
+</div>
+{% endblock %}

@@ -1,0 +1,34 @@
+{% extends "home/base.html" %}
+{% load static %}
+
+{% block title %}Horários — Redes e Sistemas Informáticos{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/rsi/horarios.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<div class="page-container">
+
+    <h1 class="page-title">Horários</h1>
+
+    <p class="intro-text">
+        Os horários da licenciatura em <strong>Redes e Sistemas Informáticos</strong> são disponibilizados no início de cada semestre e podem ser sujeitos a ajustamentos.
+    </p>
+
+    <section class="horarios-box">
+        <h2>Horários Disponíveis</h2>
+
+        <p>Podes consultar os horários atualizados no seguinte link:</p>
+
+        <a href="https://www.di.estgv.ipv.pt/horarios/index.php?curso=RSI"
+           class="btn-horarios"
+           target="_blank">
+            <i class="fa-regular fa-calendar"></i> Ver Horários RSI
+        </a>
+    </section>
+
+</div>
+
+{% endblock %}

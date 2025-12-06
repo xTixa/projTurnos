@@ -1,0 +1,27 @@
+{% extends "home/base.html" %}
+{% load static %}
+
+{% block title %}Horários — DWDM{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/dwdm/horarios.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="page-container">
+
+    <h1 class="page-title">Horários</h1>
+
+    <p class="intro-text">
+        Consulta aqui os horários das unidades curriculares do curso de
+        <strong>Desenvolvimento Web e Dispositivos Móveis</strong>.
+    </p>
+
+    <div class="pdf-box">
+        <i class="fa-solid fa-file-pdf"></i>
+        <p>O horário atualizado encontra-se disponível no ficheiro abaixo:</p>
+        <a href="#" class="pdf-link" download>📄 Download Horário DWDM (PDF)</a>
+    </div>
+
+</div>
+{% endblock %}
