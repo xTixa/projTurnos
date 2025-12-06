@@ -1,0 +1,39 @@
+{% extends "home/base.html" %}
+{% load static %}
+
+{% block title %}Contactos — TDM{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/tdm/contactos_tdm.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="page-container">
+
+    <h1 class="page-title">Contactos</h1>
+
+    <p class="intro-text">
+        Informações de contacto relativas à Licenciatura em Tecnologias e Design Multimédia.
+    </p>
+
+    <hr>
+
+    <section class="info-block">
+        <h2>Coordenador do Curso</h2>
+
+        <p><strong>Prof. Doutor António Marcos</strong></p>
+        <p>Email: <a href="mailto:amarcos@estgv.ipv.pt">amarcos@estgv.ipv.pt</a></p>
+    </section>
+
+    <hr>
+
+    <section class="info-block">
+        <h2>Secretaria da ESTGV</h2>
+
+        <p><strong>Horário:</strong> 09h00 — 12h30 / 14h00 — 17h30</p>
+        <p>Email: <a href="mailto:secretaria@estgv.ipv.pt">secretaria@estgv.ipv.pt</a></p>
+        <p>Telefone: 232 480 500</p>
+    </section>
+
+</div>
+{% endblock %}

@@ -1,0 +1,31 @@
+{% extends "home/base.html" %}
+{% load static %}
+
+{% block title %}Moodle — TDM{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/tdm/moodle.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="page-container">
+
+    <h1 class="page-title">Moodle — TDM</h1>
+
+    <p class="intro-text">
+        A plataforma Moodle é utilizada no curso de Tecnologias e Design Multimédia para apoio pedagógico,
+        partilha de conteúdos, submissão de trabalhos e comunicação entre docentes e estudantes.
+    </p>
+
+    <hr>
+
+    <section class="info-block">
+        <h2>Aceder ao Moodle da ESTGV</h2>
+
+        <a class="moodle-btn" href="https://moodle.estgv.ipv.pt" target="_blank">
+            <i class="fa-solid fa-graduation-cap"></i> Aceder ao Moodle
+        </a>
+    </section>
+
+</div>
+{% endblock %}

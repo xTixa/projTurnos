@@ -1,0 +1,56 @@
+{% extends "home/base.html" %}
+{% load static %}
+
+{% block title %}Objetivos e Saídas Profissionais — TDM{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/tdm/saidas.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="page-container">
+
+    <h1 class="page-title">Objetivos e Saídas Profissionais</h1>
+
+    <p class="intro-text">
+        A Licenciatura em <strong>Tecnologias e Design Multimédia</strong> prepara profissionais com competências técnicas,
+        criativas e conceptuais para trabalhar no setor das indústrias criativas, design digital,
+        comunicação visual e produção de conteúdos multimédia.
+    </p>
+
+    <hr>
+
+    <!-- OBJETIVOS -->
+    <section class="info-block">
+        <h2>Objetivos do Curso</h2>
+        <ul>
+            <li>Integrar conhecimentos de tecnologia e design na criação de soluções multimédia.</li>
+            <li>Capacitar para o desenvolvimento de conteúdos digitais interativos.</li>
+            <li>Fomentar a criatividade, pensamento crítico e capacidade técnica.</li>
+            <li>Promover competências em comunicação visual, design, vídeo, animação e web.</li>
+            <li>Preparar profissionais aptos a trabalhar em equipas multidisciplinares.</li>
+        </ul>
+    </section>
+
+    <hr>
+
+    <!-- SAÍDAS PROFISSIONAIS -->
+    <section class="info-block">
+        <h2>Saídas Profissionais</h2>
+        <p>Os licenciados em TDM podem exercer funções em diferentes áreas, tais como:</p>
+
+        <ul>
+            <li>Designer Gráfico / Designer Digital;</li>
+            <li>Web Designer e Web Developer;</li>
+            <li>Produtor de Conteúdos Multimédia;</li>
+            <li>Fotografia e Produção Visual;</li>
+            <li>Edição e produção de vídeo;</li>
+            <li>Animação 2D/3D e Motion Graphics;</li>
+            <li>Criação de conteúdos para jogos e experiências interativas;</li>
+            <li>Marketing Digital e Comunicação Visual;</li>
+            <li>Consultoria e freelancer em design multimédia.</li>
+        </ul>
+    </section>
+
+</div>
+{% endblock %}

@@ -70,6 +70,14 @@ urlpatterns = [
 
     #TDM
     path("tdm/", views.index_tdm, name="index_tdm"),
+    path("tdm/ingresso/", views.ingresso_tdm, name="ingresso_tdm"),
+    path("tdm/plano/", views.plano_tdm, name="plano_tdm"),
+    path("tdm/horarios/", views.horarios_tdm, name="horarios_tdm"),
+    path("tdm/contactos/", views.contactos_tdm, name="contactos_tdm"),
+    path("tdm/avaliacoes/", views.avaliacoes_tdm, name="avaliacoes_tdm"),
+    path("tdm/saidas/", views.saidas_tdm, name="saidas"),
+    path("tdm/moodle/", views.moodle, name="moodle"),
+
 
     #RSI
     path("rsi/", views.index_rsi, name="index_rsi"),

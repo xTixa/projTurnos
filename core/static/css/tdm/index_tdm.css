@@ -1,0 +1,82 @@
+/* HERO */
+.tdm-hero {
+    background: url('/static/img/tdm_banner.jpg') center/cover no-repeat;
+    padding: 80px 30px;
+    color: #fff;
+    border-radius: 12px;
+    margin-bottom: 40px;
+}
+
+.tdm-hero__content {
+    max-width: 700px;
+}
+
+.tdm-hero h1 {
+    font-size: 42px;
+    margin-bottom: 15px;
+}
+
+.tdm-hero p {
+    font-size: 18px;
+    line-height: 1.6;
+    margin-bottom: 20px;
+}
+
+.tdm-hero__actions .btn {
+    margin-right: 10px;
+}
+
+/* SECTIONS */
+.tdm-section {
+    margin: 40px 0;
+}
+
+.tdm-grid {
+    display: grid;
+    gap: 20px;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+}
+
+.tdm-card {
+    background: #fff;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+.tdm-card h3 {
+    margin-bottom: 10px;
+    color: #003366;
+}
+
+/* SHORTCUTS */
+.tdm-shortcuts {
+    margin: 50px 0;
+}
+
+.tdm-shortcuts__grid {
+    display: grid;
+    gap: 20px;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+}
+
+.tdm-shortcut-card {
+    background: #fafafa;
+    border: 1px solid #eee;
+    padding: 20px;
+    border-radius: 10px;
+    text-decoration: none;
+    color: inherit;
+    transition: 0.3s;
+}
+
+.tdm-shortcut-card:hover {
+    background: #e9f2ff;
+    border-color: #bcd7ff;
+}
+
+.tdm-shortcut-card .icon {
+    font-size: 28px;
+    margin-bottom: 10px;
+    color: #0055cc;
+}

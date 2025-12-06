@@ -1,0 +1,51 @@
+<ul class="menu">
+
+    <li class="menu__item {% if request.resolver_match.url_name == 'index_tdm' %}is-active{% endif %}">
+        <a href="{% url 'home:index_tdm' %}">
+            <i class="fa-solid fa-house"></i> Home
+        </a>
+    </li>
+
+    <li class="menu__item {% if request.resolver_match.url_name == 'ingresso_tdm' %}is-active{% endif %}">
+        <a href="{% url 'home:ingresso_tdm' %}">
+            <i class="fa-solid fa-graduation-cap"></i> Ingresso
+        </a>
+    </li>
+
+    <li class="menu__item {% if request.resolver_match.url_name == 'saidas' %}is-active{% endif %}">
+        <a href="{% url 'home:saidas' %}">
+            <i class="fa-solid fa-graduation-cap"></i> Objetivo e Saídas
+        </a>
+    </li>
+
+    <li class="menu__item {% if request.resolver_match.url_name == 'plano_tdm' %}is-active{% endif %}">
+        <a href="{% url 'home:plano_tdm' %}">
+            <i class="fa-regular fa-rectangle-list"></i> Plano Curricular
+        </a>
+    </li>
+
+    <li class="menu__item {% if request.resolver_match.url_name == 'horarios_tdm' %}is-active{% endif %}">
+        <a href="{% url 'home:horarios_tdm' %}">
+            <i class="fa-regular fa-calendar"></i> Horários
+        </a>
+    </li>
+
+    <li class="menu__item {% if request.resolver_match.url_name == 'avaliacoes_tdm' %}is-active{% endif %}">
+        <a href="{% url 'home:avaliacoes_tdm' %}">
+            <i class="fa-regular fa-clipboard"></i> Avaliações
+        </a>
+    </li>
+
+    <li class="menu__item {% if request.resolver_match.url_name == 'moodle' %}is-active{% endif %}">
+        <a href="{% url 'home:moodle' %}">
+            <i class="fa-solid fa-graduation-cap"></i> Moodle
+        </a>
+    </li>
+
+    <li class="menu__item {% if request.resolver_match.url_name == 'contactos_tdm' %}is-active{% endif %}">
+        <a href="{% url 'home:contactos_tdm' %}">
+            <i class="fa-regular fa-address-card"></i> Contactos
+        </a>
+    </li>
+
+</ul>

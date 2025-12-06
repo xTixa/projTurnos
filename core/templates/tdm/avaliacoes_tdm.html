@@ -1,0 +1,30 @@
+{% extends "home/base.html" %}
+{% load static %}
+
+{% block title %}Avaliações — TDM{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/tdm/avaliacoes_tdm.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="page-container">
+
+    <h1 class="page-title">Avaliações</h1>
+
+    <p class="intro-text">
+        Consulta os documentos de avaliação associados à Licenciatura em Tecnologias e Design Multimédia.
+    </p>
+
+    <hr>
+
+    <section class="info-block">
+        <ul class="file-list">
+            <li><a href="#" target="_blank"><i class="fa-solid fa-file-pdf"></i> Avaliações — 1.º Ano</a></li>
+            <li><a href="#" target="_blank"><i class="fa-solid fa-file-pdf"></i> Avaliações — 2.º Ano</a></li>
+            <li><a href="#" target="_blank"><i class="fa-solid fa-file-pdf"></i> Avaliações — 3.º Ano</a></li>
+        </ul>
+    </section>
+
+</div>
+{% endblock %}

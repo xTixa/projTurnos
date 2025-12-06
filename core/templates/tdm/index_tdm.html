@@ -1,0 +1,100 @@
+{% extends 'home/base.html' %}
+{% load static %}
+
+{% block title %}Tecnologias da Multimédia — ESTGV{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/tdm/index_tdm.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<!-- HERO -->
+<section class="tdm-hero">
+    <div class="tdm-hero__content">
+        <h1>Tecnologias da Multimédia</h1>
+
+        <p>
+            A licenciatura em Tecnologias da Multimédia forma profissionais capazes de integrar as áreas do 
+            design, desenvolvimento audiovisual, computação gráfica, animação, videojogos e comunicação digital.
+        </p>
+
+        <div class="tdm-hero__actions">
+            <a href="{% url 'home:plano' %}" class="btn btn-primary">
+                <i class="fa-solid fa-layer-group"></i> Plano Curricular
+            </a>
+
+            <a href="https://www.estgv.ipv.pt" target="_blank" class="btn btn-ghost">
+                <i class="fa-solid fa-circle-info"></i> Mais Informações
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- SOBRE O CURSO -->
+<section class="tdm-section">
+    <h2>O Curso</h2>
+
+    <div class="tdm-grid">
+        <article class="tdm-card">
+            <h3>O que vais aprender?</h3>
+            <ul>
+                <li>Produção audiovisual e multimédia;</li>
+                <li>Design gráfico e interação digital;</li>
+                <li>Modelação 3D e animação;</li>
+                <li>Desenvolvimento de videojogos e aplicações interativas;</li>
+                <li>Fotografia, vídeo e captura digital;</li>
+                <li>Técnicas narrativas e comunicação digital.</li>
+            </ul>
+        </article>
+
+        <article class="tdm-card">
+            <h3>Perfil do estudante</h3>
+            <p>
+                Criatividade, curiosidade tecnológica, gosto pela área visual e interesse em ferramentas digitais 
+                são características valorizadas no percurso do curso.
+            </p>
+        </article>
+
+        <article class="tdm-card">
+            <h3>Saídas profissionais</h3>
+            <ul>
+                <li>Designer Multimédia</li>
+                <li>Videógrafo / Editor de Vídeo</li>
+                <li>Técnico de Áudio e Imagem</li>
+                <li>Modelador e Animador 3D</li>
+                <li>Desenvolvedor de jogos</li>
+                <li>Produtor de conteúdo digital</li>
+            </ul>
+        </article>
+    </div>
+</section>
+
+<!-- ATALHOS -->
+<section class="tdm-shortcuts">
+    <h2>Acede rapidamente</h2>
+
+    <div class="tdm-shortcuts__grid">
+
+        <a href="{% url 'home:horarios' %}" class="tdm-shortcut-card">
+            <div class="icon"><i class="fa-regular fa-calendar"></i></div>
+            <h3>Horários</h3>
+            <p>Consulta os horários mais atualizados do curso.</p>
+        </a>
+
+        <a href="{% url 'home:plano' %}" class="tdm-shortcut-card">
+            <div class="icon"><i class="fa-solid fa-list-check"></i></div>
+            <h3>Plano Curricular</h3>
+            <p>Explora todas as unidades curriculares do curso.</p>
+        </a>
+
+        <a href="{% url 'home:contactos' %}" class="tdm-shortcut-card">
+            <div class="icon"><i class="fa-solid fa-address-book"></i></div>
+            <h3>Contactos</h3>
+            <p>Docentes, coordenação e serviços de apoio.</p>
+        </a>
+
+    </div>
+</section>
+
+{% endblock %}

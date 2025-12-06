@@ -1,0 +1,40 @@
+.page-container {
+    max-width: 900px;
+    margin: auto;
+    padding: 25px;
+}
+
+.page-title {
+    font-size: 32px;
+    margin-bottom: 10px;
+}
+
+.intro-text {
+    font-size: 18px;
+    color: #444;
+    margin-bottom: 25px;
+}
+
+.info-block h2 {
+    color: #004488;
+}
+
+.moodle-btn {
+    display: inline-block;
+    margin-top: 15px;
+    padding: 12px 20px;
+    font-size: 18px;
+    background-color: #0055aa;
+    color: white;
+    border-radius: 6px;
+    text-decoration: none;
+    transition: 0.2s;
+}
+
+.moodle-btn i {
+    margin-right: 8px;
+}
+
+.moodle-btn:hover {
+    background-color: #003f7a;
+}

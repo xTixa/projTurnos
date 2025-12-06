@@ -507,6 +507,28 @@ def index_ei(request):
 def index_tdm(request):
     return render(request, "tdm/index_tdm.html", { "area": "tdm" })
 
+def ingresso_tdm(request):
+    return render(request, "tdm/ingresso_tdm.html", { "area": "tdm" })
+
+def plano_tdm(request):
+    return render(request, "tdm/plano_tdm.html", { "area": "tdm" })
+
+def horarios_tdm(request):
+    return render(request, "tdm/horarios_tdm.html", { "area": "tdm" })
+
+def contactos_tdm(request):
+    return render(request, "tdm/contactos_tdm.html", { "area": "tdm" })
+
+def saidas_tdm(request):
+    return render(request, "tdm/saidas.html", { "area": "tdm" })
+
+def avaliacoes_tdm(request):
+    return render(request, "tdm/avaliacoes_tdm.html", { "area": "tdm" })
+
+def moodle(request):
+    return render(request, "tdm/moodle.html", { "area": "tdm" })
+
+
 
 #RSI
 def index_rsi(request):

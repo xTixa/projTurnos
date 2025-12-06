@@ -1,0 +1,36 @@
+.page-container {
+    padding: 25px;
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.page-title {
+    font-size: 32px;
+    font-weight: 700;
+    margin-bottom: 15px;
+}
+
+.intro-text {
+    font-size: 18px;
+    color: #444;
+    margin-bottom: 25px;
+}
+
+.info-block {
+    margin: 35px 0;
+}
+
+.info-block h2 {
+    font-size: 24px;
+    margin-bottom: 10px;
+    color: #004488;
+}
+
+.info-block ul {
+    padding-left: 20px;
+}
+
+.info-block ul li {
+    margin-bottom: 6px;
+    line-height: 1.5;
+}

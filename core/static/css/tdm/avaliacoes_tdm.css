@@ -1,0 +1,35 @@
+.page-container {
+    padding: 25px;
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.page-title {
+    font-size: 32px;
+    margin-bottom: 10px;
+}
+
+.intro-text {
+    margin-bottom: 20px;
+    font-size: 18px;
+    color: #444;
+}
+
+.file-list {
+    list-style: none;
+    padding-left: 0;
+}
+
+.file-list li {
+    margin: 12px 0;
+}
+
+.file-list a {
+    font-size: 18px;
+    color: #0055aa;
+}
+
+.file-list a i {
+    margin-right: 8px;
+    color: #cc0000;
+}
