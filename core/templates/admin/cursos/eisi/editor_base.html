@@ -1,0 +1,26 @@
+{% extends "admin/base_admin.html" %}
+{% load static %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/admin/editor.css' %}">
+
+<h1 class="admin-title">{{ titulo }} — Mestrado EISI</h1>
+
+<p class="admin-subtitle">Edite o conteúdo desta secção:</p>
+
+<form class="editor-form">
+
+    <label>Conteúdo HTML</label>
+    <textarea class="editor-textarea" placeholder="Escreva aqui o conteúdo..."></textarea>
+
+    <label>Upload de PDF (opcional)</label>
+    <input type="file" class="editor-file">
+
+    <div class="editor-actions">
+        <button class="btn-primary">Guardar alterações</button>
+        <button class="btn-danger">Remover conteúdo</button>
+    </div>
+
+</form>
+
+{% endblock %}

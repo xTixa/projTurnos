@@ -502,6 +502,26 @@ def contacto_di(request):
 def index_ei(request):
     return render(request, "ei/index.html", { "area": "ei" })
 
+# ADMIN – ENGENHARIA INFORMÁTICA
+def admin_ei_ingresso(request):
+    return render(request, "admin/placeholder.html", {"titulo": "EI — Ingresso"})
+
+def admin_ei_saidas(request):
+    return render(request, "admin/placeholder.html", {"titulo": "EI — Saídas"})
+
+def admin_ei_plano(request):
+    return render(request, "admin/placeholder.html", {"titulo": "EI — Plano Curricular"})
+
+def admin_ei_horarios(request):
+    return render(request, "admin/placeholder.html", {"titulo": "EI — Horários"})
+
+def admin_ei_avaliacoes(request):
+    return render(request, "admin/placeholder.html", {"titulo": "EI — Avaliações"})
+
+def admin_ei_contactos(request):
+    return render(request, "admin/placeholder.html", {"titulo": "EI — Contactos"})
+
+
 
 #TDM
 def index_tdm(request):
@@ -612,3 +632,54 @@ def contactos_mestrado(request):
     return render(request, "eisi/contactos_mestrado.html", { "area": "eisi" })
 
 
+# -------------------------
+# ADMIN — CURSOS HOME
+# -------------------------
+def admin_cursos_home(request):
+    return render(request, "admin/cursos/index.html")
+
+# -------------------------
+# ADMIN — CURSO: EI
+# -------------------------
+def admin_ei_home(request):
+    return render(request, "admin/cursos/ei/index.html")
+
+def admin_tdm_home(request):
+    return render(request, "admin/cursos/tdm/index.html")
+
+def admin_rsi_home(request):
+    return render(request, "admin/cursos/rsi/index.html")
+
+def admin_eisi_home(request):
+    return render(request, "admin/cursos/eisi/index.html")
+
+def admin_dwdm_home(request):
+    return render(request, "admin/cursos/dwdm/index.html")
+
+# -------------------------
+# ADMIN — CURSO: EISI
+# -------------------------
+
+def admin_eisi_home(request):
+    return render(request, "admin/cursos/eisi/index.html")
+
+def admin_eisi_ingresso(request):
+    return render(request, "admin/cursos/eisi/ingresso.html")
+
+def admin_eisi_destinatarios(request):
+    return render(request, "admin/cursos/eisi/destinatarios.html")
+
+def admin_eisi_plano(request):
+    return render(request, "admin/cursos/eisi/plano.html")
+
+def admin_eisi_horarios(request):
+    return render(request, "admin/cursos/eisi/horarios.html")
+
+def admin_eisi_avaliacoes(request):
+    return render(request, "admin/cursos/eisi/avaliacoes.html")
+
+def admin_eisi_testemunhos(request):
+    return render(request, "admin/cursos/eisi/testemunhos.html")
+
+def admin_eisi_contactos(request):
+    return render(request, "admin/cursos/eisi/contactos.html")

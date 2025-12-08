@@ -1,0 +1,41 @@
+{% extends "admin/base_admin.html" %}
+{% block content %}
+
+<h1 class="page-title">Gestão de Cursos</h1>
+<p class="page-subtitle">Escolhe um curso para gerir as suas páginas e conteúdos.</p>
+
+<div class="courses-grid">
+
+    <a href="{% url 'home:admin_ei_home' %}" class="course-card">
+        <i class="fa-solid fa-book"></i>
+        <h3>Engenharia Informática (EI)</h3>
+        <p>Licenciatura</p>
+    </a>
+
+    <a href="{% url 'home:admin_tdm_home' %}" class="course-card">
+        <i class="fa-solid fa-tv"></i>
+        <h3>Tecnologias e Design Multimédia (TDM)</h3>
+        <p>Licenciatura</p>
+    </a>
+
+    <a href="{% url 'home:admin_rsi_home' %}" class="course-card">
+        <i class="fa-solid fa-network-wired"></i>
+        <h3>Redes e Sistemas de Informação (RSI)</h3>
+        <p>Licenciatura</p>
+    </a>
+
+    <a href="{% url 'home:admin_eisi_home' %}" class="course-card">
+        <i class="fa-solid fa-graduation-cap"></i>
+        <h3>Engenharia Informática — Sistemas de Informação (EISI)</h3>
+        <p>Mestrado</p>
+    </a>
+
+    <a href="{% url 'home:admin_dwdm_home' %}" class="course-card">
+        <i class="fa-solid fa-code"></i>
+        <h3>Desenvolvimento Web e Dispositivos Móveis (DWDM)</h3>
+        <p>Licenciatura</p>
+    </a>
+
+</div>
+
+{% endblock %}

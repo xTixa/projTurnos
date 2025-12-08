@@ -1,0 +1,109 @@
+/* ================================
+   EDITOR DE CONTEÚDOS – ADMIN PANEL
+   ================================ */
+
+.editor-form {
+    background: #ffffff;
+    padding: 30px;
+    border-radius: 14px;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border);
+    margin-top: 25px;
+}
+
+.editor-form label {
+    font-weight: 600;
+    color: var(--text);
+    display: block;
+    margin-bottom: 8px;
+    font-size: 15px;
+}
+
+.editor-textarea {
+    width: 100%;
+    min-height: 350px;
+    padding: 14px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    resize: vertical;
+    font-family: "Segoe UI", sans-serif;
+    font-size: 15px;
+    line-height: 1.6;
+    background: #fdfdfd;
+    transition: 0.2s ease;
+}
+
+.editor-textarea:focus {
+    outline: none;
+    border-color: var(--blue);
+    box-shadow: 0 0 0 3px rgba(35, 113, 167, 0.25);
+}
+
+.editor-file {
+    margin-top: 6px;
+    padding: 10px;
+    border: 1px dashed var(--border);
+    border-radius: 10px;
+    width: 100%;
+    background: #fafafa;
+    cursor: pointer;
+}
+
+.editor-actions {
+    margin-top: 25px;
+    display: flex;
+    gap: 15px;
+}
+
+.btn-primary {
+    background: var(--blue);
+    color: #fff;
+    padding: 12px 20px;
+    border-radius: 10px;
+    border: none;
+    cursor: pointer;
+    font-size: 15px;
+    font-weight: 600;
+    transition: 0.2s ease-in-out;
+}
+
+.btn-primary:hover {
+    filter: brightness(0.9);
+}
+
+.btn-danger {
+    background: #c23434;
+    color: white;
+    padding: 12px 20px;
+    border-radius: 10px;
+    border: none;
+    cursor: pointer;
+    font-size: 15px;
+    font-weight: 600;
+    transition: 0.2s ease-in-out;
+}
+
+.btn-danger:hover {
+    background: #e04747;
+}
+
+.admin-title {
+    font-size: 26px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    color: var(--text);
+}
+
+.admin-subtitle {
+    color: var(--muted);
+    margin-bottom: 25px;
+    font-size: 15px;
+}
+
+.editor-preview-box {
+    margin-top: 25px;
+    background: #f3f7fb;
+    border: 1px solid var(--border);
+    padding: 18px;
+    border-radius: 12px;
+}
