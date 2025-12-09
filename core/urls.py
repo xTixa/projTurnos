@@ -18,7 +18,7 @@ urlpatterns = [
    path("login/", views.login_view, name="login"),
     path("logout/", views.do_logout, name="logout"),
 
-    path("inscricao_turno/", views.inscricao_turno, name="inscricao_turno"),
+    path("ei/inscricao_turno/", views.inscricao_turno, name="inscricao_turno"),
     path("turnos/inscrever/<int:turno_id>/", views.inscrever_turno, name="inscrever_turno"),
 
     # Painel Admin

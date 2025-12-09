@@ -66,6 +66,8 @@
             <th>Quarta</th>
             <th>Quinta</th>
             <th>Sexta</th>
+            <th>Sábado</th>
+            <th>Domingo</th>
         </tr>
     </thead>
     <tbody>
@@ -93,17 +95,61 @@
 
 {% block extra_scripts %}
 <script src="{% static 'js/inscricao_turno.js' %}"></script>
-<script>
-function adicionarAula(dia, hora, uc) {
-    const cellId = `${dia}-${hora}`;
-    const cell = document.getElementById(cellId);
 
-    if (cell) {
-        cell.innerHTML = `<strong>${uc}</strong>`;
-        cell.classList.add("slot-ocupado");
+<script>
+function adicionarAulaGrupo(dia, horaInicio, horaFim, uc) {
+
+    const [hIni, mIni] = horaInicio.split(":").map(Number);
+    const [hFim, mFim] = horaFim.split(":").map(Number);
+
+    const inicioMin = hIni * 60 + mIni;
+    const fimMin = hFim * 60 + mFim;
+
+    let primeiraCell = null;
+    let rowspanCount = 0;
+
+    for (let t = inicioMin; t < fimMin; t += 30) {
+        const hora = String(Math.floor(t / 60)).padStart(2, "0");
+        const minuto = String(t % 60).padStart(2, "0");
+        const cellId = `${dia}-${hora}:${minuto}`;
+        const cell = document.getElementById(cellId);
+
+        if (!cell) continue;
+
+        if (!primeiraCell) {
+            primeiraCell = cell;
+        } else {
+            cell.remove();
+        }
+
+        rowspanCount += 1;
+    }
+
+    if (primeiraCell) {
+        primeiraCell.innerHTML = `<strong>${uc}</strong>`;
+        primeiraCell.classList.add("slot-ocupado");
+        primeiraCell.style.verticalAlign = "middle";
+        primeiraCell.rowSpan = rowspanCount;   // <-- CORRETO
     }
 }
+
 </script>
+
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+
+    // AM → Segunda e Terça, 16h–18h (2 horas)
+    adicionarAulaGrupo("Segunda", "16:00", "18:00", "AM");
+    adicionarAulaGrupo("Terça", "16:00", "18:00", "AM");
+
+    // Base de Dados 2 → Quarta, 09h–13h (4 horas)
+    adicionarAulaGrupo("Quarta", "09:00", "13:00", "Base de Dados 2");
+
+});
+</script>
+
+
 
 <script>
 document.getElementById("exportPDF").addEventListener("click", async () => {

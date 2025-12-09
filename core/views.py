@@ -191,12 +191,13 @@ def inscricao_turno(request):
         "20:00","20:30","21:00","21:30","22:00","22:30","23:00","23:30"
     ]
 
-    dias = ["Segunda", "Terça", "Quarta", "Quinta", "Sexta"]
+    dias = ["Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado", "Domingo"]
 
-    return render(request, "home/inscricao_turno.html", {
+    return render(request, "ei/inscricao_turno.html", {
         "unidades": lista_uc,
         "horas": horas,
-        "dias": dias
+        "dias": dias,
+        "area": "ei"
     })
 
 def informacoes(request):
