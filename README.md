@@ -5,4 +5,14 @@ Susana Tavares - 27467
 Patricia Oliveira - 22525
 Ana Almeida - 27467
 
-  
+# Iniciar ambiente virtual
+python -m venv nome_do_ambiente
+
+# Inicia ambiente virtual
+.\venv\Scripts\activate
+
+## Requirements 
+pip install -r requirements.txt
+
+## Inciar projeto
+django-admin startproject <nome_do_projeto>

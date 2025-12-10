@@ -609,6 +609,13 @@ def avaliacoes_mestrado(request):
     return render(request, "eisi/avaliacoes_mestrado.html", { "area": "eisi" })
 
 def contactos_mestrado(request):
-    return render(request, "eisi/contactos_mestrado.html", { "area": "eisi" })
+    return render(request, "eisi/contactos_mestrado.html")
 
 
+
+# ==========================
+# Forum 
+# ==========================
+
+def forum(request):
+    return render(request, "forum/index_forum.html")

@@ -53,6 +53,9 @@
     </div>
 
     <div class="topbar__right">
+      <a href="{% url 'home:index_forum' %}" class="toplinks__link">
+          <img src="{% static 'img/forum.png' %}" alt="FórumAluno" class="toplink-logo">
+        </a>
       {% if request.session.user_id %}
       <div class="user-dropdown">
         <button class="user-btn">

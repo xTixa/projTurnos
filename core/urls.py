@@ -110,4 +110,8 @@ urlpatterns = [
     path("eisi/avaliacoes/", views.avaliacoes_mestrado, name="avaliacoes_mestrado"),
     path("eisi/contactos/", views.contactos_mestrado, name="contactos_mestrado"),
 
+
+    # Fórum
+    path("forum/", views.forum, name="index_forum"),
 ]
+
