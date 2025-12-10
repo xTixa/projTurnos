@@ -18,12 +18,48 @@ urlpatterns = [
    path("login/", views.login_view, name="login"),
     path("logout/", views.do_logout, name="logout"),
 
-    path("inscricao_turno/", views.inscricao_turno, name="inscricao_turno"),
+    path("ei/inscricao_turno/", views.inscricao_turno, name="inscricao_turno"),
     path("turnos/inscrever/<int:turno_id>/", views.inscrever_turno, name="inscrever_turno"),
 
     # Painel Admin
     path("admin-panel/", views.admin_dashboard, name="admin_dashboard"),
     path("admin-panel/logout/", views.admin_logout, name="admin_logout"),
+    # ADMIN – ENGENHARIA INFORMÁTICA
+    path("admin-panel/ei/ingresso/", views.admin_ei_ingresso, name="admin_ei_ingresso"),
+    path("admin-panel/ei/saidas/", views.admin_ei_saidas, name="admin_ei_saidas"),
+    path("admin-panel/ei/plano/", views.admin_ei_plano, name="admin_ei_plano"),
+    path("admin-panel/ei/horarios/", views.admin_ei_horarios, name="admin_ei_horarios"),
+    path("admin-panel/ei/avaliacoes/", views.admin_ei_avaliacoes, name="admin_ei_avaliacoes"),
+    path("admin-panel/ei/contactos/", views.admin_ei_contactos, name="admin_ei_contactos"),
+
+    # --------------------------
+    # ADMIN — CURSOS (HOME)
+    # --------------------------
+    path("admin-panel/cursos/", views.admin_cursos_home, name="admin_cursos_home"),
+
+    # --------------------------
+    # ADMIN — CURSOS INDIVIDUAIS
+    # --------------------------
+    path("admin-panel/cursos/ei/", views.admin_ei_home, name="admin_ei_home"),
+    path("admin-panel/cursos/tdm/", views.admin_tdm_home, name="admin_tdm_home"),
+    path("admin-panel/cursos/rsi/", views.admin_rsi_home, name="admin_rsi_home"),
+    path("admin-panel/cursos/eisi/", views.admin_eisi_home, name="admin_eisi_home"),
+    path("admin-panel/cursos/dwdm/", views.admin_dwdm_home, name="admin_dwdm_home"),
+
+    # --------------------
+    # ADMIN — EISI (MESTRADO)
+    # --------------------
+    path("admin-panel/cursos/eisi/", views.admin_eisi_home, name="admin_eisi_home"),
+
+    path("admin-panel/cursos/eisi/ingresso/", views.admin_eisi_ingresso, name="admin_eisi_ingresso"),
+    path("admin-panel/cursos/eisi/destinatarios/", views.admin_eisi_destinatarios, name="admin_eisi_destinatarios"),
+    path("admin-panel/cursos/eisi/plano/", views.admin_eisi_plano, name="admin_eisi_plano"),
+    path("admin-panel/cursos/eisi/horarios/", views.admin_eisi_horarios, name="admin_eisi_horarios"),
+    path("admin-panel/cursos/eisi/avaliacoes/", views.admin_eisi_avaliacoes, name="admin_eisi_avaliacoes"),
+    path("admin-panel/cursos/eisi/testemunhos/", views.admin_eisi_testemunhos, name="admin_eisi_testemunhos"),
+    path("admin-panel/cursos/eisi/contactos/", views.admin_eisi_contactos, name="admin_eisi_contactos"),
+
+
 
     # Users
     path("admin-panel/users/", views.admin_users_list, name="admin_users_list"),
@@ -77,7 +113,6 @@ urlpatterns = [
     path("tdm/avaliacoes/", views.avaliacoes_tdm, name="avaliacoes_tdm"),
     path("tdm/saidas/", views.saidas_tdm, name="saidas"),
     path("tdm/moodle/", views.moodle, name="moodle"),
-
 
     #RSI
     path("rsi/", views.index_rsi, name="index_rsi"),

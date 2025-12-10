@@ -3,75 +3,51 @@
 <html lang="pt">
 <head>
     <meta charset="UTF-8">
-    <title>Painel Admin — EI</title>
+    <title>Admin Panel — ESTGV</title>
 
     <link rel="stylesheet" href="{% static 'css/admin/admin.css' %}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 
 <body>
 
-<div class="admin-container">
+<div class="admin-layout">
 
     <!-- SIDEBAR -->
     <aside class="sidebar">
 
-        <h2 class="logo">Admin EI</h2>
+        <h2 class="sidebar-logo">Admin</h2>
 
-        <ul class="menu">
+        <nav>
 
-            <!-- DASHBOARD -->
-            <li class="{% if request.resolver_match.url_name == 'admin_dashboard' %}active{% endif %}">
-                <a href="{% url 'home:admin_dashboard' %}">
-                    <i class="fa-solid fa-gauge"></i> Dashboard
-                </a>
-            </li>
+            <a href="{% url 'home:admin_dashboard' %}"
+               class="nav-item {% if request.resolver_match.url_name == 'admin_dashboard' %}active{% endif %}">
+               <i class="fa-solid fa-gauge"></i> <span>Dashboard</span>
+            </a>
 
-            <!-- UTILIZADORES DROPDOWN -->
-            <li class="menu-item {% if request.resolver_match.url_name in 'admin_users_list admin_users_docentes admin_users_alunos' %}open{% endif %}">
-                
-                <button class="submenu-btn">
-                    <i class="fa-solid fa-users"></i> Utilizadores
-                    <i class="fa-solid fa-chevron-down arrow"></i>
-                </button>
+            <a href="{% url 'home:admin_users_list' %}"
+               class="nav-item {% if 'admin_users' in request.resolver_match.url_name %}active{% endif %}">
+               <i class="fa-solid fa-users"></i> <span>Utilizadores</span>
+            </a>
 
-                <ul class="submenu">
-                    <li><a href="{% url 'home:admin_users_list' %}" 
-                        class="{% if request.resolver_match.url_name == 'admin_users_list' %}active-sub{% endif %}">
-                        Todos
-                    </a></li>
+            <a href="{% url 'home:admin_turnos_list' %}"
+               class="nav-item {% if 'admin_turnos' in request.resolver_match.url_name %}active{% endif %}">
+               <i class="fa-solid fa-clock"></i> <span>Turnos</span>
+            </a>
 
-                    <li><a href="{% url 'home:admin_users_docentes' %}"
-                        class="{% if request.resolver_match.url_name == 'admin_users_docentes' %}active-sub{% endif %}">
-                        Docentes
-                    </a></li>
+            <a href="{% url 'home:admin_horarios_list' %}"
+               class="nav-item {% if 'admin_horarios' in request.resolver_match.url_name %}active{% endif %}">
+               <i class="fa-regular fa-calendar"></i> <span>Horários</span>
+            </a>
 
-                    <li><a href="{% url 'home:admin_users_alunos' %}"
-                        class="{% if request.resolver_match.url_name == 'admin_users_alunos' %}active-sub{% endif %}">
-                        Alunos
-                    </a></li>
-                </ul>
-            </li>
+            <a href="{% url 'home:admin_cursos_home' %}"
+               class="nav-item {% if 'admin_cursos' in request.resolver_match.url_name %}active{% endif %}">
+               <i class="fa-solid fa-book"></i> <span>Cursos</span>
+            </a>
 
-            <!-- TURNOS -->
-            <li class="{% if request.resolver_match.url_name == 'admin_turnos_list' %}active{% endif %}">
-                <a href="{% url 'home:admin_turnos_list' %}">
-                    <i class="fa-solid fa-clock"></i> Turnos
-                </a>
-            </li>
+        </nav>
 
-            <!-- HORÁRIOS -->
-            <li class="{% if request.resolver_match.url_name == 'admin_horarios_list' %}active{% endif %}">
-                <a href="{% url 'home:admin_horarios_list' %}">
-                    <i class="fa-regular fa-calendar"></i> Horários
-                </a>
-            </li>
-        </ul>
-
-        <!-- LOGOUT -->
-        <div class="logout-container">
+        <div class="sidebar-bottom">
             <a href="{% url 'home:admin_logout' %}" class="logout-btn">
                 <i class="fa-solid fa-right-from-bracket"></i> Logout
             </a>
@@ -79,29 +55,16 @@
 
     </aside>
 
-
-    <!-- CONTEÚDO -->
-    <main class="content">
+    <!-- MAIN CONTENT -->
+    <main class="content-area">
         <div class="content-wrapper">
+
             {% block content %}{% endblock %}
+
         </div>
     </main>
 
 </div>
-
-<!-- SCRIPT PARA DROPDOWN -->
-<script>
-document.addEventListener("DOMContentLoaded", () => {
-    const buttons = document.querySelectorAll(".submenu-btn");
-
-    buttons.forEach(btn => {
-        btn.addEventListener("click", () => {
-            btn.parentElement.classList.toggle("open");
-        });
-    });
-});
-</script>
-
 
 </body>
 </html>

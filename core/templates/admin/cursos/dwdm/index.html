@@ -1,0 +1,51 @@
+{% extends "admin/base_admin.html" %}
+{% block content %}
+
+<h1 class="page-title">DWDM — Gestão do Curso</h1>
+<p class="page-subtitle">Escolhe uma secção para editar os conteúdos do curso.</p>
+
+<div class="admin-cards">
+
+    <a href="{% url 'home:admin_dwdm_ingresso' %}" class="card">
+        <i class="fa-solid fa-door-open"></i>
+        <p>Ingresso</p>
+    </a>
+
+    <a href="{% url 'home:admin_dwdm_saidas' %}" class="card">
+        <i class="fa-solid fa-route"></i>
+        <p>Saídas Profissionais</p>
+    </a>
+
+    <a href="{% url 'home:admin_dwdm_plano' %}" class="card">
+        <i class="fa-solid fa-layer-group"></i>
+        <p>Plano Curricular</p>
+    </a>
+
+    <a href="{% url 'home:admin_dwdm_horarios' %}" class="card">
+        <i class="fa-solid fa-calendar-days"></i>
+        <p>Horários</p>
+    </a>
+
+    <a href="{% url 'home:admin_dwdm_avaliacoes' %}" class="card">
+        <i class="fa-solid fa-clipboard-check"></i>
+        <p>Avaliações</p>
+    </a>
+
+    <a href="{% url 'home:admin_dwdm_brightstart' %}" class="card">
+        <i class="fa-solid fa-star"></i>
+        <p>BrightStart</p>
+    </a>
+
+    <a href="{% url 'home:admin_dwdm_estagio' %}" class="card">
+        <i class="fa-solid fa-building"></i>
+        <p>Estágio</p>
+    </a>
+
+    <a href="{% url 'home:admin_dwdm_contactos' %}" class="card">
+        <i class="fa-solid fa-address-book"></i>
+        <p>Contactos</p>
+    </a>
+
+</div>
+
+{% endblock %}

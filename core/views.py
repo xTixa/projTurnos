@@ -191,12 +191,13 @@ def inscricao_turno(request):
         "20:00","20:30","21:00","21:30","22:00","22:30","23:00","23:30"
     ]
 
-    dias = ["Segunda", "Terça", "Quarta", "Quinta", "Sexta"]
+    dias = ["Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado", "Domingo"]
 
-    return render(request, "home/inscricao_turno.html", {
+    return render(request, "ei/inscricao_turno.html", {
         "unidades": lista_uc,
         "horas": horas,
-        "dias": dias
+        "dias": dias,
+        "area": "ei"
     })
 
 def informacoes(request):
@@ -502,6 +503,26 @@ def contacto_di(request):
 def index_ei(request):
     return render(request, "ei/index.html", { "area": "ei" })
 
+# ADMIN – ENGENHARIA INFORMÁTICA
+def admin_ei_ingresso(request):
+    return render(request, "admin/placeholder.html", {"titulo": "EI — Ingresso"})
+
+def admin_ei_saidas(request):
+    return render(request, "admin/placeholder.html", {"titulo": "EI — Saídas"})
+
+def admin_ei_plano(request):
+    return render(request, "admin/placeholder.html", {"titulo": "EI — Plano Curricular"})
+
+def admin_ei_horarios(request):
+    return render(request, "admin/placeholder.html", {"titulo": "EI — Horários"})
+
+def admin_ei_avaliacoes(request):
+    return render(request, "admin/placeholder.html", {"titulo": "EI — Avaliações"})
+
+def admin_ei_contactos(request):
+    return render(request, "admin/placeholder.html", {"titulo": "EI — Contactos"})
+
+
 
 #TDM
 def index_tdm(request):
@@ -610,7 +631,6 @@ def avaliacoes_mestrado(request):
 
 def contactos_mestrado(request):
     return render(request, "eisi/contactos_mestrado.html")
-
 
 
 # ==========================
