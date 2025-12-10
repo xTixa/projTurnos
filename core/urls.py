@@ -35,51 +35,51 @@ urlpatterns = [
     # --------------------------
     # ADMIN — CURSOS (HOME)
     # --------------------------
-    path("admin-panel/cursos/", views.admin_cursos_home, name="admin_cursos_home"),
+    #path("admin-panel/cursos/", views.admin_cursos_home, name="admin_cursos_home"),
 
     # --------------------------
     # ADMIN — CURSOS INDIVIDUAIS
     # --------------------------
-    path("admin-panel/cursos/ei/", views.admin_ei_home, name="admin_ei_home"),
-    path("admin-panel/cursos/tdm/", views.admin_tdm_home, name="admin_tdm_home"),
-    path("admin-panel/cursos/rsi/", views.admin_rsi_home, name="admin_rsi_home"),
-    path("admin-panel/cursos/eisi/", views.admin_eisi_home, name="admin_eisi_home"),
-    path("admin-panel/cursos/dwdm/", views.admin_dwdm_home, name="admin_dwdm_home"),
+    #path("admin-panel/cursos/ei/", views.admin_ei_home, name="admin_ei_home"),
+    #path("admin-panel/cursos/tdm/", views.admin_tdm_home, name="admin_tdm_home"),
+    #path("admin-panel/cursos/rsi/", views.admin_rsi_home, name="admin_rsi_home"),
+    #path("admin-panel/cursos/eisi/", views.admin_eisi_home, name="admin_eisi_home"),
+    #path("admin-panel/cursos/dwdm/", views.admin_dwdm_home, name="admin_dwdm_home"),
 
     # --------------------
     # ADMIN — EISI (MESTRADO)
     # --------------------
-    path("admin-panel/cursos/eisi/", views.admin_eisi_home, name="admin_eisi_home"),
+    #path("admin-panel/cursos/eisi/", views.admin_eisi_home, name="admin_eisi_home"),
 
-    path("admin-panel/cursos/eisi/ingresso/", views.admin_eisi_ingresso, name="admin_eisi_ingresso"),
-    path("admin-panel/cursos/eisi/destinatarios/", views.admin_eisi_destinatarios, name="admin_eisi_destinatarios"),
-    path("admin-panel/cursos/eisi/plano/", views.admin_eisi_plano, name="admin_eisi_plano"),
-    path("admin-panel/cursos/eisi/horarios/", views.admin_eisi_horarios, name="admin_eisi_horarios"),
-    path("admin-panel/cursos/eisi/avaliacoes/", views.admin_eisi_avaliacoes, name="admin_eisi_avaliacoes"),
-    path("admin-panel/cursos/eisi/testemunhos/", views.admin_eisi_testemunhos, name="admin_eisi_testemunhos"),
-    path("admin-panel/cursos/eisi/contactos/", views.admin_eisi_contactos, name="admin_eisi_contactos"),
+    #path("admin-panel/cursos/eisi/ingresso/", views.admin_eisi_ingresso, name="admin_eisi_ingresso"),
+    #path("admin-panel/cursos/eisi/destinatarios/", views.admin_eisi_destinatarios, name="admin_eisi_destinatarios"),
+    #path("admin-panel/cursos/eisi/plano/", views.admin_eisi_plano, name="admin_eisi_plano"),
+    #path("admin-panel/cursos/eisi/horarios/", views.admin_eisi_horarios, name="admin_eisi_horarios"),
+    #path("admin-panel/cursos/eisi/avaliacoes/", views.admin_eisi_avaliacoes, name="admin_eisi_avaliacoes"),
+    #path("admin-panel/cursos/eisi/testemunhos/", views.admin_eisi_testemunhos, name="admin_eisi_testemunhos"),
+    #path("admin-panel/cursos/eisi/contactos/", views.admin_eisi_contactos, name="admin_eisi_contactos"),
 
 
 
     # Users
-    path("admin-panel/users/", views.admin_users_list, name="admin_users_list"),
-    path("admin-panel/users/create/", views.admin_users_create, name="admin_users_create"),
-    path("admin-panel/users/<int:id>/edit/", views.admin_users_edit, name="admin_users_edit"),
-    path("admin-panel/users/<int:id>/delete/", views.admin_users_delete, name="admin_users_delete"),
-    path("admin-panel/users/docentes/", views.admin_users_docentes, name="admin_users_docentes"),
-    path("admin-panel/users/alunos/", views.admin_users_alunos, name="admin_users_alunos"),
+    #path("admin-panel/users/", views.admin_users_list, name="admin_users_list"),
+    #path("admin-panel/users/create/", views.admin_users_create, name="admin_users_create"),
+    #path("admin-panel/users/<int:id>/edit/", views.admin_users_edit, name="admin_users_edit"),
+    #path("admin-panel/users/<int:id>/delete/", views.admin_users_delete, name="admin_users_delete"),
+    #path("admin-panel/users/docentes/", views.admin_users_docentes, name="admin_users_docentes"),
+    #path("admin-panel/users/alunos/", views.admin_users_alunos, name="admin_users_alunos"),
 
     # Turnos
-    path("admin-panel/turnos/", views.admin_turnos_list, name="admin_turnos_list"),
-    path("admin-panel/turnos/create/", views.admin_turnos_create, name="admin_turnos_create"),
-    path("admin-panel/turnos/<int:id>/edit/", views.admin_turnos_edit, name="admin_turnos_edit"),
-    path("admin-panel/turnos/<int:id>/delete/", views.admin_turnos_delete, name="admin_turnos_delete"),
+    #path("admin-panel/turnos/", views.admin_turnos_list, name="admin_turnos_list"),
+    #path("admin-panel/turnos/create/", views.admin_turnos_create, name="admin_turnos_create"),
+    #path("admin-panel/turnos/<int:id>/edit/", views.admin_turnos_edit, name="admin_turnos_edit"),
+    #path("admin-panel/turnos/<int:id>/delete/", views.admin_turnos_delete, name="admin_turnos_delete"),
 
     # HORARIOS ADMIN (AJUSTADO)
-    path("admin-panel/horarios/", views.admin_horarios_list, name="admin_horarios_list"),
-    path("admin-panel/horarios/novo/", views.admin_horarios_create, name="admin_horarios_create"),
-    path("admin-panel/horarios/<int:id>/editar/", views.admin_horarios_edit, name="admin_horarios_edit"),
-    path("admin-panel/horarios/<int:id>/apagar/", views.admin_horarios_delete, name="admin_horarios_delete"),
+    #path("admin-panel/horarios/", views.admin_horarios_list, name="admin_horarios_list"),
+    #path("admin-panel/horarios/novo/", views.admin_horarios_create, name="admin_horarios_create"),
+    #path("admin-panel/horarios/<int:id>/editar/", views.admin_horarios_edit, name="admin_horarios_edit"),
+    #path("admin-panel/horarios/<int:id>/apagar/", views.admin_horarios_delete, name="admin_horarios_delete"),
 
     #ficha 12
     path("4etcs/", views.uc_mais_4_ects, name="uc_mais_4_ects"),
