@@ -40,11 +40,15 @@
                <i class="fa-regular fa-calendar"></i> <span>Horários</span>
             </a>
 
-            <a href="{% url 'home:admin_cursos_home' %}"
-               class="nav-item {% if 'admin_cursos' in request.resolver_match.url_name %}active{% endif %}">
-               <i class="fa-solid fa-book"></i> <span>Cursos</span>
+            <a href="{% url 'home:admin_uc_list' %}"
+               class="nav-item {% if 'admin_uc' in request.resolver_match.url_name %}active{% endif %}">
+               <i class="fa-solid fa-graduation-cap"></i> <span>UC</span>
             </a>
 
+            <a href="{% url 'home:admin_logs_list' %}"
+               class="nav-item {% if 'admin_logs' in request.resolver_match.url_name %}active{% endif %}">
+               <i class="fa-solid fa-clipboard-list"></i> <span>Logs</span>
+            </a>
         </nav>
 
         <div class="sidebar-bottom">
@@ -57,11 +61,11 @@
 
     <!-- MAIN CONTENT -->
     <main class="content-area">
-        <div class="content-wrapper">
-
-            {% block content %}{% endblock %}
-
-        </div>
+        {% block content_wrapper %}
+            <div class="content-wrapper">
+                {% block content %}{% endblock %}
+            </div>
+        {% endblock %}
     </main>
 
 </div>

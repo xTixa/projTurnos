@@ -1,0 +1,71 @@
+{% extends "admin/base_admin.html" %}
+
+{% block content %}
+<h1>Gerir Unidades Curriculares</h1>
+
+<a href="{% url 'home:admin_uc_create' %}" class="btn-create">+ Nova UC</a>
+
+<form method="get" class="filters-form">
+
+    <select name="ano">
+        <option value="">Ano</option>
+        <option value="1" {% if ano_selected == "1" %}selected{% endif %}>1º Ano</option>
+        <option value="2" {% if ano_selected == "2" %}selected{% endif %}>2º Ano</option>
+        <option value="3" {% if ano_selected == "3" %}selected{% endif %}>3º Ano</option>
+    </select>
+
+    <select name="semestre">
+        <option value="">Semestre</option>
+        <option value="1" {% if semestre_selected == "1" %}selected{% endif %}>1º Semestre</option>
+        <option value="2" {% if semestre_selected == "2" %}selected{% endif %}>2º Semestre</option>
+    </select>
+
+    <select name="curso">
+        <option value="">Curso</option>
+        {% for c in cursos %}
+            <option value="{{ c.id_curso }}"
+                {% if curso_selected == c.id_curso|stringformat:"s" %}selected{% endif %}>
+                {{ c.nome }}
+            </option>
+        {% endfor %}
+    </select>
+
+    <button type="submit" class="btn-filter">
+        <i class="fa-solid fa-filter"></i> Filtrar
+    </button>
+
+    <a href="{% url 'home:admin_uc_list' %}" class="btn-clear">
+        Limpar
+    </a>
+
+</form>
+
+
+<table class="admin-table">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Código</th>
+            <th>Nome</th>
+            <th>ECTS</th>
+            <th>Ações</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        {% for uc in ucs %}
+        <tr>
+            <td>{{ uc.id_unidadecurricular  }}</td>
+            <td>{{ uc.codigo }}</td>
+            <td>{{ uc.nome }}</td>
+            <td>{{ uc.ects }}</td>
+
+            <td>
+                <a href="{% url 'home:admin_uc_edit' uc.id_unidadecurricular  %}" class="edit-btn">✏️</a>
+                <a href="{% url 'home:admin_uc_delete' uc.id_unidadecurricular  %}" class="delete-btn" onclick="return confirm('Apagar UC?');">❌</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

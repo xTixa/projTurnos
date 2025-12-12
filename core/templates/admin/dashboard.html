@@ -1,6 +1,6 @@
 {% extends "admin/base_admin.html" %}
 
-{% block content %}
+{% block content_wrapper %}
 
 <h1>Painel de Administração</h1>
 
@@ -29,9 +29,15 @@
         </div>
 
         <div class="stat-card">
-            <i class="fa-solid fa-book"></i>
+            <i class="fa-solid fa-graduation-cap"></i>
             <h3>{{ total_ucs }}</h3>
             <p>Unidades Curriculares</p>
+        </div>
+
+        <div class="stat-card">
+            <i class="fa-solid fa-book"></i>
+            <h3>{{ total_cursos }}</h3>
+            <p>Cursos</p>
         </div>
 
         <div class="stat-card">

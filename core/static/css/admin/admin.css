@@ -138,3 +138,126 @@ body {
     color: #6b7280;
     font-size: 14px;
 }
+
+/* ---------- STATS ---------- */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    margin: 25px 0;
+}
+
+.stat-card {
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    text-align: center;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+}
+
+.stat-card i {
+    font-size: 28px;
+    color: #2563eb;
+    margin-bottom: 10px;
+}
+
+.stat-card h3 {
+    margin: 5px 0;
+    font-size: 26px;
+}
+
+.stat-card p {
+    margin: 0;
+    color: #6b7280;
+}
+
+/* ---------- CHARTS ---------- */
+.charts-section {
+    margin: 40px 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+    gap: 25px;
+}
+
+.chart-card {
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+}
+
+/* ---------- ADMIN MANAGEMENT ---------- */
+.admin-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 20px;
+    margin: 20px 0 40px;
+}
+
+.admin-cards .card {
+    background: #f9fafb;
+    border-radius: 12px;
+    padding: 25px;
+    text-align: center;
+    text-decoration: none;
+    color: #111827;
+    transition: 0.25s;
+}
+
+.admin-cards .card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+}
+
+.admin-cards i {
+    font-size: 30px;
+    color: #2563eb;
+    margin-bottom: 12px;
+}
+
+/* ---------- QUICK ACTIONS ---------- */
+.quick-actions {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.quick-actions a {
+    background: #2563eb;
+    color: white;
+    padding: 10px 18px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.quick-actions a:hover {
+    background: #1d4ed8;
+}
+
+
+.filters-form {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.filters-form select,
+.filters-form button,
+.filters-form a {
+    padding: 8px 12px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+}
+
+.btn-filter {
+    background: #2563eb;
+    color: white;
+    border: none;
+}
+
+.btn-clear {
+    text-decoration: none;
+    background: #e5e7eb;
+    color: #111;
+}

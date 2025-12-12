@@ -147,14 +147,31 @@ class TurnoUc(models.Model):
 
 class UnidadeCurricular(models.Model):
     id_unidadecurricular = models.AutoField(primary_key=True)
-    id_semestre = models.ForeignKey(Semestre, models.DO_NOTHING, db_column='id_semestre')
-    id_anocurricular = models.ForeignKey(AnoCurricular, models.DO_NOTHING, db_column='id_anocurricular')
-    ects = models.IntegerField()
     nome = models.CharField(max_length=255)
+    ects = models.FloatField()
+
+    id_anocurricular = models.ForeignKey(
+        AnoCurricular,
+        models.DO_NOTHING,
+        db_column='id_anocurricular'
+    )
+
+    id_semestre = models.ForeignKey(
+        Semestre,
+        models.DO_NOTHING,
+        db_column='id_semestre'
+    )
+
+    id_curso = models.ForeignKey(
+        Curso,
+        models.DO_NOTHING,
+        db_column='id_curso'
+    )
 
     class Meta:
         managed = False
         db_table = 'unidade_curricular'
+
 
 class VwTopDocenteUcAnoCorrente(models.Model):
     id_docente = models.IntegerField()
@@ -188,3 +205,4 @@ class HorarioPDF(models.Model):
 
     def __str__(self):
         return f"{self.nome} ({self.atualizado_em.date()})"
+    

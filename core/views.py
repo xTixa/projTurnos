@@ -4,7 +4,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.shortcuts import redirect
 from huggingface_hub import logout
-from .models import UnidadeCurricular, Docente, Curso, HorarioPDF, Aluno, TurnoUc, Turno, InscricaoTurno, InscritoUc
+from .models import AnoCurricular, UnidadeCurricular, Semestre, Docente, Curso, HorarioPDF, Aluno, TurnoUc, Turno, InscricaoTurno, InscritoUc
 from .db_views import UCMais4Ects, CadeirasSemestre, AlunosMatriculadosPorDia, AlunosPorOrdemAlfabetica, Turnos, Cursos
 from django.http import JsonResponse
 from .models import VwTopDocenteUcAnoCorrente
@@ -524,6 +524,7 @@ def admin_ei_contactos(request):
 
 
 
+
 #TDM
 def index_tdm(request):
     return render(request, "tdm/index_tdm.html", { "area": "tdm" })
@@ -606,7 +607,6 @@ def brightstart(request):
     return render(request, "dwdm/brightstart.html", { "area": "dwdm" })
 
 
-
 #MESTRADO
 def index_mestrado(request):
     return render(request, "eisi/index_mestrado.html", { "area": "eisi" })
@@ -633,8 +633,82 @@ def contactos_mestrado(request):
     return render(request, "eisi/contactos_mestrado.html")
 
 
+
+#==========================
+# ADMIN — UNIDADE CURRICULAR CRUD
+def admin_uc_list(request):
+    ucs = UnidadeCurricular.objects.all().order_by("id_unidadecurricular")
+
+    ano = request.GET.get('ano')
+    semestre = request.GET.get('semestre')
+    curso = request.GET.get('curso')
+
+    if ano:
+        ucs = ucs.filter(id_anocurricular_id=ano)
+
+    if semestre:
+        ucs = ucs.filter(id_semestre_id=semestre)
+
+    if curso:
+        ucs = ucs.filter(id_curso_id=curso)
+
+    anos = AnoCurricular.objects.all()
+    semestres = Semestre.objects.all()
+    cursos = Curso.objects.all()
+
+    return render(request, "admin/uc_list.html", {
+        "ucs": ucs,
+        "anos": anos,
+        "semestres": semestres,
+        "cursos": cursos,
+        "ano_selected": ano,
+        "semestre_selected": semestre,
+        "curso_selected": curso,
+    })
+
+
+
+def admin_uc_create(request):
+    if request.method == "POST":
+        nome = request.POST.get("nome")
+        ects = request.POST.get("ects")
+
+        UnidadeCurricular.objects.create(
+            nome=nome,
+            ects=ects,
+        )
+        messages.success(request, "Unidade Curricular criada com sucesso!")
+        return redirect("home:admin_uc_list")
+
+    return render(request, "admin/uc_form.html")
+
+def admin_uc_edit(request, id):
+    uc = get_object_or_404(UnidadeCurricular, id_unidadecurricular=id)
+
+    if request.method == "POST":
+        uc.nome = request.POST.get("nome")
+        uc.ects = request.POST.get("ects")
+        uc.save()
+
+        messages.success(request, "Unidade Curricular atualizada!")
+        return redirect("home:admin_uc_list")
+
+    return render(request, "admin/uc_form.html", {"uc": uc})
+
+def admin_uc_delete(request, id):
+    uc = get_object_or_404(UnidadeCurricular, id_unidadecurricular=id)
+    uc.delete()
+    messages.success(request, "Unidade Curricular apagada!")
+    return redirect("home:admin_uc_list")
+
+
+
+def admin_logs(request):
+    logs = listar_logs()
+    return render(request, "admin/logs_list.html", {"logs": logs})
+
 # ==========================
-# Forum 
+# Forum
 # ==========================
 
 def forum(request):
