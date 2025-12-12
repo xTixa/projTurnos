@@ -22,7 +22,7 @@
             <td>{{ log.id_log }}</td>
             <td>{{ log.data_hora|date:"d/m/Y H:i" }}</td>
             <td>{{ log.utilizador_db }}</td>
-            <td>{{ log.operacao }}</td>
+            <td class="log-op log-{{ log.operacao|lower }}">{{ log.operacao }}</td>
             <td>{{ log.entidade }}</td>
             <td>{{ log.chave_primaria }}</td>
             <td>{{ log.detalhes }}</td>

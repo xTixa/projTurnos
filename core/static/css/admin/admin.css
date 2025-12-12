@@ -261,3 +261,79 @@ body {
     background: #e5e7eb;
     color: #111;
 }
+
+/* ---------- ADMIN TABLES (GLOBAL) ---------- */
+.admin-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    font-size: 14px;
+}
+
+.admin-table thead {
+    background: #f1f5f9;
+}
+
+.admin-table th {
+    text-align: left;
+    padding: 12px 14px;
+    font-weight: 600;
+    color: #374151;
+    border-bottom: 2px solid #e5e7eb;
+    white-space: nowrap;
+}
+
+.admin-table td {
+    padding: 12px 14px;
+    border-bottom: 1px solid #e5e7eb;
+    vertical-align: top;
+    color: #111827;
+}
+
+/* Zebra striping */
+.admin-table tbody tr:nth-child(even) {
+    background: #f9fafb;
+}
+
+/* Hover row */
+.admin-table tbody tr:hover {
+    background: #eef2ff;
+}
+
+/* Long text handling (logs!) */
+.admin-table td {
+    max-width: 320px;
+    word-wrap: break-word;
+    word-break: break-word;
+}
+
+/* Smaller columns */
+.admin-table td:nth-child(1),
+.admin-table th:nth-child(1) {
+    width: 60px;
+}
+
+.admin-table td:nth-child(2),
+.admin-table th:nth-child(2) {
+    width: 160px;
+    white-space: nowrap;
+}
+
+
+/* ---------- LOG OPERATION COLORS ---------- */
+.log-op {
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.log-criar {
+    color: #16a34a;
+}
+
+.log-editar {
+    color: #2563eb;
+}
+
+.log-apagar {
+    color: #dc2626;
+}
