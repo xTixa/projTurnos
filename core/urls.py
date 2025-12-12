@@ -24,7 +24,7 @@ urlpatterns = [
     # Painel Admin
     path("admin-panel/", views.admin_dashboard, name="admin_dashboard"),
     path("admin-panel/logout/", views.admin_logout, name="admin_logout"),
-    path("admin-panel/logs/", views.admin_logs, name="admin_logs_list"),
+    path("admin-panel/logs/", views.admin_logs_list, name="admin_logs_list"),
 
     # ADMIN – UNIDADE CURRICULAR
     path("admin-panel/uc/", views.admin_uc_list, name="admin_uc_list"),
@@ -55,6 +55,7 @@ urlpatterns = [
     path("admin-panel/turnos/create/", views.admin_turnos_create, name="admin_turnos_create"),
     path("admin-panel/turnos/<int:id>/edit/", views.admin_turnos_edit, name="admin_turnos_edit"),
     path("admin-panel/turnos/<int:id>/delete/", views.admin_turnos_delete, name="admin_turnos_delete"),
+    path("admin-panel/turnos/", views.admin_turnos_list, name="admin_turnos_list"),
 
     # HORARIOS ADMIN (AJUSTADO)
     path("admin-panel/horarios/", views.admin_horarios_list, name="admin_horarios_list"),

@@ -4,13 +4,15 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.shortcuts import redirect
 from huggingface_hub import logout
-from .models import AnoCurricular, UnidadeCurricular, Semestre, Docente, Curso, HorarioPDF, Aluno, TurnoUc, Turno, InscricaoTurno, InscritoUc
+from .models import AnoCurricular, UnidadeCurricular, Semestre, Docente, Curso, HorarioPDF, Aluno, TurnoUc, Turno, InscricaoTurno, InscritoUc, LogEvento
 from .db_views import UCMais4Ects, CadeirasSemestre, AlunosMatriculadosPorDia, AlunosPorOrdemAlfabetica, Turnos, Cursos
 from django.http import JsonResponse
 from .models import VwTopDocenteUcAnoCorrente
 from .models import VwAlunosInscricoes2025
 from django.contrib.auth.models import User
 from bd2_projeto.services.mongo_service import adicionar_log, listar_logs
+from core.utils import registar_log
+
 
 def index(request):
     return render(request, "di/index_di.html")
@@ -362,13 +364,15 @@ def admin_turnos_create(request):
         capacidade = request.POST.get("capacidade")
         tipo = request.POST.get("tipo")
 
-        Turnos.objects.create(
+        turno = Turnos.objects.create(
             n_turno=n_turno,
             capacidade=capacidade,
             tipo=tipo,
         )
+
+        registar_log(request, operacao="CREATE", entidade="turno", chave=str(turno.id_turno), detalhes=f"Turno criado: {turno.tipo} (nº {turno.n_turno})")
         messages.success(request, "Turno criado com sucesso!")
-        return redirect("admin_turnos_list")
+        return redirect("home:admin_turnos_list")
 
     return render(request, "admin/turnos_form.html")
 
@@ -381,6 +385,8 @@ def admin_turnos_edit(request, id):
         turno.tipo = request.POST.get("tipo")
         turno.save()
 
+        registar_log(request, operacao="UPDATE", entidade="turno", chave=str(turno.id_turno), detalhes=f"Turno atualizado: {turno.tipo} (nº {turno.n_turno})")
+
         messages.success(request, "Turno atualizado!")
         return redirect("admin_turnos_list")
 
@@ -389,6 +395,7 @@ def admin_turnos_edit(request, id):
 def admin_turnos_delete(request, id):
     turno = get_object_or_404(Turnos, id_turno=id)
     turno.delete()
+    registar_log(request, operacao="DELETE", entidade="turno", chave=str(turno.id_turno), detalhes=f"Turno apagado: {turno.tipo} (nº {turno.n_turno})")
     messages.success(request, "Turno apagado!")
     return redirect("admin_turnos_list")
 
@@ -673,10 +680,13 @@ def admin_uc_create(request):
         nome = request.POST.get("nome")
         ects = request.POST.get("ects")
 
-        UnidadeCurricular.objects.create(
+        uc = UnidadeCurricular.objects.create(
             nome=nome,
             ects=ects,
         )
+
+        registar_log( request, operacao="CREATE", entidade="unidade_curricular", chave=str(uc.id_unidadecurricular), detalhes=f"UC criada: {uc.nome}")
+
         messages.success(request, "Unidade Curricular criada com sucesso!")
         return redirect("home:admin_uc_list")
 
@@ -690,6 +700,8 @@ def admin_uc_edit(request, id):
         uc.ects = request.POST.get("ects")
         uc.save()
 
+        registar_log( request, operacao="UPDATE", entidade="unidade_curricular", chave=str(uc.id_unidadecurricular), detalhes=f"UC atualizada: {uc.nome}")
+
         messages.success(request, "Unidade Curricular atualizada!")
         return redirect("home:admin_uc_list")
 
@@ -698,14 +710,19 @@ def admin_uc_edit(request, id):
 def admin_uc_delete(request, id):
     uc = get_object_or_404(UnidadeCurricular, id_unidadecurricular=id)
     uc.delete()
+
+    registar_log( request, operacao="DELETE", entidade="unidade_curricular", chave=str(uc.id_unidadecurricular), detalhes=f"UC apagada: {uc.nome}")
     messages.success(request, "Unidade Curricular apagada!")
     return redirect("home:admin_uc_list")
 
 
 
-def admin_logs(request):
-    logs = listar_logs()
-    return render(request, "admin/logs_list.html", {"logs": logs})
+def admin_logs_list(request):
+    logs = LogEvento.objects.all()[:500]
+
+    return render(request, "admin/logs_list.html", {
+        "logs": logs
+    })
 
 # ==========================
 # Forum

@@ -206,3 +206,17 @@ class HorarioPDF(models.Model):
     def __str__(self):
         return f"{self.nome} ({self.atualizado_em.date()})"
     
+
+class LogEvento(models.Model):
+    id_log = models.AutoField(primary_key=True)
+    data_hora = models.DateTimeField()
+    operacao = models.CharField(max_length=255)
+    detalhes = models.TextField()
+    utilizador_db = models.CharField(max_length=255)
+    chave_primaria = models.CharField(max_length=255)
+    entidade = models.CharField(max_length=255)
+
+    class Meta:
+        managed = False
+        db_table = 'log_eventos'
+        ordering = ['-data_hora']
