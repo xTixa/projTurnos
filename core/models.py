@@ -205,7 +205,7 @@ class HorarioPDF(models.Model):
 
     def __str__(self):
         return f"{self.nome} ({self.atualizado_em.date()})"
-    
+
 
 class LogEvento(models.Model):
     id_log = models.AutoField(primary_key=True)

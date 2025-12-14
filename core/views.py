@@ -1,67 +1,81 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth import logout as auth_logout
+from django.contrib.auth import authenticate, login, logout as auth_logout
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.shortcuts import redirect
-from huggingface_hub import logout
 from .models import AnoCurricular, UnidadeCurricular, Semestre, Docente, Curso, HorarioPDF, Aluno, TurnoUc, Turno, InscricaoTurno, InscritoUc, LogEvento
-from .db_views import UCMais4Ects, CadeirasSemestre, AlunosMatriculadosPorDia, AlunosPorOrdemAlfabetica, Turnos, Cursos
+from .db_views import CadeirasSemestre, AlunosPorOrdemAlfabetica, Turnos, Cursos
 from django.http import JsonResponse
-from .models import VwTopDocenteUcAnoCorrente
-from .models import VwAlunosInscricoes2025
 from django.contrib.auth.models import User
 from bd2_projeto.services.mongo_service import adicionar_log, listar_logs
-from core.utils import registar_log
-
+from core.utils import registar_log, admin_required
 
 def index(request):
     return render(request, "di/index_di.html")
 
 def login_view(request):
     if request.method == "POST":
-        email = request.POST.get("username")
+        username_or_email = request.POST.get("username")
         password = request.POST.get("password")
 
-        # 1) Tentar autenticar ALUNO
-        try:
-            aluno = Aluno.objects.get(email=email)
+        # =========================
+        # 1️⃣ ADMIN (Django User)
+        # =========================
+        user = authenticate(
+            request,
+            username=username_or_email,
+            password=password
+        )
 
+        if user is not None:
+            login(request, user)
+
+            if user.is_staff:
+                return redirect("home:admin_dashboard")
+
+            return redirect("home:index")
+
+        # =========================
+        # 2️⃣ ALUNO
+        # =========================
+        try:
+            aluno = Aluno.objects.get(email=username_or_email)
             if aluno.password == password:
+                request.session.flush()  # limpa tudo
                 request.session["user_tipo"] = "aluno"
                 request.session["user_id"] = aluno.n_mecanografico
                 request.session["user_nome"] = aluno.nome
                 request.session["user_email"] = aluno.email
                 return redirect("home:index")
-            else:
-                messages.error(request, "Password incorreta.")
-                return redirect("home:login")
-
         except Aluno.DoesNotExist:
             pass
 
-        # 2) Tentar autenticar DOCENTE
+        # =========================
+        # 3️⃣ DOCENTE
+        # =========================
         try:
-            docente = Docente.objects.get(email=email)
-
-            if hasattr(docente, "password") and docente.password == password:
+            docente = Docente.objects.get(email=username_or_email)
+            if docente.password == password:
+                request.session.flush()
                 request.session["user_tipo"] = "docente"
                 request.session["user_id"] = docente.id_docente
                 request.session["user_nome"] = docente.nome
                 request.session["user_email"] = docente.email
                 return redirect("home:index")
-
-            else:
-                messages.error(request, "Password incorreta.")
-                return redirect("home:login")
-
         except Docente.DoesNotExist:
             pass
 
-        # Se não encontrou em lado nenhum
-        messages.error(request, "Utilizador não encontrado.")
+        messages.error(request, "Utilizador ou palavra-passe incorretos.")
         return redirect("home:login")
 
     return render(request, "auth/login.html")
+
+
+def do_logout(request):
+    auth_logout(request)  # Logout do Django
+    request.session.flush()  # Limpa as sessões personalizadas
+    return redirect("home:login")  # Redireciona para a página de login
+
 
 def ingresso(request):
     return render(request, "ei/ingresso.html", { "area": "ei" })
@@ -208,12 +222,11 @@ def informacoes(request):
 def perfil(request):
     return render(request, "profile/perfil.html")
 
-def do_logout(request):
-    auth_logout(request)                 # termina a sessão
-    return redirect("home:index")        # redireciona para a home
-
-@login_required
 def inscrever_turno(request, turno_id):
+    if request.session.get("user_tipo") != "aluno":
+        messages.error(request, "Sessão inválida.")
+        return redirect("home:login")
+    
     if request.method != "POST":
         messages.error(request, "Método inválido. Usa o botão para te inscreveres.")
         return redirect("home:perfil")
@@ -222,28 +235,12 @@ def inscrever_turno(request, turno_id):
     messages.success(request, f"Inscrição no turno #{turno_id} concluída com sucesso")
     return redirect("home:perfil")
 
-#ficha 12
-def uc_mais_4_ects(request):
-    data = list(
-        UCMais4Ects.objects
-        .order_by('id_anocurricular', 'id_semestre', 'nome')
-        .values('id_unidadecurricular', 'nome', 'ects', 'id_anocurricular', 'id_semestre')
-    )
-    return JsonResponse(data, safe=False)
 
 def cadeiras_semestre(request):
     data = list(
         CadeirasSemestre.objects
         .order_by('semestre_id', 'nome')
         .values('id_unidadecurricular', 'nome', 'ects', 'semestre_id', 'semestre_nome')
-    )
-    return JsonResponse(data, safe=False)
-
-def alunos_matriculados_por_dia(request):
-    data = list(
-        AlunosMatriculadosPorDia.objects
-        .order_by('ano_matricula', 'dia_matricula', 'nome')
-        .values('id_matricula', 'n_mecanografico', 'nome', 'email', 'estado', 'data_matricula', 'dia_matricula', 'ano_matricula')
     )
     return JsonResponse(data, safe=False)
 
@@ -271,34 +268,8 @@ def cursos_list(request):
     )
     return JsonResponse(data, safe=False)
 
-
-def top_docente_uc_ano_corrente(request):
-    data = list(
-        VwTopDocenteUcAnoCorrente.objects
-        .all()
-        .values('id_docente', 'nome', 'email', 'total_ucs')
-    )
-    return JsonResponse(data, safe=False)
-
-def alunos_inscricoes_2025(request):
-    data = list(
-        VwAlunosInscricoes2025.objects
-        .all()
-        .values(
-            'id_inscricao',
-            'data_inscricao',
-            'n_mecanografico',
-            'aluno_nome',
-            'aluno_email',
-            'id_unidadecurricular',
-            'uc_nome',
-            'id_turno'
-        )
-    )
-    return JsonResponse(data, safe=False)
-
-
 # Dashboard
+@admin_required
 def admin_dashboard(request):
     total_users = User.objects.count()
     total_turnos = Turnos.objects.count()
@@ -465,10 +436,6 @@ def admin_users_alunos(request):
         "titulo": "Alunos",
         "users": alunos
     })
-
-def admin_logout(request):
-    logout(request)
-    return redirect("home:admin_login")
 
 def testar_mongo(request):
     # Adicionar um log no MongoDB

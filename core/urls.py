@@ -23,7 +23,6 @@ urlpatterns = [
 
     # Painel Admin
     path("admin-panel/", views.admin_dashboard, name="admin_dashboard"),
-    path("admin-panel/logout/", views.admin_logout, name="admin_logout"),
     path("admin-panel/logs/", views.admin_logs_list, name="admin_logs_list"),
 
     # ADMIN – UNIDADE CURRICULAR
@@ -64,14 +63,10 @@ urlpatterns = [
     path("admin-panel/horarios/<int:id>/apagar/", views.admin_horarios_delete, name="admin_horarios_delete"),
 
     #ficha 12
-    path("4etcs/", views.uc_mais_4_ects, name="uc_mais_4_ects"),
     path("cadeiras_semestre/", views.cadeiras_semestre, name="cadeiras_semestre"),
-    path("vw_alunos_matriculas_por_dia/", views.alunos_matriculados_por_dia, name="vw_alunos_matriculados_por_dia"),
     path("vw_alunos_por_ordem_alfabetica/", views.alunos_por_ordem_alfabetica, name="vw_alunos_por_ordem_alfabetica"),
     path("turnos_list/", views.turnos_list, name="turnos_list"),
     path("cursos_list/", views.cursos_list, name="cursos_list"),
-    path("top_docente_uc_ano_corrente/", views.top_docente_uc_ano_corrente, name="top_docente_uc_ano_corrente"),
-    path("alunos_inscricoes_2025/", views.alunos_inscricoes_2025, name="alunos_inscricoes_2025"),
 
     # MONGO TESTE
     path("testar-mongo/", testar_mongo, name="testar_mongo"),
