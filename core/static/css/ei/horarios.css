@@ -1,185 +1,157 @@
-/* ===== HORÁRIOS ===== */
+/* =========================
+   HORÁRIOS — EI
+   ========================= */
+
 .horarios-hero {
   background: linear-gradient(135deg, #eaf4ff, #ffffff);
-  border-radius: 16px;
-  padding: 30px;
-  margin-bottom: 20px;
+  border-radius: 18px;
+  padding: 40px;
   box-shadow: var(--shadow);
 }
+
+.horarios-inner {
+  max-width: 900px;
+}
+
 .horarios-hero h1 {
+  color: var(--blue);
+  margin-bottom: 6px;
+}
+
+.horarios-hero p {
+  color: #475569;
+}
+
+/* =========================
+   BOTÃO INSCRIÇÃO TURNOS
+   ========================= */
+
+.inscricao-btn-wrapper {
+  margin: 24px 0 14px 0;
+}
+
+.btn-inscricao {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: linear-gradient(135deg, var(--blue), #1e40af);
+  color: white;
+  padding: 12px 20px;
+  border-radius: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  box-shadow: var(--shadow);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.btn-inscricao:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+  color: white;
+}
+
+/* =========================
+   ABAS
+   ========================= */
+
+.horarios-tabs {
+  margin-top: 30px;
+  border-bottom: none;
+  display: flex;
+  gap: 14px;
+  list-style: none;
+  padding-left: 0;
+  margin-bottom: 0;
+}
+
+.horarios-tabs li {
+  list-style: none;
+}
+
+.horarios-tabs .nav-link {
+  border: none;
+  background: #f1f5f9;
+  padding: 10px 20px;
+  border-radius: 999px;
+  font-weight: 600;
+  color: #475569;
+  transition: all 0.2s ease;
+}
+
+.horarios-tabs .nav-link:hover {
+  background: #e0e7ff;
   color: var(--blue);
 }
 
-.horarios-tabela table {
-  width: 100%;
-  border-collapse: collapse;
-  box-shadow: var(--shadow);
-  border-radius: 10px;
-  overflow: hidden;
-}
-.horarios-tabela th {
+.horarios-tabs .nav-link.active {
   background: var(--blue);
   color: white;
-  text-align: left;
-  padding: 10px;
-}
-.horarios-tabela td {
-  padding: 10px;
-  border-bottom: 1px solid var(--border);
-}
-.horarios-tabela tr:nth-child(even) {
-  background: #f9fafb;
-}
-.horarios-tabela tr.conflito {
-  background: #fee2e2;
-  color: #b91c1c;
-  font-weight: 600;
+  box-shadow: 0 6px 14px rgba(37,99,235,0.25);
 }
 
-/* ===== INSCRIÇÕES EM TURNOS ===== */
-.turno-header {
-  background: linear-gradient(135deg, #eaf4ff, #ffffff);
-  border-radius: 16px; padding: 30px; margin-bottom: 30px;
-  box-shadow: var(--shadow);
-}
-.turno-header h1 { color: var(--blue); margin-bottom: 8px; }
-/* ============================
-   INSCRIÇÃO EM TURNOS — ESTILOS
-   ============================ */
+/* =========================
+   CONTEÚDO DAS ABAS
+   ========================= */
 
-.turnos-lista {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 25px;
-    margin-bottom: 40px;
-}
-
-.uc-card {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-}
-
-.uc-card h3 {
-    font-size: 20px;
-    color: var(--blue);
-    margin-bottom: 5px;
-}
-
-/* Seletores de turnos */
-.uc-turnos {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    flex-wrap: wrap;
-}
-
-.turno-select {
-    padding: 10px 14px;
-    border-radius: 10px;
-    border: 1px solid var(--border);
-    font-size: 15px;
-    min-width: 250px;
-    background: #f9fafb;
-    transition: border 0.2s ease, box-shadow 0.2s ease;
-}
-
-.turno-select:focus {
-    border-color: var(--blue);
-    box-shadow: 0 0 0 3px rgba(37,99,235,0.2);
-}
-
-/* ===== HORÁRIO PERSONALIZADO ===== */
-.horario-wrapper {
+.horarios-content {
   margin-top: 30px;
-  padding: 20px;
-  border: 1px solid var(--border);
-  border-radius: 12px;
+}
+
+.horario-card {
   background: white;
+  border-radius: 16px;
+  padding: 30px;
   box-shadow: var(--shadow);
+  animation: fadeIn 0.25s ease;
 }
 
-.tabela-horario {
-  width: 100%;
-  border-collapse: collapse;
-  text-align: center;
-  font-size: 14px;
+.horario-card.empty {
+  background: #f8fafc;
+  border: 1px dashed var(--border);
 }
 
-.tabela-horario th {
-  padding: 10px;
-  background: var(--blue);
-  color: white;
-  position: sticky;
-  top: 0;
+/* =========================
+   BOTÕES
+   ========================= */
+
+.horario-actions {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
 }
 
-.tabela-horario td {
-  border: 1px solid #d3d3d3;
-  height: 60px;
-  vertical-align: middle;
-}
-
-.slot-ocupado {
-  background: #dbeafe;
+.horario-actions .btn {
+  padding: 12px 18px;
   font-weight: 600;
-  color: #1e3a8a;
+  border-radius: 12px;
 }
 
-.export-btn {
-  margin-top: 20px;
-  padding: 12px 20px;
-  background: #dc2626;
-  color: white;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 16px;
-  box-shadow: var(--shadow);
+/* =========================
+   BOOTSTRAP TABS — FIX
+   ========================= */
+
+/* Esconde todas as abas */
+.tab-pane {
+  display: none;
 }
 
-.export-btn:hover {
-  background: #b91c1c;
+/* Mostra apenas a aba ativa */
+.tab-pane.active,
+.tab-pane.show {
+  display: block;
 }
 
-.inscricao-btn-wrapper {
-    margin: 20px 0;
-    text-align: left;
-}
+/* =========================
+   ANIMAÇÃO
+   ========================= */
 
-/* Botão Inscrever */
-.btn-inscrever {
-    background: var(--blue);
-    color: white;
-    padding: 10px 16px;
-    border-radius: 10px;
-    border: none;
-    cursor: pointer;
-    font-weight: 600;
-    transition: background .2s ease, transform .1s ease;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    box-shadow: var(--shadow);
-}
-
-.btn-inscrever:hover {
-    background: #1e40af;
-    transform: translateY(-2px);
-}
-
-.btn-inscrever:disabled {
-    background: #9ca3af;
-    cursor: not-allowed;
-}
-
-/* Badge de vagas */
-.option-vagas {
-    font-weight: 600;
-    color: var(--blue);
-}
-
-.option-esgotado {
-    color: #b91c1c;
-    font-weight: 600;
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }

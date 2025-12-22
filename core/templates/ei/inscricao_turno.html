@@ -7,52 +7,66 @@
 {% endblock %}
 
 {% block content %}
+
 <section class="turno-header">
-  <h1>Inscrição em Turnos</h1>
-  <p>Seleciona a unidade curricular e o turno que pretendes frequentar.  
-     As vagas são atualizadas em tempo real.</p>
+    <h1>Inscrição em Turnos</h1>
+    <p>
+        Seleciona a unidade curricular e o turno que pretendes frequentar.
+        As vagas são atualizadas em tempo real.
+    </p>
 </section>
 
 <section class="turnos-lista">
-  {% for uc in unidades %}
-  <div class="uc-card">
-    <h3>{{ uc.nome }}</h3>
-    <div class="uc-turnos">
-      <label for="turno{{ forloop.counter }}">Selecionar Turno:</label>
-      <select id="turno{{ forloop.counter }}" class="turno-select">
-          <option disabled selected>Escolhe um turno...</option>
 
-          {% for t in uc.turnos %}
-          <option 
-              value="{{ t.id }}" 
-              {% if t.vagas == 0 %}disabled{% endif %}
-              class="{% if t.vagas == 0 %}option-esgotado{% else %}option-vagas{% endif %}"
-          >
-              {{ t.nome }}
-              — {{ t.horario }}
-              —
-              {% if t.vagas == 0 %}
-                  Esgotado
-              {% else %}
-                  {{ t.vagas }} vaga{{ t.vagas|pluralize:"s" }}
-              {% endif %}
-          </option>
-          {% endfor %}
-      </select>
+    {% for uc in unidades %}
+    <div class="uc-card">
 
-      <button class="btn btn-primary btn-inscrever" {% if uc.turnos|length == 0 %}disabled{% endif %}>
-        <i class="fa-solid fa-check"></i> Inscrever
-      </button>
+        <h3>{{ uc.nome }}</h3>
+
+        <!-- FORMULÁRIO POR UC -->
+        <form method="POST"
+              action="{% url 'home:inscrever_turno' 0 %}"
+              class="uc-turnos"
+              onsubmit="this.action=this.action.replace('/0/', '/' + this.turno.value + '/');">
+
+            {% csrf_token %}
+
+            <label for="turno{{ forloop.counter }}">Selecionar Turno:</label>
+
+            <select name="turno"
+                    id="turno{{ forloop.counter }}"
+                    class="turno-select"
+                    required>
+
+                <option value="" disabled selected>Escolhe um turno...</option>
+
+                {% for t in uc.turnos %}
+                <option value="{{ t.id }}"
+                        {% if t.vagas == 0 %}disabled{% endif %}
+                        class="{% if t.vagas == 0 %}option-esgotado{% else %}option-vagas{% endif %}">
+                    {{ t.nome }} — {{ t.horario }} —
+                    {% if t.vagas == 0 %}
+                        Esgotado
+                    {% else %}
+                        {{ t.vagas }} vaga{{ t.vagas|pluralize:"s" }}
+                    {% endif %}
+                </option>
+                {% endfor %}
+
+            </select>
+
+            <button type="submit"
+                    class="btn btn-primary btn-inscrever"
+                    {% if uc.turnos|length == 0 %}disabled{% endif %}>
+                <i class="fa-solid fa-check"></i> Inscrever
+            </button>
+
+        </form>
+
     </div>
-  </div>
-  {% endfor %}
-</section>
+    {% endfor %}
 
-<!-- Mensagem de sucesso -->
-<div id="mensagem" class="mensagem hidden">
-  <i class="fa-solid fa-circle-check"></i>
-  Inscrição efetuada com sucesso!
-</div>
+</section>
 
 <h2>O teu horário</h2>
 
@@ -74,7 +88,6 @@
         {% for hora in horas %}
         <tr>
             <td>{{ hora }}</td>
-
             {% for dia in dias %}
             <td id="{{ dia }}-{{ hora }}" class="slot"></td>
             {% endfor %}
@@ -94,85 +107,26 @@
 {% endblock %}
 
 {% block extra_scripts %}
+
 <script src="{% static 'js/inscricao_turno.js' %}"></script>
-
-<script>
-function adicionarAulaGrupo(dia, horaInicio, horaFim, uc) {
-
-    const [hIni, mIni] = horaInicio.split(":").map(Number);
-    const [hFim, mFim] = horaFim.split(":").map(Number);
-
-    const inicioMin = hIni * 60 + mIni;
-    const fimMin = hFim * 60 + mFim;
-
-    let primeiraCell = null;
-    let rowspanCount = 0;
-
-    for (let t = inicioMin; t < fimMin; t += 30) {
-        const hora = String(Math.floor(t / 60)).padStart(2, "0");
-        const minuto = String(t % 60).padStart(2, "0");
-        const cellId = `${dia}-${hora}:${minuto}`;
-        const cell = document.getElementById(cellId);
-
-        if (!cell) continue;
-
-        if (!primeiraCell) {
-            primeiraCell = cell;
-        } else {
-            cell.remove();
-        }
-
-        rowspanCount += 1;
-    }
-
-    if (primeiraCell) {
-        primeiraCell.innerHTML = `<strong>${uc}</strong>`;
-        primeiraCell.classList.add("slot-ocupado");
-        primeiraCell.style.verticalAlign = "middle";
-        primeiraCell.rowSpan = rowspanCount;   // <-- CORRETO
-    }
-}
-
-</script>
-
-
-<script>
-document.addEventListener("DOMContentLoaded", () => {
-
-    // AM → Segunda e Terça, 16h–18h (2 horas)
-    adicionarAulaGrupo("Segunda", "16:00", "18:00", "AM");
-    adicionarAulaGrupo("Terça", "16:00", "18:00", "AM");
-
-    // Base de Dados 2 → Quarta, 09h–13h (4 horas)
-    adicionarAulaGrupo("Quarta", "09:00", "13:00", "Base de Dados 2");
-
-});
-</script>
-
-
 
 <script>
 document.getElementById("exportPDF").addEventListener("click", async () => {
     const { jsPDF } = window.jspdf;
-
     const container = document.getElementById("horarioContainer");
 
-    // Renderiza o horário como imagem
     const canvas = await html2canvas(container, {
         scale: 3,
         backgroundColor: "#FFFFFF",
     });
 
     const imgData = canvas.toDataURL("image/png");
-
-    // Cria PDF A4
     const pdf = new jsPDF("p", "mm", "a4");
 
     const pdfWidth = pdf.internal.pageSize.getWidth();
     const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
 
     pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
-
     pdf.save("horario_personalizado.pdf");
 });
 </script>

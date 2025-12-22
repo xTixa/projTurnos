@@ -7,7 +7,6 @@
 # Feel free to rename the models, but don't rename db_table values or field names.
 from django.db import models
 
-
 class Aluno(models.Model):
     n_mecanografico = models.IntegerField(primary_key=True)
     id_curso = models.ForeignKey('Curso', models.DO_NOTHING, db_column='id_curso')
@@ -19,7 +18,6 @@ class Aluno(models.Model):
     class Meta:
         managed = False
         db_table = 'aluno'
-
 
 class AnoCurricular(models.Model):
     id_anocurricular = models.AutoField(primary_key=True)
@@ -69,6 +67,18 @@ class Horario(models.Model):
         managed = False
         db_table = 'horario'
 
+class HorarioPDF(models.Model):
+    nome = models.CharField(max_length=200, default="Horário Oficial")
+    ficheiro = models.FileField(upload_to="horarios/")
+    id_anocurricular = models.ForeignKey(
+        AnoCurricular,
+        models.DO_NOTHING,
+        db_column="id_anocurricular"
+    )
+    atualizado_em = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.nome} - {self.id_anocurricular.ano_curricular}"
 
 class InscricaoTurno(models.Model):
     id_inscricao = models.AutoField(primary_key=True)
@@ -196,16 +206,6 @@ class VwAlunosInscricoes2025(models.Model):
     class Meta:
         managed = False
         db_table = 'vw_alunos_inscricoes_2025'
-
-
-class HorarioPDF(models.Model):
-    nome = models.CharField(max_length=200, default="Horário Oficial")
-    ficheiro = models.FileField(upload_to="horarios/")
-    atualizado_em = models.DateTimeField(auto_now=True)
-
-    def __str__(self):
-        return f"{self.nome} ({self.atualizado_em.date()})"
-
 
 class LogEvento(models.Model):
     id_log = models.AutoField(primary_key=True)

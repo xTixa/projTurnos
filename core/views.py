@@ -19,7 +19,7 @@ def login_view(request):
         password = request.POST.get("password")
 
         # =========================
-        # 1️⃣ ADMIN (Django User)
+        # ADMIN (Django User)
         # =========================
         user = authenticate(
             request,
@@ -36,7 +36,7 @@ def login_view(request):
             return redirect("home:index")
 
         # =========================
-        # 2️⃣ ALUNO
+        #  ALUNO
         # =========================
         try:
             aluno = Aluno.objects.get(email=username_or_email)
@@ -51,7 +51,7 @@ def login_view(request):
             pass
 
         # =========================
-        # 3️⃣ DOCENTE
+        # DOCENTE
         # =========================
         try:
             docente = Docente.objects.get(email=username_or_email)
@@ -100,32 +100,22 @@ def plano_curricular(request):
     return render(request, "ei/plano_curricular.html", {"plano": plano, "area": "ei"})
 
 def horarios(request):
-    horarios = {
-        "1º Ano": [
-            {"dia": "Segunda", "hora": "08:30 - 10:00", "uc": "Programação I", "sala": "Lab 1", "turno": "TP A"},
-            {"dia": "Terça", "hora": "10:00 - 11:30", "uc": "Matemática Discreta", "sala": "A1.2", "turno": "T"},
-            {"dia": "Quinta", "hora": "09:00 - 10:30", "uc": "Bases de Dados I", "sala": "A2.1", "turno": "T"},
-        ],
-        "2º Ano": [
-            {"dia": "Segunda", "hora": "14:00 - 15:30", "uc": "Programação para Dispositivos Móveis", "sala": "Lab 2", "turno": "TP"},
-            {"dia": "Quarta", "hora": "09:00 - 10:30", "uc": "Engenharia de Software", "sala": "A3.2", "turno": "T"},
-        ],
-        "3º Ano": [
-            {"dia": "Terça", "hora": "08:30 - 10:00", "uc": "Sistemas Distribuídos", "sala": "Lab 5", "turno": "TP"},
-            {"dia": "Sexta", "hora": "10:30 - 12:00", "uc": "Inteligência Artificial", "sala": "A4.1", "turno": "T"},
-        ]
-    }
+    anos = AnoCurricular.objects.all().order_by("id_anocurricular")
 
-    # Marcar conflitos dentro de cada ano
-    for ano, lista in horarios.items():
-        for i, h in enumerate(lista):
-            h["conflito"] = any(
-                i != j and h["dia"] == o["dia"] and h["hora"] == o["hora"]
-                for j, o in enumerate(lista)
-            )
+    horarios_por_ano = []
 
-    return render(request, "ei/horarios.html", {"horarios_por_ano": horarios, "area": "ei"})
+    for ano in anos:
+        pdf = (HorarioPDF.objects.filter(id_anocurricular=ano).order_by("-atualizado_em").first())
 
+        horarios_por_ano.append({
+            "ano": ano,
+            "pdf": pdf
+        })
+
+    return render(request, "ei/horarios.html", {
+        "horarios_por_ano": horarios_por_ano,
+        "area": "ei"
+    })
 
 def avaliacoes(request):
     avaliacoes_docs = [
@@ -150,7 +140,6 @@ def contactos(request):
 
 
 def inscricao_turno(request):
-
     # --- 1) Obter aluno autenticado ---
     if "user_tipo" not in request.session or request.session["user_tipo"] != "aluno":
         messages.error(request, "É necessário iniciar sessão como aluno.")
@@ -185,7 +174,7 @@ def inscricao_turno(request):
                 vagas = 0
 
             turnos.append({
-                "id": turno.id_turno,
+                "id": r.id_turno_uc,
                 "nome": f"T{turno.n_turno}",
                 "tipo": turno.tipo,
                 "capacidade": turno.capacidade,
@@ -208,6 +197,7 @@ def inscricao_turno(request):
     ]
 
     dias = ["Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado", "Domingo"]
+    print("UCS:", lista_uc)
 
     return render(request, "ei/inscricao_turno.html", {
         "unidades": lista_uc,
@@ -222,18 +212,52 @@ def informacoes(request):
 def perfil(request):
     return render(request, "profile/perfil.html")
 
+@login_required
 def inscrever_turno(request, turno_id):
-    if request.session.get("user_tipo") != "aluno":
-        messages.error(request, "Sessão inválida.")
-        return redirect("home:login")
-    
-    if request.method != "POST":
-        messages.error(request, "Método inválido. Usa o botão para te inscreveres.")
-        return redirect("home:perfil")
 
-    # (futuro) lógica real de BD; por agora só feedback
-    messages.success(request, f"Inscrição no turno #{turno_id} concluída com sucesso")
-    return redirect("home:perfil")
+    if "user_tipo" not in request.session or request.session["user_tipo"] != "aluno":
+        messages.error(request, "Apenas alunos se podem inscrever em turnos.")
+        return redirect("home:login")
+
+    aluno = Aluno.objects.get(n_mecanografico=request.session["user_id"])
+
+    # Turno UC (relação UC ↔ Turno)
+    turno_uc = get_object_or_404(TurnoUc, id_turno_uc=turno_id)
+
+    # Verificar se o aluno está inscrito nessa UC
+    inscrito = InscritoUc.objects.filter(
+        n_mecanografico=aluno,
+        id_unidadecurricular=turno_uc.id_unidadecurricular,
+        estado=True
+    ).exists()
+
+    if not inscrito:
+        messages.error(request, "Não estás inscrito nesta UC.")
+        return redirect("home:inscricao_turno")
+
+    # Verificar se já está inscrito nesse turno
+    if InscricaoTurno.objects.filter(
+        n_mecanografico=aluno,
+        id_turno=turno_uc
+    ).exists():
+        messages.warning(request, "Já estás inscrito neste turno.")
+        return redirect("home:inscricao_turno")
+
+    #Verificar vagas
+    ocupados = InscricaoTurno.objects.filter(id_turno=turno_uc).count()
+    if ocupados >= turno_uc.id_turno.capacidade:
+        messages.error(request, "Este turno já está cheio.")
+        return redirect("home:inscricao_turno")
+
+    # Inscrever
+    InscricaoTurno.objects.create(
+        n_mecanografico=aluno,
+        id_turno=turno_uc
+    )
+
+    messages.success(request, "Inscrição no turno efetuada com sucesso!")
+    return redirect("home:inscricao_turno")
+
 
 
 def cadeiras_semestre(request):
@@ -378,6 +402,7 @@ def admin_horarios_create(request):
     if request.method == "POST":
         nome = request.POST.get("nome")
         ficheiro = request.FILES.get("ficheiro")
+        ano_id = request.POST.get("id_anocurricular")
 
         if not ficheiro:
             messages.error(request, "É necessário enviar um ficheiro PDF.")
@@ -385,7 +410,8 @@ def admin_horarios_create(request):
 
         HorarioPDF.objects.create(
             nome=nome,
-            ficheiro=ficheiro
+            ficheiro=ficheiro,
+            id_anocurricular_id=ano_id
         )
 
         messages.success(request, "Horário carregado com sucesso!")
