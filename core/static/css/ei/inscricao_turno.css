@@ -238,3 +238,36 @@ h2 {
   background: #be123c;
   transform: translateY(-2px);
 }
+
+
+.tabela-horario td.ocupado {
+    background-color: #4A90E2;
+    color: white;
+    font-weight: bold;
+    vertical-align: top;
+    padding: 8px;
+}
+
+.aula-bloco {
+    text-align: center;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.aula-bloco strong {
+    font-size: 0.9em;
+    margin-bottom: 4px;
+}
+
+.aula-bloco span {
+    font-size: 0.8em;
+    opacity: 0.9;
+}
+
+.aula-bloco small {
+    font-size: 0.7em;
+    margin-top: 4px;
+    opacity: 0.8;
+}

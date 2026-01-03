@@ -1,3 +1,13 @@
+function adicionarAula(dia, hora, uc) {
+    const cellId = `${dia}-${hora}`;  // ex.: "Segunda-09:00"
+    const cell = document.getElementById(cellId);
+    if (!cell) {
+        console.warn("Célula não encontrada:", cellId);
+        return;
+    }
+    cell.textContent = uc;
+}
+
 document.addEventListener("DOMContentLoaded", () => {
     const cards = document.querySelectorAll(".uc-card");
 
@@ -5,28 +15,31 @@ document.addEventListener("DOMContentLoaded", () => {
         const select = card.querySelector(".turno-select");
         const button = card.querySelector(".btn-inscrever");
 
-        button.addEventListener("click", () => {
-            const valorEscolhido = select.value;
+        if (!select || !button) return;
 
-            if (!valorEscolhido || valorEscolhido.startsWith("Escolhe")) {
+        button.addEventListener("click", (e) => {
+            e.preventDefault();  // não submeter já
+
+            const option = select.selectedOptions[0];
+
+            if (!option || !option.value) {
                 alert("Escolhe um turno primeiro!");
                 return;
             }
 
-            // "T1 — Segunda 09:00 (25 vagas)"
-            const [turnoNome, resto] = valorEscolhido.split("—");
-            const [dia, horaRaw] = resto.trim().split(" ");
-            const hora = horaRaw.replace("(", "").trim();
-
+            const dia = option.dataset.dia;
+            const hora = option.dataset.hora;
             const uc = card.querySelector("h3").innerText;
 
-            // Preenche a célula correspondente
+            if (!dia || !hora) {
+                console.warn("Falta dia ou hora no option selecionado", option);
+                return;
+            }
+
             adicionarAula(dia, hora, uc);
 
-            // Mostra mensagem de sucesso
-            const mensagem = document.getElementById("mensagem");
-            mensagem.classList.remove("hidden");
-            setTimeout(() => mensagem.classList.add("hidden"), 2000);
+            // depois de desenhar no horário, submeter o form
+            card.querySelector("form").submit();
         });
     });
 });

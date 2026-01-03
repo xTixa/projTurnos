@@ -41,21 +41,21 @@
                 <option value="" disabled selected>Escolhe um turno...</option>
 
                 {% for t in uc.turnos %}
-                <option value="{{ t.id }}"
-                        {% if t.vagas == 0 or t.ja_inscrito %}disabled{% endif %}
-                        class="{% if t.ja_inscrito %}option-inscrito{% elif t.vagas == 0 %}option-esgotado{% else %}option-vagas{% endif %}"
-                        data-vagas="{{ t.vagas }}">
-                    {{ t.nome }} — {{ t.horario }} —
-                    {% if t.ja_inscrito %}
-                        ✓ Já inscrito
-                    {% elif t.vagas == 0 %}
-                        Esgotado
-                    {% else %}
-                        {{ t.vagas }} vaga{{ t.vagas|pluralize:"s" }}
-                    {% endif %}
-                </option>
+                    <option value="{{ t.id }}"
+                            {% if t.vagas == 0 or t.ja_inscrito %}disabled{% endif %}
+                            class="{% if t.ja_inscrito %}option-inscrito{% elif t.vagas == 0 %}option-esgotado{% else %}option-vagas{% endif %}"
+                            data-dia="{{ t.dia }}"
+                            data-hora="{{ t.hora_inicio }}">
+                        {{ t.nome }} — {{ t.horario }} —
+                        {% if t.ja_inscrito %}
+                            ✓ Já inscrito
+                        {% elif t.vagas == 0 %}
+                            Esgotado
+                        {% else %}
+                            {{ t.vagas }} vaga{{ t.vagas|pluralize:"s" }}
+                        {% endif %}
+                    </option>
                 {% endfor %}
-
             </select>
 
             <button type="submit"
@@ -130,6 +130,53 @@
 <script src="{% static 'js/inscricao_turno.js' %}"></script>
 
 <script>
+// Dados dos turnos inscritos vindos do Django
+const turnosInscritos = {{ turnos_horario|safe }};
+
+console.log("Turnos inscritos:", turnosInscritos);
+
+// Preencher o horário
+turnosInscritos.forEach(aula => {
+    const { uc_nome, turno_nome, tipo, dia, hora_inicio, hora_fim } = aula;
+    
+    // Calcular quantas células (slots de 30min) a aula ocupa
+    const [hi_h, hi_m] = hora_inicio.split(':').map(Number);
+    const [hf_h, hf_m] = hora_fim.split(':').map(Number);
+    
+    const inicio_minutos = hi_h * 60 + hi_m;
+    const fim_minutos = hf_h * 60 + hf_m;
+    const duracao_slots = (fim_minutos - inicio_minutos) / 30;
+    
+    // Encontrar a célula inicial
+    const celula = document.getElementById(`${dia}-${hora_inicio}`);
+    
+    if (celula) {
+        celula.innerHTML = `
+            <div class="aula-bloco">
+                <strong>${uc_nome}</strong><br>
+                <span>${turno_nome} (${tipo})</span><br>
+                <small>${hora_inicio} - ${hora_fim}</small>
+            </div>
+        `;
+        celula.classList.add('ocupado');
+        celula.rowSpan = duracao_slots;
+        
+        // Remover células seguintes que serão ocupadas pelo rowspan
+        let proxima = celula.nextElementSibling;
+        for (let i = 1; i < duracao_slots; i++) {
+            if (proxima) {
+                const proximaLinha = celula.parentElement.nextElementSibling;
+                if (proximaLinha) {
+                    const colIndex = Array.from(celula.parentElement.children).indexOf(celula);
+                    const celulaRemover = proximaLinha.children[colIndex];
+                    if (celulaRemover) celulaRemover.remove();
+                }
+            }
+        }
+    }
+});
+
+// Exportar PDF
 document.getElementById("exportPDF").addEventListener("click", async () => {
     const { jsPDF } = window.jspdf;
     const container = document.getElementById("horarioContainer");

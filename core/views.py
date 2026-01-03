@@ -148,13 +148,13 @@ def inscricao_turno(request):
     n_meca = request.session["user_id"]
     aluno = Aluno.objects.get(n_mecanografico=n_meca)
 
-    # --- Obter turnos em que o aluno já está inscrito ---
     inscricoes_turno = InscricaoTurno.objects.filter(n_mecanografico=aluno).values_list('id_turno_id', flat=True)
     turnos_inscritos = set(inscricoes_turno)
 
-    inscricoes = InscritoUc.objects.filter( n_mecanografico=aluno, estado=True).values('id_unidadecurricular')
+    inscricoes = InscritoUc.objects.filter(n_mecanografico=aluno, estado=True).values('id_unidadecurricular')
 
     lista_uc = []
+    turnos_no_horario = []  # NOVA LISTA para o horário
 
     for inscricao in inscricoes:
         uc_id = inscricao['id_unidadecurricular']
@@ -165,23 +165,55 @@ def inscricao_turno(request):
         turnos = []
         for r in relacoes:
             turno = r.id_turno
+
             ocupados = InscricaoTurno.objects.filter(id_turno=turno).count()
             vagas = turno.capacidade - ocupados
             if vagas < 0:
                 vagas = 0
 
-            # Verificar se aluno já está inscrito neste turno
             ja_inscrito = turno.id_turno in turnos_inscritos
 
-            turnos.append({
+            hora_inicio_str = r.hora_inicio.strftime("%H:%M")
+            hora_fim_str = r.hora_fim.strftime("%H:%M")
+
+            # Mapear dia da semana
+            h_int = int(hora_inicio_str.split(":")[0])
+            if 8 <= h_int < 10:
+                dia_semana = "Segunda"
+            elif 10 <= h_int < 12:
+                dia_semana = "Terça"
+            elif 12 <= h_int < 14:
+                dia_semana = "Quarta"
+            elif 14 <= h_int < 16:
+                dia_semana = "Quinta"
+            else:
+                dia_semana = "Sexta"
+
+            turno_info = {
                 "id": turno.id_turno,
                 "nome": f"T{turno.n_turno}",
                 "tipo": turno.tipo,
                 "capacidade": turno.capacidade,
                 "vagas": vagas,
-                "horario": "A definir",
-                "ja_inscrito": ja_inscrito
-            })
+                "horario": f"{dia_semana} {hora_inicio_str}-{hora_fim_str}",
+                "ja_inscrito": ja_inscrito,
+                "dia": dia_semana,
+                "hora_inicio": hora_inicio_str,
+                "hora_fim": hora_fim_str,
+            }
+            
+            turnos.append(turno_info)
+            
+            # Se o aluno está inscrito, adiciona à lista do horário
+            if ja_inscrito:
+                turnos_no_horario.append({
+                    "uc_nome": uc.nome,
+                    "turno_nome": f"T{turno.n_turno}",
+                    "tipo": turno.tipo,
+                    "dia": dia_semana,
+                    "hora_inicio": hora_inicio_str,
+                    "hora_fim": hora_fim_str,
+                })
 
         lista_uc.append({
             "id": uc.id_unidadecurricular,
@@ -189,7 +221,6 @@ def inscricao_turno(request):
             "turnos": turnos,
         })
 
-    # --- Horário e dias ---
     horas = [
         "08:00","08:30","09:00","09:30","10:00","10:30","11:00","11:30",
         "12:00","12:30","13:00","13:30","14:00","14:30","15:00","15:30",
@@ -203,6 +234,7 @@ def inscricao_turno(request):
         "unidades": lista_uc,
         "horas": horas,
         "dias": dias,
+        "turnos_horario": turnos_no_horario,  # PASSA OS TURNOS INSCRITOS
         "area": "ei"
     })
 
