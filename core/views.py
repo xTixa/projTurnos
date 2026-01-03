@@ -1,3 +1,4 @@
+from datetime import datetime
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout as auth_logout
 from django.contrib.auth.decorators import login_required
@@ -140,7 +141,6 @@ def contactos(request):
 
 
 def inscricao_turno(request):
-    # --- 1) Obter aluno autenticado ---
     if "user_tipo" not in request.session or request.session["user_tipo"] != "aluno":
         messages.error(request, "É necessário iniciar sessão como aluno.")
         return redirect("home:login")
@@ -148,11 +148,11 @@ def inscricao_turno(request):
     n_meca = request.session["user_id"]
     aluno = Aluno.objects.get(n_mecanografico=n_meca)
 
-    # --- 2) Buscar APENAS as UCs em que o aluno está inscrito ---
-    inscricoes = InscritoUc.objects.filter(
-        n_mecanografico=aluno,
-        estado=True
-    ).values('id_unidadecurricular')
+    # --- Obter turnos em que o aluno já está inscrito ---
+    inscricoes_turno = InscricaoTurno.objects.filter(n_mecanografico=aluno).values_list('id_turno_id', flat=True)
+    turnos_inscritos = set(inscricoes_turno)
+
+    inscricoes = InscritoUc.objects.filter( n_mecanografico=aluno, estado=True).values('id_unidadecurricular')
 
     lista_uc = []
 
@@ -160,26 +160,27 @@ def inscricao_turno(request):
         uc_id = inscricao['id_unidadecurricular']
         uc = UnidadeCurricular.objects.get(id_unidadecurricular=uc_id)
 
-        # --- 3) Buscar os turnos dessa UC ---
         relacoes = TurnoUc.objects.filter(id_unidadecurricular=uc)
 
         turnos = []
         for r in relacoes:
-            turno = r.id_turno  # Turno real
-
-            # 4) Calcular vagas ocupadas
-            ocupados = InscricaoTurno.objects.filter(id_turno=r).count()
+            turno = r.id_turno
+            ocupados = InscricaoTurno.objects.filter(id_turno=turno).count()
             vagas = turno.capacidade - ocupados
             if vagas < 0:
                 vagas = 0
 
+            # Verificar se aluno já está inscrito neste turno
+            ja_inscrito = turno.id_turno in turnos_inscritos
+
             turnos.append({
-                "id": r.id_turno_uc,
+                "id": turno.id_turno,
                 "nome": f"T{turno.n_turno}",
                 "tipo": turno.tipo,
                 "capacidade": turno.capacidade,
                 "vagas": vagas,
-                "horario": "A definir"
+                "horario": "A definir",
+                "ja_inscrito": ja_inscrito
             })
 
         lista_uc.append({
@@ -197,7 +198,6 @@ def inscricao_turno(request):
     ]
 
     dias = ["Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado", "Domingo"]
-    print("UCS:", lista_uc)
 
     return render(request, "ei/inscricao_turno.html", {
         "unidades": lista_uc,
@@ -212,48 +212,35 @@ def informacoes(request):
 def perfil(request):
     return render(request, "profile/perfil.html")
 
-@login_required
-def inscrever_turno(request, turno_id):
-
+def inscrever_turno(request, turno_id, uc_id):
     if "user_tipo" not in request.session or request.session["user_tipo"] != "aluno":
         messages.error(request, "Apenas alunos se podem inscrever em turnos.")
         return redirect("home:login")
 
-    aluno = Aluno.objects.get(n_mecanografico=request.session["user_id"])
+    aluno = get_object_or_404(Aluno, n_mecanografico=request.session["user_id"])
+    turno_uc = get_object_or_404(Turno, id_turno=turno_id)
+    uc = get_object_or_404(UnidadeCurricular, id_unidadecurricular=uc_id)
 
-    # Turno UC (relação UC ↔ Turno)
-    turno_uc = get_object_or_404(TurnoUc, id_turno_uc=turno_id)
+    turno_uc_existe = TurnoUc.objects.filter(id_turno=turno_uc, id_unidadecurricular=uc).exists()
+    if not turno_uc_existe:
+        messages.error(request, "Este turno não pertence a esta UC.")
+        return redirect("home:inscricao_turno")
 
-    # Verificar se o aluno está inscrito nessa UC
-    inscrito = InscritoUc.objects.filter(
-        n_mecanografico=aluno,
-        id_unidadecurricular=turno_uc.id_unidadecurricular,
-        estado=True
-    ).exists()
-
+    inscrito = InscritoUc.objects.filter(n_mecanografico=aluno, id_unidadecurricular=uc, estado=True).exists()
     if not inscrito:
         messages.error(request, "Não estás inscrito nesta UC.")
         return redirect("home:inscricao_turno")
-
-    # Verificar se já está inscrito nesse turno
-    if InscricaoTurno.objects.filter(
-        n_mecanografico=aluno,
-        id_turno=turno_uc
-    ).exists():
+    
+    if InscricaoTurno.objects.filter(n_mecanografico=aluno, id_turno=turno_uc, id_unidadecurricular=uc).exists():
         messages.warning(request, "Já estás inscrito neste turno.")
         return redirect("home:inscricao_turno")
 
-    #Verificar vagas
-    ocupados = InscricaoTurno.objects.filter(id_turno=turno_uc).count()
-    if ocupados >= turno_uc.id_turno.capacidade:
+    ocupados = InscricaoTurno.objects.filter(id_turno=turno_uc, id_unidadecurricular=uc).count()
+    if ocupados >= turno_uc.capacidade:
         messages.error(request, "Este turno já está cheio.")
         return redirect("home:inscricao_turno")
 
-    # Inscrever
-    InscricaoTurno.objects.create(
-        n_mecanografico=aluno,
-        id_turno=turno_uc
-    )
+    InscricaoTurno.objects.create(n_mecanografico=aluno, id_turno=turno_uc, id_unidadecurricular=uc, data_inscricao=datetime.today().date())
 
     messages.success(request, "Inscrição no turno efetuada com sucesso!")
     return redirect("home:inscricao_turno")
@@ -399,13 +386,21 @@ def admin_turnos_delete(request, id):
 # ==========================
 
 def admin_horarios_create(request):
+    cursos = Curso.objects.all().order_by('nome')
+    anos_curriculares = AnoCurricular.objects.all().order_by('id_anocurricular')
+    
     if request.method == "POST":
         nome = request.POST.get("nome")
         ficheiro = request.FILES.get("ficheiro")
+        curso_id = request.POST.get("id_curso")
         ano_id = request.POST.get("id_anocurricular")
 
         if not ficheiro:
             messages.error(request, "É necessário enviar um ficheiro PDF.")
+            return redirect("home:admin_horarios_create")
+        
+        if not curso_id or not ano_id:
+            messages.error(request, "É necessário selecionar o curso e o ano curricular.")
             return redirect("home:admin_horarios_create")
 
         HorarioPDF.objects.create(
@@ -417,13 +412,23 @@ def admin_horarios_create(request):
         messages.success(request, "Horário carregado com sucesso!")
         return redirect("home:admin_horarios_list")
 
-    return render(request, "admin/horarios_form.html")
+    return render(request, "admin/horarios_form.html", {
+        'cursos': cursos,
+        'anos_curriculares': anos_curriculares
+    })
 
 def admin_horarios_edit(request, id):
     horario = get_object_or_404(HorarioPDF, id=id)
+    cursos = Curso.objects.all().order_by('nome')
+    anos_curriculares = AnoCurricular.objects.all().order_by('id_anocurricular')
 
     if request.method == "POST":
         horario.nome = request.POST.get("nome")
+        curso_id = request.POST.get("id_curso")
+        ano_id = request.POST.get("id_anocurricular")
+        
+        if ano_id:
+            horario.id_anocurricular_id = ano_id
 
         if "ficheiro" in request.FILES:
             horario.ficheiro = request.FILES["ficheiro"]
@@ -432,7 +437,11 @@ def admin_horarios_edit(request, id):
         messages.success(request, "Horário atualizado!")
         return redirect("home:admin_horarios_list")
 
-    return render(request, "admin/horarios_form.html", {"horario": horario})
+    return render(request, "admin/horarios_form.html", {
+        "horario": horario,
+        'cursos': cursos,
+        'anos_curriculares': anos_curriculares
+    })
 
 def admin_horarios_delete(request, id):
     horario = get_object_or_404(HorarioPDF, id=id)
@@ -536,7 +545,22 @@ def plano_tdm(request):
     return render(request, "tdm/plano_tdm.html", { "area": "tdm" })
 
 def horarios_tdm(request):
-    return render(request, "tdm/horarios_tdm.html", { "area": "tdm" })
+    anos = AnoCurricular.objects.all().order_by("id_anocurricular")
+
+    horarios_por_ano = []
+
+    for ano in anos:
+        pdf = (HorarioPDF.objects.filter(id_anocurricular=ano).order_by("-atualizado_em").first())
+
+        horarios_por_ano.append({
+            "ano": ano,
+            "pdf": pdf
+        })
+
+    return render(request, "tdm/horarios_tdm.html", {
+        "horarios_por_ano": horarios_por_ano,
+        "area": "tdm"
+    })
 
 def contactos_tdm(request):
     return render(request, "tdm/contactos_tdm.html", { "area": "tdm" })

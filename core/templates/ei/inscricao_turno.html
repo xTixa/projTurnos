@@ -25,9 +25,9 @@
 
         <!-- FORMULÁRIO POR UC -->
         <form method="POST"
-              action="{% url 'home:inscrever_turno' 0 %}"
+              action="{% url 'home:inscrever_turno' 0 uc.id %}"
               class="uc-turnos"
-              onsubmit="this.action=this.action.replace('/0/', '/' + this.turno.value + '/');">
+              onsubmit="this.action = this.action.replace('/0/', '/' + this.turno.value + '/');">
 
             {% csrf_token %}
 
@@ -42,10 +42,13 @@
 
                 {% for t in uc.turnos %}
                 <option value="{{ t.id }}"
-                        {% if t.vagas == 0 %}disabled{% endif %}
-                        class="{% if t.vagas == 0 %}option-esgotado{% else %}option-vagas{% endif %}">
+                        {% if t.vagas == 0 or t.ja_inscrito %}disabled{% endif %}
+                        class="{% if t.ja_inscrito %}option-inscrito{% elif t.vagas == 0 %}option-esgotado{% else %}option-vagas{% endif %}"
+                        data-vagas="{{ t.vagas }}">
                     {{ t.nome }} — {{ t.horario }} —
-                    {% if t.vagas == 0 %}
+                    {% if t.ja_inscrito %}
+                        ✓ Já inscrito
+                    {% elif t.vagas == 0 %}
                         Esgotado
                     {% else %}
                         {{ t.vagas }} vaga{{ t.vagas|pluralize:"s" }}
@@ -62,6 +65,22 @@
             </button>
 
         </form>
+
+        <!-- Informação de turnos inscritos -->
+        {% with inscritos=uc.turnos|dictsort:"ja_inscrito"|last %}
+            {% if uc.turnos|dictsort:"ja_inscrito"|length > 0 %}
+            <div class="turnos-inscritos">
+                <p class="inscrito-info">
+                    <i class="fa-solid fa-circle-check"></i>
+                    {% for t in uc.turnos %}
+                        {% if t.ja_inscrito %}
+                        Já estás inscrito em <strong>{{ t.nome }}</strong>
+                        {% endif %}
+                    {% endfor %}
+                </p>
+            </div>
+            {% endif %}
+        {% endwith %}
 
     </div>
     {% endfor %}
