@@ -242,7 +242,68 @@ def informacoes(request):
     return render(request, "ei/informacoes.html", { "area": "ei" })
 
 def perfil(request):
-    return render(request, "profile/perfil.html")
+    user_tipo = request.session.get("user_tipo")
+    user_id = request.session.get("user_id")
+    
+    context = {}
+
+    if user_tipo == "aluno":
+        aluno = get_object_or_404(Aluno, n_mecanografico=user_id)
+        context["user_obj"] = aluno
+        context["tipo"] = "Aluno"
+        
+        # Turnos inscritos
+        inscricoes = InscricaoTurno.objects.filter(n_mecanografico=aluno).select_related('id_turno', 'id_unidadecurricular')
+        
+        turnos_info = []
+        for inscricao in inscricoes:
+            turno = inscricao.id_turno
+            uc = inscricao.id_unidadecurricular
+            
+            # Tenta pegar info extra de horário (TurnoUc)
+            # Usamos filter().first() porque a tabela pode ter múltiplas entradas para o mesmo id_turno (modelo incorreto?)
+            # e porque queremos o horário deste turno NESTA disciplina específica.
+            turno_uc = TurnoUc.objects.filter(id_turno=turno, id_unidadecurricular=uc).first()
+            
+            if turno_uc:
+                hora_inicio = turno_uc.hora_inicio.strftime("%H:%M")
+                hora_fim = turno_uc.hora_fim.strftime("%H:%M")
+                
+                # Lógica de dia da semana
+                try:
+                    h_int = int(hora_inicio.split(":")[0])
+                    if 8 <= h_int < 10:
+                        dia_semana = "Segunda"
+                    elif 10 <= h_int < 12:
+                        dia_semana = "Terça"
+                    elif 12 <= h_int < 14:
+                        dia_semana = "Quarta"
+                    elif 14 <= h_int < 16:
+                        dia_semana = "Quinta"
+                    else:
+                        dia_semana = "Sexta"
+                except:
+                    dia_semana = "?"
+            else:
+                hora_inicio = "?"
+                hora_fim = "?"
+                dia_semana = "?"
+            
+            turnos_info.append({
+                "uc": uc.nome,
+                "turno": f"T{turno.n_turno}",
+                "tipo": turno.tipo,
+                "horario": f"{dia_semana}, {hora_inicio} - {hora_fim}"
+            })
+            
+        context["turnos"] = turnos_info
+
+    elif user_tipo == "docente":
+        docente = get_object_or_404(Docente, id_docente=user_id)
+        context["user_obj"] = docente
+        context["tipo"] = "Docente"
+
+    return render(request, "profile/perfil.html", context)
 
 def inscrever_turno(request, turno_id, uc_id):
     if "user_tipo" not in request.session or request.session["user_tipo"] != "aluno":

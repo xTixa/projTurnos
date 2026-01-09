@@ -1,12 +1,21 @@
 {% extends "home/base.html" %}
 {% load static %}
 
+{% block sidebar %}{% endblock %}
+
 {% block content %}
-<link rel="stylesheet" href="{% static 'css/login.css' %}">
+<link rel="stylesheet" href="{% static 'css/login.css' %}?v={{ request.session.session_key|default:'1' }}">
 
 <section class="auth">
   <div class="auth-card {% if form.errors %}auth-card--error{% endif %}">
-    <h2 class="auth-title">Iniciar Sessão</h2>
+    
+    <div class="auth-header">
+      <div class="auth-icon">
+        <i class="fa-solid fa-graduation-cap"></i>
+      </div>
+      <h2 class="auth-title">Bem-vindo</h2>
+      <p class="auth-subtitle">Introduz os teus dados de acesso</p>
+    </div>
 
     {% if form.errors %}
       <div class="alert alert--error" role="alert">
@@ -27,7 +36,7 @@
         <input type="password" name="password" id="id_password" required autocomplete="current-password" class="input">
       </div>
 
-      <button type="submit" class="btn btn--primary">Entrar</button>
+      <button type="submit" class="auth-btn auth-btn--primary">Entrar</button>
     </form>
   </div>
 </section>

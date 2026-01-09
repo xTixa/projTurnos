@@ -3,7 +3,7 @@
 
 <head>
   {% load static %}
-    <link rel="stylesheet" href="{% static 'css/base.css' %}">
+    <link rel="stylesheet" href="{% static 'css/base.css' %}?v={{ request.session.session_key|default:'5' }}">
 
   {% if request.user.is_authenticated and request.user.is_staff %}
     <link rel="stylesheet" href="{% static 'css/admin/admin.css' %}">
@@ -122,6 +122,7 @@
   <!-- LAYOUT GERAL -->
   <div class="container-flex {% if request.user.is_authenticated and request.user.is_staff %}admin{% endif %}">
 
+    {% block sidebar %}
     <aside class="sidebar">
 
       {% if request.user.is_authenticated and request.user.is_staff %}
@@ -163,6 +164,7 @@
       {% endif %}
 
     </aside>
+    {% endblock %}
 
     <main class="main-content">
       {% block content %}{% endblock %}

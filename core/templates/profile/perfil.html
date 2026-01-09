@@ -1,57 +1,122 @@
 {% extends "home/base.html" %}
 {% load static %}
 
+{% block sidebar %}{% endblock %}
+
 {% block content %}
-<link rel="stylesheet" href="{% static 'css/perfil.css' %}">
+<link rel="stylesheet" href="{% static 'css/perfil.css' %}?v=6">
 
-<section class="profile">
-  <h1 class="profile__title">O Meu Perfil</h1>
+<div class="layout-container">
 
-  {% if user.is_authenticated %}
-    <div class="card card--soft">
-      <p class="card__row"><span class="label">Utilizador:</span> {{ user.username }}</p>
-      <p class="card__row"><span class="label">Email:</span> {{ user.email|default:"(não definido)" }}</p>
-    </div>
+  {# ---------- 1. HERO PROFILE SECTION ---------- #}
+  {% if user_obj or user.is_authenticated %}
+  <section class="profile-hero">
+      <div class="hero-banner"></div>
 
-    <div class="section">
-      <h3 class="section__title">Gestão de Turnos</h3>
-      <p class="section__subtitle">Seleciona o turno em que te queres inscrever:</p>
-
-      <ul class="shift-list">
-        <li class="shift">
-          <div class="shift__info">
-            <strong class="shift__name">Turno A</strong>
-            <span class="shift__meta">2ª feira, 10:00–12:00 · Sala B1</span>
+      <div class="hero-content">
+          <div class="avatar-wrapper">
+             <div class="avatar-inner">
+                 {% if tipo == "Aluno" %}
+                   <i class="fa-regular fa-user"></i>
+                 {% else %}
+                   <i class="fa-solid fa-user-shield"></i>
+                 {% endif %}
+             </div>
           </div>
-          <form method="post" action="{% url 'home:inscrever_turno' turno_id=1 %}">
-            {% csrf_token %}
-            <button type="submit" class="btn btn--success">Inscrever</button>
-          </form>
-        </li>
-
-        <li class="shift">
-          <div class="shift__info">
-            <strong class="shift__name">Turno B</strong>
-            <span class="shift__meta">4ª feira, 14:00–16:00 · Sala C3</span>
+          
+          <div class="profile-info-block">
+            {% if user_obj %}
+                <h1 class="profile-user-name">{{ user_obj.nome }}</h1>
+                <div class="profile-user-meta">
+                   <div class="profile-meta-item"><i class="fa-regular fa-envelope"></i> {{ user_obj.email }}</div>
+                   {% if tipo == "Aluno" %}
+                     <div class="profile-meta-item"><i class="fa-solid fa-id-card"></i> {{ user_obj.n_mecanografico }}</div>
+                   {% endif %}
+                </div>
+            {% elif user.is_authenticated %}
+                <h1 class="profile-user-name">{{ user.username }}</h1>
+                <div class="profile-user-meta">
+                   <div class="profile-meta-item"><i class="fa-regular fa-envelope"></i> {{ user.email|default:"S/ Email" }}</div>
+                   <div class="profile-meta-item"><span style="background:#dcfce7; color:#166534; padding:2px 8px; border-radius:10px; font-size:0.8em; font-weight:700">ADMIN</span></div>
+                </div>
+            {% endif %}
           </div>
-          <form method="post" action="{% url 'home:inscrever_turno' turno_id=2 %}">
-            {% csrf_token %}
-            <button type="submit" class="btn btn--success">Inscrever</button>
-          </form>
-        </li>
-      </ul>
-    </div>
 
-    <a href="{% url 'home:logout' %}" class="btn btn--danger btn--ghost">Terminar Sessão</a>
+          <div class="profile-user-stats">
+             {% if tipo == "Aluno" %}
+             <div class="profile-stat-box">
+                <span class="profile-stat-value">{{ turnos|length }}</span>
+                <span class="profile-stat-label">Inscrições</span>
+             </div>
+             {% endif %}
+          </div>
+      </div>
+  </section>
+
+  {# ---------- 2. GRID SECTIONS ---------- #}
+  
+  {% if tipo == "Aluno" %}
+      <h3 class="page-subtitle">
+        Os Meus Turnos
+      </h3>
+
+      {% if turnos %}
+        <div class="grid-cards">
+          {% for t in turnos %}
+          <div class="shift-card">
+            <div class="shift-top">
+               <div class="uc-badge">
+                 <i class="fa-solid fa-book-bookmark"></i>
+               </div>
+               <span class="shift-tag">{{ t.tipo }}</span>
+            </div>
+            
+            <div class="shift-title">{{ t.uc }}</div>
+            
+            <div class="shift-details">
+               <i class="fa-regular fa-clock"></i>
+               <span>{{ t.horario }}</span>
+               <div style="margin-left:auto; font-weight:700; color:var(--primary)">
+                 {{ t.turno }}
+               </div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="empty-box">
+           <i class="fa-regular fa-calendar-xmark" style="font-size:3rem; color: #cbd5e1; margin-bottom:1rem"></i>
+           <p style="color:#64748b; margin-bottom:1.5rem">Ainda não te inscreveste em nenhum turno.</p>
+           <a href="{% url 'home:inscricao_turno' %}" class="action-btn">Inscrever Agora</a>
+        </div>
+      {% endif %}
+
+  {% elif user.is_authenticated %}
+     <h3 class="page-subtitle">Área de Administração</h3>
+     <div class="grid-cards">
+         <div class="shift-card" onclick="location.href='{% url 'home:admin_dashboard' %}'" style="cursor: pointer;">
+             <div class="shift-top">
+                 <div class="uc-badge" style="background:#f59e0b; color:white">
+                     <i class="fa-solid fa-gauge-high"></i>
+                 </div>
+             </div>
+             <div class="shift-title">Painel de Controlo</div>
+             <div class="shift-details">
+                 Aceder à gestão integral do sistema.
+             </div>
+         </div>
+     </div>
+  {% endif %}
+
   {% else %}
-    <div class="card card--soft">
-      <p class="card__text">
-        Para acederes ao teu perfil e gerir os teus turnos, tens de iniciar sessão.
-      </p>
-      <a href="{% url 'home:login' %}?next={{ request.get_full_path|urlencode }}" class="btn btn--primary">
-        Iniciar Sessão
-      </a>
+    <div style="text-align:center; padding: 4rem;">
+       <h2>Sem Sessão Iniciada</h2>
+       <p style="color:#64748b; margin-bottom:2rem">Precisas de entrar na tua conta para ver o teu perfil.</p>
+       <a href="{% url 'home:login' %}" style="background:var(--primary); color:white; padding:12px 24px; border-radius:8px; text-decoration:none; font-weight:600">
+         Ir para Login
+       </a>
     </div>
   {% endif %}
-</section>
+  
+</div>
 {% endblock %}
