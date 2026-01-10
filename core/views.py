@@ -11,6 +11,7 @@ from django.contrib.auth.models import User
 from bd2_projeto.services.mongo_service import adicionar_log, listar_logs
 from core.utils import registar_log, admin_required
 
+
 def index(request):
     return render(request, "di/index_di.html")
 
@@ -80,6 +81,7 @@ def do_logout(request):
 
 def ingresso(request):
     return render(request, "ei/ingresso.html", { "area": "ei" })
+
 
 def plano_curricular(request):
     # Busca todas as unidades, com joins automáticos

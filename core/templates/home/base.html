@@ -18,6 +18,10 @@
   <!-- Ícones -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
     referrerpolicy="no-referrer" />
+
+  <link rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
 </head>
 
 <body>
@@ -59,8 +63,11 @@
     </div>
 
     <div class="topbar__right">
-      <a href="{% url 'home:index_forum' %}" class="toplinks__link">
-        <img src="{% static 'img/forum.png' %}" alt="FórumAluno" class="toplink-logo">
+        <a href="{% url 'extra_app:sugestao' %}" class="toplinks__link">
+        <i class="fa fa-lightbulb-o" aria-hidden="true"></i>
+        <span>&nbsp;Sugestões </span>
+      </a>
+
       </a>
 
       {# ---------- ADMIN (Django User) ---------- #}
@@ -143,6 +150,8 @@
           {% include "components/sidebar_mestrado.html" %}
         {% elif area == "dwdm" %}
           {% include "components/sidebar_dwdm.html" %}
+        {% elif area == "extra" %}  // Extra app não tem sidebar própria, por isso redireciona para a do DI (zona de sugestoes )
+          {% include "components/sidebar_di.html" %}
         {% endif %}
 
       {% else %}
@@ -159,6 +168,8 @@
           {% include "components/sidebar_mestrado.html" %}
         {% elif area == "dwdm" %}
           {% include "components/sidebar_dwdm.html" %}
+        {% elif area == "extra" %}  
+          {% include "components/sidebar_di.html" %}
         {% endif %}
 
       {% endif %}
