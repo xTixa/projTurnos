@@ -24,11 +24,13 @@ body {
   background: var(--bg);
 }
 
-/* ===== TOPBAR (corrigida) ===== */
+/* ===== TOPBAR (Fixed) ===== */
 .topbar {
-  position: sticky;
+  position: fixed;
   top: 0;
-  z-index: 50;
+  left: 0;
+  width: 100%;
+  z-index: 1000;
   height: 56px;
   display: flex;
   align-items: center;
@@ -141,18 +143,32 @@ body {
 .container-flex {
   display: flex;
   min-height: calc(100vh - 56px);
+  margin-top: 56px; /* Offset for topbar */
 }
 
+/* Sidebar Fixed */
 .sidebar {
   width: 260px;
   background: var(--sidebar-bg);
   border-right: 1px solid var(--border);
   padding: 18px 12px;
+  
+  /* Fixed positioning */
+  position: fixed;
+  top: 56px;
+  left: 0;
+  bottom: 0;
+  overflow-y: auto;
+  z-index: 900;
 }
 
 .main-content {
   flex: 1;
   padding: 32px 40px;
+  
+  /* Push content */
+  margin-left: 260px;
+  width: calc(100% - 260px);
 }
 
 /* ===== SIDEBAR MENU ===== */
