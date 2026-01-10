@@ -3,7 +3,7 @@
 
 <head>
   {% load static %}
-    <link rel="stylesheet" href="{% static 'css/base.css' %}?v={{ request.session.session_key|default:'10' }}">
+    <link rel="stylesheet" href="{% static 'css/base.css' %}?v=13">
 
   {% if request.user.is_authenticated and request.user.is_staff %}
     <link rel="stylesheet" href="{% static 'css/admin/admin.css' %}">

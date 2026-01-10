@@ -4,7 +4,7 @@
     --primary-dark: #1b5a85;
     --secondary: #64748b;
     --surface: #ffffff;
-    --bg-color: #eff6ff; /* More colorful (Light Blue) */
+    --bg-color: #ffffff;
     --text-main: #0f172a;
     --text-muted: #64748b;
     --border: #bfdbfe; /* Blueish border */
@@ -16,10 +16,18 @@
     --shadow-soft: 0 10px 15px -3px rgba(35, 113, 167, 0.08), 0 4px 6px -2px rgba(35, 113, 167, 0.04);
     --shadow-hover: 0 20px 25px -5px rgba(35, 113, 167, 0.1), 0 10px 10px -5px rgba(35, 113, 167, 0.04);
 
-    max-width: 1200px;
-    margin: 0 auto;
+    background-color: var(--bg-color);
+    min-height: calc(100vh - 56px);
+    margin: -32px -40px;
     padding: 2rem;
     font-family: 'Inter', sans-serif;
+}
+
+/* CONTENT LIMITER */
+.di-layout > section {
+    max-width: 1200px;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 /* Background fix for main content area */
@@ -33,7 +41,7 @@ body .main-content {
     grid-template-columns: 1.2fr 0.8fr;
     align-items: center;
     gap: 3rem;
-    background: linear-gradient(135deg, #ffffff 0%, #f0f9ff 100%);
+    background: #ffffff;
     padding: 3rem;
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-soft);
@@ -271,6 +279,7 @@ body .main-content {
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     display: flex;
     flex-direction: column;
+    cursor: default;
 }
 .shortcut-card:hover {
     transform: translateY(-5px);

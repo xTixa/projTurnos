@@ -4,7 +4,7 @@
 {% block title %}Departamento de Informática — ESTGV{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/di/index_di.css' %}?v=6">
+<link rel="stylesheet" href="{% static 'css/di/index_di.css' %}?v=9">
 {% endblock %}
 
 {% block content %}
@@ -103,32 +103,29 @@
 
   <div class="di-shortcuts__grid">
 
-    <a href="https://www.di.estgv.ipv.pt/Dep/di/web/?opt=MTE4LjYxLjQ2Lg==" 
-       class="shortcut-card" target="_blank">
+    <div class="shortcut-card">
       <div class="shortcut-card__icon purple"><i class="fa-solid fa-user-group"></i></div>
       <h3>Corpo Docente</h3>
       <p>Consulta todos os docentes e investigadores.</p>
-    </a>
+    </div>
 
-    <a href="https://www.di.estgv.ipv.ipv.pt/Dep/di/web/?opt=MTE4LjYxLjUxLg==" 
-       class="shortcut-card" target="_blank">
+    <div class="shortcut-card">
       <div class="shortcut-card__icon green"><i class="fa-solid fa-flask"></i></div>
       <h3>Investigação</h3>
       <p>Grupos, projetos e publicações científicas.</p>
-    </a>
+    </div>
 
-    <a href="https://www.di.estgv.ipv.pt/Dep/di/web/?opt=MTE4LjYxLjQ5Lg==" 
-       class="shortcut-card" target="_blank">
+    <div class="shortcut-card">
       <div class="shortcut-card__icon pink"><i class="fa-solid fa-diagram-project"></i></div>
       <h3>Projetos</h3>
       <p>Conhece os projetos tecnológicos do DI.</p>
-    </a>
+    </div>
 
-    <a href="{% url 'home:contactos' %}" class="shortcut-card">
+    <div class="shortcut-card">
       <div class="shortcut-card__icon cyan"><i class="fa-regular fa-address-card"></i></div>
       <h3>Contactos</h3>
       <p>Informações gerais, secretaria e direção.</p>
-    </a>
+    </div>
 
   </div>
 </section>

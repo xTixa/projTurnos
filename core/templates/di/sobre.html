@@ -2,88 +2,106 @@
 {% load static %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/di/sobre.css' %}">
+<link rel="stylesheet" href="{% static 'css/di/sobre.css' %}?v=9">
 {% endblock %}
 
 {% block title %}Sobre — Departamento de Informática{% endblock %}
 
 {% block content %}
 
-<div class="sobre-container">
+<div class="di-sobre-layout">
 
-    <h1 class="sobre-title">Sobre o Departamento de Informática</h1>
-
-    <p class="sobre-intro">
-        O Departamento de Informática (DI) da Escola Superior de Tecnologia e Gestão de Viseu
-        é uma unidade de ensino e investigação dedicada à formação de profissionais de excelência
-        na área das Tecnologias de Informação.
-    </p>
-
-    <!-- BLOCO APRESENTAÇÃO -->
-    <section class="sobre-section">
-        <h2 class="section-title"><i class="fa-solid fa-building-columns"></i> Apresentação</h2>
-
+    <!-- HERO SECTION -->
+    <section class="di-hero">
+        <h1>Sobre o Departamento de Informática</h1>
         <p>
-            O Departamento de Informática desenvolve atividades de <strong>ensino, investigação e ligação à comunidade</strong>.
-            A oferta formativa integra cursos alinhados com as necessidades reais do mercado de trabalho,
-            combinando componentes teóricas e práticas em ambientes laboratoriais modernos.
-        </p>
-
-        <p>
-            O DI destaca-se pela forte componente tecnológica, pelo corpo docente qualificado e pela constante atualização
-            dos seus planos curriculares, de forma a acompanhar a rápida evolução da área da informática.
+            O Departamento de Informática (DI) da Escola Superior de Tecnologia e Gestão de Viseu
+            é uma unidade de ensino e investigação dedicada à formação de profissionais de excelência
+            na área das Tecnologias de Informação.
         </p>
     </section>
 
+    <div class="di-grid-layout">
+        
+        <!-- APRESENTAÇÃO (Full Width) -->
+        <article class="di-card full-width">
+            <div class="di-card__header">
+                <div class="di-card__icon blue">
+                    <i class="fa-solid fa-building-columns"></i>
+                </div>
+                <h2>Apresentação</h2>
+            </div>
+            <div class="di-card__content">
+                <p>
+                    O Departamento de Informática desenvolve atividades de <strong>ensino, investigação e ligação à comunidade</strong>.
+                    A oferta formativa integra cursos alinhados com as necessidades reais do mercado de trabalho,
+                    combinando componentes teóricas e práticas em ambientes laboratoriais modernos.
+                </p>
+                <p>
+                    O DI destaca-se pela forte componente tecnológica, pelo corpo docente qualificado e pela constante atualização
+                    dos seus planos curriculares, de forma a acompanhar a rápida evolução da área da informática.
+                </p>
+            </div>
+        </article>
 
-    <!-- MISSÃO -->
-    <section class="sobre-section">
-        <h2 class="section-title"><i class="fa-solid fa-bullseye"></i> Missão</h2>
+        <!-- MISSÃO -->
+        <article class="di-card">
+            <div class="di-card__header">
+                <div class="di-card__icon red">
+                    <i class="fa-solid fa-bullseye"></i>
+                </div>
+                <h2>Missão</h2>
+            </div>
+            <p>
+                A missão do Departamento de Informática é formar profissionais altamente competentes,
+                promovendo o desenvolvimento científico, tecnológico e humano na área das Tecnologias da Informação.
+            </p>
+            <ul class="di-list">
+                <li>Garantir um ensino superior de qualidade</li>
+                <li>Desenvolver investigação aplicada</li>
+                <li>Inovação tecnológica constante</li>
+                <li>Formação contínua e atualizada</li>
+            </ul>
+        </article>
 
-        <p>
-            A missão do Departamento de Informática é formar profissionais altamente competentes,
-            promovendo o desenvolvimento científico, tecnológico e humano na área das Tecnologias da Informação.
-        </p>
+        <!-- OBJETIVOS -->
+        <article class="di-card">
+            <div class="di-card__header">
+                <div class="di-card__icon green">
+                    <i class="fa-solid fa-list-check"></i>
+                </div>
+                <h2>Objetivos</h2>
+            </div>
+            <ul class="di-list">
+                <li>Competências sólidas em informática</li>
+                <li>Pensamento crítico e resolução de problemas</li>
+                <li>Projetos práticos e investigação</li>
+                <li>Resposta aos desafios tecnológicos</li>
+                <li>Ligação às empresas e parceiros</li>
+            </ul>
+        </article>
 
-        <ul class="sobre-list">
-            <li>Garantir um ensino superior de qualidade;</li>
-            <li>Desenvolver investigação aplicada e inovação tecnológica;</li>
-            <li>Contribuir para o desenvolvimento regional e nacional;</li>
-            <li>Promover a formação contínua e atualizada dos estudantes.</li>
-        </ul>
-    </section>
+         <!-- ATIVIDADES -->
+         <article class="di-card full-width">
+            <div class="di-card__header">
+                <div class="di-card__icon purple">
+                    <i class="fa-solid fa-people-group"></i>
+                </div>
+                <h2>Atividades</h2>
+            </div>
+            <p>
+                O Departamento promove e participa em várias iniciativas que reforçam a ligação à comunidade académica e empresarial:
+            </p>
+            <div class="di-tags">
+                <span>Seminários & Workshops</span>
+                <span>Projetos I&D</span>
+                <span>Parcerias Empresariais</span>
+                <span>Concursos Tecnológicos</span>
+                <span>Eventos Científicos</span>
+            </div>
+        </article>
 
-
-    <!-- OBJETIVOS -->
-    <section class="sobre-section">
-        <h2 class="section-title"><i class="fa-solid fa-list-check"></i> Objetivos</h2>
-
-        <ul class="sobre-list">
-            <li>Proporcionar competências sólidas em áreas fundamentais da informática;</li>
-            <li>Estimular o pensamento crítico e a resolução de problemas complexos;</li>
-            <li>Fomentar a participação em projetos práticos e investigação;</li>
-            <li>Preparar profissionais capazes de responder aos desafios do setor tecnológico;</li>
-            <li>Aproximar os estudantes das empresas e instituições parceiras.</li>
-        </ul>
-    </section>
-
-
-    <!-- ATIVIDADES -->
-    <section class="sobre-section">
-        <h2 class="section-title"><i class="fa-solid fa-people-group"></i> Atividades</h2>
-
-        <p>
-            O Departamento promove e participa em várias iniciativas que reforçam a ligação à comunidade académica e empresarial:
-        </p>
-
-        <ul class="sobre-list">
-            <li>Organização de seminários, palestras e workshops;</li>
-            <li>Projetos de investigação e desenvolvimento;</li>
-            <li>Parcerias com empresas e instituições;</li>
-            <li>Participação em concursos, desafios tecnológicos e eventos científicos;</li>
-            <li>Atividades extracurriculares e grupos de estudo.</li>
-        </ul>
-    </section>
+    </div>
 
 </div>
 
