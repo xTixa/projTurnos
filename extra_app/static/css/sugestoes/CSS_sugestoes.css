@@ -1,0 +1,12 @@
+.sugestoes-scroll {
+  display: flex;
+  overflow-x: auto;
+  gap: 1rem;
+  padding: 0.5rem 0;
+  white-space: nowrap;
+}
+
+.sugestao-card {
+  min-width: 260px;
+  flex: 0 0 auto;
+}

@@ -21,6 +21,7 @@
 
   <link rel="stylesheet"
     href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    
 
 </head>
 
@@ -61,14 +62,13 @@
       </nav>
 
     </div>
-
+    {% if  request.session.user_id or request.user.is_authenticated and request.user.is_staff %}
     <div class="topbar__right">
-        <a href="{% url 'extra_app:sugestao' %}" class="toplinks__link">
+      <a href="{% url 'extra_app:sugestao' %}" class="toplinks__link">
         <i class="fa fa-lightbulb-o" aria-hidden="true"></i>
-        <span>&nbsp;Sugestões </span>
+        <span>&nbsp;Sugestões</span>
       </a>
-
-      </a>
+    {% endif %}
 
       {# ---------- ADMIN (Django User) ---------- #}
       {% if request.user.is_authenticated and request.user.is_staff %}
