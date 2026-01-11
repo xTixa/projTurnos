@@ -5,20 +5,22 @@
 {% block title %}Admin Dashboard{% endblock %}
 {% block extra_css %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    window.chartAlunosData = {
+        labels: {{ chart_alunos_labels|safe }},
+        values: {{ chart_alunos_values|safe }}
+    };
+    window.chartTurnosData = {
+        ocupadas: {{ vagas_ocupadas }},
+        disponiveis: {{ vagas_disponiveis }}
+    };
+</script>
 <script src="{% static 'js/admin/dashboard_charts.js' %}" defer></script>
 {% endblock %}
 
 {% block content %}
 
 <h1>Painel de Administração</h1>
-
-<!-- SEARCH BAR -->
-<div class="admin-search">
-    <form method="GET">
-        <input type="text" placeholder="Pesquisar utilizadores, turnos, UCs..." name="q">
-        <button><i class="fa-solid fa-search"></i></button>
-    </form>
-</div>
 
 <!-- STATISTICS -->
 <section class="stats-section">

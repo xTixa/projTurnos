@@ -1,6 +1,7 @@
 from django.db import connection
 from django.shortcuts import redirect
 from django.contrib import messages
+from bd2_projeto.services.mongo_service import adicionar_log
 
 def registar_log(request, operacao, entidade, chave, detalhes):
     with connection.cursor() as cursor:
@@ -15,6 +16,14 @@ def registar_log(request, operacao, entidade, chave, detalhes):
             chave,
             entidade
         ])
+    
+    # Também guarda no MongoDB
+    adicionar_log(operacao, {
+        "utilizador": request.user.username,
+        "entidade": entidade,
+        "chave_primaria": chave,
+        "detalhes": detalhes
+    })
 
 def admin_required(view_func):
     def wrapper(request, *args, **kwargs):

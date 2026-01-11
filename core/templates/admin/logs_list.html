@@ -1,7 +1,45 @@
 {% extends "../home/base.html" %}
 
 {% block content %}
-<h1>Logs</h1>
+<h1>Logs do Sistema</h1>
+
+<!-- FILTROS -->
+<div class="filters-section" style="margin: 20px 0; padding: 20px; background: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+    <form method="GET" style="display: flex; gap: 15px; align-items: flex-end; flex-wrap: wrap;">
+        <div style="flex: 1; min-width: 200px;">
+            <label for="operacao" style="display: block; margin-bottom: 5px; font-weight: 500;">Operação:</label>
+            <select name="operacao" id="operacao" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                <option value="">Todas</option>
+                {% for op in operacoes %}
+                <option value="{{ op }}" {% if op == operacao_filter %}selected{% endif %}>{{ op }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div style="flex: 1; min-width: 200px;">
+            <label for="entidade" style="display: block; margin-bottom: 5px; font-weight: 500;">Entidade:</label>
+            <select name="entidade" id="entidade" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                <option value="">Todas</option>
+                {% for ent in entidades %}
+                <option value="{{ ent }}" {% if ent == entidade_filter %}selected{% endif %}>{{ ent }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div style="display: flex; gap: 10px;">
+            <button type="submit" style="padding: 8px 20px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                <i class="fa-solid fa-filter"></i> Filtrar
+            </button>
+            <a href="{% url 'home:admin_logs_list' %}" style="padding: 8px 20px; background: #6c757d; color: white; border: none; border-radius: 4px; text-decoration: none; display: inline-block;">
+                <i class="fa-solid fa-times"></i> Limpar
+            </a>
+        </div>
+    </form>
+</div>
+
+<div style="margin-bottom: 15px; color: #666;">
+    <strong>Total de logs:</strong> {{ logs|length }}
+</div>
 
 <table class="admin-table">
     <thead>
@@ -26,6 +64,12 @@
             <td>{{ log.entidade }}</td>
             <td>{{ log.chave_primaria }}</td>
             <td>{{ log.detalhes }}</td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="7" style="text-align: center; padding: 30px; color: #999;">
+                Nenhum log encontrado com os filtros selecionados.
+            </td>
         </tr>
         {% endfor %}
     </tbody>

@@ -4,9 +4,11 @@ from django.contrib.auth import authenticate, login, logout as auth_logout
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.shortcuts import redirect
+from django.db import models
 from .models import AnoCurricular, UnidadeCurricular, Semestre, Docente, Curso, HorarioPDF, Aluno, TurnoUc, Turno, InscricaoTurno, InscritoUc, LogEvento
 from .db_views import CadeirasSemestre, AlunosPorOrdemAlfabetica, Turnos, Cursos
 from django.http import JsonResponse
+import json
 from django.contrib.auth.models import User
 from bd2_projeto.services.mongo_service import adicionar_log, listar_logs
 from core.utils import registar_log, admin_required
@@ -380,13 +382,35 @@ def admin_dashboard(request):
     total_users = User.objects.count()
     total_turnos = Turnos.objects.count()
     total_ucs = UnidadeCurricular.objects.count()
+    total_cursos = Curso.objects.count()
     total_horarios = HorarioPDF.objects.count()
+
+    # Dados para o gráfico de alunos por UC
+    from django.db.models import Count
+    alunos_por_uc = InscritoUc.objects.values(
+        'id_unidadecurricular__nome'
+    ).annotate(
+        total=Count('n_mecanografico')
+    ).order_by('-total')[:10]  # Top 10 UCs
+    
+    chart_alunos_labels = json.dumps([item['id_unidadecurricular__nome'] for item in alunos_por_uc])
+    chart_alunos_values = json.dumps([item['total'] for item in alunos_por_uc])
+
+    # Dados para o gráfico de turnos disponíveis vs ocupados
+    total_vagas = Turno.objects.aggregate(total=models.Sum('capacidade'))['total'] or 0
+    vagas_ocupadas = InscricaoTurno.objects.count()
+    vagas_disponiveis = total_vagas - vagas_ocupadas
 
     return render(request, "admin/dashboard.html", {
         "total_users": total_users,
         "total_turnos": total_turnos,
         "total_ucs": total_ucs,
+        "total_cursos": total_cursos,
         "total_horarios": total_horarios,
+        "chart_alunos_labels": chart_alunos_labels,
+        "chart_alunos_values": chart_alunos_values,
+        "vagas_ocupadas": vagas_ocupadas,
+        "vagas_disponiveis": vagas_disponiveis,
     })
 
 def admin_users_list(request):
@@ -830,10 +854,30 @@ def admin_uc_delete(request, id):
 
 
 def admin_logs_list(request):
-    logs = LogEvento.objects.all()[:500]
+    # Filtrar por operação
+    operacao_filter = request.GET.get('operacao', '')
+    entidade_filter = request.GET.get('entidade', '')
+    
+    logs = LogEvento.objects.all()
+    
+    if operacao_filter:
+        logs = logs.filter(operacao__icontains=operacao_filter)
+    
+    if entidade_filter:
+        logs = logs.filter(entidade__icontains=entidade_filter)
+    
+    logs = logs[:500]
+    
+    # Obter lista de operações para os filtros
+    operacoes = LogEvento.objects.values_list('operacao', flat=True).distinct().order_by('operacao')
+    entidades = LogEvento.objects.values_list('entidade', flat=True).distinct().order_by('entidade')
 
     return render(request, "admin/logs_list.html", {
-        "logs": logs
+        "logs": logs,
+        "operacoes": operacoes,
+        "entidades": entidades,
+        "operacao_filter": operacao_filter,
+        "entidade_filter": entidade_filter,
     })
 
 # ==========================

@@ -109,6 +109,11 @@
     box-shadow: 0 6px 18px rgba(0,0,0,0.06);
 }
 
+.admin .chart-card canvas {
+    max-height: 300px;
+    height: 300px;
+}
+
 /* ---------- ADMIN MANAGEMENT ---------- */
 .admin .admin-cards {
     display: grid;
