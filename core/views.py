@@ -843,7 +843,9 @@ def sobre_di(request):
     return render(request, "di/sobre.html", { "area": "di" })
 
 def contacto_di(request):
-    return render(request, "di/contactos.html", { "area": "di" })
+    # Listar docentes para a página do Departamento
+    docentes = Docente.objects.all().order_by('nome')
+    return render(request, "di/contactos.html", { "area": "di", "docentes": docentes })
 
 
 #ENG INFORMATICA
@@ -919,7 +921,9 @@ def horarios_tdm(request):
     })
 
 def contactos_tdm(request):
-    return render(request, "tdm/contactos_tdm.html", { "area": "tdm" })
+    # Reutiliza a lista de docentes (igual a EI)
+    docentes = Docente.objects.all().order_by('nome')
+    return render(request, "tdm/contactos_tdm.html", { "area": "tdm", "docentes": docentes })
 
 def saidas_tdm(request):
     return render(request, "tdm/saidas.html", { "area": "tdm" })
@@ -1157,7 +1161,8 @@ def estagio_rsi(request):
     return render(request, "rsi/estagio_rsi.html", { "area": "rsi" })
 
 def contactos_rsi(request):
-    return render(request, "rsi/contactos_rsi.html", { "area": "rsi" })
+    docentes = Docente.objects.all().order_by('nome')
+    return render(request, "rsi/contactos_rsi.html", { "area": "rsi", "docentes": docentes })
 
 def avaliacoes_rsi(request):
     return render(request, "rsi/avaliacoes_rsi.html", { "area": "rsi" })
@@ -1204,7 +1209,8 @@ def avaliacoes_dwdm(request):
     return render(request, "dwdm/avaliacoes_dwdm.html", { "area": "dwdm" })
 
 def contactos_dwdm(request):
-    return render(request, "dwdm/contactos_dwdm.html", { "area": "dwdm" })
+    docentes = Docente.objects.all().order_by('nome')
+    return render(request, "dwdm/contactos_dwdm.html", { "area": "dwdm", "docentes": docentes })
 
 def estagio_dwdm(request):
     return render(request, "dwdm/estagio_dwdm.html", { "area": "dwdm" })
@@ -1257,7 +1263,8 @@ def avaliacoes_mestrado(request):
     return render(request, "eisi/avaliacoes_mestrado.html", { "area": "eisi" })
 
 def contactos_mestrado(request):
-    return render(request, "eisi/contactos_mestrado.html")
+    docentes = Docente.objects.all().order_by('nome')
+    return render(request, "eisi/contactos_mestrado.html", { "area": "eisi", "docentes": docentes })
 
 
 

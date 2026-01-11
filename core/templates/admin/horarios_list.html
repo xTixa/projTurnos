@@ -25,9 +25,9 @@
             <td><a href="{{ h.ficheiro.url }}" target="_blank">Abrir</a></td>
             <td>{{ h.atualizado_em|date:"d/m/Y H:i" }}</td>
             <td>
-                <a href="{% url 'home:admin_horarios_edit' h.id %}" class="edit-btn">✏️</a>
-                <a href="{% url 'home:admin_horarios_delete' h.id %}" class="delete-btn"
-                   onclick="return confirm('Apagar horário?');">❌</a>
+                     <a href="{% url 'home:admin_horarios_edit' h.id %}" class="edit-btn"><i class="fa-regular fa-pen-to-square"></i></a>
+                     <a href="{% url 'home:admin_horarios_delete' h.id %}" class="delete-btn"
+                         onclick="return confirm('Apagar horário?');"><i class="fa-solid fa-trash"></i></a>
             </td>
         </tr>
         {% endfor %}

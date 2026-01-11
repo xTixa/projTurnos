@@ -35,5 +35,28 @@
         <p>Telefone: 232 480 500</p>
     </section>
 
+    <hr>
+
+    <section class="info-block">
+        <h2>Corpo Docente</h2>
+
+        {% if docentes %}
+        <div class="docentes-grid">
+            {% for d in docentes %}
+            <div class="docente-card">
+                <h3>{{ d.nome }}</h3>
+                {% if d.email %}
+                <p>Email: <a href="mailto:{{ d.email }}">{{ d.email }}</a></p>
+                {% else %}
+                <p><em>Sem email registado</em></p>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p>Sem docentes registados.</p>
+        {% endif %}
+    </section>
+
 </div>
 {% endblock %}

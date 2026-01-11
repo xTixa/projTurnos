@@ -61,8 +61,8 @@
             <td>{{ uc.ects }}</td>
 
             <td>
-                <a href="{% url 'home:admin_uc_edit' uc.id_unidadecurricular  %}" class="edit-btn">✏️</a>
-                <a href="{% url 'home:admin_uc_delete' uc.id_unidadecurricular  %}" class="delete-btn" onclick="return confirm('Apagar UC?');">❌</a>
+                <a href="{% url 'home:admin_uc_edit' uc.id_unidadecurricular  %}" class="edit-btn"><i class="fa-regular fa-pen-to-square"></i></a>
+                <a href="{% url 'home:admin_uc_delete' uc.id_unidadecurricular  %}" class="delete-btn" onclick="return confirm('Apagar UC?');"><i class="fa-solid fa-trash"></i></a>
             </td>
         </tr>
         {% endfor %}

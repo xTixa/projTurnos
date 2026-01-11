@@ -43,3 +43,23 @@
 .info-block a:hover {
     text-decoration: underline;
 }
+
+/* Docentes grid */
+.docentes-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 16px;
+    margin-top: 12px;
+}
+
+.docente-card {
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 12px 14px;
+    background: #fff;
+}
+
+.docente-card h3 {
+    font-size: 16px;
+    margin: 0 0 6px 0;
+}

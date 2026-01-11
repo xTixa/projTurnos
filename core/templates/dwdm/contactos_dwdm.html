@@ -18,22 +18,42 @@
     </p>
 
     <section class="info-block">
-        <h2>📞 Coordenação do Curso</h2>
+        <h2><i class="fa-solid fa-phone"></i> Coordenação do Curso</h2>
         <p><strong>Coordenador:</strong> Prof. Doutor João Pedro Moreira</p>
         <p><strong>Email:</strong> <a href="mailto:jmoreira@estgv.ipv.pt">jmoreira@estgv.ipv.pt</a></p>
     </section>
 
     <section class="info-block">
-        <h2>🏛️ Secretaria da ESTGV</h2>
+        <h2><i class="fa-solid fa-building-columns"></i> Secretaria da ESTGV</h2>
         <p><strong>Telefone:</strong> 232 419 100</p>
         <p><strong>Email:</strong> <a href="mailto:secretaria@estgv.ipv.pt">secretaria@estgv.ipv.pt</a></p>
         <p><strong>Horário:</strong> Dias úteis — 9h00 às 12h30 e 14h00 às 17h30</p>
     </section>
 
     <section class="info-block">
-        <h2>📍 Localização</h2>
+        <h2><i class="fa-solid fa-location-dot"></i> Localização</h2>
         <p>Escola Superior de Tecnologia e Gestão de Viseu</p>
         <p>Campus Politécnico • 3504-510 Viseu</p>
+    </section>
+
+    <section class="info-block">
+        <h2><i class="fa-solid fa-chalkboard-teacher"></i> Corpo Docente</h2>
+        {% if docentes %}
+        <div class="docentes-grid">
+            {% for d in docentes %}
+            <div class="docente-card">
+                <h3>{{ d.nome }}</h3>
+                {% if d.email %}
+                <p>Email: <a href="mailto:{{ d.email }}">{{ d.email }}</a></p>
+                {% else %}
+                <p><em>Sem email registado</em></p>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p>Sem docentes registados.</p>
+        {% endif %}
     </section>
 
 </div>

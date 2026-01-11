@@ -48,7 +48,7 @@
                             data-hora="{{ t.hora_inicio }}">
                         {{ t.nome }} — {{ t.horario }} —
                         {% if t.ja_inscrito %}
-                            ✓ Já inscrito
+                            <i class="fa-solid fa-check"></i> Já inscrito
                         {% elif t.vagas == 0 %}
                             Esgotado
                         {% else %}

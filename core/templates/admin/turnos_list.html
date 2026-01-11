@@ -25,8 +25,8 @@
             <td>{{ t.tipo }}</td>
 
             <td>
-                <a href="{% url 'home:admin_turnos_edit' t.id_turno %}" class="edit-btn">✏️</a>
-                <a href="{% url 'home:admin_turnos_delete' t.id_turno %}" class="delete-btn" onclick="return confirm('Apagar turno?');">❌</a>
+                <a href="{% url 'home:admin_turnos_edit' t.id_turno %}" class="edit-btn"><i class="fa-regular fa-pen-to-square"></i></a>
+                <a href="{% url 'home:admin_turnos_delete' t.id_turno %}" class="delete-btn" onclick="return confirm('Apagar turno?');"><i class="fa-solid fa-trash"></i></a>
             </td>
         </tr>
         {% endfor %}

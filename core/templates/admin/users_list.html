@@ -24,10 +24,10 @@
 
             <td>
                 <a href="{% url 'home:admin_users_edit' u.id %}" class="edit-btn">
-                    ✏️ Editar
+                    <i class="fa-regular fa-pen-to-square"></i> Editar
                 </a>
                 <a href="{% url 'home:admin_users_delete' u.id %}" class="delete-btn" onclick="return confirm('Apagar?');">
-                    ❌ Apagar
+                    <i class="fa-solid fa-trash"></i> Apagar
                 </a>
             </td>
         </tr>
