@@ -8,90 +8,35 @@
 {% endblock %}
 
 {% block content %}
-<div class="page-container">
+<section class="plano-hero">
+  <h1>Plano Curricular</h1>
+  <p>Consulta as Unidades Curriculares de cada ano e semestre do curso.</p>
+</section>
 
-    <h1 class="page-title">Plano Curricular</h1>
+<section class="plano-section">
+  {% for ano, semestres in plano.items %}
+  <div class="ano-bloco animate">
+    <h2>{{ ano }}</h2>
 
-    <p class="intro-text">
-        A Licenciatura em <strong>Redes e Sistemas Informáticos (RSI)</strong> organiza-se em seis semestres,
-        com uma forte componente prática, focada em redes, sistemas, segurança informática e tecnologias de suporte.
-    </p>
-
-    <section class="info-block">
-        <h2>Estrutura do Curso</h2>
-        <p>O plano curricular distribui-se ao longo de três anos, com unidades curriculares essenciais para o desenvolvimento
-            de competências técnicas na área das tecnologias de informação.</p>
-    </section>
-
-    <section class="semester-grid">
-
-        <!-- Ano 1 -->
-        <div class="semester-card">
-            <h3>1º Ano — 1º Semestre</h3>
-            <ul>
-                <li>Fundamentos de Programação</li>
-                <li>Arquitetura de Computadores</li>
-                <li>Introdução às Redes</li>
-                <li>Matemática Discreta</li>
-                <li>Sistemas de Informação</li>
-            </ul>
+    <div class="semestres-lado-a-lado">
+      {% for semestre, unidades in semestres.items %}
+      <div class="semestre-coluna">
+        <h3>{{ semestre }}</h3>
+        <div class="uc-grid">
+          {% for uc in unidades %}
+          <div class="uc-card">
+            <h4>{{ uc.nome }}</h4>
+            <span class="ects">{{ uc.ects }} ECTS</span>
+          </div>
+          {% endfor %}
         </div>
+      </div>
+      {% endfor %}
+    </div>
 
-        <div class="semester-card">
-            <h3>1º Ano — 2º Semestre</h3>
-            <ul>
-                <li>Programação II</li>
-                <li>Eletrónica e Sistemas Digitais</li>
-                <li>Redes de Comunicação</li>
-                <li>Bases de Dados</li>
-                <li>Sistemas Operativos</li>
-            </ul>
-        </div>
-
-        <!-- Ano 2 -->
-        <div class="semester-card">
-            <h3>2º Ano — 1º Semestre</h3>
-            <ul>
-                <li>Administração de Sistemas</li>
-                <li>Protocolos e Tecnologias de Rede</li>
-                <li>Segurança Informática</li>
-                <li>Gestão de Infraestruturas</li>
-                <li>Estatística e Probabilidades</li>
-            </ul>
-        </div>
-
-        <div class="semester-card">
-            <h3>2º Ano — 2º Semestre</h3>
-            <ul>
-                <li>Serviços e Tecnologias de Internet</li>
-                <li>Virtualização e Cloud Computing</li>
-                <li>Projeto em Sistemas Informáticos</li>
-                <li>Administração Avançada de Redes</li>
-                <li>Gestão de Projetos</li>
-            </ul>
-        </div>
-
-        <!-- Ano 3 -->
-        <div class="semester-card">
-            <h3>3º Ano — 1º Semestre</h3>
-            <ul>
-                <li>Monitorização e Diagnóstico</li>
-                <li>Forense Digital</li>
-                <li>Administração Segurança de Redes</li>
-                <li>Opção I</li>
-                <li>Opção II</li>
-            </ul>
-        </div>
-
-        <div class="semester-card">
-            <h3>3º Ano — 2º Semestre</h3>
-            <ul>
-                <li>Estágio em Empresa</li>
-                <li>Projeto Final</li>
-            </ul>
-        </div>
-
-    </section>
-
-</div>
+  </div>
+  {% empty %}
+    <p class="placeholder">Nenhuma unidade curricular disponível.</p>
+  {% endfor %}
+</section>
 {% endblock %}

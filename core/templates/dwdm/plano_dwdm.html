@@ -1,55 +1,42 @@
 {% extends "home/base.html" %}
 {% load static %}
 
-{% block title %}Plano Curricular — DWDM{% endblock %}
+{% block title %}Plano Curricular — Desenvolvimento Web e Dispositivos Móveis{% endblock %}
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/dwdm/plano.css' %}">
 {% endblock %}
 
 {% block content %}
-<div class="page-container">
+<section class="plano-hero">
+  <h1>Plano Curricular</h1>
+  <p>Consulta as Unidades Curriculares de cada ano e semestre do curso.</p>
+</section>
 
-    <h1 class="page-title">Plano Curricular</h1>
+<section class="plano-section">
+  {% for ano, semestres in plano.items %}
+  <div class="ano-bloco animate">
+    <h2>{{ ano }}</h2>
 
-    <p class="intro-text">
-        O plano curricular do curso de <strong>DWDM</strong> integra formação técnica
-        em programação web e mobile, bases de dados, computação na cloud,
-        interfaces digitais e desenvolvimento de software.
-    </p>
+    <div class="semestres-lado-a-lado">
+      {% for semestre, unidades in semestres.items %}
+      <div class="semestre-coluna">
+        <h3>{{ semestre }}</h3>
+        <div class="uc-grid">
+          {% for uc in unidades %}
+          <div class="uc-card">
+            <h4>{{ uc.nome }}</h4>
+            <span class="ects">{{ uc.ects }} ECTS</span>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+      {% endfor %}
+    </div>
 
-    <section class="plan-block">
-        <h2>1º Ano</h2>
-        <ul>
-            <li>Programação I</li>
-            <li>Fundamentos de Web</li>
-            <li>Bases de Dados I</li>
-            <li>Matemática Discreta</li>
-            <li>Design de Interfaces I</li>
-            <li>Algoritmos e Estruturas de Dados</li>
-        </ul>
-    </section>
-
-    <section class="plan-block">
-        <h2>2º Ano</h2>
-        <ul>
-            <li>Programação Web Avançada</li>
-            <li>Desenvolvimento Mobile</li>
-            <li>Bases de Dados II</li>
-            <li>Cloud Computing</li>
-            <li>Design de Interfaces II</li>
-            <li>APIs e Microserviços</li>
-        </ul>
-    </section>
-
-    <section class="plan-block">
-        <h2>3º Ano</h2>
-        <ul>
-            <li>Projeto de Desenvolvimento</li>
-            <li>Tópicos Avançados em TI</li>
-            <li>Estágio em Empresa</li>
-        </ul>
-    </section>
-
-</div>
+  </div>
+  {% empty %}
+    <p class="placeholder">Nenhuma unidade curricular disponível.</p>
+  {% endfor %}
+</section>
 {% endblock %}

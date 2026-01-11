@@ -1,105 +1,42 @@
 {% extends "home/base.html" %}
 {% load static %}
 
-{% block title %}Plano Curricular — TDM{% endblock %}
+{% block title %}Plano Curricular — Tecnologias e Design Multimédia{% endblock %}
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/tdm/plano_tdm.css' %}">
 {% endblock %}
 
 {% block content %}
-<div class="page-container">
+<section class="plano-hero">
+  <h1>Plano Curricular</h1>
+  <p>Consulta as Unidades Curriculares de cada ano e semestre do curso.</p>
+</section>
 
-    <h1 class="page-title">Plano Curricular — Tecnologias e Design Multimédia</h1>
+<section class="plano-section">
+  {% for ano, semestres in plano.items %}
+  <div class="ano-bloco animate">
+    <h2>{{ ano }}</h2>
 
-    <p class="intro-text">
-        O curso está organizado em <strong>3 anos</strong>, num total de <strong>180 ECTS</strong>.
-        A estrutura curricular integra componentes tecnológicas, criativas e práticas,
-        promovendo um perfil profissional completo e multidisciplinar.
-    </p>
-
-    <hr>
-
-    <!-- ANO 1 -->
-    <section class="year-block">
-        <h2>1.º Ano</h2>
-
-        <div class="semester">
-            <h3>1.º Semestre</h3>
-            <ul>
-                <li>Desenho — 6 ECTS</li>
-                <li>Fundamentos de Multimédia — 6 ECTS</li>
-                <li>Tecnologias Web I — 6 ECTS</li>
-                <li>Matemática Aplicada — 6 ECTS</li>
-                <li>Comunicação Visual — 6 ECTS</li>
-            </ul>
+    <div class="semestres-lado-a-lado">
+      {% for semestre, unidades in semestres.items %}
+      <div class="semestre-coluna">
+        <h3>{{ semestre }}</h3>
+        <div class="uc-grid">
+          {% for uc in unidades %}
+          <div class="uc-card">
+            <h4>{{ uc.nome }}</h4>
+            <span class="ects">{{ uc.ects }} ECTS</span>
+          </div>
+          {% endfor %}
         </div>
+      </div>
+      {% endfor %}
+    </div>
 
-        <div class="semester">
-            <h3>2.º Semestre</h3>
-            <ul>
-                <li>Design Gráfico — 6 ECTS</li>
-                <li>Programação para Multimédia — 6 ECTS</li>
-                <li>Fotografia e Vídeo — 6 ECTS</li>
-                <li>Modelação 3D — 6 ECTS</li>
-                <li>Projeto Multimédia I — 6 ECTS</li>
-            </ul>
-        </div>
-    </section>
-
-    <hr>
-
-    <!-- ANO 2 -->
-    <section class="year-block">
-        <h2>2.º Ano</h2>
-
-        <div class="semester">
-            <h3>1.º Semestre</h3>
-            <ul>
-                <li>Design de Interação — 6 ECTS</li>
-                <li>Programação Web — 6 ECTS</li>
-                <li>Animação 2D/3D — 6 ECTS</li>
-                <li>Áudio Digital — 6 ECTS</li>
-                <li>Projeto Multimédia II — 6 ECTS</li>
-            </ul>
-        </div>
-
-        <div class="semester">
-            <h3>2.º Semestre</h3>
-            <ul>
-                <li>Interface e Experiência do Utilizador (UI/UX) — 6 ECTS</li>
-                <li>Vídeo Digital — 6 ECTS</li>
-                <li>Realidade Virtual e Aumentada — 6 ECTS</li>
-                <li>Marketing Digital — 6 ECTS</li>
-                <li>Projeto Multimédia III — 6 ECTS</li>
-            </ul>
-        </div>
-    </section>
-
-    <hr>
-
-    <!-- ANO 3 -->
-    <section class="year-block">
-        <h2>3.º Ano</h2>
-
-        <div class="semester">
-            <h3>1.º Semestre</h3>
-            <ul>
-                <li>Produção Multimédia Avançada — 6 ECTS</li>
-                <li>Gestão de Projetos — 6 ECTS</li>
-                <li>Laboratório de Multimédia — 6 ECTS</li>
-                <li>Opção I — 6 ECTS</li>
-                <li>Projeto Multimédia IV — 6 ECTS</li>
-            </ul>
-        </div>
-
-        <div class="semester">
-            <h3>2.º Semestre</h3>
-            <ul>
-                <li>Estágio / Projeto Final — 30 ECTS</li>
-            </ul>
-        </div>
-    </section>
-
-</div>
+  </div>
+  {% empty %}
+    <p class="placeholder">Nenhuma unidade curricular disponível.</p>
+  {% endfor %}
+</section>
 {% endblock %}

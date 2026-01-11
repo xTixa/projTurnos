@@ -86,8 +86,10 @@ def ingresso(request):
 
 
 def plano_curricular(request):
-    # Busca todas as unidades, com joins automáticos
-    unidades = UnidadeCurricular.objects.select_related('id_anocurricular', 'id_semestre').order_by(
+    # Filtrar apenas UCs de Engenharia Informática (id_curso = 1)
+    unidades = UnidadeCurricular.objects.filter(id_curso_id=1).select_related(
+        'id_anocurricular', 'id_semestre'
+    ).order_by(
         'id_anocurricular__id_anocurricular', 'id_semestre__id_semestre'
     )
 
@@ -661,7 +663,25 @@ def ingresso_tdm(request):
     return render(request, "tdm/ingresso_tdm.html", { "area": "tdm" })
 
 def plano_tdm(request):
-    return render(request, "tdm/plano_tdm.html", { "area": "tdm" })
+    # Filtrar apenas UCs de Tecnologia e Design Multimedia (id_curso = 2)
+    unidades = UnidadeCurricular.objects.filter(id_curso_id=2).select_related(
+        'id_anocurricular', 'id_semestre'
+    ).order_by(
+        'id_anocurricular__id_anocurricular', 'id_semestre__id_semestre'
+    )
+
+    # Organiza por ano e semestre
+    plano = {}
+    for uc in unidades:
+        ano = uc.id_anocurricular.ano_curricular
+        semestre = uc.id_semestre.semestre
+        if ano not in plano:
+            plano[ano] = {}
+        if semestre not in plano[ano]:
+            plano[ano][semestre] = []
+        plano[ano][semestre].append(uc)
+
+    return render(request, "tdm/plano_tdm.html", {"plano": plano, "area": "tdm"})
 
 def horarios_tdm(request):
     anos = AnoCurricular.objects.all().order_by("id_anocurricular")
@@ -703,7 +723,25 @@ def ingresso_rsi(request):
     return render(request, "rsi/ingresso_rsi.html", { "area": "rsi" })
 
 def plano_curric_rsi(request):
-    return render(request, "rsi/plano_curric_rsi.html", { "area": "rsi" })
+    # Filtrar apenas UCs de Redes e Sistemas Informaticos (id_curso = 3)
+    unidades = UnidadeCurricular.objects.filter(id_curso_id=3).select_related(
+        'id_anocurricular', 'id_semestre'
+    ).order_by(
+        'id_anocurricular__id_anocurricular', 'id_semestre__id_semestre'
+    )
+
+    # Organiza por ano e semestre
+    plano = {}
+    for uc in unidades:
+        ano = uc.id_anocurricular.ano_curricular
+        semestre = uc.id_semestre.semestre
+        if ano not in plano:
+            plano[ano] = {}
+        if semestre not in plano[ano]:
+            plano[ano][semestre] = []
+        plano[ano][semestre].append(uc)
+
+    return render(request, "rsi/plano_curric_rsi.html", {"plano": plano, "area": "rsi"})
 
 def estagio_rsi(request):
     return render(request, "rsi/estagio_rsi.html", { "area": "rsi" })
@@ -729,7 +767,25 @@ def ingresso_dwdm(request):
     return render(request, "dwdm/ingresso_dwdm.html", { "area": "dwdm" })
 
 def plano_dwdm(request):
-    return render(request, "dwdm/plano_dwdm.html", { "area": "dwdm" })
+    # Filtrar apenas UCs de Desenvolvimento Web e Dispositivos Móveis (id_curso = 4)
+    unidades = UnidadeCurricular.objects.filter(id_curso_id=4).select_related(
+        'id_anocurricular', 'id_semestre'
+    ).order_by(
+        'id_anocurricular__id_anocurricular', 'id_semestre__id_semestre'
+    )
+
+    # Organiza por ano e semestre
+    plano = {}
+    for uc in unidades:
+        ano = uc.id_anocurricular.ano_curricular
+        semestre = uc.id_semestre.semestre
+        if ano not in plano:
+            plano[ano] = {}
+        if semestre not in plano[ano]:
+            plano[ano][semestre] = []
+        plano[ano][semestre].append(uc)
+
+    return render(request, "dwdm/plano_dwdm.html", {"plano": plano, "area": "dwdm"})
 
 def horarios_dwdm(request):
     return render(request, "dwdm/horarios_dwdm.html", { "area": "dwdm" })
@@ -764,7 +820,25 @@ def destinatarios_mestrado(request):
     return render(request, "eisi/destinatarios_mestrado.html", { "area": "eisi" })
 
 def plano_curric_mestrado(request):
-    return render(request, "eisi/plano_curric_mestrado.html", { "area": "eisi" })
+    # Filtrar apenas UCs de Engenharia Informática – Sistemas de Informação (id_curso = 5)
+    unidades = UnidadeCurricular.objects.filter(id_curso_id=5).select_related(
+        'id_anocurricular', 'id_semestre'
+    ).order_by(
+        'id_anocurricular__id_anocurricular', 'id_semestre__id_semestre'
+    )
+
+    # Organiza por ano e semestre
+    plano = {}
+    for uc in unidades:
+        ano = uc.id_anocurricular.ano_curricular
+        semestre = uc.id_semestre.semestre
+        if ano not in plano:
+            plano[ano] = {}
+        if semestre not in plano[ano]:
+            plano[ano][semestre] = []
+        plano[ano][semestre].append(uc)
+
+    return render(request, "eisi/plano_curric_mestrado.html", {"plano": plano, "area": "eisi"})
 
 def horarios_mestrado(request):
     return render(request, "eisi/horarios_mestrado.html", { "area": "eisi" })

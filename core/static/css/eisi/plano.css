@@ -1,36 +1,134 @@
-.page-container {
-    padding: 25px;
-    max-width: 900px;
-    margin: auto;
+/* ===== PLANO CURRICULAR — EISI ===== */
+
+.plano-hero {
+  background: linear-gradient(135deg, #eaf4ff, #ffffff);
+  text-align: center;
+  padding: 40px;
+  border-radius: 20px;
+  margin-bottom: 40px;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+}
+.plano-hero h1 {
+  color: #2371a7;
+  font-size: 2rem;
+  margin-bottom: 10px;
+}
+.plano-hero p {
+  color: #64748b;
+  font-size: 1rem;
 }
 
-.page-title {
-    font-size: 32px;
-    margin-bottom: 10px;
+/* Container geral */
+.plano-section {
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
 }
 
-.intro-text {
-    font-size: 18px;
-    margin-bottom: 20px;
+/* Bloco de cada ano */
+.ano-bloco {
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+  padding: 24px 30px;
+  transition: all 0.2s ease;
+}
+.ano-bloco:hover {
+  transform: translateY(-3px);
+}
+.ano-bloco h2 {
+  color: #2371a7;
+  margin-bottom: 20px;
+  border-bottom: 2px solid #eaf4ff;
+  padding-bottom: 6px;
 }
 
-.year-block {
-    margin: 40px 0;
+/* Lado a lado — 1º e 2º semestre */
+.semestres-lado-a-lado {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+@media (max-width: 900px) {
+  .semestres-lado-a-lado {
+    grid-template-columns: 1fr;
+  }
 }
 
-.year-block h2 {
-    color: #004488;
+/* Coluna de semestre */
+.semestre-coluna {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+  padding: 20px;
+  transition: transform 0.2s ease;
+}
+.semestre-coluna:hover {
+  transform: translateY(-3px);
+}
+.semestre-coluna h3 {
+  color: #2371a7;
+  font-size: 1.1rem;
+  border-bottom: 2px solid #eaf4ff;
+  padding-bottom: 6px;
+  margin-bottom: 12px;
 }
 
-.semester h3 {
-    margin-top: 15px;
-    color: #0060aa;
+/* Grelha de UCs */
+.uc-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
-.semester ul {
-    padding-left: 20px;
+/* Cartão da UC */
+.uc-card {
+  background: #eaf4ff;
+  border-radius: 10px;
+  padding: 12px 14px;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+.uc-card:hover {
+  background: #2371a7;
+  color: #fff;
+}
+.uc-card h4 {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+.uc-card .ects {
+  display: inline-block;
+  margin-top: 6px;
+  font-size: 0.75rem;
+  background: rgba(255, 255, 255, 0.3);
+  color: #fff;
+  padding: 3px 8px;
+  border-radius: 8px;
 }
 
-.semester li {
-    margin: 6px 0;
+/* Placeholder */
+.placeholder {
+  text-align: center;
+  color: #64748b;
+  font-style: italic;
+}
+
+/* Animação */
+.animate {
+  animation: fadeIn 0.4s ease;
+}
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
