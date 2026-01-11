@@ -1,12 +1,12 @@
 {% extends "../home/base.html" %}
 
 {% block content %}
-<h1>Logs do Sistema</h1>
+<h1>Logs Unificados</h1>
 
 <!-- FILTROS -->
 <div class="filters-section" style="margin: 20px 0; padding: 20px; background: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
     <form method="GET" style="display: flex; gap: 15px; align-items: flex-end; flex-wrap: wrap;">
-        <div style="flex: 1; min-width: 200px;">
+        <div style="flex: 1; min-width: 180px;">
             <label for="operacao" style="display: block; margin-bottom: 5px; font-weight: 500;">Operação:</label>
             <select name="operacao" id="operacao" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
                 <option value="">Todas</option>
@@ -16,7 +16,7 @@
             </select>
         </div>
 
-        <div style="flex: 1; min-width: 200px;">
+        <div style="flex: 1; min-width: 180px;">
             <label for="entidade" style="display: block; margin-bottom: 5px; font-weight: 500;">Entidade:</label>
             <select name="entidade" id="entidade" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
                 <option value="">Todas</option>
@@ -24,6 +24,11 @@
                 <option value="{{ ent }}" {% if ent == entidade_filter %}selected{% endif %}>{{ ent }}</option>
                 {% endfor %}
             </select>
+        </div>
+
+        <div style="width: 140px;">
+            <label for="limite" style="display: block; margin-bottom: 5px; font-weight: 500;">Limite:</label>
+            <input type="number" name="limite" id="limite" value="{{ limite }}" min="50" max="1000" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;" />
         </div>
 
         <div style="display: flex; gap: 10px;">
@@ -44,12 +49,14 @@
 <table class="admin-table">
     <thead>
         <tr>
-            <th>ID</th>
+            <th>Fonte</th>
             <th>Data</th>
             <th>Utilizador</th>
             <th>Operação</th>
             <th>Entidade</th>
             <th>Chave</th>
+            <th>IP</th>
+            <th>User-Agent</th>
             <th>Detalhes</th>
         </tr>
     </thead>
@@ -57,17 +64,19 @@
     <tbody>
         {% for log in logs %}
         <tr>
-            <td>{{ log.id_log }}</td>
-            <td>{{ log.data_hora|date:"d/m/Y H:i" }}</td>
-            <td>{{ log.utilizador_db }}</td>
-            <td class="log-op log-{{ log.operacao|lower }}">{{ log.operacao }}</td>
-            <td>{{ log.entidade }}</td>
-            <td>{{ log.chave_primaria }}</td>
-            <td>{{ log.detalhes }}</td>
+            <td><span style="padding: 2px 8px; border-radius: 10px; background: {% if log.fonte == 'Mongo' %}#e0f2fe{% else %}#e2e8f0{% endif %}; color: #111; font-weight: 600;">{{ log.fonte }}</span></td>
+            <td>{{ log.data_display }}</td>
+            <td>{{ log.utilizador|default:"-" }}</td>
+            <td class="log-op">{{ log.operacao }}</td>
+            <td>{{ log.entidade|default:"-" }}</td>
+            <td>{{ log.chave|default:"-" }}</td>
+            <td>{{ log.ip|default:"-" }}</td>
+            <td>{{ log.user_agent|default:""|truncatechars:60 }}</td>
+            <td style="max-width: 360px; white-space: pre-wrap;">{{ log.detalhes }}</td>
         </tr>
         {% empty %}
         <tr>
-            <td colspan="7" style="text-align: center; padding: 30px; color: #999;">
+            <td colspan="9" style="text-align: center; padding: 30px; color: #999;">
                 Nenhum log encontrado com os filtros selecionados.
             </td>
         </tr>

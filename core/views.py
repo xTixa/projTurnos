@@ -1051,30 +1051,116 @@ def admin_uc_delete(request, id):
 
 
 def admin_logs_list(request):
-    # Filtrar por operação
-    operacao_filter = request.GET.get('operacao', '')
-    entidade_filter = request.GET.get('entidade', '')
-    
-    logs = LogEvento.objects.all()
-    
+    # Filtros
+    operacao_filter = (request.GET.get('operacao') or '').strip()
+    entidade_filter = (request.GET.get('entidade') or '').strip()
+    limite = int(request.GET.get('limite', 500) or 500)
+    limite = 1000 if limite > 1000 else (100 if limite < 1 else limite)
+
+    def _to_str(val):
+        if val is None:
+            return ""
+        if isinstance(val, str):
+            return val
+        try:
+            return json.dumps(val, ensure_ascii=False)
+        except Exception:
+            return str(val)
+
+    # Fonte SQL
+    sql_qs = LogEvento.objects.all()
     if operacao_filter:
-        logs = logs.filter(operacao__icontains=operacao_filter)
-    
+        sql_qs = sql_qs.filter(operacao__icontains=operacao_filter)
     if entidade_filter:
-        logs = logs.filter(entidade__icontains=entidade_filter)
-    
-    logs = logs[:500]
-    
-    # Obter lista de operações para os filtros
-    operacoes = LogEvento.objects.values_list('operacao', flat=True).distinct().order_by('operacao')
-    entidades = LogEvento.objects.values_list('entidade', flat=True).distinct().order_by('entidade')
+        sql_qs = sql_qs.filter(entidade__icontains=entidade_filter)
+    sql_qs = sql_qs.order_by('-data_hora')[:limite]
+
+    sql_logs = [
+        {
+            "id": log.id_log,
+            "fonte": "SQL",
+            "data": log.data_hora,
+            "data_display": log.data_hora.strftime("%Y-%m-%d %H:%M:%S") if log.data_hora else "",
+            "operacao": log.operacao,
+            "entidade": log.entidade,
+            "chave": log.chave_primaria,
+            "utilizador": log.utilizador_db,
+            "ip": "",
+            "user_agent": "",
+            "detalhes": _to_str(log.detalhes),
+        }
+        for log in sql_qs
+    ]
+
+    # Fonte Mongo
+    filtro_mongo = {}
+    if operacao_filter:
+        filtro_mongo['acao'] = operacao_filter
+
+    mongo_raw = listar_logs(filtro_mongo, limite)
+    mongo_logs = []
+    for log in mongo_raw:
+        # filtro de entidade aplicado manualmente (campo dentro de detalhes)
+        ent_mongo = ""
+        detalhes_raw = log.get("detalhes")
+        if isinstance(detalhes_raw, dict):
+            ent_mongo = detalhes_raw.get("entidade", "")
+        if entidade_filter and entidade_filter.lower() not in str(ent_mongo).lower():
+            continue
+
+        ts = log.get("timestamp") or log.get("data_formatada")
+        ts_dt = None
+        if isinstance(ts, str):
+            try:
+                ts_dt = datetime.fromisoformat(ts)
+            except Exception:
+                ts_dt = None
+        else:
+            ts_dt = ts
+
+        mongo_logs.append({
+            "id": log.get("_id"),
+            "fonte": "Mongo",
+            "data": ts_dt,
+            "data_display": log.get("data_formatada") or (ts_dt.strftime("%Y-%m-%d %H:%M:%S") if ts_dt else ""),
+            "operacao": log.get("acao", ""),
+            "entidade": ent_mongo,
+            "chave": detalhes_raw.get("chave", "") if isinstance(detalhes_raw, dict) else "",
+            "utilizador": (log.get("contexto") or {}).get("utilizador", ""),
+            "ip": (log.get("contexto") or {}).get("ip", ""),
+            "user_agent": (log.get("contexto") or {}).get("user_agent", ""),
+            "detalhes": _to_str(detalhes_raw),
+        })
+
+    # Unificar e ordenar
+    logs_unificados = sql_logs + mongo_logs
+    logs_unificados = sorted(
+        logs_unificados,
+        key=lambda l: l.get("data") or datetime.min,
+        reverse=True
+    )[:limite]
+
+    # Opções para filtros combinados
+    operacoes = set(
+        list(LogEvento.objects.values_list('operacao', flat=True).distinct()) +
+        [l.get("operacao", "") for l in mongo_raw]
+    )
+    entidades = set(
+        list(LogEvento.objects.values_list('entidade', flat=True).distinct()) +
+        [
+            (l.get("detalhes") or {}).get("entidade", "")
+            for l in mongo_raw
+            if isinstance(l.get("detalhes"), dict)
+        ]
+    )
 
     return render(request, "admin/logs_list.html", {
-        "logs": logs,
-        "operacoes": operacoes,
-        "entidades": entidades,
+        "logs": logs_unificados,
+        "operacoes": sorted([op for op in operacoes if op]),
+        "entidades": sorted([ent for ent in entidades if ent]),
         "operacao_filter": operacao_filter,
         "entidade_filter": entidade_filter,
+        "limite": limite,
     })
 
 # ==========================

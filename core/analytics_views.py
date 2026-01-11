@@ -12,8 +12,7 @@ from bd2_projeto.services.mongo_service import (
     analisar_inscricoes_por_dia,
     analisar_alunos_mais_ativos,
     analisar_ucs_mais_procuradas,
-    analisar_turnos_sobrecarregados,
-    listar_logs
+    analisar_turnos_sobrecarregados
 )
 from core.utils import admin_required
 
@@ -79,34 +78,3 @@ def analytics_api_ucs_procuradas(request):
     """API para gráfico de UCs mais procuradas"""
     dados = analisar_ucs_mais_procuradas()
     return JsonResponse(dados, safe=False)
-
-
-@admin_required
-@login_required
-def logs_detalhados(request):
-    """View para ver logs detalhados com filtros"""
-    
-    # Filtros opcionais
-    acao = request.GET.get('acao', '')
-    limite = int(request.GET.get('limite', 100))
-    
-    filtro = {}
-    if acao:
-        filtro['acao'] = acao
-    
-    logs = listar_logs(filtro, limite)
-    
-    # Obter ações únicas para dropdown
-    todas_acoes = set()
-    for log in logs:
-        if 'acao' in log:
-            todas_acoes.add(log['acao'])
-    
-    contexto = {
-        "logs": logs,
-        "acoes": sorted(todas_acoes),
-        "acao_filtrada": acao,
-        "total_logs": len(logs)
-    }
-    
-    return render(request, "admin/logs_detalhados.html", contexto)

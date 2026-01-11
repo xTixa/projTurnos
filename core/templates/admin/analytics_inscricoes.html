@@ -1,0 +1,145 @@
+{% extends "home/base.html" %}
+{% load static %}
+
+{% block title %}Analytics — Inscrições{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+  <h1>📊 Analytics — Inscrições em Turnos</h1>
+
+  <div class="row mt-4">
+    <div class="col-md-6 mb-4">
+      <h3>Taxa de Sucesso</h3>
+      <canvas id="taxa-sucesso-chart"></canvas>
+    </div>
+    <div class="col-md-6 mb-4">
+      <h3>Inscrições por Dia</h3>
+      <canvas id="inscricoes-dia-chart"></canvas>
+    </div>
+  </div>
+
+  <div class="row mt-4">
+    <div class="col-md-6 mb-4">
+      <h3>Top 10 Alunos Mais Ativos</h3>
+      <table class="table table-striped">
+        <thead>
+          <tr>
+            <th>Aluno</th>
+            <th>Tentativas</th>
+            <th>Sucessos</th>
+            <th>Taxa</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for aluno in alunos_ativos %}
+          <tr>
+            <td>{{ aluno.aluno_id }}</td>
+            <td>{{ aluno.total_tentativas }}</td>
+            <td>{{ aluno.sucessos }}</td>
+            <td>{{ aluno.taxa_sucesso|floatformat:2 }}</td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="4">Sem dados.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <div class="col-md-6 mb-4">
+      <h3>Top 10 UCs Mais Procuradas</h3>
+      <table class="table table-striped">
+        <thead>
+          <tr>
+            <th>UC</th>
+            <th>Tentativas</th>
+            <th>Sucessos</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for uc in ucs_procuradas %}
+          <tr>
+            <td>{{ uc.uc_nome }}</td>
+            <td>{{ uc.total_tentativas }}</td>
+            <td>{{ uc.sucessos }}</td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="3">Sem dados.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="row mt-4">
+    <div class="col-md-12 mb-4">
+      <h3>Turnos Sobrecarregados</h3>
+      <table class="table table-striped">
+        <thead>
+          <tr>
+            <th>ID Turno</th>
+            <th>Rejeições por limite</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for turno in turnos_cheios %}
+          <tr>
+            <td>{{ turno.turno_id }}</td>
+            <td>{{ turno.rejeicoes_por_limite }}</td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="2">Sem dados.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  // Taxa de sucesso
+  fetch('/api/analytics/taxa-sucesso/')
+    .then(r => r.json())
+    .then(data => {
+      const ctx = document.getElementById('taxa-sucesso-chart');
+      new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+          labels: data.map(d => d._id),
+          datasets: [{
+            data: data.map(d => d.count),
+            backgroundColor: ['#10b981', '#ef4444', '#f59e0b', '#3b82f6', '#6366f1', '#14b8a6']
+          }]
+        }
+      });
+    });
+
+  // Inscrições por dia
+  fetch('/api/analytics/inscricoes-dia/')
+    .then(r => r.json())
+    .then(data => {
+      const ctx = document.getElementById('inscricoes-dia-chart');
+      new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: data.map(d => d._id),
+          datasets: [{
+            label: 'Inscrições',
+            data: data.map(d => d.total_tentativas),
+            borderColor: '#3b82f6',
+            backgroundColor: 'rgba(59, 130, 246, 0.2)',
+            fill: true,
+            tension: 0.3
+          }, {
+            label: 'Sucessos',
+            data: data.map(d => d.sucesso),
+            borderColor: '#10b981',
+            backgroundColor: 'rgba(16, 185, 129, 0.15)',
+            fill: true,
+            tension: 0.3
+          }]
+        }
+      });
+    });
+</script>
+{% endblock %}

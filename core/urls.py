@@ -32,7 +32,6 @@ urlpatterns = [
     path("api/analytics/taxa-sucesso/", analytics_views.analytics_api_taxa_sucesso, name="api_taxa_sucesso"),
     path("api/analytics/alunos-ativos/", analytics_views.analytics_api_alunos_ativos, name="api_alunos_ativos"),
     path("api/analytics/ucs-procuradas/", analytics_views.analytics_api_ucs_procuradas, name="api_ucs_procuradas"),
-    path("admin-panel/logs/detalhados/", analytics_views.logs_detalhados, name="logs_detalhados"),
 
     # ADMIN – UNIDADE CURRICULAR
     path("admin-panel/uc/", views.admin_uc_list, name="admin_uc_list"),
