@@ -186,6 +186,13 @@ def inscricao_turno(request):
     n_meca = request.session["user_id"]
     aluno = Aluno.objects.get(n_mecanografico=n_meca)
 
+    # Verificar se o aluno é de EI (id_curso = 1)
+    if aluno.id_curso_id != 1:
+        messages.error(request, "Esta página é apenas para alunos de Engenharia Informática.")
+        if aluno.id_curso_id == 2:  # Se for TDM, redirecionar para a página correta
+            return redirect("home:inscricao_turno_tdm")
+        return redirect("home:index")
+
     inscricoes_turno = InscricaoTurno.objects.filter(n_mecanografico=aluno).values_list('id_turno_id', flat=True)
     turnos_inscritos = set(inscricoes_turno)
 
@@ -359,6 +366,12 @@ def inscrever_turno(request, turno_id, uc_id):
 
     try:
         aluno = get_object_or_404(Aluno, n_mecanografico=request.session["user_id"])
+        
+        # Verificar se o aluno é de EI (id_curso = 1)
+        if aluno.id_curso_id != 1:
+            messages.error(request, "Esta funcionalidade é apenas para alunos de Engenharia Informática.")
+            return redirect("home:index")
+        
         turno_uc = get_object_or_404(Turno, id_turno=turno_id)
         uc = get_object_or_404(UnidadeCurricular, id_unidadecurricular=uc_id)
 
@@ -916,6 +929,199 @@ def avaliacoes_tdm(request):
 
 def moodle(request):
     return render(request, "tdm/moodle.html", { "area": "tdm" })
+
+def inscricao_turno_tdm(request):
+    """
+    Sistema de inscrição específico para TDM:
+    Alunos escolhem APENAS Turno 1 ou Turno 2, aplicando a TODAS as UCs do semestre
+    """
+    if "user_tipo" not in request.session or request.session["user_tipo"] != "aluno":
+        messages.error(request, "É necessário iniciar sessão como aluno.")
+        return redirect("home:login")
+
+    n_meca = request.session["user_id"]
+    aluno = Aluno.objects.get(n_mecanografico=n_meca)
+    
+    # Verificar se o aluno é de TDM (id_curso = 2)
+    if aluno.id_curso_id != 2:
+        messages.error(request, "Esta página é apenas para alunos de Tecnologia e Design Multimédia.")
+        if aluno.id_curso_id == 1:  # Se for EI, redirecionar para a página correta
+            return redirect("home:inscricao_turno")
+        return redirect("home:index")
+    
+    # Verificar se o aluno já escolheu um turno
+    inscricoes_existentes = InscricaoTurno.objects.filter(n_mecanografico=aluno)
+    turno_escolhido = None
+    
+    if inscricoes_existentes.exists():
+        # Pega o primeiro turno inscrito para saber qual foi a escolha (T1 ou T2)
+        primeira_inscricao = inscricoes_existentes.first()
+        turno_escolhido = primeira_inscricao.id_turno.n_turno if primeira_inscricao.id_turno else None
+    
+    # Buscar as UCs em que o aluno está inscrito
+    inscricoes = InscritoUc.objects.filter(n_mecanografico=aluno, estado=True).select_related('id_unidadecurricular')
+    ucs_inscritas = [i.id_unidadecurricular for i in inscricoes]
+    
+    # Buscar informações dos turnos disponíveis (T1 e T2)
+    turnos_info = {
+        1: {"nome": "Turno 1", "ucs": []},
+        2: {"nome": "Turno 2", "ucs": []}
+    }
+    
+    for uc in ucs_inscritas:
+        # Buscar turnos T1 e T2 desta UC
+        turnos_uc = TurnoUc.objects.filter(
+            id_unidadecurricular=uc
+        ).select_related('id_turno')
+        
+        for turno_rel in turnos_uc:
+            turno = turno_rel.id_turno
+            n_turno = turno.n_turno
+            
+            if n_turno in [1, 2]:
+                # Calcular vagas
+                ocupados = InscricaoTurno.objects.filter(
+                    id_turno=turno,
+                    id_unidadecurricular=uc
+                ).count()
+                vagas = turno.capacidade - ocupados
+                if vagas < 0:
+                    vagas = 0
+                
+                # Mapear dia da semana baseado na hora
+                hora_inicio_str = turno_rel.hora_inicio.strftime("%H:%M")
+                h_int = int(hora_inicio_str.split(":")[0])
+                
+                if 8 <= h_int < 10:
+                    dia_semana = "Segunda"
+                elif 10 <= h_int < 12:
+                    dia_semana = "Terça"
+                elif 12 <= h_int < 14:
+                    dia_semana = "Quarta"
+                elif 14 <= h_int < 16:
+                    dia_semana = "Quinta"
+                else:
+                    dia_semana = "Sexta"
+                
+                turnos_info[n_turno]["ucs"].append({
+                    "nome": uc.nome,
+                    "horario": f"{dia_semana} {turno_rel.hora_inicio.strftime('%H:%M')}-{turno_rel.hora_fim.strftime('%H:%M')}",
+                    "vagas": vagas,
+                    "capacidade": turno.capacidade
+                })
+    
+    return render(request, "tdm/inscricao_turno_tdm.html", {
+        "turnos_info": turnos_info,
+        "turno_escolhido": turno_escolhido,
+        "area": "tdm"
+    })
+
+def inscrever_turno_tdm(request, n_turno):
+    """
+    Inscreve aluno TDM em TODAS as UCs do semestre no turno escolhido (1 ou 2)
+    """
+    if "user_tipo" not in request.session or request.session["user_tipo"] != "aluno":
+        messages.error(request, "Apenas alunos podem inscrever-se em turnos.")
+        return redirect("home:login")
+    
+    inicio_tempo = time.time()
+    n_meca = request.session["user_id"]
+    aluno = Aluno.objects.get(n_mecanografico=n_meca)
+    
+    # Verificar se o aluno é de TDM (id_curso = 2)
+    if aluno.id_curso_id != 2:
+        messages.error(request, "Esta funcionalidade é apenas para alunos de TDM.")
+        return redirect("home:index")
+    
+    try:
+        # Verificar se já tem inscrições
+        inscricoes_existentes = InscricaoTurno.objects.filter(n_mecanografico=aluno)
+        if inscricoes_existentes.exists():
+            messages.warning(request, "Já tens um turno escolhido. Para mudar, contacta a coordenação.")
+            return redirect("home:inscricao_turno_tdm")
+        
+        # Buscar todas as UCs em que o aluno está inscrito
+        inscricoes = InscritoUc.objects.filter(n_mecanografico=aluno, estado=True)
+        
+        inscricoes_realizadas = 0
+        erros = []
+        
+        for inscricao in inscricoes:
+            uc = inscricao.id_unidadecurricular
+            
+            # Buscar o turno específico (T1 ou T2) para esta UC
+            try:
+                turno_uc_rel = TurnoUc.objects.filter(
+                    id_unidadecurricular=uc,
+                    id_turno__n_turno=n_turno
+                ).select_related('id_turno').first()
+                
+                if not turno_uc_rel:
+                    erros.append(f"{uc.nome}: Turno {n_turno} não disponível")
+                    continue
+                
+                turno = turno_uc_rel.id_turno
+                
+                # Verificar capacidade
+                ocupados = InscricaoTurno.objects.filter(
+                    id_turno=turno,
+                    id_unidadecurricular=uc
+                ).count()
+                
+                if ocupados >= turno.capacidade:
+                    erros.append(f"{uc.nome}: Turno {n_turno} cheio")
+                    continue
+                
+                # Criar inscrição
+                InscricaoTurno.objects.create(
+                    n_mecanografico=aluno,
+                    id_turno=turno,
+                    id_unidadecurricular=uc,
+                    data_inscricao=datetime.today().date()
+                )
+                
+                # Registar auditoria
+                tempo_ms = int((time.time() - inicio_tempo) * 1000)
+                registar_auditoria_inscricao(
+                    aluno.n_mecanografico,
+                    turno.id_turno,
+                    uc.id_unidadecurricular,
+                    uc.nome,
+                    'sucesso',
+                    f'Inscrição TDM - Turno {n_turno}',
+                    tempo_ms
+                )
+                
+                inscricoes_realizadas += 1
+                
+            except Exception as e:
+                erros.append(f"{uc.nome}: {str(e)}")
+        
+        # Mensagens de feedback
+        if inscricoes_realizadas > 0:
+            messages.success(request, f"✓ Inscrito no Turno {n_turno} em {inscricoes_realizadas} UC(s)!")
+            
+            # Registar log
+            adicionar_log(
+                "inscricao_turno_tdm_sucesso",
+                {
+                    "aluno": aluno.nome,
+                    "turno": n_turno,
+                    "ucs_inscritas": inscricoes_realizadas
+                },
+                request
+            )
+        
+        if erros:
+            for erro in erros:
+                messages.warning(request, f"⚠ {erro}")
+        
+        return redirect("home:inscricao_turno_tdm")
+        
+    except Exception as e:
+        messages.error(request, f"Erro ao processar inscrição: {str(e)}")
+        registar_erro("inscrever_turno_tdm", str(e), {"aluno": n_meca, "turno": n_turno})
+        return redirect("home:inscricao_turno_tdm")
 
 
 

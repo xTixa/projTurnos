@@ -1,0 +1,419 @@
+/* INSCRIÇÃO TURNOS TDM */
+
+.turno-header {
+  text-align: center;
+  margin-bottom: 3rem;
+  padding-bottom: 2rem;
+  border-bottom: 2px solid #e5e7eb;
+}
+
+.turno-header h1 {
+  font-size: 2rem;
+  color: #1f2937;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+}
+
+.turno-header h1 i {
+  color: #3b82f6;
+}
+
+.turno-header .subtitle {
+  font-size: 1.1rem;
+  color: #6b7280;
+  margin: 0;
+}
+
+/* MESSAGES */
+.messages-container {
+  max-width: 1200px;
+  margin: 0 auto 2rem;
+}
+
+.alert {
+  padding: 1rem 1.5rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-weight: 500;
+}
+
+.alert i {
+  font-size: 1.25rem;
+}
+
+.alert-success {
+  background-color: #d1fae5;
+  color: #065f46;
+  border: 1px solid #10b981;
+}
+
+.alert-warning {
+  background-color: #fef3c7;
+  color: #b45309;
+  border: 1px solid #f59e0b;
+}
+
+.alert-error {
+  background-color: #fee2e2;
+  color: #991b1b;
+  border: 1px solid #ef4444;
+}
+
+.alert-info {
+  background-color: #dbeafe;
+  color: #1e40af;
+  border: 1px solid #3b82f6;
+}
+
+/* ESCOLHA DE TURNOS */
+.turnos-escolha {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 2rem;
+  max-width: 1400px;
+  margin: 0 auto 3rem;
+}
+
+.turno-card {
+  background: white;
+  border-radius: 16px;
+  padding: 2rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border: 2px solid transparent;
+  transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+}
+
+.turno-card:hover {
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  transform: translateY(-4px);
+}
+
+.turno-card.turno-1 {
+  border-color: #3b82f6;
+}
+
+.turno-card.turno-1:hover {
+  border-color: #2563eb;
+}
+
+.turno-card.turno-2 {
+  border-color: #8b5cf6;
+}
+
+.turno-card.turno-2:hover {
+  border-color: #7c3aed;
+}
+
+.turno-icon {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1.5rem;
+  font-size: 2.5rem;
+  color: white;
+  font-weight: 700;
+}
+
+.turno-1 .turno-icon {
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+}
+
+.turno-2 .turno-icon {
+  background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+}
+
+.turno-card h2 {
+  text-align: center;
+  font-size: 1.75rem;
+  margin-bottom: 0.5rem;
+  color: #1f2937;
+}
+
+.turno-desc {
+  text-align: center;
+  color: #6b7280;
+  margin-bottom: 2rem;
+  font-size: 0.95rem;
+}
+
+/* LISTA DE UCs */
+.ucs-lista {
+  background: #f9fafb;
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  flex-grow: 1;
+}
+
+.ucs-lista h3 {
+  font-size: 1rem;
+  color: #374151;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.ucs-lista h3 i {
+  color: #3b82f6;
+}
+
+.uc-item {
+  background: white;
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 0.75rem;
+  border: 1px solid #e5e7eb;
+}
+
+.uc-item:last-child {
+  margin-bottom: 0;
+}
+
+.uc-nome {
+  font-weight: 600;
+  color: #1f2937;
+  margin-bottom: 0.5rem;
+  font-size: 0.95rem;
+}
+
+.uc-horario {
+  font-size: 0.85rem;
+  color: #6b7280;
+  margin-bottom: 0.35rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.uc-vagas {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #059669;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.uc-vagas.sem-vagas {
+  color: #dc2626;
+}
+
+.sem-dados {
+  text-align: center;
+  color: #9ca3af;
+  font-style: italic;
+  padding: 1rem 0;
+}
+
+/* BUTTONS */
+.btn {
+  width: 100%;
+  padding: 1rem 2rem;
+  border: none;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  margin-top: auto;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  color: white;
+}
+
+.btn-primary:hover {
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  transform: scale(1.02);
+}
+
+.btn-disabled {
+  background: #e5e7eb;
+  color: #9ca3af;
+  cursor: not-allowed;
+}
+
+.turno-2 .btn-primary {
+  background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+}
+
+.turno-2 .btn-primary:hover {
+  background: linear-gradient(135deg, #7c3aed, #6d28d9);
+}
+
+/* INFO BOX */
+.info-box {
+  max-width: 1200px;
+  margin: 3rem auto;
+  background: #fef3c7;
+  border: 2px solid #f59e0b;
+  border-radius: 12px;
+  padding: 2rem;
+  display: flex;
+  gap: 1.5rem;
+}
+
+.info-box > i {
+  font-size: 2rem;
+  color: #b45309;
+  flex-shrink: 0;
+}
+
+.info-content h3 {
+  color: #92400e;
+  margin-bottom: 1rem;
+  font-size: 1.125rem;
+}
+
+.info-content ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.info-content li {
+  color: #78350f;
+  margin-bottom: 0.5rem;
+  padding-left: 1.5rem;
+  position: relative;
+}
+
+.info-content li:before {
+  content: "•";
+  position: absolute;
+  left: 0;
+  color: #f59e0b;
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+/* TURNO CONFIRMADO */
+.turno-confirmado {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.confirmacao-card {
+  background: white;
+  border-radius: 16px;
+  padding: 3rem 2rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
+
+.confirmacao-icon {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 2rem;
+  font-size: 3rem;
+}
+
+.confirmacao-card h2 {
+  font-size: 2rem;
+  color: #1f2937;
+  margin-bottom: 1rem;
+}
+
+.confirmacao-card p {
+  font-size: 1.125rem;
+  color: #6b7280;
+  margin-bottom: 2rem;
+}
+
+.confirmacao-card .alert {
+  margin-top: 2rem;
+  justify-content: center;
+}
+
+/* RESPONSIVE */
+@media (max-width: 1024px) {
+  .turnos-escolha {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .turno-header h1 {
+    font-size: 1.5rem;
+  }
+
+  .turno-header .subtitle {
+    font-size: 1rem;
+  }
+
+  .turno-card {
+    padding: 1.5rem;
+  }
+
+  .turno-icon {
+    width: 60px;
+    height: 60px;
+    font-size: 2rem;
+  }
+
+  .turno-card h2 {
+    font-size: 1.5rem;
+  }
+
+  .info-box {
+    flex-direction: column;
+    padding: 1.5rem;
+  }
+
+  .confirmacao-card {
+    padding: 2rem 1.5rem;
+  }
+
+  .confirmacao-icon {
+    width: 80px;
+    height: 80px;
+    font-size: 2.5rem;
+  }
+
+  .confirmacao-card h2 {
+    font-size: 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .turno-card {
+    padding: 1rem;
+  }
+
+  .ucs-lista {
+    padding: 1rem;
+  }
+
+  .uc-item {
+    padding: 0.75rem;
+  }
+
+  .btn {
+    padding: 0.875rem 1.5rem;
+    font-size: 0.95rem;
+  }
+}

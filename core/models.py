@@ -109,7 +109,7 @@ class InscricaoTurno(models.Model):
         db_table = 'inscricao_turno'
 
 class InscritoUc(models.Model):
-    n_mecanografico = models.ForeignKey(Aluno, models.DO_NOTHING, db_column='n_mecanografico')
+    n_mecanografico = models.ForeignKey(Aluno, models.DO_NOTHING, db_column='n_mecanografico', primary_key=True)
     id_unidadecurricular = models.ForeignKey('UnidadeCurricular', models.DO_NOTHING, db_column='id_unidadecurricular')
     estado = models.BooleanField()
 

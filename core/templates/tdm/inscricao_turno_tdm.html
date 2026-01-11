@@ -1,0 +1,150 @@
+{% extends "home/base.html" %}
+{% load static %}
+{% block title %}Inscrição em Turnos - TDM{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/tdm/inscricao_turno_tdm.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<section class="turno-header">
+    <h1><i class="fa-solid fa-calendar-check"></i> Inscrição em Turnos - TDM</h1>
+    <p class="subtitle">
+        {% if turno_escolhido %}
+            ✓ Escolheste o <strong>Turno {{ turno_escolhido }}</strong> para todas as UCs
+        {% else %}
+            Escolhe o <strong>Turno 1</strong> ou <strong>Turno 2</strong> que será aplicado a todas as UCs do semestre
+        {% endif %}
+    </p>
+</section>
+
+{% if messages %}
+<div class="messages-container">
+    {% for message in messages %}
+    <div class="alert alert-{{ message.tags }}">
+        <i class="fa-solid fa-{% if message.tags == 'success' %}check-circle{% elif message.tags == 'warning' %}exclamation-triangle{% else %}times-circle{% endif %}"></i>
+        {{ message }}
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+{% if not turno_escolhido %}
+<section class="turnos-escolha">
+    
+    <div class="turno-card turno-1">
+        <div class="turno-icon">
+            <i class="fa-solid fa-1"></i>
+        </div>
+        <h2>Turno 1</h2>
+        <p class="turno-desc">Escolher este turno para todas as UCs</p>
+        
+        <div class="ucs-lista">
+            <h3><i class="fa-solid fa-list"></i> Horários das UCs</h3>
+            {% if turnos_info.1.ucs %}
+                {% for uc in turnos_info.1.ucs %}
+                <div class="uc-item">
+                    <div class="uc-nome">{{ uc.nome }}</div>
+                    <div class="uc-horario">
+                        <i class="fa-regular fa-clock"></i> {{ uc.horario }}
+                    </div>
+                    <div class="uc-vagas {% if uc.vagas == 0 %}sem-vagas{% endif %}">
+                        <i class="fa-solid fa-users"></i> 
+                        {{ uc.vagas }}/{{ uc.capacidade }} vagas
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <p class="sem-dados">Sem horários disponíveis</p>
+            {% endif %}
+        </div>
+        
+        {% if turnos_info.1.ucs %}
+        <form method="POST" action="{% url 'home:inscrever_turno_tdm' 1 %}" onsubmit="return confirm('Tens a certeza que queres escolher o Turno 1 para todas as UCs?');">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-primary">
+                <i class="fa-solid fa-check"></i> Escolher Turno 1
+            </button>
+        </form>
+        {% else %}
+        <button class="btn btn-disabled" disabled>
+            <i class="fa-solid fa-ban"></i> Indisponível
+        </button>
+        {% endif %}
+    </div>
+    
+    <div class="turno-card turno-2">
+        <div class="turno-icon">
+            <i class="fa-solid fa-2"></i>
+        </div>
+        <h2>Turno 2</h2>
+        <p class="turno-desc">Escolher este turno para todas as UCs</p>
+        
+        <div class="ucs-lista">
+            <h3><i class="fa-solid fa-list"></i> Horários das UCs</h3>
+            {% if turnos_info.2.ucs %}
+                {% for uc in turnos_info.2.ucs %}
+                <div class="uc-item">
+                    <div class="uc-nome">{{ uc.nome }}</div>
+                    <div class="uc-horario">
+                        <i class="fa-regular fa-clock"></i> {{ uc.horario }}
+                    </div>
+                    <div class="uc-vagas {% if uc.vagas == 0 %}sem-vagas{% endif %}">
+                        <i class="fa-solid fa-users"></i> 
+                        {{ uc.vagas }}/{{ uc.capacidade }} vagas
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <p class="sem-dados">Sem horários disponíveis</p>
+            {% endif %}
+        </div>
+        
+        {% if turnos_info.2.ucs %}
+        <form method="POST" action="{% url 'home:inscrever_turno_tdm' 2 %}" onsubmit="return confirm('Tens a certeza que queres escolher o Turno 2 para todas as UCs?');">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-primary">
+                <i class="fa-solid fa-check"></i> Escolher Turno 2
+            </button>
+        </form>
+        {% else %}
+        <button class="btn btn-disabled" disabled>
+            <i class="fa-solid fa-ban"></i> Indisponível
+        </button>
+        {% endif %}
+    </div>
+    
+</section>
+
+<div class="info-box">
+    <i class="fa-solid fa-info-circle"></i>
+    <div class="info-content">
+        <h3>Como funciona?</h3>
+        <ul>
+            <li>Em TDM, deves escolher <strong>apenas um turno</strong> (Turno 1 ou Turno 2)</li>
+            <li>A tua escolha será aplicada <strong>automaticamente a todas as UCs</strong> do semestre</li>
+            <li>Após escolheres, <strong>não poderás mudar</strong> sem autorização da coordenação</li>
+            <li>Verifica os horários de cada UC antes de confirmar a tua escolha</li>
+        </ul>
+    </div>
+</div>
+
+{% else %}
+<section class="turno-confirmado">
+    <div class="confirmacao-card">
+        <div class="confirmacao-icon">
+            <i class="fa-solid fa-circle-check"></i>
+        </div>
+        <h2>Turno Confirmado</h2>
+        <p>Estás inscrito no <strong>Turno {{ turno_escolhido }}</strong> para todas as UCs</p>
+        
+        <div class="alert alert-info">
+            <i class="fa-solid fa-info-circle"></i>
+            Para alterar o turno, contacta a coordenação do curso.
+        </div>
+    </div>
+</section>
+{% endif %}
+
+{% endblock %}
