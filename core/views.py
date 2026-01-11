@@ -5,13 +5,18 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.shortcuts import redirect
 from django.db import models
-from .models import AnoCurricular, UnidadeCurricular, Semestre, Docente, Curso, HorarioPDF, Aluno, TurnoUc, Turno, InscricaoTurno, InscritoUc, LogEvento
+from .models import AnoCurricular, UnidadeCurricular, Semestre, Docente, Curso, HorarioPDF, Aluno, TurnoUc, Turno, InscricaoTurno, InscritoUc, LogEvento, AuditoriaInscricao
 from .db_views import CadeirasSemestre, AlunosPorOrdemAlfabetica, Turnos, Cursos
 from django.http import JsonResponse
 import json
 from django.contrib.auth.models import User
-from bd2_projeto.services.mongo_service import adicionar_log, listar_logs
+from bd2_projeto.services.mongo_service import (
+    adicionar_log, listar_logs, registar_auditoria_inscricao, 
+    validar_inscricao_disponivel, registar_consulta_aluno, 
+    registar_atividade_docente, registar_erro
+)
 from core.utils import registar_log, admin_required
+import time
 
 
 def index(request):
@@ -86,6 +91,15 @@ def ingresso(request):
 
 
 def plano_curricular(request):
+    # ✅ Registar consulta em MongoDB
+    if "user_tipo" in request.session and request.session["user_tipo"] == "aluno":
+        registar_consulta_aluno(
+            request.session.get("user_id"),
+            request.session.get("user_nome", "desconhecido"),
+            "plano_curricular",
+            {"curso": "EI"}
+        )
+    
     # Filtrar apenas UCs de Engenharia Informática (id_curso = 1)
     unidades = UnidadeCurricular.objects.filter(id_curso_id=1).select_related(
         'id_anocurricular', 'id_semestre'
@@ -107,6 +121,15 @@ def plano_curricular(request):
     return render(request, "ei/plano_curricular.html", {"plano": plano, "area": "ei"})
 
 def horarios(request):
+    # ✅ Registar consulta em MongoDB
+    if "user_tipo" in request.session and request.session["user_tipo"] == "aluno":
+        registar_consulta_aluno(
+            request.session.get("user_id"),
+            request.session.get("user_nome", "desconhecido"),
+            "horarios",
+            {"curso": "EI"}
+        )
+    
     anos = AnoCurricular.objects.all().order_by("id_anocurricular")
 
     horarios_por_ano = []
@@ -125,6 +148,15 @@ def horarios(request):
     })
 
 def avaliacoes(request):
+    # ✅ Registar consulta em MongoDB
+    if "user_tipo" in request.session and request.session["user_tipo"] == "aluno":
+        registar_consulta_aluno(
+            request.session.get("user_id"),
+            request.session.get("user_nome", "desconhecido"),
+            "avaliacoes",
+            {"curso": "EI"}
+        )
+    
     avaliacoes_docs = [
         {"ano": "1º Ano", "ficheiro": "avaliacoes_1ano.pdf"},
         {"ano": "2º Ano", "ficheiro": "avaliacoes_2ano.pdf"},
@@ -312,37 +344,128 @@ def perfil(request):
     return render(request, "profile/perfil.html", context)
 
 def inscrever_turno(request, turno_id, uc_id):
+    """
+    Inscreve aluno em turno com auditoria em PostgreSQL e MongoDB
+    """
+    inicio_tempo = time.time()
+    resultado = None
+    motivo = None
+    
     if "user_tipo" not in request.session or request.session["user_tipo"] != "aluno":
-        messages.error(request, "Apenas alunos se podem inscrever em turnos.")
+        mensagem_erro = "Apenas alunos se podem inscrever em turnos."
+        messages.error(request, mensagem_erro)
+        registar_erro("inscrever_turno", mensagem_erro)
         return redirect("home:login")
 
-    aluno = get_object_or_404(Aluno, n_mecanografico=request.session["user_id"])
-    turno_uc = get_object_or_404(Turno, id_turno=turno_id)
-    uc = get_object_or_404(UnidadeCurricular, id_unidadecurricular=uc_id)
+    try:
+        aluno = get_object_or_404(Aluno, n_mecanografico=request.session["user_id"])
+        turno_uc = get_object_or_404(Turno, id_turno=turno_id)
+        uc = get_object_or_404(UnidadeCurricular, id_unidadecurricular=uc_id)
 
-    turno_uc_existe = TurnoUc.objects.filter(id_turno=turno_uc, id_unidadecurricular=uc).exists()
-    if not turno_uc_existe:
-        messages.error(request, "Este turno não pertence a esta UC.")
+        # ✅ Validar se turno pertence à UC
+        turno_uc_existe = TurnoUc.objects.filter(id_turno=turno_uc, id_unidadecurricular=uc).exists()
+        if not turno_uc_existe:
+            resultado = "nao_autorizado"
+            motivo = "Este turno não pertence a esta UC"
+            messages.error(request, motivo)
+            tempo_ms = int((time.time() - inicio_tempo) * 1000)
+            registar_auditoria_inscricao(
+                aluno.n_mecanografico, turno_id, uc_id, uc.nome, 
+                resultado, motivo, tempo_ms
+            )
+            return redirect("home:inscricao_turno")
+
+        # ✅ Validar se está inscrito na UC
+        inscrito = InscritoUc.objects.filter(n_mecanografico=aluno, id_unidadecurricular=uc, estado=True).exists()
+        if not inscrito:
+            resultado = "nao_autorizado"
+            motivo = "Não estás inscrito nesta UC"
+            messages.error(request, motivo)
+            tempo_ms = int((time.time() - inicio_tempo) * 1000)
+            registar_auditoria_inscricao(
+                aluno.n_mecanografico, turno_id, uc_id, uc.nome, 
+                resultado, motivo, tempo_ms
+            )
+            return redirect("home:inscricao_turno")
+        
+        # ✅ Validar se já está inscrito neste turno (em MongoDB)
+        pode_inscrever, msg_validacao = validar_inscricao_disponivel(
+            aluno.n_mecanografico, turno_id
+        )
+        if not pode_inscrever:
+            resultado = "uc_duplicada"
+            motivo = msg_validacao
+            messages.warning(request, "Já estás inscrito neste turno.")
+            tempo_ms = int((time.time() - inicio_tempo) * 1000)
+            registar_auditoria_inscricao(
+                aluno.n_mecanografico, turno_id, uc_id, uc.nome, 
+                resultado, motivo, tempo_ms
+            )
+            return redirect("home:inscricao_turno")
+
+        # ✅ Validar capacidade do turno
+        ocupados = InscricaoTurno.objects.filter(id_turno=turno_uc, id_unidadecurricular=uc).count()
+        if ocupados >= turno_uc.capacidade:
+            resultado = "turno_cheio"
+            motivo = f"Turno cheio (capacidade: {turno_uc.capacidade}, ocupado: {ocupados})"
+            messages.error(request, "Este turno já está cheio.")
+            tempo_ms = int((time.time() - inicio_tempo) * 1000)
+            registar_auditoria_inscricao(
+                aluno.n_mecanografico, turno_id, uc_id, uc.nome, 
+                resultado, motivo, tempo_ms
+            )
+            return redirect("home:inscricao_turno")
+
+        # ✅ INSCRIÇÃO BEM-SUCEDIDA
+        inscricao = InscricaoTurno.objects.create(
+            n_mecanografico=aluno, 
+            id_turno=turno_uc, 
+            id_unidadecurricular=uc, 
+            data_inscricao=datetime.today().date()
+        )
+
+        # ✅ REGISTAR AUDITORIA (PostgreSQL)
+        tempo_ms = int((time.time() - inicio_tempo) * 1000)
+        auditoria_pg = AuditoriaInscricao.objects.create(
+            n_mecanografico=aluno,
+            id_turno=turno_uc,
+            id_unidadecurricular=uc,
+            resultado='sucesso',
+            tempo_processamento_ms=tempo_ms
+        )
+
+        # ✅ REGISTAR AUDITORIA (MongoDB)
+        registar_auditoria_inscricao(
+            aluno.n_mecanografico, turno_id, uc_id, uc.nome, 
+            'sucesso', None, tempo_ms
+        )
+
+        # ✅ REGISTAR LOG COM CONTEXTO
+        adicionar_log(
+            "inscricao_turno_sucesso",
+            {
+                "aluno": aluno.nome,
+                "uc": uc.nome,
+                "turno": turno_id,
+                "tempo_ms": tempo_ms
+            },
+            request
+        )
+
+        messages.success(request, "Inscrição no turno efetuada com sucesso!")
         return redirect("home:inscricao_turno")
-
-    inscrito = InscritoUc.objects.filter(n_mecanografico=aluno, id_unidadecurricular=uc, estado=True).exists()
-    if not inscrito:
-        messages.error(request, "Não estás inscrito nesta UC.")
+        
+    except Exception as e:
+        resultado = "erro_sistema"
+        motivo = str(e)
+        tempo_ms = int((time.time() - inicio_tempo) * 1000)
+        registar_erro("inscrever_turno", str(e), {"turno_id": turno_id, "uc_id": uc_id})
+        registar_auditoria_inscricao(
+            request.session.get("user_id"), turno_id, uc_id, "desconhecido", 
+            resultado, motivo, tempo_ms
+        )
+        messages.error(request, "Erro ao processar inscrição. Tente novamente.")
         return redirect("home:inscricao_turno")
-    
-    if InscricaoTurno.objects.filter(n_mecanografico=aluno, id_turno=turno_uc, id_unidadecurricular=uc).exists():
-        messages.warning(request, "Já estás inscrito neste turno.")
-        return redirect("home:inscricao_turno")
-
-    ocupados = InscricaoTurno.objects.filter(id_turno=turno_uc, id_unidadecurricular=uc).count()
-    if ocupados >= turno_uc.capacidade:
-        messages.error(request, "Este turno já está cheio.")
-        return redirect("home:inscricao_turno")
-
-    InscricaoTurno.objects.create(n_mecanografico=aluno, id_turno=turno_uc, id_unidadecurricular=uc, data_inscricao=datetime.today().date())
-
-    messages.success(request, "Inscrição no turno efetuada com sucesso!")
-    return redirect("home:inscricao_turno")
 
 
 

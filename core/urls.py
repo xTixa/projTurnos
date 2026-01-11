@@ -1,6 +1,7 @@
 from django.urls import path
 from django.contrib.auth import views as auth_views
 from . import views
+from . import analytics_views
 from core.views import testar_mongo
 
 app_name = "home"
@@ -24,6 +25,14 @@ urlpatterns = [
     # Painel Admin
     path("admin-panel/", views.admin_dashboard, name="admin_dashboard"),
     path("admin-panel/logs/", views.admin_logs_list, name="admin_logs_list"),
+    
+    # ✅ ANALYTICS — ANÁLISE DE DADOS (MongoDB)
+    path("admin-panel/analytics/inscricoes/", analytics_views.analytics_inscricoes, name="analytics_inscricoes"),
+    path("api/analytics/inscricoes-dia/", analytics_views.analytics_api_inscricoes_dia, name="api_inscricoes_dia"),
+    path("api/analytics/taxa-sucesso/", analytics_views.analytics_api_taxa_sucesso, name="api_taxa_sucesso"),
+    path("api/analytics/alunos-ativos/", analytics_views.analytics_api_alunos_ativos, name="api_alunos_ativos"),
+    path("api/analytics/ucs-procuradas/", analytics_views.analytics_api_ucs_procuradas, name="api_ucs_procuradas"),
+    path("admin-panel/logs/detalhados/", analytics_views.logs_detalhados, name="logs_detalhados"),
 
     # ADMIN – UNIDADE CURRICULAR
     path("admin-panel/uc/", views.admin_uc_list, name="admin_uc_list"),

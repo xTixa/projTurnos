@@ -73,7 +73,9 @@ class HorarioPDF(models.Model):
     id_anocurricular = models.ForeignKey(
         AnoCurricular,
         models.DO_NOTHING,
-        db_column="id_anocurricular"
+        db_column="id_anocurricular",
+        null=True,
+        blank=True
     )
     atualizado_em = models.DateTimeField(auto_now=True)
 
@@ -191,3 +193,39 @@ class LogEvento(models.Model):
         managed = False
         db_table = 'log_eventos'
         ordering = ['-data_hora']
+
+class AuditoriaInscricao(models.Model):
+    """
+    Rastreia cada tentativa de inscrição em turno
+    Para análise temporal, padrões de comportamento, etc.
+    """
+    RESULTADO_CHOICES = [
+        ('sucesso', 'Sucesso'),
+        ('turno_cheio', 'Turno Cheio'),
+        ('conflito_horario', 'Conflito de Horário'),
+        ('nao_autorizado', 'Não Autorizado'),
+        ('uc_duplicada', 'UC Duplicada'),
+        ('erro_sistema', 'Erro do Sistema'),
+    ]
+    
+    id_auditoria = models.AutoField(primary_key=True)
+    n_mecanografico = models.ForeignKey(Aluno, models.DO_NOTHING, db_column='n_mecanografico', null=True, blank=True)
+    id_turno = models.ForeignKey(Turno, models.DO_NOTHING, db_column='id_turno', null=True, blank=True)
+    id_unidadecurricular = models.ForeignKey('UnidadeCurricular', models.DO_NOTHING, db_column='id_unidadecurricular', null=True, blank=True)
+    data_tentativa = models.DateTimeField(auto_now_add=True)
+    resultado = models.CharField(max_length=50, choices=RESULTADO_CHOICES)
+    motivo_rejeicao = models.TextField(null=True, blank=True)
+    tempo_processamento_ms = models.IntegerField(default=0, help_text="Tempo de processamento em millisegundos")
+    
+    class Meta:
+        managed = True
+        db_table = 'auditoria_inscricao'
+        ordering = ['-data_tentativa']
+        indexes = [
+            models.Index(fields=['n_mecanografico', '-data_tentativa']),
+            models.Index(fields=['resultado']),
+            models.Index(fields=['data_tentativa']),
+        ]
+    
+    def __str__(self):
+        return f"{self.n_mecanografico} — {self.id_unidadecurricular.nome} ({self.resultado})" if self.n_mecanografico else "Auditoria desconhecida"
