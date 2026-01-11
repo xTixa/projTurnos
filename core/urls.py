@@ -70,6 +70,12 @@ urlpatterns = [
     path("admin-panel/horarios/<int:id>/editar/", views.admin_horarios_edit, name="admin_horarios_edit"),
     path("admin-panel/horarios/<int:id>/apagar/", views.admin_horarios_delete, name="admin_horarios_delete"),
 
+    # AVALIACOES ADMIN
+    path("admin-panel/avaliacoes/", views.admin_avaliacoes_list, name="admin_avaliacoes_list"),
+    path("admin-panel/avaliacoes/novo/", views.admin_avaliacoes_create, name="admin_avaliacoes_create"),
+    path("admin-panel/avaliacoes/<int:id>/editar/", views.admin_avaliacoes_edit, name="admin_avaliacoes_edit"),
+    path("admin-panel/avaliacoes/<int:id>/apagar/", views.admin_avaliacoes_delete, name="admin_avaliacoes_delete"),
+
     #ficha 12
     path("cadeiras_semestre/", views.cadeiras_semestre, name="cadeiras_semestre"),
     path("vw_alunos_por_ordem_alfabetica/", views.alunos_por_ordem_alfabetica, name="vw_alunos_por_ordem_alfabetica"),

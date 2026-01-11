@@ -82,6 +82,21 @@ class HorarioPDF(models.Model):
     def __str__(self):
         return f"{self.nome} - {self.id_anocurricular.ano_curricular}"
 
+class AvaliacaoPDF(models.Model):
+    nome = models.CharField(max_length=200, default="Calendário de Avaliações")
+    ficheiro = models.FileField(upload_to="avaliacoes/")
+    id_anocurricular = models.ForeignKey(
+        AnoCurricular,
+        models.DO_NOTHING,
+        db_column="id_anocurricular",
+        null=True,
+        blank=True
+    )
+    atualizado_em = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.nome} - {self.id_anocurricular.ano_curricular}"
+
 class InscricaoTurno(models.Model):
     id_inscricao = models.AutoField(primary_key=True)
     n_mecanografico = models.ForeignKey(Aluno, models.DO_NOTHING, db_column='n_mecanografico')

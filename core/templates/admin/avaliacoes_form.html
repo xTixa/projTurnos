@@ -1,0 +1,132 @@
+{% extends "../home/base.html" %}
+
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/admin/avaliacoes_form.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="form-container">
+    <div class="form-header">
+        <i class="fa-solid fa-file-lines"></i>
+        <h1>{% if avaliacao %}Editar Avaliação{% else %}Nova Avaliação{% endif %}</h1>
+        <p>{% if avaliacao %}Atualizar o calendário de avaliações{% else %}Adicionar um novo calendário de avaliações{% endif %}</p>
+    </div>
+
+    {% if avaliacao %}
+    <div class="alert alert-info">
+        <i class="fa-solid fa-circle-info"></i>
+        <span>A editar um calendário existente. Deixe o campo de ficheiro vazio para manter o atual.</span>
+    </div>
+    {% endif %}
+
+    <div class="form-card">
+        <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+
+            <!-- Informações Básicas -->
+            <div class="form-section">
+                <div class="form-section-title">
+                    <i class="fa-solid fa-info-circle"></i>
+                    <span>Informações Básicas</span>
+                </div>
+
+                <div class="form-group">
+                    <label>
+                        <i class="fa-solid fa-tag"></i>
+                        Nome do Calendário
+                    </label>
+                    <input 
+                        type="text" 
+                        name="nome" 
+                        class="form-control" 
+                        value="{{ avaliacao.nome|default:'Calendário de Avaliações' }}"
+                        placeholder="Ex: Avaliações 1º Semestre 2024/2025"
+                        required
+                    >
+                </div>
+            </div>
+
+            <!-- Seleção de Curso e Ano -->
+            <div class="form-section">
+                <div class="form-section-title">
+                    <i class="fa-solid fa-graduation-cap"></i>
+                    <span>Curso e Ano Curricular</span>
+                </div>
+
+                <div class="form-group">
+                    <label>
+                        <i class="fa-solid fa-book"></i>
+                        Curso
+                    </label>
+                    <select name="id_curso" class="form-control" required>
+                        <option value="">Selecione um curso</option>
+                        {% for curso in cursos %}
+                        <option value="{{ curso.id_curso }}">
+                            {{ curso.nome }} ({{ curso.grau }})
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>
+                        <i class="fa-solid fa-layer-group"></i>
+                        Ano Curricular
+                    </label>
+                    <select name="id_anocurricular" class="form-control" required>
+                        <option value="">Selecione um ano</option>
+                        {% for ano in anos_curriculares %}
+                        <option value="{{ ano.id_anocurricular }}" 
+                            {% if avaliacao and avaliacao.id_anocurricular.id_anocurricular == ano.id_anocurricular %}selected{% endif %}>
+                            {{ ano.ano_curricular }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+
+            <!-- Upload de Ficheiro -->
+            <div class="form-section">
+                <div class="form-section-title">
+                    <i class="fa-solid fa-file-pdf"></i>
+                    <span>Ficheiro PDF</span>
+                </div>
+
+                {% if avaliacao and avaliacao.ficheiro %}
+                <a href="{{ avaliacao.ficheiro.url }}" target="_blank" class="current-file">
+                    <i class="fa-solid fa-file-pdf"></i>
+                    <span>Ver ficheiro atual</span>
+                    <i class="fa-solid fa-external-link-alt"></i>
+                </a>
+                {% endif %}
+
+                <div class="file-upload-area">
+                    <i class="fa-solid fa-cloud-arrow-up"></i>
+                    <p class="file-info">Clique ou arraste o ficheiro PDF aqui</p>
+                    <p>Tamanho máximo: 10MB</p>
+                    <input 
+                        type="file" 
+                        name="ficheiro" 
+                        accept="application/pdf"
+                        {% if not avaliacao %}required{% endif %}
+                    >
+                </div>
+            </div>
+
+            <!-- Botões de Ação -->
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fa-solid fa-save"></i>
+                    {% if avaliacao %}Atualizar Calendário{% else %}Criar Calendário{% endif %}
+                </button>
+                <a href="{% url 'home:admin_avaliacoes_list' %}" class="btn btn-secondary">
+                    <i class="fa-solid fa-times"></i>
+                    Cancelar
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

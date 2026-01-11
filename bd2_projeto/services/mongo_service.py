@@ -1,6 +1,7 @@
 from ..mongodb import db
 from datetime import datetime
 import time
+import json
 
 # ==========================================
 # INICIALIZAÇÃO — ÍNDICES
@@ -325,3 +326,137 @@ def registar_erro(funcao, erro_msg, detalhes=None):
     }
     db.erros.insert_one(erro)
     return erro
+
+# ==========================================
+# AGREGAÇÃO DE LOGS (MÚLTIPLAS COLEÇÕES)
+# ==========================================
+
+def _parse_ts(doc):
+    ts = doc.get("timestamp") or doc.get("data_formatada")
+    if isinstance(ts, datetime):
+        return ts
+    if isinstance(ts, str):
+        for fmt in ("%Y-%m-%d %H:%M:%S", "%Y-%m-%dT%H:%M:%S", "%Y-%m-%dT%H:%M:%S.%f"):
+            try:
+                return datetime.strptime(ts, fmt)
+            except Exception:
+                continue
+    return None
+
+def _str_val(val):
+    if val is None:
+        return ""
+    if isinstance(val, str):
+        return val
+    try:
+        return json.dumps(val, ensure_ascii=False)
+    except Exception:
+        return str(val)
+
+
+def listar_eventos_mongo(filtro_acao=None, filtro_entidade=None, limite=500):
+    """
+    Consolida eventos das coleções Mongo (logs, consultas_alunos, atividades_docentes,
+    auditoria_inscricoes, erros) para exibição unificada.
+    """
+    eventos = []
+    limite = 1000 if limite > 1000 else (100 if limite < 1 else limite)
+
+    def add_evento(doc, fonte, operacao, entidade, chave="", utilizador="", ip="", user_agent="", detalhes=None):
+        # filtros
+        if filtro_acao and str(operacao).lower() != str(filtro_acao).lower():
+            return
+        if filtro_entidade and filtro_entidade.lower() not in str(entidade).lower():
+            return
+        ts_dt = _parse_ts(doc) or datetime.min
+        eventos.append({
+            "id": str(doc.get("_id", "")),
+            "fonte": fonte,
+            "data": ts_dt,
+            "data_display": doc.get("data_formatada") or (ts_dt.strftime("%Y-%m-%d %H:%M:%S") if ts_dt != datetime.min else ""),
+            "operacao": operacao,
+            "entidade": entidade,
+            "chave": chave,
+            "utilizador": utilizador,
+            "ip": ip,
+            "user_agent": user_agent,
+            "detalhes": _str_val(detalhes),
+        })
+
+    # Coleção logs
+    filtro_logs = {}
+    if filtro_acao:
+        filtro_logs["acao"] = filtro_acao
+    for log in db.logs.find(filtro_logs, {"_id": 0}).sort("timestamp", -1).limit(limite):
+        det = log.get("detalhes") or {}
+        ent = det.get("entidade", "") if isinstance(det, dict) else ""
+        add_evento(
+            log,
+            fonte="Mongo",
+            operacao=log.get("acao", ""),
+            entidade=ent,
+            chave=det.get("chave", "") if isinstance(det, dict) else "",
+            utilizador=(log.get("contexto") or {}).get("utilizador", ""),
+            ip=(log.get("contexto") or {}).get("ip", ""),
+            user_agent=(log.get("contexto") or {}).get("user_agent", ""),
+            detalhes=det,
+        )
+
+    # Consultas de alunos
+    for doc in db.consultas_alunos.find({}, {"_id": 0}).sort("timestamp", -1).limit(limite):
+        add_evento(
+            doc,
+            fonte="Mongo",
+            operacao=doc.get("tipo_consulta", "consulta_aluno"),
+            entidade="consulta_aluno",
+            chave=doc.get("aluno_id", ""),
+            utilizador=doc.get("aluno_nome", ""),
+            detalhes=doc.get("detalhes") or {},
+        )
+
+    # Atividades de docentes
+    for doc in db.atividades_docentes.find({}, {"_id": 0}).sort("timestamp", -1).limit(limite):
+        add_evento(
+            doc,
+            fonte="Mongo",
+            operacao=doc.get("tipo_atividade", "atividade_docente"),
+            entidade="atividade_docente",
+            chave=doc.get("docente_id", ""),
+            utilizador=doc.get("docente_nome", ""),
+            detalhes=doc.get("detalhes") or {},
+        )
+
+    # Auditoria de inscrições
+    for doc in db.auditoria_inscricoes.find({}, {"_id": 0}).sort("timestamp", -1).limit(limite):
+        add_evento(
+            doc,
+            fonte="Mongo",
+            operacao=doc.get("resultado", "auditoria_inscricao"),
+            entidade="auditoria_inscricao",
+            chave=f"{doc.get('aluno_id', '')}:{doc.get('turno_id', '')}",
+            utilizador=doc.get("aluno_id", ""),
+            detalhes={
+                "uc": doc.get("uc_nome", ""),
+                "motivo": doc.get("motivo_rejeicao", ""),
+                "tempo_ms": doc.get("tempo_processamento_ms", 0),
+            },
+        )
+
+    # Erros
+    for doc in db.erros.find({}, {"_id": 0}).sort("timestamp", -1).limit(limite):
+        add_evento(
+            doc,
+            fonte="Mongo",
+            operacao="erro",
+            entidade=doc.get("funcao", "erro"),
+            chave="",
+            utilizador="",
+            detalhes={
+                "erro": doc.get("erro_msg", ""),
+                "detalhes": doc.get("detalhes") or {},
+            },
+        )
+
+    # Ordenar e cortar
+    eventos = sorted(eventos, key=lambda e: e.get("data") or datetime.min, reverse=True)
+    return eventos[:limite]

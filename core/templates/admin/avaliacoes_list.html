@@ -1,0 +1,41 @@
+{% extends "../home/base.html" %}
+
+{% block content %}
+<h1>Gerir Avaliações (PDF)</h1>
+
+<a href="{% url 'home:admin_avaliacoes_create' %}" class="btn-create">+ Novo PDF</a>
+
+{% if avaliacoes %}
+<table class="admin-table">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Nome</th>
+            <th>Ano Curricular</th>
+            <th>Ficheiro</th>
+            <th>Atualizado em</th>
+            <th>Ações</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        {% for a in avaliacoes %}
+        <tr>
+            <td>{{ a.id }}</td>
+            <td>{{ a.nome }}</td>
+            <td>{{ a.id_anocurricular.ano_curricular }}</td>
+            <td><a href="{{ a.ficheiro.url }}" target="_blank">Abrir</a></td>
+            <td>{{ a.atualizado_em|date:"d/m/Y H:i" }}</td>
+            <td>
+                <a href="{% url 'home:admin_avaliacoes_edit' a.id %}" class="edit-btn">✏️</a>
+                <a href="{% url 'home:admin_avaliacoes_delete' a.id %}" class="delete-btn"
+                   onclick="return confirm('Apagar calendário de avaliações?');">❌</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p>Nenhum calendário de avaliações foi carregado ainda.</p>
+{% endif %}
+{% endblock %}

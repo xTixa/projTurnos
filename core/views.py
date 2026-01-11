@@ -5,14 +5,14 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.shortcuts import redirect
 from django.db import models
-from .models import AnoCurricular, UnidadeCurricular, Semestre, Docente, Curso, HorarioPDF, Aluno, TurnoUc, Turno, InscricaoTurno, InscritoUc, LogEvento, AuditoriaInscricao
+from .models import AnoCurricular, UnidadeCurricular, Semestre, Docente, Curso, HorarioPDF, AvaliacaoPDF, Aluno, TurnoUc, Turno, InscricaoTurno, InscritoUc, LogEvento, AuditoriaInscricao
 from .db_views import CadeirasSemestre, AlunosPorOrdemAlfabetica, Turnos, Cursos
 from django.http import JsonResponse
 import json
 from django.contrib.auth.models import User
 from bd2_projeto.services.mongo_service import (
-    adicionar_log, listar_logs, registar_auditoria_inscricao, 
-    validar_inscricao_disponivel, registar_consulta_aluno, 
+    adicionar_log, listar_eventos_mongo, listar_logs, registar_auditoria_inscricao,
+    validar_inscricao_disponivel, registar_consulta_aluno,
     registar_atividade_docente, registar_erro
 )
 from core.utils import registar_log, admin_required
@@ -509,6 +509,7 @@ def admin_dashboard(request):
     total_ucs = UnidadeCurricular.objects.count()
     total_cursos = Curso.objects.count()
     total_horarios = HorarioPDF.objects.count()
+    total_avaliacoes = AvaliacaoPDF.objects.count()
 
     # Dados para o gráfico de alunos por UC
     from django.db.models import Count
@@ -532,6 +533,7 @@ def admin_dashboard(request):
         "total_ucs": total_ucs,
         "total_cursos": total_cursos,
         "total_horarios": total_horarios,
+        "total_avaliacoes": total_avaliacoes,
         "chart_alunos_labels": chart_alunos_labels,
         "chart_alunos_values": chart_alunos_values,
         "vagas_ocupadas": vagas_ocupadas,
@@ -700,6 +702,85 @@ def admin_horarios_list(request):
 def horarios_admin(request):
     pdf = HorarioPDF.objects.order_by("-atualizado_em").first()
     return render(request, "home/horarios.html", {"pdf": pdf})
+
+
+# ==========================
+# AVALIACOES ADMIN (GESTÃO DE PDFs)
+# ==========================
+
+@admin_required
+def admin_avaliacoes_list(request):
+    avaliacoes = AvaliacaoPDF.objects.all().order_by("-atualizado_em")
+    return render(request, "admin/avaliacoes_list.html", {"avaliacoes": avaliacoes})
+
+@admin_required
+def admin_avaliacoes_create(request):
+    cursos = Curso.objects.all().order_by('nome')
+    anos_curriculares = AnoCurricular.objects.all().order_by('id_anocurricular')
+
+    if request.method == "POST":
+        nome = request.POST.get("nome")
+        ficheiro = request.FILES.get("ficheiro")
+        ano_id = request.POST.get("id_anocurricular")
+
+        if not ficheiro:
+            messages.error(request, "É necessário enviar um ficheiro PDF.")
+            return redirect("home:admin_avaliacoes_create")
+        
+        if not ano_id:
+            messages.error(request, "É necessário selecionar o ano curricular.")
+            return redirect("home:admin_avaliacoes_create")
+
+        AvaliacaoPDF.objects.create(
+            nome=nome,
+            ficheiro=ficheiro,
+            id_anocurricular_id=ano_id
+        )
+
+        registar_log(request, operacao="CREATE", entidade="avaliacao_pdf", chave="novo", detalhes=f"Avaliação PDF criada: {nome}")
+        messages.success(request, "Calendário de avaliações carregado com sucesso!")
+        return redirect("home:admin_avaliacoes_list")
+
+    return render(request, "admin/avaliacoes_form.html", {
+        'cursos': cursos,
+        'anos_curriculares': anos_curriculares
+    })
+
+@admin_required
+def admin_avaliacoes_edit(request, id):
+    avaliacao = get_object_or_404(AvaliacaoPDF, id=id)
+    cursos = Curso.objects.all().order_by('nome')
+    anos_curriculares = AnoCurricular.objects.all().order_by('id_anocurricular')
+
+    if request.method == "POST":
+        avaliacao.nome = request.POST.get("nome")
+        ano_id = request.POST.get("id_anocurricular")
+        
+        if ano_id:
+            avaliacao.id_anocurricular_id = ano_id
+
+        if "ficheiro" in request.FILES:
+            avaliacao.ficheiro = request.FILES["ficheiro"]
+
+        avaliacao.save()
+        registar_log(request, operacao="UPDATE", entidade="avaliacao_pdf", chave=str(id), detalhes=f"Avaliação PDF atualizada: {avaliacao.nome}")
+        messages.success(request, "Calendário de avaliações atualizado!")
+        return redirect("home:admin_avaliacoes_list")
+
+    return render(request, "admin/avaliacoes_form.html", {
+        "avaliacao": avaliacao,
+        'cursos': cursos,
+        'anos_curriculares': anos_curriculares
+    })
+
+@admin_required
+def admin_avaliacoes_delete(request, id):
+    avaliacao = get_object_or_404(AvaliacaoPDF, id=id)
+    nome = avaliacao.nome
+    avaliacao.delete()
+    registar_log(request, operacao="DELETE", entidade="avaliacao_pdf", chave=str(id), detalhes=f"Avaliação PDF apagada: {nome}")
+    messages.success(request, "Calendário de avaliações apagado!")
+    return redirect("home:admin_avaliacoes_list")
 
 
 def admin_users_docentes(request):
@@ -1092,45 +1173,12 @@ def admin_logs_list(request):
         for log in sql_qs
     ]
 
-    # Fonte Mongo
-    filtro_mongo = {}
-    if operacao_filter:
-        filtro_mongo['acao'] = operacao_filter
-
-    mongo_raw = listar_logs(filtro_mongo, limite)
-    mongo_logs = []
-    for log in mongo_raw:
-        # filtro de entidade aplicado manualmente (campo dentro de detalhes)
-        ent_mongo = ""
-        detalhes_raw = log.get("detalhes")
-        if isinstance(detalhes_raw, dict):
-            ent_mongo = detalhes_raw.get("entidade", "")
-        if entidade_filter and entidade_filter.lower() not in str(ent_mongo).lower():
-            continue
-
-        ts = log.get("timestamp") or log.get("data_formatada")
-        ts_dt = None
-        if isinstance(ts, str):
-            try:
-                ts_dt = datetime.fromisoformat(ts)
-            except Exception:
-                ts_dt = None
-        else:
-            ts_dt = ts
-
-        mongo_logs.append({
-            "id": log.get("_id"),
-            "fonte": "Mongo",
-            "data": ts_dt,
-            "data_display": log.get("data_formatada") or (ts_dt.strftime("%Y-%m-%d %H:%M:%S") if ts_dt else ""),
-            "operacao": log.get("acao", ""),
-            "entidade": ent_mongo,
-            "chave": detalhes_raw.get("chave", "") if isinstance(detalhes_raw, dict) else "",
-            "utilizador": (log.get("contexto") or {}).get("utilizador", ""),
-            "ip": (log.get("contexto") or {}).get("ip", ""),
-            "user_agent": (log.get("contexto") or {}).get("user_agent", ""),
-            "detalhes": _to_str(detalhes_raw),
-        })
+    # Fonte Mongo (todas as coleções relevantes)
+    mongo_logs = listar_eventos_mongo(
+        filtro_acao=operacao_filter or None,
+        filtro_entidade=entidade_filter or None,
+        limite=limite,
+    )
 
     # Unificar e ordenar
     logs_unificados = sql_logs + mongo_logs
@@ -1141,17 +1189,14 @@ def admin_logs_list(request):
     )[:limite]
 
     # Opções para filtros combinados
+    mongo_all_for_filters = listar_eventos_mongo(limite=1000)
     operacoes = set(
         list(LogEvento.objects.values_list('operacao', flat=True).distinct()) +
-        [l.get("operacao", "") for l in mongo_raw]
+        [l.get("operacao", "") for l in mongo_all_for_filters]
     )
     entidades = set(
         list(LogEvento.objects.values_list('entidade', flat=True).distinct()) +
-        [
-            (l.get("detalhes") or {}).get("entidade", "")
-            for l in mongo_raw
-            if isinstance(l.get("detalhes"), dict)
-        ]
+        [l.get("entidade", "") for l in mongo_all_for_filters]
     )
 
     return render(request, "admin/logs_list.html", {

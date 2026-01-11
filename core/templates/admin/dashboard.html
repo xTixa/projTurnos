@@ -56,12 +56,12 @@
                         <p>Horários PDF</p>
                 </div>
 
+        <div class="stat-card">
+            <i class="fa-solid fa-file-lines"></i>
+            <h3>{{ total_avaliacoes }}</h3>
+            <p>Avaliações PDF</p>
         </div>
-</section>
 
-
-<!-- GRÁFICOS -->
-<section class="charts-section">
 
         <h2>Estatísticas</h2>
 
@@ -97,6 +97,11 @@
                 <p>Gerir Horários</p>
         </a>
 
+        <a href="{% url 'home:admin_avaliacoes_list' %}" class="card">
+                <i class="fa-solid fa-file-lines"></i>
+                <p>Gerir Avaliações</p>
+        </a>
+
         <a href="{% url 'home:admin_uc_list' %}" class="card">
                 <i class="fa-solid fa-book"></i>
                 <p>Gerir UCs</p>
@@ -125,6 +130,7 @@
         <a href="{% url 'home:admin_users_create' %}">+ Criar Utilizador</a>
         <a href="{% url 'home:admin_turnos_create' %}">+ Criar Turno</a>
         <a href="{% url 'home:admin_horarios_create' %}">+ Carregar Horário PDF</a>
+        <a href="{% url 'home:admin_avaliacoes_create' %}">+ Carregar Avaliações PDF</a>
         <a href="{% url 'home:analytics_inscricoes' %}">→ Ver Analytics</a>
         <a href="{% url 'home:admin_logs_list' %}">→ Ver Logs</a>
 </div>
