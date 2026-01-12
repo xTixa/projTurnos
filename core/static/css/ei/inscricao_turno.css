@@ -118,7 +118,7 @@ body {
 .turnos-inscritos {
   margin-top: 15px;
   padding: 12px 15px;
-  background: #e0f2fe;
+  background: #f0f9ff;
   border-left: 4px solid #0284c7;
   border-radius: 8px;
 }
@@ -131,11 +131,66 @@ body {
   display: flex;
   align-items: center;
   gap: 8px;
+  justify-content: space-between;
+  flex-wrap: wrap;
 }
 
 .inscrito-info i {
   color: #16a34a;
   font-size: 16px;
+}
+
+.btn-remover {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  background: #ef4444;
+  color: white;
+  border-radius: 6px;
+  text-decoration: none;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: 0.2s;
+  border: none;
+}
+
+.btn-remover:hover {
+  background: #dc2626;
+  transform: translateY(-1px);
+}
+
+/* ============================
+   ALERTA DE CONFLITOS
+============================ */
+.alert {
+  padding: 15px 18px;
+  border-radius: 12px;
+  border-left: 4px solid;
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.alert-warning {
+  background: #fef3c7;
+  border-color: #f59e0b;
+  color: #92400e;
+}
+
+.alert-warning i {
+  color: #f59e0b;
+  margin-top: 2px;
+}
+
+.alert-warning strong {
+  color: #78350f;
+}
+
+.alert-warning p {
+  margin: 8px 0 0;
+  font-size: 0.95rem;
+  line-height: 1.4;
 }
 
 /* ============================

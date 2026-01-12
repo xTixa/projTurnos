@@ -12,18 +12,16 @@ document.addEventListener("DOMContentLoaded", () => {
     const cards = document.querySelectorAll(".uc-card");
 
     cards.forEach((card) => {
+        const form = card.querySelector("form");
         const select = card.querySelector(".turno-select");
-        const button = card.querySelector(".btn-inscrever");
 
-        if (!select || !button) return;
+        if (!select || !form) return;
 
-        button.addEventListener("click", (e) => {
-            e.preventDefault();  // não submeter já
-
-            const option = select.selectedOptions[0];
+        // Quando mudar o select, atualizar o horário
+        select.addEventListener("change", (e) => {
+            const option = e.target.selectedOptions[0];
 
             if (!option || !option.value) {
-                alert("Escolhe um turno primeiro!");
                 return;
             }
 
@@ -37,9 +35,6 @@ document.addEventListener("DOMContentLoaded", () => {
             }
 
             adicionarAula(dia, hora, uc);
-
-            // depois de desenhar no horário, submeter o form
-            card.querySelector("form").submit();
         });
     });
 });

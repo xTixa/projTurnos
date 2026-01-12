@@ -481,6 +481,114 @@ def inscrever_turno(request, turno_id, uc_id):
         return redirect("home:inscricao_turno")
 
 
+def desinscrever_turno(request, turno_id, uc_id):
+    """
+    Remove aluno de inscrição em turno
+    """
+    if "user_tipo" not in request.session or request.session["user_tipo"] != "aluno":
+        return JsonResponse({"erro": "Acesso não autorizado"}, status=403)
+
+    try:
+        aluno = get_object_or_404(Aluno, n_mecanografico=request.session["user_id"])
+        turno_uc = get_object_or_404(Turno, id_turno=turno_id)
+        uc = get_object_or_404(UnidadeCurricular, id_unidadecurricular=uc_id)
+
+        # Remover inscrição (tenta com UC e, se não encontrar, remove apenas pelo turno)
+        qs = InscricaoTurno.objects.filter(
+            n_mecanografico=aluno,
+            id_turno=turno_uc,
+            id_unidadecurricular=uc
+        )
+
+        removidas = qs.delete()[0]
+
+        # Fallback: caso algum registo tenha ficado sem UC associada (dados antigos)
+        if removidas == 0:
+            removidas = InscricaoTurno.objects.filter(
+                n_mecanografico=aluno,
+                id_turno=turno_uc
+            ).delete()[0]
+
+        if removidas > 0:
+            registar_auditoria_inscricao(
+                aluno.n_mecanografico, turno_id, uc_id, uc.nome,
+                'desinscrever', None, 0
+            )
+            messages.success(request, f"Desinscrição em {uc.nome} — {turno_uc.tipo} efetuada!")
+        else:
+            messages.warning(request, "Inscrição não encontrada.")
+
+        return redirect("home:inscricao_turno")
+
+    except Exception as e:
+        registar_erro("desinscrever_turno", str(e), {"turno_id": turno_id, "uc_id": uc_id})
+        messages.error(request, "Erro ao remover inscrição.")
+        return redirect("home:inscricao_turno")
+
+
+def api_verificar_conflitos(request, turno_id):
+    """
+    API para verificar conflitos de horário antes de inscrever
+    Retorna lista de UCs com conflito se houver
+    """
+    if "user_tipo" not in request.session or request.session["user_tipo"] != "aluno":
+        return JsonResponse({"erro": "Não autorizado"}, status=403)
+
+    try:
+        aluno = get_object_or_404(Aluno, n_mecanografico=request.session["user_id"])
+        turno_novo = get_object_or_404(Turno, id_turno=turno_id)
+
+        # Pegar os horários do turno novo (pode haver múltiplas associações com UCs diferentes)
+        turnos_uc_novo = TurnoUc.objects.filter(id_turno=turno_novo)
+        if not turnos_uc_novo.exists():
+            return JsonResponse({"conflitos": []})
+
+        # Pegar todas as inscrições do aluno com os horários associados
+        inscricoes = InscricaoTurno.objects.filter(
+            n_mecanografico=aluno
+        ).select_related('id_turno', 'id_unidadecurricular')
+
+        conflitos = []
+        
+        # Para cada turno novo que será inscrito
+        for turno_uc_novo in turnos_uc_novo:
+            hora_inicio_novo = turno_uc_novo.hora_inicio
+            hora_fim_novo = turno_uc_novo.hora_fim
+
+            # Verificar com todas as inscrições existentes
+            for insc in inscricoes:
+                turno_uc_existente = TurnoUc.objects.filter(
+                    id_turno=insc.id_turno
+                ).first()
+
+                if turno_uc_existente:
+                    hora_inicio_existente = turno_uc_existente.hora_inicio
+                    hora_fim_existente = turno_uc_existente.hora_fim
+
+                    # Verificar se há sobreposição (time objects podem ser comparados diretamente)
+                    if (hora_inicio_novo < hora_fim_existente and hora_fim_novo > hora_inicio_existente):
+                        conflitos.append({
+                            "uc": insc.id_unidadecurricular.nome,
+                            "turno": insc.id_turno.tipo,
+                            "horario": f"{hora_inicio_existente.strftime('%H:%M')} - {hora_fim_existente.strftime('%H:%M')}"
+                        })
+
+        # Remover duplicatas mantendo ordem
+        conflitos_unicos = []
+        chaves_vistas = set()
+        for c in conflitos:
+            chave = (c['uc'], c['turno'], c['horario'])
+            if chave not in chaves_vistas:
+                chaves_vistas.add(chave)
+                conflitos_unicos.append(c)
+
+        return JsonResponse({"conflitos": conflitos_unicos})
+
+    except Exception as e:
+        import traceback
+        registar_erro("api_verificar_conflitos", str(e), {"turno_id": turno_id, "traceback": traceback.format_exc()})
+        return JsonResponse({"erro": str(e), "debug": traceback.format_exc()}, status=500)
+
 
 def cadeiras_semestre(request):
     data = list(
@@ -1317,22 +1425,132 @@ def admin_uc_create(request):
         messages.success(request, "Unidade Curricular criada com sucesso!")
         return redirect("home:admin_uc_list")
 
-    return render(request, "admin/uc_form.html")
+    return render(
+        request,
+        "admin/uc_form.html",
+        {
+            "uc": None,
+            "turnos_uc": [],
+            "turnos_count": 0,
+        },
+    )
 
 def admin_uc_edit(request, id):
     uc = get_object_or_404(UnidadeCurricular, id_unidadecurricular=id)
+    turnos_uc = (
+        TurnoUc.objects.filter(id_unidadecurricular=uc)
+        .select_related("id_turno")
+        .order_by("id_turno__n_turno")
+    )
+    turnos_count = turnos_uc.count()
 
     if request.method == "POST":
-        uc.nome = request.POST.get("nome")
-        uc.ects = request.POST.get("ects")
-        uc.save()
+        action = request.POST.get("action") or "update_uc"
 
-        registar_log( request, operacao="UPDATE", entidade="unidade_curricular", chave=str(uc.id_unidadecurricular), detalhes=f"UC atualizada: {uc.nome}")
+        # Atualizar dados da UC
+        if action == "update_uc":
+            uc.nome = request.POST.get("nome")
+            uc.ects = request.POST.get("ects")
+            uc.save()
 
-        messages.success(request, "Unidade Curricular atualizada!")
-        return redirect("home:admin_uc_list")
+            registar_log(
+                request,
+                operacao="UPDATE",
+                entidade="unidade_curricular",
+                chave=str(uc.id_unidadecurricular),
+                detalhes=f"UC atualizada: {uc.nome}",
+            )
 
-    return render(request, "admin/uc_form.html", {"uc": uc})
+            messages.success(request, "Unidade Curricular atualizada!")
+            return redirect("home:admin_uc_list")
+
+        # Adicionar novo turno para esta UC
+        if action == "add_turno":
+            n_turno = request.POST.get("n_turno")
+            tipo = request.POST.get("tipo")
+            capacidade = request.POST.get("capacidade")
+            hora_inicio = request.POST.get("hora_inicio")
+            hora_fim = request.POST.get("hora_fim")
+
+            novo_turno = Turno.objects.create(
+                n_turno=n_turno or 0,
+                tipo=tipo or "",
+                capacidade=capacidade or 0,
+            )
+
+            TurnoUc.objects.create(
+                id_turno=novo_turno,
+                id_unidadecurricular=uc,
+                hora_inicio=hora_inicio,
+                hora_fim=hora_fim,
+            )
+
+            registar_log(
+                request,
+                operacao="CREATE",
+                entidade="turno",
+                chave=str(novo_turno.id_turno),
+                detalhes=f"Turno criado para UC {uc.nome}",
+            )
+
+            messages.success(request, "Turno adicionado à UC!")
+            return redirect("home:admin_uc_edit", id=uc.id_unidadecurricular)
+
+        # Atualizar um turno existente
+        if action == "update_turno":
+            turno_id = request.POST.get("turno_id")
+            turno = get_object_or_404(Turno, id_turno=turno_id)
+            turno_uc = get_object_or_404(TurnoUc, id_turno=turno)
+
+            turno.n_turno = request.POST.get("n_turno")
+            turno.tipo = request.POST.get("tipo")
+            turno.capacidade = request.POST.get("capacidade")
+            turno.save()
+
+            turno_uc.hora_inicio = request.POST.get("hora_inicio")
+            turno_uc.hora_fim = request.POST.get("hora_fim")
+            turno_uc.save()
+
+            registar_log(
+                request,
+                operacao="UPDATE",
+                entidade="turno",
+                chave=str(turno.id_turno),
+                detalhes=f"Turno atualizado para UC {uc.nome}",
+            )
+
+            messages.success(request, "Turno atualizado!")
+            return redirect("home:admin_uc_edit", id=uc.id_unidadecurricular)
+
+        # Remover turno de uma UC
+        if action == "delete_turno":
+            turno_id = request.POST.get("turno_id")
+            turno = get_object_or_404(Turno, id_turno=turno_id)
+
+            # Remover relação Turno-UC e o próprio turno
+            TurnoUc.objects.filter(id_turno=turno).delete()
+            turno.delete()
+
+            registar_log(
+                request,
+                operacao="DELETE",
+                entidade="turno",
+                chave=str(turno_id),
+                detalhes=f"Turno removido da UC {uc.nome}",
+            )
+
+            messages.success(request, "Turno removido!")
+            return redirect("home:admin_uc_edit", id=uc.id_unidadecurricular)
+
+    return render(
+        request,
+        "admin/uc_form.html",
+        {
+            "uc": uc,
+            "turnos_uc": turnos_uc,
+            "turnos_count": turnos_count,
+        },
+    )
 
 def admin_uc_delete(request, id):
     uc = get_object_or_404(UnidadeCurricular, id_unidadecurricular=id)
@@ -1427,3 +1645,10 @@ def admin_logs_list(request):
 
 def forum(request):
     return render(request, "forum/index_forum.html")
+
+
+
+# ==========================
+
+def dape(request):
+    return render(request, "dape/dape.html")

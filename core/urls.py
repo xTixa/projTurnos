@@ -21,6 +21,8 @@ urlpatterns = [
 
     path("ei/inscricao_turno/", views.inscricao_turno, name="inscricao_turno"),
     path("turnos/inscrever/<int:turno_id>/<int:uc_id>/", views.inscrever_turno, name="inscrever_turno"),
+    path("turnos/desinscrever/<int:turno_id>/<int:uc_id>/", views.desinscrever_turno, name="desinscrever_turno"),
+    path("api/turnos/conflitos/<int:turno_id>/", views.api_verificar_conflitos, name="api_verificar_conflitos"),
 
     # Painel Admin
     path("admin-panel/", views.admin_dashboard, name="admin_dashboard"),
@@ -141,5 +143,9 @@ urlpatterns = [
 
     # Fórum
     path("forum/", views.forum, name="index_forum"),
+
+
+    # DAPE
+    path("dape/", views.dape, name="index_dape"),
 ]
 

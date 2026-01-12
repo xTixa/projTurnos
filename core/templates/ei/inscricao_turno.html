@@ -16,6 +16,13 @@
     </p>
 </section>
 
+<!-- Alerta de conflitos -->
+<div id="conflito-alert" class="alert alert-warning" style="display: none; margin-bottom: 20px;">
+	<i class="fa-solid fa-triangle-exclamation"></i>
+	<strong>Aviso de Conflito de Horário</strong>
+	<p id="conflito-msg"></p>
+</div>
+
 <section class="turnos-lista">
 
     {% for uc in unidades %}
@@ -25,9 +32,9 @@
 
         <!-- FORMULÁRIO POR UC -->
         <form method="POST"
-              action="{% url 'home:inscrever_turno' 0 uc.id %}"
+              id="form-uc-{{ uc.id }}"
               class="uc-turnos"
-              onsubmit="this.action = this.action.replace('/0/', '/' + this.turno.value + '/');">
+              onsubmit="return validarInscricao(this);">
 
             {% csrf_token %}
 
@@ -45,7 +52,9 @@
                             {% if t.vagas == 0 or t.ja_inscrito %}disabled{% endif %}
                             class="{% if t.ja_inscrito %}option-inscrito{% elif t.vagas == 0 %}option-esgotado{% else %}option-vagas{% endif %}"
                             data-dia="{{ t.dia }}"
-                            data-hora="{{ t.hora_inicio }}">
+                            data-hora="{{ t.hora_inicio }}"
+                            data-hora-fim="{{ t.hora_fim }}"
+                            data-uc-id="{{ uc.id }}">
                         {{ t.nome }} — {{ t.horario }} —
                         {% if t.ja_inscrito %}
                             <i class="fa-solid fa-check"></i> Já inscrito
@@ -66,21 +75,22 @@
 
         </form>
 
-        <!-- Informação de turnos inscritos -->
-        {% with inscritos=uc.turnos|dictsort:"ja_inscrito"|last %}
-            {% if uc.turnos|dictsort:"ja_inscrito"|length > 0 %}
+        <!-- Informação de turnos inscritos com opção de desinscrever -->
+        {% for t in uc.turnos %}
+            {% if t.ja_inscrito %}
             <div class="turnos-inscritos">
                 <p class="inscrito-info">
                     <i class="fa-solid fa-circle-check"></i>
-                    {% for t in uc.turnos %}
-                        {% if t.ja_inscrito %}
-                        Já estás inscrito em <strong>{{ t.nome }}</strong>
-                        {% endif %}
-                    {% endfor %}
+                    Já estás inscrito em <strong>{{ t.nome }}</strong> ({{ t.horario }})
+                    <a href="{% url 'home:desinscrever_turno' t.id uc.id %}" 
+                       class="btn-remover" 
+                       onclick="return confirm('Desinscrever deste turno?');">
+                        <i class="fa-solid fa-trash"></i> Remover
+                    </a>
                 </p>
             </div>
             {% endif %}
-        {% endwith %}
+        {% endfor %}
 
     </div>
     {% endfor %}
@@ -132,48 +142,132 @@
 <script>
 // Dados dos turnos inscritos vindos do Django
 const turnosInscritos = {{ turnos_horario|safe }};
+let horarioAtualizado = false;
 
-console.log("Turnos inscritos:", turnosInscritos);
+// Função para atualizar o horário
+function atualizarHorario() {
+    // Limpar tabela anterior
+    document.querySelectorAll('.slot').forEach(slot => {
+        slot.innerHTML = '';
+        slot.classList.remove('ocupado');
+        slot.rowSpan = 1;
+    });
 
-// Preencher o horário
-turnosInscritos.forEach(aula => {
-    const { uc_nome, turno_nome, tipo, dia, hora_inicio, hora_fim } = aula;
-    
-    // Calcular quantas células (slots de 30min) a aula ocupa
-    const [hi_h, hi_m] = hora_inicio.split(':').map(Number);
-    const [hf_h, hf_m] = hora_fim.split(':').map(Number);
-    
-    const inicio_minutos = hi_h * 60 + hi_m;
-    const fim_minutos = hf_h * 60 + hf_m;
-    const duracao_slots = (fim_minutos - inicio_minutos) / 30;
-    
-    // Encontrar a célula inicial
-    const celula = document.getElementById(`${dia}-${hora_inicio}`);
-    
-    if (celula) {
-        celula.innerHTML = `
-            <div class="aula-bloco">
-                <strong>${uc_nome}</strong><br>
-                <span>${turno_nome} (${tipo})</span><br>
-                <small>${hora_inicio} - ${hora_fim}</small>
-            </div>
-        `;
-        celula.classList.add('ocupado');
-        celula.rowSpan = duracao_slots;
+    // Preencher o horário
+    turnosInscritos.forEach(aula => {
+        const { uc_nome, turno_nome, tipo, dia, hora_inicio, hora_fim } = aula;
         
-        // Remover células seguintes que serão ocupadas pelo rowspan
-        let proxima = celula.nextElementSibling;
-        for (let i = 1; i < duracao_slots; i++) {
-            if (proxima) {
-                const proximaLinha = celula.parentElement.nextElementSibling;
-                if (proximaLinha) {
-                    const colIndex = Array.from(celula.parentElement.children).indexOf(celula);
-                    const celulaRemover = proximaLinha.children[colIndex];
-                    if (celulaRemover) celulaRemover.remove();
+        // Calcular quantas células (slots de 30min) a aula ocupa
+        const [hi_h, hi_m] = hora_inicio.split(':').map(Number);
+        const [hf_h, hf_m] = hora_fim.split(':').map(Number);
+        
+        const inicio_minutos = hi_h * 60 + hi_m;
+        const fim_minutos = hf_h * 60 + hf_m;
+        const duracao_slots = (fim_minutos - inicio_minutos) / 30;
+        
+        // Encontrar a célula inicial
+        const celula = document.getElementById(`${dia}-${hora_inicio}`);
+        
+        if (celula) {
+            celula.innerHTML = `
+                <div class="aula-bloco">
+                    <strong>${uc_nome}</strong><br>
+                    <span>${turno_nome} (${tipo})</span><br>
+                    <small>${hora_inicio} - ${hora_fim}</small>
+                </div>
+            `;
+            celula.classList.add('ocupado');
+            celula.rowSpan = duracao_slots;
+            
+            // Remover células seguintes que serão ocupadas pelo rowspan
+            let proxima = celula.nextElementSibling;
+            for (let i = 1; i < duracao_slots; i++) {
+                if (proxima) {
+                    const proximaLinha = celula.parentElement.nextElementSibling;
+                    if (proximaLinha) {
+                        const colIndex = Array.from(celula.parentElement.children).indexOf(celula);
+                        const celulaRemover = proximaLinha.children[colIndex];
+                        if (celulaRemover) celulaRemover.remove();
+                    }
                 }
             }
         }
+    });
+}
+
+// Atualizar horário ao carregar a página
+atualizarHorario();
+
+// Função para validar inscrição antes de submeter
+function validarInscricao(form) {
+    const turnoSelect = form.querySelector('.turno-select');
+    const selectedOption = turnoSelect.selectedOptions[0];
+    const turnoId = turnoSelect.value;
+    const ucId = selectedOption.dataset.ucId;
+
+    console.log('validarInscricao chamada:', { turnoId, ucId, selectedOption: selectedOption.textContent });
+
+    if (!turnoId) {
+        return true;
     }
+
+    // Verificar conflitos via API
+    fetch(`/api/turnos/conflitos/${turnoId}/`)
+        .then(response => response.json())
+        .then(data => {
+            console.log('Resposta da API:', data);
+            
+            if (data.conflitos && data.conflitos.length > 0) {
+                const conflitorAlert = document.getElementById('conflito-alert');
+                const conflitorMsg = document.getElementById('conflito-msg');
+                
+                let mensagem = 'Este turno tem sobreposição com:<br>';
+                data.conflitos.forEach(c => {
+                    mensagem += `<br>• <strong>${c.uc}</strong> - ${c.turno} (${c.horario})`;
+                });
+                
+                conflitorMsg.innerHTML = mensagem;
+                conflitorAlert.style.display = 'block';
+                conflitorAlert.scrollIntoView({ behavior: 'smooth' });
+                
+                // Mostrar pergunta de confirmação
+                const confirmar = confirm(
+                    'Este turno tem sobreposição de horário com outras inscrições.\n\n' +
+                    'Deseja continuar mesmo assim?'
+                );
+                
+                if (confirmar) {
+                    submeterInscricao(turnoId, ucId);
+                }
+            } else {
+                // Sem conflitos, submeter
+                submeterInscricao(turnoId, ucId);
+            }
+        })
+        .catch(error => {
+            console.error('Erro ao verificar conflitos:', error);
+            // Em caso de erro, submeter mesmo assim
+            submeterInscricao(turnoId, ucId);
+        });
+
+    return false;
+}
+
+// Função para submeter a inscrição com a ação dinâmica
+function submeterInscricao(turnoId, ucId) {
+    const url = `/turnos/inscrever/${turnoId}/${ucId}/`;
+    console.log('Redirecionando para:', url);
+    window.location.href = url;
+}
+
+// Atualizar horário após desinscrever (se a página for recarregada, os dados vêm do servidor)
+document.addEventListener('DOMContentLoaded', () => {
+    // Ao clicar em remover, atualizar os dados após redirect
+    document.querySelectorAll('.btn-remover').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            // Permitir que o link funcione, a página recarregará com dados atualizados
+        });
+    });
 });
 
 // Exportar PDF
@@ -198,3 +292,4 @@ document.getElementById("exportPDF").addEventListener("click", async () => {
 </script>
 
 {% endblock %}
+
