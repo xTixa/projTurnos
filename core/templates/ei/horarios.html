@@ -6,77 +6,53 @@
 {% endblock %}
 
 {% block content %}
-<section class="horarios-hero">
-  <div class="horarios-inner">
+<div class="horarios-container">
 
-    <h1>Horários — Engenharia Informática</h1>
-    <p>Consulta aqui os horários.</p>
+  <!-- HEADER -->
+  <header class="simple-header">
+    <h1>Horários Escolares</h1>
+    <p>Acede aos calendários letivos e distribuições de turmas atualizados.</p>
 
     {% if request.session.user_id %}
-      <div class="inscricao-btn-wrapper">
+      <div class="inscricao-wrapper">
         <a href="{% url 'home:inscricao_turno' %}" class="btn-inscricao">
-          <i class="fa-solid fa-check"></i>
-          Inscrever-me nos Turnos
+          <span>Inscrever nos Turnos</span>
+          <i class="fa-solid fa-arrow-right"></i>
         </a>
       </div>
     {% endif %}
+  </header>
 
-    <!-- ABAS -->
-    <ul class="nav nav-tabs horarios-tabs" role="tablist">
-      {% for item in horarios_por_ano %}
-        <li class="nav-item" role="presentation">
-          <button
-            class="nav-link {% if forloop.first %}active{% endif %}"
-            data-bs-toggle="tab"
-            data-bs-target="#ano-{{ item.ano.id_anocurricular }}"
-            type="button"
-            role="tab">
-            {{ item.ano.ano_curricular }}
-          </button>
-        </li>
-      {% endfor %}
-    </ul>
-
-    <!-- CONTEÚDO DAS ABAS -->
-    <div class="tab-content horarios-content">
-      {% for item in horarios_por_ano %}
-        <div
-          class="tab-pane fade {% if forloop.first %}show active{% endif %}"
-          id="ano-{{ item.ano.id_anocurricular }}"
-          role="tabpanel">
-
+  <!-- CLEAN ROWS LAYOUT (Refined) -->
+  <div class="schedules-list">
+    {% for item in horarios_por_ano %}
+      <div class="schedule-card">
+        
+        <div class="schedule-main">
+          <h2 class="year-title">Horário - {{ item.ano.ano_curricular }}</h2>
           {% if item.pdf %}
-            <div class="horario-card">
-              <p class="text-muted mb-4">
-                O horário encontra-se disponível em formato PDF.
-              </p>
-
-              <div class="horario-actions">
-                <a href="{{ item.pdf.ficheiro.url }}"
-                   class="btn btn-primary"
-                   target="_blank">
-                  <i class="fa-regular fa-file-pdf"></i> Ver Horário
-                </a>
-
-                <a href="{{ item.pdf.ficheiro.url }}"
-                   class="btn btn-outline-secondary"
-                   download>
-                  <i class="fa-solid fa-download"></i> Download
-                </a>
-              </div>
-            </div>
+            <span class="status-badge available">Disponível</span>
           {% else %}
-            <div class="horario-card empty">
-              <p class="text-muted">
-                Ainda não existe horário para {{ item.ano.ano_curricular }}.
-              </p>
-            </div>
+            <span class="status-badge pending">Pendente</span>
           {% endif %}
-
         </div>
-      {% endfor %}
-    </div>
 
+        <div class="schedule-actions">
+          {% if item.pdf %}
+            <a href="{{ item.pdf.ficheiro.url }}" class="btn-view-pdf" target="_blank">
+              Ver PDF
+            </a>
+            <a href="{{ item.pdf.ficheiro.url }}" class="icon-btn download" download title="Download PDF">
+              <i class="fa-solid fa-download"></i>
+            </a>
+          {% else %}
+            <span class="disabled-msg">---</span>
+          {% endif %}
+        </div>
+
+      </div>
+    {% endfor %}
   </div>
-</section>
+
+</div>
 {% endblock %}

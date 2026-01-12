@@ -5,7 +5,7 @@
 .ingress-container {
     max-width: 1200px;
     margin: 0 auto;
-    padding: 3rem 2rem;
+    padding: 0 2rem; /* Fully pulled up */
     font-family: 'Inter', system-ui, sans-serif;
     color: #1e293b;
 }
@@ -13,10 +13,11 @@
 /* --- HERO SECTION --- */
 .ingress-hero {
     text-align: center;
-    margin-bottom: 4rem;
-    padding: 4rem 2rem;
+    margin-top: 1rem; /* Minimal top margin */
+    margin-bottom: 2rem;
+    padding: 2.5rem 2rem; /* More compact */
     background: #eff6ff; /* Solid Light Blue */
-    border-radius: 30px;
+    border-radius: 24px;
     border: 1px solid #bfdbfe;
     box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.1);
 }
