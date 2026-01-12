@@ -11,13 +11,21 @@
         {% for s in sugestoes %}
             <div class="sugestao-card">
                 <p>{{ s.texto }}</p>
-                <small>Autor: {{ s.autor_nome }}</small>
-                <button class="like-btn">
+                <small>{{ s.autor_nome }}</small>
+                <form action="{% url 'extra_app:feedback_sugestao' s.id %}" method="post">
+                    {% csrf_token %}
+                    <button class="like-btn {% if s.user_liked %}active-like{% endif %}"
+                            type="submit" name="acao" value="like">
+                    {{ s.Like|length }}
                     <i class="fa fa-thumbs-up"></i>
-                </button>
-                <button class="dislike-btn">
+                    </button>
+
+                    <button class="dislike-btn {% if s.user_disliked %}active-dislike{% endif %}"
+                            type="submit" name="acao" value="dislike">
+                    {{ s.Dislike|length }}
                     <i class="fa fa-thumbs-down"></i>
-                </button>
+                    </button>
+                </form>
             </div>
         {% endfor %}
         </div>
