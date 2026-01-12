@@ -6,6 +6,11 @@
 {% endblock %} 
 {% block sb_info_active %}is-active{% endblock %}
 {% block content %}
+   <div class="section-tabs">
+    <a href="#sec-sugerir" class="active">Sugerir</a>
+    <a href="#sec-populares">Mais votadas</a>
+    <a href="{% url 'extra_app:sugestoes_todas' %}">Todas</a>
+   </div>
     <p>Olá, {{ request.session.user_nome|default:request.user.username }}</p>
         <div class="sugestoes-scroll">
         {% for s in sugestoes %}
@@ -42,8 +47,5 @@
                 <br>
                 <button type="submit">Enviar</button>
             </form>
+            
 {% endblock %}
-
-
-
-

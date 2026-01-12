@@ -112,3 +112,7 @@ def feedback_sugestao(request, sugestao_id):
             )
     return redirect("extra_app:sugestao")
 
+
+def sugestoes_todas(request):
+    return render(request, "extra_app/sugestoes_todas.html")
+

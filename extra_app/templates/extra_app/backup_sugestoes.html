@@ -1,0 +1,46 @@
+{% extends 'home/base.html' %}
+{% load static %} 
+{% block title %}Sugestões{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/sugestoes/CSS_sugestoes.css' %}"> 
+{% endblock %} 
+{% block sb_info_active %}is-active{% endblock %}
+{% block content %}
+    <p>Olá, {{ request.session.user_nome|default:request.user.username }}</p>
+        <div class="sugestoes-scroll">
+        {% for s in sugestoes %}
+            <div class="sugestao-card">
+                <p>{{ s.texto }}</p>
+                <small>{{ s.autor_nome }}</small>
+                <form action="{% url 'extra_app:feedback_sugestao' s.id %}" method="post">
+                    {% csrf_token %}
+                    <button class="like-btn {% if s.user_liked %}active-like{% endif %}"
+                            type="submit" name="acao" value="like">
+                    {{ s.Like|length }}
+                    <i class="fa fa-thumbs-up"></i>
+                    </button>
+
+                    <button class="dislike-btn {% if s.user_disliked %}active-dislike{% endif %}"
+                            type="submit" name="acao" value="dislike">
+                    {{ s.Dislike|length }}
+                    <i class="fa fa-thumbs-down"></i>
+                    </button>
+                </form>
+            </div>
+        {% endfor %}
+        </div>
+            <h1>Caixa de sugestões</h1>
+
+            {% if mensagem %}
+                <p>{{ mensagem }}</p>
+            {% endif %}
+
+            <form method="post">
+                {% csrf_token %}
+                <textarea name="texto" rows="4" cols="50"
+                        placeholder="Escreve aqui a tua sugestão"></textarea>
+                <br>
+                <button type="submit">Enviar</button>
+            </form>
+            
+{% endblock %}
