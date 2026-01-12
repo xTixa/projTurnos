@@ -1,7 +1,11 @@
 {% extends "home/base.html" %}
 {% load static %}
 
-{% block sidebar %}{% endblock %}
+{% block sidebar %}
+<aside class="sidebar">
+  {% include "components/sidebar_ei.html" %}
+</aside>
+{% endblock %}
 
 {% block content %}
 <link rel="stylesheet" href="{% static 'css/perfil.css' %}?v=6">

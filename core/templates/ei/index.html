@@ -4,94 +4,118 @@
 {% block title %}Início — Engenharia Informática{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/ei/index.css' %}">
+<link rel="stylesheet" href="{% static 'css/ei/index.css' %}?v=19">
 {% endblock %}
 
 {% block content %}
-<section class="hero-ei">
-  <div class="hero-ei__text">
-    <h1>Engenharia Informática — ESTGV</h1>
-    <p>
-      O curso de Engenharia Informática privilegia um modelo de ensino
-      predominantemente prático, com forte componente de laboratório e
-      projeto/estágio curricular. Aqui preparas-te para responder à constante
-      evolução das TIC e aos desafios de um mercado competitivo e global.
-    </p>
+<div class="ei-layout">
 
-    <div class="hero-ei__actions">
-      <a href="{% url 'home:horarios' %}" class="btn btn-primary">
-        <i class="fa-regular fa-calendar"></i> Ver horários
-      </a>
-      <a href="{% url 'home:plano' %}" class="btn btn-ghost">
-        <i class="fa-regular fa-rectangle-list"></i> Plano curricular
-      </a>
+  <!-- HERO SECTION -->
+  <section class="ei-hero">
+    <div class="ei-hero__text">
+      <h1>Engenharia Informática — ESTGV</h1>
+      <p>
+        O curso de Engenharia Informática privilegia um modelo de ensino
+        predominantemente prático, com forte componente de laboratório e
+        projeto/estágio curricular. Aqui preparas-te para responder à constante
+        evolução das TIC e aos desafios de um mercado competitivo e global.
+      </p>
+
+      <div class="ei-hero__actions">
+        <a href="{% url 'home:horarios' %}" class="btn btn-primary">
+          <i class="fa-regular fa-calendar"></i> Ver horários
+        </a>
+        <a href="{% url 'home:plano' %}" class="btn btn-ghost">
+          <i class="fa-regular fa-rectangle-list"></i> Plano curricular
+        </a>
+      </div>
     </div>
-  </div>
-</section>
 
-<section class="ei-grid">
-  <article class="card ei-card">
-    <h2>O que vais encontrar no curso</h2>
-    <ul>
-      <li>Ensino prático com forte componente laboratorial;</li>
-      <li>Projetos reais e estágio curricular;</li>
-      <li>Trabalho em equipa e desenvolvimento de competências humanas;</li>
-      <li>Preparação para desafios tecnológicos e organizacionais.</li>
-    </ul>
-  </article>
+    <div class="ei-hero__illustration">
+      <img src="{% static 'img/ei2.png' %}" alt="Engenharia Informática" class="hero-photo">
+    </div>
+  </section>
 
-  <article class="card ei-card">
-    <h2>Saídas profissionais</h2>
-    <ul>
-      <li>Desenvolvimento de software e análise de sistemas;</li>
-      <li>Administração de bases de dados;</li>
-      <li>Gestão de redes e comunicação;</li>
-      <li>Administração e manutenção de sistemas;</li>
-      <li>Integração de sistemas informáticos.</li>
-    </ul>
-  </article>
-</section>
+  <!-- FEATURES / SAÍDAS -->
+  <section class="ei-section">
+    <div class="ei-cards">
+      
+      <!-- Card 1: O que vais encontrar -->
+      <article class="ei-card">
+        <div class="ei-card__icon blue"><i class="fa-solid fa-graduation-cap"></i></div>
+        <h3>O que vais encontrar no curso</h3>
+        <ul>
+          <li>Ensino prático com forte componente laboratorial;</li>
+          <li>Projetos reais e estágio curricular;</li>
+          <li>Trabalho em equipa e desenvolvimento de competências humanas;</li>
+          <li>Preparação para desafios tecnológicos e organizacionais.</li>
+        </ul>
+      </article>
 
-<section class="ei-shortcuts">
-  <h2>Acede rapidamente</h2>
-  <div class="ei-shortcuts__grid">
+      <!-- Card 2: Saídas Profissionais -->
+      <article class="ei-card">
+        <div class="ei-card__icon cyan"><i class="fa-solid fa-rocket"></i></div>
+        <h3>Saídas profissionais</h3>
+        <ul>
+          <li>Desenvolvimento de software e análise de sistemas;</li>
+          <li>Administração de bases de dados;</li>
+          <li>Gestão de redes e comunicação;</li>
+          <li>Administração e manutenção de sistemas;</li>
+          <li>Integração de sistemas informáticos.</li>
+        </ul>
+      </article>
 
-    <a href="{% url 'home:ingresso' %}" class="card shortcut-card">
-      <div class="shortcut-card__icon"><i class="fa-solid fa-graduation-cap"></i></div>
-      <h3>Ingresso</h3>
-      <p>Informação para futuros estudantes.</p>
-    </a>
+    </div>
+  </section>
 
-    <a href="{% url 'home:horarios' %}" class="card shortcut-card">
-      <div class="shortcut-card__icon"><i class="fa-regular fa-calendar"></i></div>
-      <h3>Horários</h3>
-      <p>Consulta os horários por ano e turno.</p>
-    </a>
+  <!-- SHORTCUTS SECTION -->
+  <section class="ei-section">
+    <h2 class="section-title">Acede rapidamente</h2>
 
-    <a href="{% url 'home:avaliacoes' %}" class="card shortcut-card">
-      <div class="shortcut-card__icon"><i class="fa-regular fa-clipboard"></i></div>
-      <h3>Avaliações</h3>
-      <p>Datas de testes, frequências e exames.</p>
-    </a>
+    <div class="ei-shortcuts__grid">
 
-    <a href="{% url 'home:contactos' %}" class="card shortcut-card">
-      <div class="shortcut-card__icon"><i class="fa-regular fa-address-card"></i></div>
-      <h3>Contactos</h3>
-      <p>Departamento, secretaria e apoio ao estudante.</p>
-    </a>
+      <a href="{% url 'home:ingresso' %}" class="innovation-card accent-blue">
+        <div class="card-background-icon"><i class="fa-solid fa-graduation-cap"></i></div>
+        <div class="card-content">
+            <span class="card-label">Candidaturas</span>
+            <h3>Ingresso</h3>
+            <p>Informações de acesso, provas e prazos de candidatura.</p>
+        </div>
+        <div class="card-arrow"><i class="fa-solid fa-arrow-right-long"></i></div>
+      </a>
 
-  </div>
-</section>
+      <a href="{% url 'home:horarios' %}" class="innovation-card accent-green">
+        <div class="card-background-icon"><i class="fa-regular fa-calendar"></i></div>
+        <div class="card-content">
+            <span class="card-label">Aulas</span>
+            <h3>Horários</h3>
+            <p>Consulta a distribuição de turmas, salas e horários.</p>
+        </div>
+        <div class="card-arrow"><i class="fa-solid fa-arrow-right-long"></i></div>
+      </a>
 
-<section class="ei-howto">
-  <h2>Como usar esta página</h2>
-  <ol>
-    <li>Escolhe uma secção na barra lateral.</li>
-    <li>Consulta horários, avaliações ou informações do curso.</li>
-    <li>Volta a esta página para atalhos rápidos.</li>
-  </ol>
-  <p class="ei-howto__note">
-    Dica: guarda esta página nos favoritos para acesso rápido durante o semestre.
-  </p>
-</section>
+      <a href="{% url 'home:avaliacoes' %}" class="innovation-card accent-indigo">
+        <div class="card-background-icon"><i class="fa-regular fa-clipboard"></i></div>
+        <div class="card-content">
+            <span class="card-label">Exames</span>
+            <h3>Avaliações</h3>
+            <p>Calendário de frequências, exames e entregas.</p>
+        </div>
+        <div class="card-arrow"><i class="fa-solid fa-arrow-right-long"></i></div>
+      </a>
+
+      <a href="{% url 'home:contactos' %}" class="innovation-card accent-orange">
+        <div class="card-background-icon"><i class="fa-regular fa-address-card"></i></div>
+        <div class="card-content">
+            <span class="card-label">Secretaria</span>
+            <h3>Contactos</h3>
+            <p>Coordenação de curso, gabinetes e apoio.</p>
+        </div>
+        <div class="card-arrow"><i class="fa-solid fa-arrow-right-long"></i></div>
+      </a>
+
+    </div>
+  </section>
+
+</div>
 {% endblock %}
