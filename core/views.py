@@ -13,7 +13,7 @@ from django.contrib.auth.models import User
 from bd2_projeto.services.mongo_service import (
     adicionar_log, listar_eventos_mongo, listar_logs, registar_auditoria_inscricao,
     validar_inscricao_disponivel, registar_consulta_aluno,
-    registar_atividade_docente, registar_erro
+    registar_atividade_docente, registar_erro, registar_auditoria_user
 )
 from core.utils import registar_log, admin_required
 import time
@@ -675,8 +675,29 @@ def admin_dashboard(request):
     })
 
 def admin_users_list(request):
-    users = User.objects.all().order_by("id")
-    return render(request, "admin/users_list.html", {"users": users})
+    # Combinar todos os tipos de utilizadores
+    django_users = User.objects.all().values('id', 'username', 'email', 'date_joined', 'is_active', 'is_staff').annotate(tipo=models.Value('Admin', output_field=models.CharField()))
+    alunos = Aluno.objects.all().values('n_mecanografico', 'nome', 'email').annotate(
+        id=models.F('n_mecanografico'),
+        username=models.F('nome'),
+        date_joined=models.Value(None, output_field=models.DateTimeField()),
+        is_active=models.Value(True, output_field=models.BooleanField()),
+        is_staff=models.Value(False, output_field=models.BooleanField()),
+        tipo=models.Value('Aluno', output_field=models.CharField())
+    )
+    docentes = Docente.objects.all().values('id_docente', 'nome', 'email').annotate(
+        id=models.F('id_docente'),
+        username=models.F('nome'),
+        date_joined=models.Value(None, output_field=models.DateTimeField()),
+        is_active=models.Value(True, output_field=models.BooleanField()),
+        is_staff=models.Value(False, output_field=models.BooleanField()),
+        tipo=models.Value('Docente', output_field=models.CharField())
+    )
+    
+    users = list(django_users) + list(alunos) + list(docentes)
+    users_sorted = sorted(users, key=lambda x: x.get('id', 0))
+    
+    return render(request, "admin/users_list.html", {"users": users_sorted})
 
 def admin_users_create(request):
     if request.method == "POST":
@@ -686,31 +707,275 @@ def admin_users_create(request):
 
         if not username or not password:
             messages.error(request, "Username e password são obrigatórios.")
-            return redirect("admin_users_create")
+            django_users = User.objects.all().values('id', 'username', 'email', 'date_joined', 'is_active', 'is_staff').annotate(tipo=models.Value('Admin', output_field=models.CharField()))
+            alunos = Aluno.objects.all().values('n_mecanografico', 'nome', 'email').annotate(
+                id=models.F('n_mecanografico'),
+                username=models.F('nome'),
+                date_joined=models.Value(None, output_field=models.DateTimeField()),
+                is_active=models.Value(True, output_field=models.BooleanField()),
+                is_staff=models.Value(False, output_field=models.BooleanField()),
+                tipo=models.Value('Aluno', output_field=models.CharField())
+            )
+            docentes = Docente.objects.all().values('id_docente', 'nome', 'email').annotate(
+                id=models.F('id_docente'),
+                username=models.F('nome'),
+                date_joined=models.Value(None, output_field=models.DateTimeField()),
+                is_active=models.Value(True, output_field=models.BooleanField()),
+                is_staff=models.Value(False, output_field=models.BooleanField()),
+                tipo=models.Value('Docente', output_field=models.CharField())
+            )
+            users = list(django_users) + list(alunos) + list(docentes)
+            users_sorted = sorted(users, key=lambda x: x.get('id', 0))
+            return render(request, "admin/users_form.html", {"users": users_sorted})
 
         User.objects.create_user(username=username, email=email, password=password)
+        
+        # Obter o user criado para registar o ID
+        novo_user = User.objects.get(username=username)
+        
+        # Registar em PostgreSQL
+        registar_log(
+            request, 
+            operacao="CREATE", 
+            entidade="user_admin", 
+            chave=str(novo_user.id), 
+            detalhes=f"Novo utilizador criado: {username} ({email})"
+        )
+        
+        # Registar em MongoDB
+        registar_auditoria_user(
+            "CREATE", 
+            novo_user.id, 
+            "Admin",
+            {"username": username, "email": email},
+            request
+        )
+        
         messages.success(request, "Utilizador criado com sucesso!")
-        return redirect("admin_users_list")
+        return redirect("home:admin_users_list")
 
-    return render(request, "admin/users_form.html")
+    django_users = User.objects.all().values('id', 'username', 'email', 'date_joined', 'is_active', 'is_staff').annotate(tipo=models.Value('Admin', output_field=models.CharField()))
+    alunos = Aluno.objects.all().values('n_mecanografico', 'nome', 'email').annotate(
+        id=models.F('n_mecanografico'),
+        username=models.F('nome'),
+        date_joined=models.Value(None, output_field=models.DateTimeField()),
+        is_active=models.Value(True, output_field=models.BooleanField()),
+        is_staff=models.Value(False, output_field=models.BooleanField()),
+        tipo=models.Value('Aluno', output_field=models.CharField())
+    )
+    docentes = Docente.objects.all().values('id_docente', 'nome', 'email').annotate(
+        id=models.F('id_docente'),
+        username=models.F('nome'),
+        date_joined=models.Value(None, output_field=models.DateTimeField()),
+        is_active=models.Value(True, output_field=models.BooleanField()),
+        is_staff=models.Value(False, output_field=models.BooleanField()),
+        tipo=models.Value('Docente', output_field=models.CharField())
+    )
+    users = list(django_users) + list(alunos) + list(docentes)
+    users_sorted = sorted(users, key=lambda x: x.get('id', 0))
+    return render(request, "admin/users_form.html", {"users": users_sorted})
 
 def admin_users_edit(request, id):
-    user = get_object_or_404(User, id=id)
-
-    if request.method == "POST":
-        user.username = request.POST.get("username")
-        user.email = request.POST.get("email")
-        user.save()
-        messages.success(request, "Utilizador atualizado!")
+    # Tentar encontrar em Django User
+    user = None
+    user_type = None
+    
+    try:
+        user = User.objects.get(id=id)
+        user_type = "Admin"
+    except User.DoesNotExist:
+        pass
+    
+    # Tentar encontrar em Aluno
+    if not user:
+        try:
+            user = Aluno.objects.get(n_mecanografico=id)
+            user_type = "Aluno"
+        except Aluno.DoesNotExist:
+            pass
+    
+    # Tentar encontrar em Docente
+    if not user:
+        try:
+            user = Docente.objects.get(id_docente=id)
+            user_type = "Docente"
+        except Docente.DoesNotExist:
+            pass
+    
+    if not user:
         return redirect("admin_users_list")
 
-    return render(request, "admin/users_form.html", {"user": user})
+    if request.method == "POST":
+        username = request.POST.get("username")
+        email = request.POST.get("email")
+        
+        # Guardar dados antigos para auditoria
+        old_data = {
+            'username': user.username if user_type == "Admin" else user.nome,
+            'email': user.email
+        }
+        
+        if user_type == "Admin":
+            user.username = username
+            user.email = email
+            user.save()
+        elif user_type == "Aluno":
+            user.nome = username
+            user.email = email
+            user.save()
+        elif user_type == "Docente":
+            user.nome = username
+            user.email = email
+            user.save()
+        
+        # Registar mudanças em PostgreSQL
+        registar_log(
+            request, 
+            operacao="UPDATE", 
+            entidade=f"user_{user_type.lower()}", 
+            chave=str(id), 
+            detalhes=f"Campos alterados: username={username}, email={email}"
+        )
+        
+        # Registar em MongoDB
+        registar_auditoria_user(
+            "UPDATE", 
+            id, 
+            user_type,
+            {
+                "username": username,
+                "email": email,
+                "alterado_de": old_data
+            },
+            request
+        )
+        
+        messages.success(request, "Utilizador atualizado com sucesso!")
+        return redirect("home:admin_users_list")
+
+    # Preparar dados para o template
+    user_data = {
+        'id': user.id if user_type == "Admin" else (user.n_mecanografico if user_type == "Aluno" else user.id_docente),
+        'username': user.username if user_type == "Admin" else user.nome,
+        'email': user.email,
+        'tipo': user_type
+    }
+    
+    django_users = User.objects.all().values('id', 'username', 'email', 'date_joined', 'is_active', 'is_staff').annotate(tipo=models.Value('Admin', output_field=models.CharField()))
+    alunos = Aluno.objects.all().values('n_mecanografico', 'nome', 'email').annotate(
+        id=models.F('n_mecanografico'),
+        username=models.F('nome'),
+        date_joined=models.Value(None, output_field=models.DateTimeField()),
+        is_active=models.Value(True, output_field=models.BooleanField()),
+        is_staff=models.Value(False, output_field=models.BooleanField()),
+        tipo=models.Value('Aluno', output_field=models.CharField())
+    )
+    docentes = Docente.objects.all().values('id_docente', 'nome', 'email').annotate(
+        id=models.F('id_docente'),
+        username=models.F('nome'),
+        date_joined=models.Value(None, output_field=models.DateTimeField()),
+        is_active=models.Value(True, output_field=models.BooleanField()),
+        is_staff=models.Value(False, output_field=models.BooleanField()),
+        tipo=models.Value('Docente', output_field=models.CharField())
+    )
+    users = list(django_users) + list(alunos) + list(docentes)
+    users_sorted = sorted(users, key=lambda x: x.get('id', 0))
+    
+    return render(request, "admin/users_form.html", {"user": user_data, "users": users_sorted})
 
 def admin_users_delete(request, id):
-    user = get_object_or_404(User, id=id)
+    # Tentar encontrar em Django User
+    user = None
+    user_type = None
+    username = None
+    
+    try:
+        user = User.objects.get(id=id)
+        user_type = "Admin"
+        username = user.username
+    except User.DoesNotExist:
+        pass
+    
+    # Tentar encontrar em Aluno
+    if not user:
+        try:
+            user = Aluno.objects.get(n_mecanografico=id)
+            user_type = "Aluno"
+            username = user.nome
+            
+            # Limpar matrículas (foreign key constraint)
+            from .models import Matricula
+            matriculas = Matricula.objects.filter(n_mecanografico=user)
+            total_matriculas = matriculas.count()
+            matriculas.delete()
+            
+            # Limpar inscrições em turnos (libera vagas)
+            inscricoes_turno = InscricaoTurno.objects.filter(n_mecanografico=user)
+            total_inscricoes = inscricoes_turno.count()
+            inscricoes_turno.delete()
+            
+            # Limpar inscrições em UCs
+            inscricoes_uc = InscritoUc.objects.filter(n_mecanografico=user)
+            total_ucs = inscricoes_uc.count()
+            inscricoes_uc.delete()
+            
+            # Limpar auditorias relacionadas (opcional - para não perder histórico, comentar estas linhas)
+            # AuditoriaInscricao.objects.filter(n_mecanografico=user).delete()
+            
+            messages.info(request, f"Removidas {total_matriculas} matrículas, {total_inscricoes} inscrições em turnos e {total_ucs} inscrições em UCs.")
+            
+        except Aluno.DoesNotExist:
+            pass
+    
+    # Tentar encontrar em Docente
+    if not user:
+        try:
+            user = Docente.objects.get(id_docente=id)
+            user_type = "Docente"
+            username = user.nome
+            
+            # Limpar associações de docente com UCs
+            from .models import LecionaUc
+            leciona = LecionaUc.objects.filter(id_docente=user)
+            total_ucs = leciona.count()
+            leciona.delete()
+            
+            messages.info(request, f"Removidas {total_ucs} associações com UCs.")
+            
+        except Docente.DoesNotExist:
+            pass
+    
+    if not user:
+        messages.error(request, "Utilizador não encontrado.")
+        return redirect("home:admin_users_list")
+    
+    # Registar antes de apagar em PostgreSQL
+    registar_log(
+        request, 
+        operacao="DELETE", 
+        entidade=f"user_{user_type.lower()}", 
+        chave=str(id), 
+        detalhes=f"Utilizador apagado: {username} (Tipo: {user_type})"
+    )
+    
+    # Registar em MongoDB
+    registar_auditoria_user(
+        "DELETE", 
+        id, 
+        user_type,
+        {
+            "username": username, 
+            "email": user.email,
+            "tipo": user_type
+        },
+        request
+    )
+    
+    # Apagar o utilizador
     user.delete()
-    messages.success(request, "Utilizador apagado!")
-    return redirect("admin_users_list")
+    
+    messages.success(request, f"{user_type} '{username}' apagado com sucesso!")
+    return redirect("home:admin_users_list")
 
 # ==========================
 # ADMIN — TURNOS CRUD

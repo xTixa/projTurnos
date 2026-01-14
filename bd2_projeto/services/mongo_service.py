@@ -460,3 +460,47 @@ def listar_eventos_mongo(filtro_acao=None, filtro_entidade=None, limite=500):
     # Ordenar e cortar
     eventos = sorted(eventos, key=lambda e: e.get("data") or datetime.min, reverse=True)
     return eventos[:limite]
+
+# ==========================================
+# AUDITORIA DE CRUD DE USERS
+# ==========================================
+
+def registar_auditoria_user(operacao, user_id, user_tipo, detalhes=None, request=None):
+    """
+    Registra operações CRUD de utilizadores no MongoDB
+    
+    Args:
+        operacao: 'CREATE', 'UPDATE', 'DELETE'
+        user_id: ID do utilizador
+        user_tipo: Tipo ('Admin', 'Aluno', 'Docente')
+        detalhes: Dict com campos alterados (username, email, etc)
+        request: Objeto request do Django
+    """
+    auditoria = {
+        "operacao": operacao,
+        "user_id": user_id,
+        "user_tipo": user_tipo,
+        "timestamp": datetime.now(),
+        "data_formatada": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        "detalhes": detalhes or {}
+    }
+    
+    if request:
+        auditoria["contexto"] = {
+            "ip": request.META.get('REMOTE_ADDR', 'desconhecido'),
+            "user_agent": request.META.get('HTTP_USER_AGENT', 'desconhecido')[:200],
+            "admin": getattr(request.user, 'username', 'anonimo') if request.user.is_authenticated else 'anonimo'
+        }
+    
+    db.auditoria_users.insert_one(auditoria)
+    return auditoria
+
+def listar_auditoria_users(filtro=None, limite=100):
+    """
+    Lista auditoria de users com filtro opcional
+    
+    Args:
+        filtro: Dict com filtros (ex: {"operacao": "CREATE"})
+        limite: Número máximo de logs a retornar
+    """
+    return list(db.auditoria_users.find(filtro or {}, {"_id": 0}).sort("timestamp", -1).limit(limite))

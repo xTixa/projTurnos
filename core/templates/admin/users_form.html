@@ -1,22 +1,212 @@
 {% extends "../home/base.html" %}
 
+{% load static %}
+
 {% block content %}
-<h1>{% if user %}Editar Utilizador{% else %}Novo Utilizador{% endif %}</h1>
+<link rel="stylesheet" href="{% static 'css/admin/users_form.css' %}">
 
-<form method="post">
-    {% csrf_token %}
+<div class="users-container">
+    <h1>Gerir Utilizadores</h1>
 
-    <label>Username:</label>
-    <input type="text" name="username" value="{{ user.username|default:'' }}" required>
+    <!-- Botão para criar novo utilizador -->
+    <div class="action-buttons">
+        <a href="#novo-form" class="btn-create" id="btn-novo-user">+ Novo Utilizador</a>
+    </div>
 
-    <label>Email:</label>
-    <input type="email" name="email" value="{{ user.email|default:'' }}">
+    <!-- FORMULÁRIO (CREATE/UPDATE) -->
+    <div class="form-section" id="novo-form" style="display:none;">
+        <h2>{% if user %}Editar Utilizador ({{ user.tipo }}){% else %}Novo Utilizador (Admin){% endif %}</h2>
+        
+        <form method="post" class="user-form">
+            {% csrf_token %}
 
-    {% if not user %}
-        <label>Password:</label>
-        <input type="password" name="password" required>
+            <div class="form-group">
+                <label for="username">{% if user and user.tipo != "Admin" %}Nome{% else %}Username{% endif %}:</label>
+                <input type="text" id="username" name="username" value="{{ user.username|default:'' }}" required>
+            </div>
+
+            <div class="form-group">
+                <label for="email">Email:</label>
+                <input type="email" id="email" name="email" value="{{ user.email|default:'' }}">
+            </div>
+
+            {% if not user %}
+                <div class="form-group">
+                    <label for="password">Password:</label>
+                    <input type="password" id="password" name="password" required>
+                </div>
+            {% else %}
+                <div class="form-info">
+                    <p><small>{% if user.tipo == "Admin" %}Para alterar a password, use o painel de administração do Django.{% else %}Este é um utilizador do tipo {{ user.tipo }} - edite apenas nome e email.{% endif %}</small></p>
+                </div>
+            {% endif %}
+
+            <div class="form-actions">
+                <button type="submit" class="btn-save">Guardar</button>
+                <button type="button" class="btn-cancel" onclick="document.getElementById('novo-form').style.display='none';">Cancelar</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- LISTA DE UTILIZADORES -->
+    <div class="list-section">
+        <h2>Lista de Utilizadores</h2>
+
+        <!-- Filtros e Opções -->
+        <div class="filter-options">
+            <div class="filter-group">
+                <label for="search-user">Pesquisar:</label>
+                <input type="text" id="search-user" placeholder="Nome, username ou email...">
+            </div>
+
+            <div class="filter-group">
+                <label for="filter-tipo">Tipo:</label>
+                <select id="filter-tipo">
+                    <option value="">Todos</option>
+                    <option value="admin">Admin</option>
+                    <option value="aluno">Aluno</option>
+                    <option value="docente">Docente</option>
+                </select>
+            </div>
+
+            <div class="filter-group">
+                <label for="filter-status">Status:</label>
+                <select id="filter-status">
+                    <option value="">Todos</option>
+                    <option value="active">Ativo</option>
+                    <option value="inactive">Inativo</option>
+                </select>
+            </div>
+
+            <button class="btn-filter" onclick="aplicarFiltros()">Filtrar</button>
+            <button class="btn-filter-reset" onclick="resetarFiltros()">Limpar</button>
+        </div>
+        
+        {% if users %}
+            <div class="table-info">Total: <strong>{{ users|length }}</strong> utilizador(es)</div>
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Nome/Username</th>
+                        <th>Email</th>
+                        <th>Tipo</th>
+                        <th>Data de Criação</th>
+                        <th>Admin</th>
+                        <th>Ativo</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody id="users-tbody">
+                    {% for u in users %}
+                    <tr class="user-row" data-username="{{ u.username|lower }}" data-email="{{ u.email|lower }}" data-tipo="{{ u.tipo }}" data-status="{% if u.is_active %}active{% else %}inactive{% endif %}" data-staff="{% if u.is_staff %}admin{% else %}user{% endif %}">
+                        <td><strong>{{ u.id }}</strong></td>
+                        <td>{{ u.username }}</td>
+                        <td>{{ u.email|default:"—" }}</td>
+                        <td>
+                            <span class="badge badge-{{ u.tipo|lower }}">{{ u.tipo }}</span>
+                        </td>
+                        <td>{% if u.date_joined %}{{ u.date_joined|date:"d/m/Y H:i" }}{% else %}—{% endif %}</td>
+                        <td>
+                            {% if u.is_staff %}
+                                <span class="status-active">✓ Sim</span>
+                            {% else %}
+                                <span class="status-inactive">✗ Não</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if u.is_active %}
+                                <span class="status-active">✓ Ativo</span>
+                            {% else %}
+                                <span class="status-inactive">✗ Inativo</span>
+                            {% endif %}
+                        </td>
+                        <td class="actions-cell">
+                            <a href="{% url 'home:admin_users_edit' u.id %}" class="btn-edit" title="Editar utilizador">
+                                <i class="fa-regular fa-pen-to-square"></i> Editar
+                            </a>
+                            <a href="{% url 'home:admin_users_delete' u.id %}" class="btn-delete" 
+                               onclick="return confirm('{% if u.tipo == 'Aluno' %}Tem a certeza que deseja apagar o aluno {{ u.username }}?\n\nSerão removidas:\n• Matrículas\n• Inscrições em turnos (libera vagas)\n• Inscrições em UCs{% elif u.tipo == 'Docente' %}Tem a certeza que deseja apagar o docente {{ u.username }}?\n\nSerão removidas:\n• Associações com UCs{% else %}Tem a certeza que deseja apagar o utilizador {{ u.username }}?{% endif %}');" 
+                               title="Apagar utilizador">
+                                <i class="fa-solid fa-trash"></i> Apagar
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p class="no-data">Nenhum utilizador encontrado.</p>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+    // Mostrar/ocultar formulário
+    document.getElementById('btn-novo-user').addEventListener('click', function(e) {
+        e.preventDefault();
+        var formSection = document.getElementById('novo-form');
+        formSection.style.display = formSection.style.display === 'none' ? 'block' : 'none';
+    });
+
+    // Se for edição, manter o formulário visível
+    {% if user %}
+        document.getElementById('novo-form').style.display = 'block';
     {% endif %}
 
-    <button class="btn-save">Guardar</button>
-</form>
+    // Funções de filtro
+    function aplicarFiltros() {
+        const searchTerm = document.getElementById('search-user').value.toLowerCase();
+        const tipoFilter = document.getElementById('filter-tipo').value.toLowerCase();
+        const statusFilter = document.getElementById('filter-status').value;
+        
+        const rows = document.querySelectorAll('.user-row');
+        let visibleCount = 0;
+
+        rows.forEach(row => {
+            let show = true;
+
+            // Pesquisa
+            if (searchTerm) {
+                const username = row.dataset.username;
+                const email = row.dataset.email;
+                show = username.includes(searchTerm) || email.includes(searchTerm);
+            }
+
+            // Tipo
+            if (show && tipoFilter) {
+                show = row.dataset.tipo.toLowerCase() === tipoFilter;
+            }
+
+            // Status
+            if (show && statusFilter) {
+                show = row.dataset.status === statusFilter;
+            }
+
+            row.style.display = show ? '' : 'none';
+            if (show) visibleCount++;
+        });
+
+        // Atualizar total
+        document.querySelector('.table-info').innerHTML = `Total: <strong>${visibleCount}</strong> utilizador(es)`;
+    }
+
+    function resetarFiltros() {
+        document.getElementById('search-user').value = '';
+        document.getElementById('filter-tipo').value = '';
+        document.getElementById('filter-status').value = '';
+        
+        const rows = document.querySelectorAll('.user-row');
+        rows.forEach(row => {
+            row.style.display = '';
+        });
+
+        document.querySelector('.table-info').innerHTML = `Total: <strong>${rows.length}</strong> utilizador(es)`;
+    }
+
+    // Permitir pesquisa ao digitar
+    document.getElementById('search-user').addEventListener('keyup', aplicarFiltros);
+    document.getElementById('filter-tipo').addEventListener('change', aplicarFiltros);
+    document.getElementById('filter-status').addEventListener('change', aplicarFiltros);
+</script>
 {% endblock %}
