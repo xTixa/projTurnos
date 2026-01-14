@@ -30,11 +30,7 @@ def login_view(request):
         # =========================
         # ADMIN (Django User)
         # =========================
-        user = authenticate(
-            request,
-            username=username_or_email,
-            password=password
-        )
+        user = authenticate(request, username=username_or_email, password=password)
 
         if user is not None:
             login(request, user)
@@ -514,6 +510,17 @@ def desinscrever_turno(request, turno_id, uc_id):
                 aluno.n_mecanografico, turno_id, uc_id, uc.nome,
                 'desinscrever', None, 0
             )
+            # Logar quantidade removida para diagnóstico
+            adicionar_log(
+                "desinscrever_turno",
+                {
+                    "aluno": aluno.n_mecanografico,
+                    "turno": turno_id,
+                    "uc": uc_id,
+                    "registos_removidos": removidas,
+                },
+                request
+            )
             messages.success(request, f"Desinscrição em {uc.nome} — {turno_uc.tipo} efetuada!")
         else:
             messages.warning(request, "Inscrição não encontrada.")
@@ -554,6 +561,7 @@ def api_verificar_conflitos(request, turno_id):
         for turno_uc_novo in turnos_uc_novo:
             hora_inicio_novo = turno_uc_novo.hora_inicio
             hora_fim_novo = turno_uc_novo.hora_fim
+            dia_novo = getattr(turno_uc_novo, "dia", None)
 
             # Verificar com todas as inscrições existentes
             for insc in inscricoes:
@@ -564,8 +572,13 @@ def api_verificar_conflitos(request, turno_id):
                 if turno_uc_existente:
                     hora_inicio_existente = turno_uc_existente.hora_inicio
                     hora_fim_existente = turno_uc_existente.hora_fim
+                    dia_existente = getattr(turno_uc_existente, "dia", None)
 
-                    # Verificar se há sobreposição (time objects podem ser comparados diretamente)
+                    # Se ambos têm dia e são diferentes, não há conflito
+                    if dia_novo and dia_existente and dia_novo != dia_existente:
+                        continue
+
+                    # Verificar sobreposição temporal
                     if (hora_inicio_novo < hora_fim_existente and hora_fim_novo > hora_inicio_existente):
                         conflitos.append({
                             "uc": insc.id_unidadecurricular.nome,

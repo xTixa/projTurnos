@@ -48,13 +48,16 @@
                 <option value="" disabled selected>Escolhe um turno...</option>
 
                 {% for t in uc.turnos %}
-                    <option value="{{ t.id }}"
+                        <option value="{{ t.id }}"
                             {% if t.vagas == 0 or t.ja_inscrito %}disabled{% endif %}
                             class="{% if t.ja_inscrito %}option-inscrito{% elif t.vagas == 0 %}option-esgotado{% else %}option-vagas{% endif %}"
                             data-dia="{{ t.dia }}"
                             data-hora="{{ t.hora_inicio }}"
                             data-hora-fim="{{ t.hora_fim }}"
-                            data-uc-id="{{ uc.id }}">
+                            data-uc-id="{{ uc.id }}"
+                            data-uc-nome="{{ uc.nome }}"
+                            data-tipo="{{ t.tipo }}"
+                            data-turno-nome="{{ t.nome }}">
                         {{ t.nome }} — {{ t.horario }} —
                         {% if t.ja_inscrito %}
                             <i class="fa-solid fa-check"></i> Já inscrito
@@ -82,9 +85,17 @@
                 <p class="inscrito-info">
                     <i class="fa-solid fa-circle-check"></i>
                     Já estás inscrito em <strong>{{ t.nome }}</strong> ({{ t.horario }})
-                    <a href="{% url 'home:desinscrever_turno' t.id uc.id %}" 
-                       class="btn-remover" 
-                       onclick="return confirm('Desinscrever deste turno?');">
+                          <a href="{% url 'home:desinscrever_turno' t.id uc.id %}" 
+                              class="btn-remover" 
+                              data-turno-id="{{ t.id }}"
+                              data-uc-id="{{ uc.id }}"
+                              data-uc-nome="{{ uc.nome }}"
+                              data-turno-nome="{{ t.nome }}"
+                              data-tipo="{{ t.tipo }}"
+                              data-dia="{{ t.dia }}"
+                              data-hora-inicio="{{ t.hora_inicio }}"
+                              data-hora-fim="{{ t.hora_fim }}"
+                              onclick="return confirm('Desinscrever deste turno?');">
                         <i class="fa-solid fa-trash"></i> Remover
                     </a>
                 </p>
@@ -141,7 +152,7 @@
 
 <script>
 // Dados dos turnos inscritos vindos do Django
-const turnosInscritos = {{ turnos_horario|safe }};
+let turnosInscritos = {{ turnos_horario|safe }};
 let horarioAtualizado = false;
 
 // Função para atualizar o horário
@@ -198,14 +209,103 @@ function atualizarHorario() {
 // Atualizar horário ao carregar a página
 atualizarHorario();
 
+function removerDaLista(turnoId, ucId) {
+    turnosInscritos = turnosInscritos.filter(
+        (t) => !(String(t.turno_id || t.turno_nome || t.turno) === String(turnoId) && String(t.uc_id || t.uc_nome || t.uc) === String(ucId))
+    );
+}
+
+function marcarOptionDisponivel(card, turnoId) {
+    const select = card.querySelector('.turno-select');
+    if (!select) return;
+    const opt = select.querySelector(`option[value="${turnoId}"]`);
+    if (opt) {
+        opt.disabled = false;
+        opt.classList.remove('option-inscrito');
+    }
+}
+
+function marcarOptionInscrito(card, turnoId) {
+    const select = card.querySelector('.turno-select');
+    if (!select) return;
+    const opt = select.querySelector(`option[value="${turnoId}"]`);
+    if (opt) {
+        opt.disabled = true;
+        opt.classList.add('option-inscrito');
+    }
+}
+
+function adicionarBlocoInscrito(card, data) {
+    const { turnoId, ucId, ucNome, turnoNome, horario, tipo, dia, hora_inicio, hora_fim } = data;
+    const container = card.querySelector('.turnos-inscritos') || document.createElement('div');
+    container.classList.add('turnos-inscritos');
+
+    const p = document.createElement('p');
+    p.classList.add('inscrito-info');
+    p.innerHTML = `
+        <i class="fa-solid fa-circle-check"></i>
+        Já estás inscrito em <strong>${turnoNome}</strong> (${horario})
+    `;
+
+    const a = document.createElement('a');
+    a.href = `/turnos/desinscrever/${turnoId}/${ucId}/`;
+    a.className = 'btn-remover';
+    a.dataset.turnoId = turnoId;
+    a.dataset.ucId = ucId;
+    a.dataset.ucNome = ucNome;
+    a.dataset.turnoNome = turnoNome;
+    a.dataset.tipo = tipo || '';
+    a.dataset.dia = dia || '';
+    a.dataset.horaInicio = hora_inicio || '';
+    a.dataset.horaFim = hora_fim || '';
+    a.innerHTML = '<i class="fa-solid fa-trash"></i> Remover';
+
+    p.appendChild(a);
+    container.innerHTML = '';
+    container.appendChild(p);
+    if (!container.parentElement) {
+        card.appendChild(container);
+    }
+
+    anexarHandlerRemover(a);
+}
+
+async function anexarHandlerRemover(btn) {
+    btn.addEventListener('click', async (e) => {
+        e.preventDefault();
+        if (!confirm('Desinscrever deste turno?')) return;
+
+        try {
+            const resp = await fetch(btn.href, { method: 'GET', redirect: 'follow' });
+            if (!resp.ok && resp.status !== 302) {
+                throw new Error('Falha ao remover');
+            }
+
+            const card = btn.closest('.uc-card');
+            const turnoId = btn.dataset.turnoId;
+            const ucId = btn.dataset.ucId;
+
+            removerDaLista(turnoId, ucId);
+            atualizarHorario();
+
+            const bloco = btn.closest('.turnos-inscritos');
+            if (bloco) bloco.remove();
+
+            if (card) marcarOptionDisponivel(card, turnoId);
+        } catch (err) {
+            console.error('Erro ao desinscrever:', err);
+            alert('Erro ao remover inscrição.');
+        }
+    });
+}
+
 // Função para validar inscrição antes de submeter
 function validarInscricao(form) {
     const turnoSelect = form.querySelector('.turno-select');
     const selectedOption = turnoSelect.selectedOptions[0];
     const turnoId = turnoSelect.value;
     const ucId = selectedOption.dataset.ucId;
-
-    console.log('validarInscricao chamada:', { turnoId, ucId, selectedOption: selectedOption.textContent });
+    const ucNome = selectedOption.dataset.ucNome || form.closest('.uc-card')?.querySelector('h3')?.innerText || '';
 
     if (!turnoId) {
         return true;
@@ -215,8 +315,6 @@ function validarInscricao(form) {
     fetch(`/api/turnos/conflitos/${turnoId}/`)
         .then(response => response.json())
         .then(data => {
-            console.log('Resposta da API:', data);
-            
             if (data.conflitos && data.conflitos.length > 0) {
                 const conflitorAlert = document.getElementById('conflito-alert');
                 const conflitorMsg = document.getElementById('conflito-msg');
@@ -237,37 +335,75 @@ function validarInscricao(form) {
                 );
                 
                 if (confirmar) {
-                    submeterInscricao(turnoId, ucId);
+                    submeterInscricao(turnoId, ucId, selectedOption, ucNome, form.closest('.uc-card'));
                 }
             } else {
                 // Sem conflitos, submeter
-                submeterInscricao(turnoId, ucId);
+                submeterInscricao(turnoId, ucId, selectedOption, ucNome, form.closest('.uc-card'));
             }
         })
         .catch(error => {
             console.error('Erro ao verificar conflitos:', error);
             // Em caso de erro, submeter mesmo assim
-            submeterInscricao(turnoId, ucId);
+            submeterInscricao(turnoId, ucId, selectedOption, ucNome, form.closest('.uc-card'));
         });
 
     return false;
 }
 
-// Função para submeter a inscrição com a ação dinâmica
-function submeterInscricao(turnoId, ucId) {
+// Função para submeter a inscrição com a ação dinâmica (sem reload)
+function submeterInscricao(turnoId, ucId, selectedOption, ucNome, card) {
     const url = `/turnos/inscrever/${turnoId}/${ucId}/`;
-    console.log('Redirecionando para:', url);
-    window.location.href = url;
+
+    fetch(url, { method: 'GET', redirect: 'follow' })
+        .then(resp => {
+            if (!resp.ok && resp.status !== 302) {
+                throw new Error('Falha ao inscrever');
+            }
+
+            const turnoNome = selectedOption.dataset.turnoNome || selectedOption.textContent.trim().split(' — ')[0];
+            const tipo = selectedOption.dataset.tipo || '';
+            const dia = selectedOption.dataset.dia;
+            const hora_inicio = selectedOption.dataset.hora;
+            const hora_fim = selectedOption.dataset.horaFim;
+            const horarioStr = `${dia} ${hora_inicio}-${hora_fim}`;
+
+            turnosInscritos.push({
+                uc_nome: ucNome,
+                turno_nome: turnoNome,
+                tipo,
+                dia,
+                hora_inicio,
+                hora_fim,
+                uc_id: ucId,
+                turno_id: turnoId
+            });
+
+            atualizarHorario();
+            if (card) marcarOptionInscrito(card, turnoId);
+            if (card) {
+                adicionarBlocoInscrito(card, {
+                    turnoId,
+                    ucId,
+                    ucNome,
+                    turnoNome,
+                    horario: horarioStr,
+                    tipo,
+                    dia,
+                    hora_inicio,
+                    hora_fim
+                });
+            }
+        })
+        .catch(err => {
+            console.error('Erro ao inscrever:', err);
+            alert('Erro ao inscrever no turno.');
+        });
 }
 
-// Atualizar horário após desinscrever (se a página for recarregada, os dados vêm do servidor)
+// Atualizar horário após desinscrever (sem reload)
 document.addEventListener('DOMContentLoaded', () => {
-    // Ao clicar em remover, atualizar os dados após redirect
-    document.querySelectorAll('.btn-remover').forEach(btn => {
-        btn.addEventListener('click', function(e) {
-            // Permitir que o link funcione, a página recarregará com dados atualizados
-        });
-    });
+    document.querySelectorAll('.btn-remover').forEach(anexarHandlerRemover);
 });
 
 // Exportar PDF
