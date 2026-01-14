@@ -20,7 +20,7 @@ import time
 
 
 def index(request):
-    return render(request, "di/index_di.html")
+    return render(request, "di/index_di.html", {"area": "di"})
 
 def login_view(request):
     if request.method == "POST":

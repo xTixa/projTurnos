@@ -1,0 +1,17 @@
+{% extends 'home/base.html' %}
+{% load static %} 
+{% block title %}Sugestões – Todas{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/sugestoes/CSS_sugestoes.css' %}"> 
+{% endblock %} 
+{% block content %}
+<div class="section-tabs">
+    <a href="{% url 'extra_app:sugestao' %}" >Sugerir</a>
+    <a href="#sec-populares">Mais votadas</a>
+    <a href="{% url 'extra_app:sugestoes_todas' %}" class="active">Todas</a>
+</div>
+  <div class="container mt-4">
+    <h1>Todas as sugestões</h1>
+    <p>Aqui vais listar as sugestões...</p>
+  </div>
+{% endblock %}

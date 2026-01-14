@@ -10,3 +10,41 @@
   min-width: 260px;
   flex: 0 0 auto;
 }
+.like-btn.active-like {
+  background-color: #4caf50;
+  color: white;
+}
+
+.dislike-btn.active-dislike {
+  background-color: #f44336;
+  color: white;
+}
+
+/* Seccao */
+.section-tabs {
+  margin: 20px 0;
+  border-bottom: 1px solid #ddd;
+}
+
+.section-tabs a {
+  display: inline-block;
+  padding: 8px 16px;
+  margin-right: 8px;
+  text-decoration: none;
+  color: #555;
+  border-radius: 4px 4px 0 0;
+  border: 1px solid transparent;
+}
+
+.section-tabs a:hover {
+  background-color: #f7f7f7;
+  color: #000;
+}
+
+.section-tabs a.active {
+  background-color: #fff;
+  border-color: #ddd;
+  border-bottom-color: #fff;
+  color: #000;
+  font-weight: 600;
+}
