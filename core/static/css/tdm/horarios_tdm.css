@@ -1,0 +1,199 @@
+:root {
+  --bg-body: #ffffff;
+  --surface: #ffffff;
+  
+  --brand-blue: #2563eb;
+  --brand-light: #eff6ff;
+  --brand-dark: #1e40af;
+  
+  --text-primary: #0f172a;
+  --text-secondary: #64748b;
+}
+
+/* Page Layout */
+.horarios-container {
+  max-width: 800px; /* Reduced width for focus */
+  margin: 0 auto;
+  padding: 0 2rem;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  color: var(--text-primary);
+  min-height: 100vh;
+}
+
+/* Header */
+.simple-header {
+  text-align: center;
+  margin-top: 2rem;
+  margin-bottom: 4rem;
+}
+
+.simple-header h1 {
+  font-size: 3rem;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  margin-bottom: 0.5rem;
+  color: var(--text-primary);
+}
+
+.simple-header p {
+  font-size: 1.15rem;
+  color: var(--text-secondary);
+}
+
+/* Inscricao Button */
+.inscricao-wrapper {
+  margin-top: 2rem;
+  display: flex;
+  justify-content: center;
+}
+
+.btn-inscricao {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: var(--text-primary);
+  color: white;
+  padding: 0.875rem 2rem;
+  border-radius: 99px;
+  font-weight: 600;
+  text-decoration: none;
+  font-size: 1rem;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.btn-inscricao:hover {
+  background: var(--brand-blue);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.3);
+}
+
+/* -- NEW LIST STYLE (Consistent with Avaliacoes) -- */
+.schedules-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.schedule-card {
+  background: white;
+  border-radius: 16px; /* Softer radius */
+  padding: 1.5rem; /* Spacious but contained */
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border: 1px solid #e2e8f0;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Hover Effect */
+.schedule-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--brand-blue);
+  box-shadow: 0 10px 20px -5px rgba(37, 99, 235, 0.1);
+}
+
+/* Left Content Wrapper */
+.schedule-info {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+}
+
+/* Icon Container (Blue Version of Avaliacoes) */
+.icon-container {
+  width: 52px;
+  height: 52px;
+  background: #eff6ff; /* Blue BG */
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #dbeafe;
+}
+
+.icon-container i {
+  font-size: 1.5rem;
+  color: var(--brand-blue);
+}
+
+.year-title {
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 0.25rem;
+}
+
+/* Status Badge - Refined to sit under title */
+.status-badge {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.2rem 0.6rem;
+  border-radius: 6px;
+  display: inline-block;
+}
+
+.status-badge.available {
+  background: #ecfdf5;
+  color: #059669;
+}
+
+.status-badge.pending {
+  background: #f1f5f9;
+  color: #64748b;
+}
+
+/* Actions Right */
+.schedule-actions {
+  display: flex;
+  gap: 1rem;
+}
+
+.btn-download {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 1.2rem;
+  background: white;
+  color: var(--text-primary);
+  font-weight: 600;
+  border-radius: 8px;
+  text-decoration: none;
+  font-size: 0.95rem;
+  border: 1px solid #e2e8f0;
+  transition: all 0.2s ease;
+}
+
+.btn-download:hover {
+  border-color: var(--brand-blue);
+  color: var(--brand-blue);
+  background: #f8fafc;
+}
+
+.icon-btn.download {
+  width: 42px;
+  height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  background: #f1f5f9;
+  color: var(--text-secondary);
+  transition: all 0.2s ease;
+  border: none;
+}
+
+.icon-btn.download:hover {
+  background: var(--brand-blue);
+  color: white;
+}
+
+.disabled-msg {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  font-style: italic;
+  padding-right: 1rem;
+}

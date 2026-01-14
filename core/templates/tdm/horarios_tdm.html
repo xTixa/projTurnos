@@ -1,82 +1,70 @@
 {% extends "home/base.html" %}
 {% load static %}
 
+{% block title %}Horários — Tecnologia e Design Multimédia{% endblock %}
+
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/ei/horarios.css' %}">
+<link rel="stylesheet" href="{% static 'css/tdm/horarios_tdm.css' %}?v=remodel">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 {% endblock %}
 
 {% block content %}
-<section class="horarios-hero">
-  <div class="horarios-inner">
+<div class="horarios-container">
 
-    <h1>Horários — Tecnologia e Design Multimédia</h1>
+  <!-- HEADER -->
+  <header class="simple-header">
+    <h1>Horários — TDM</h1>
     <p>Consulta aqui os horários.</p>
 
     {% if request.session.user_id %}
-      <div class="inscricao-btn-wrapper">
+      <div class="inscricao-wrapper">
         <a href="{% url 'home:inscricao_turno' %}" class="btn-inscricao">
           <i class="fa-solid fa-check"></i>
-          Inscrever-me no Turno
+          <span>Inscrever-me no Turno</span>
         </a>
       </div>
     {% endif %}
+  </header>
 
-    <!-- ABAS -->
-    <ul class="nav nav-tabs horarios-tabs" role="tablist">
-      {% for item in horarios_por_ano %}
-        <li class="nav-item" role="presentation">
-          <button
-            class="nav-link {% if forloop.first %}active{% endif %}"
-            data-bs-toggle="tab"
-            data-bs-target="#ano-{{ item.ano.id_anocurricular }}"
-            type="button"
-            role="tab">
-            {{ item.ano.ano_curricular }}
-          </button>
-        </li>
-      {% endfor %}
-    </ul>
-
-    <!-- CONTEÚDO DAS ABAS -->
-    <div class="tab-content horarios-content">
-      {% for item in horarios_por_ano %}
-        <div
-          class="tab-pane fade {% if forloop.first %}show active{% endif %}"
-          id="ano-{{ item.ano.id_anocurricular }}"
-          role="tabpanel">
-
-          {% if item.pdf %}
-            <div class="horario-card">
-              <p class="text-muted mb-4">
-                O horário encontra-se disponível em formato PDF.
-              </p>
-
-              <div class="horario-actions">
-                <a href="{{ item.pdf.ficheiro.url }}"
-                   class="btn btn-primary"
-                   target="_blank">
-                  <i class="fa-regular fa-file-pdf"></i> Ver Horário
-                </a>
-
-                <a href="{{ item.pdf.ficheiro.url }}"
-                   class="btn btn-outline-secondary"
-                   download>
-                  <i class="fa-solid fa-download"></i> Download
-                </a>
-              </div>
-            </div>
-          {% else %}
-            <div class="horario-card empty">
-              <p class="text-muted">
-                Ainda não existe horário para {{ item.ano.ano_curricular }}.
-              </p>
-            </div>
-          {% endif %}
-
+  <!-- CLEAN ROWS LAYOUT (Modified to list all years instead of tabs) -->
+  <div class="schedules-list">
+    {% for item in horarios_por_ano %}
+      <div class="schedule-card">
+        
+        <div class="schedule-info">
+          <div class="icon-container">
+            <i class="fa-regular fa-calendar-days"></i>
+          </div>
+          <div>
+            <h2 class="year-title">{{ item.ano.ano_curricular }}</h2>
+            {% if item.pdf %}
+              <span class="status-badge available">Disponível</span>
+            {% else %}
+              <span class="status-badge pending">Pendente</span>
+            {% endif %}
+          </div>
         </div>
-      {% endfor %}
-    </div>
 
+        <div class="schedule-actions">
+          {% if item.pdf %}
+            <a href="{{ item.pdf.ficheiro.url }}" class="btn-download" target="_blank">
+               <span class="btn-text">Ver Horário</span> <i class="fa-solid fa-arrow-right-long"></i>
+            </a>
+            <a href="{{ item.pdf.ficheiro.url }}" class="icon-btn download" download title="Descarregar">
+              <i class="fa-solid fa-download"></i>
+            </a>
+          {% else %}
+            <span class="disabled-msg">Ainda não existe horário</span>
+          {% endif %}
+        </div>
+
+      </div>
+    {% empty %}
+      <div class="empty-msg">
+        <p>Não existem horários disponíveis.</p>
+      </div>
+    {% endfor %}
   </div>
-</section>
+
+</div>
 {% endblock %}
