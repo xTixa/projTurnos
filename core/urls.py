@@ -15,7 +15,6 @@ urlpatterns = [
     path("contactos/", views.contactos, name="contactos"),
     path("informacoes/", views.informacoes, name="informacoes"),
     path("perfil/", views.perfil, name="perfil"),
-   # path("login/",  auth_views.LoginView.as_view(template_name="auth/login.html"), name="login"),
     path("login/", views.login_view, name="login"),
     path("logout/", views.do_logout, name="logout"),
 
@@ -28,7 +27,7 @@ urlpatterns = [
     path("admin-panel/", views.admin_dashboard, name="admin_dashboard"),
     path("admin-panel/logs/", views.admin_logs_list, name="admin_logs_list"),
     
-    # ✅ ANALYTICS — ANÁLISE DE DADOS (MongoDB)
+    # ANALYTICS — ANÁLISE DE DADOS (MongoDB)
     path("admin-panel/analytics/inscricoes/", analytics_views.analytics_inscricoes, name="analytics_inscricoes"),
     path("api/analytics/inscricoes-dia/", analytics_views.analytics_api_inscricoes_dia, name="api_inscricoes_dia"),
     path("api/analytics/taxa-sucesso/", analytics_views.analytics_api_taxa_sucesso, name="api_taxa_sucesso"),
@@ -40,16 +39,6 @@ urlpatterns = [
     path("admin-panel/uc/create/", views.admin_uc_create, name="admin_uc_create"),
     path("admin-panel/uc/<int:id>/edit/", views.admin_uc_edit, name="admin_uc_edit"),
     path("admin-panel/uc/<int:id>/delete/", views.admin_uc_delete, name="admin_uc_delete"),
-
-
-    # ADMIN – ENGENHARIA INFORMÁTICA
-    path("admin-panel/ei/ingresso/", views.admin_ei_ingresso, name="admin_ei_ingresso"),
-    path("admin-panel/ei/saidas/", views.admin_ei_saidas, name="admin_ei_saidas"),
-    path("admin-panel/ei/plano/", views.admin_ei_plano, name="admin_ei_plano"),
-    path("admin-panel/ei/horarios/", views.admin_ei_horarios, name="admin_ei_horarios"),
-    path("admin-panel/ei/avaliacoes/", views.admin_ei_avaliacoes, name="admin_ei_avaliacoes"),
-    path("admin-panel/ei/contactos/", views.admin_ei_contactos, name="admin_ei_contactos"),
-
 
     # Users
     path("admin-panel/users/", views.admin_users_list, name="admin_users_list"),
