@@ -1,93 +1,93 @@
 {% extends "home/base.html" %}
 {% load static %}
-
 {% block title %}Ingresso — Tecnologias e Design Multimédia{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/tdm/ingresso_tdm.css' %}">
+<link rel="stylesheet" href="{% static 'css/tdm/ingresso_tdm.css' %}?v=remodel">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 {% endblock %}
 
 {% block content %}
-<div class="page-container">
+<div class="ingress-container">
 
-    <h1 class="page-title">Ingresso em Tecnologias e Design Multimédia</h1>
-
+  <!-- HERO SECTION -->
+  <header class="ingress-hero">
+    <div class="badge-pill">Licenciatura em Tecnologias e Design Multimédia</div>
+    <h1>Onde a Criatividade Ganha Vida</h1>
     <p class="intro-text">
         O curso de <strong>Tecnologias e Design Multimédia (TDM)</strong> forma profissionais capazes de integrar
         competências técnicas e criativas nas áreas do multimédia, design digital, animação, vídeo, web e comunicação visual.
         O curso combina conhecimentos tecnológicos com expressão artística e produção digital.
     </p>
+  </header>
 
-    <hr>
+  <!-- MAIN CONTENT GRID -->
+  <main class="ingress-grid">
 
-    <!-- OBJETIVOS -->
-    <section class="info-block">
+    <!-- 1. OBJETIVOS -->
+    <section class="ingress-card highlight-card">
+      <div class="card-header">
+        <div class="icon-box blue"><i class="fa-solid fa-bullseye"></i></div>
         <h2>Objetivos do Curso</h2>
-        <ul>
+      </div>
+      <div class="card-body">
+        <ul class="check-list">
             <li>Desenvolver competências em design gráfico, animação, vídeo, fotografia e web.</li>
             <li>Aplicar tecnologias digitais na criação de conteúdos multimédia interativos.</li>
             <li>Preparar profissionais para o mercado das indústrias criativas.</li>
             <li>Estimular a criatividade, pensamento crítico e capacidade de inovação.</li>
         </ul>
+      </div>
     </section>
 
-    <hr>
-
-    <!-- INGRESSO -->
-    <section class="info-block">
+    <!-- 2. CONDIÇÕES DE INGRESSO -->
+    <section class="ingress-card">
+      <div class="card-header">
+        <div class="icon-box"><i class="fa-solid fa-key"></i></div>
         <h2>Condições de Ingresso</h2>
+      </div>
+      <div class="card-body">
         <p>Podem candidatar-se ao curso através dos seguintes regimes de acesso:</p>
-        <ul>
+        <ul class="check-list">
             <li>Concurso Nacional de Acesso ao Ensino Superior;</li>
             <li>Concursos especiais (maiores de 23, titulares de curso superior, entre outros);</li>
             <li>Reingresso, mudança de par instituição/curso ou transferência.</li>
         </ul>
+      </div>
     </section>
 
-    <hr>
-
-    <!-- PROVAS DE INGRESSO -->
-    <section class="info-block">
+    <!-- 3. PROVAS DE INGRESSO -->
+    <section class="ingress-card">
+      <div class="card-header">
+        <div class="icon-box purple"><i class="fa-solid fa-file-contract"></i></div>
         <h2>Provas de Ingresso</h2>
+      </div>
+      <div class="card-body">
         <p>É necessária a aprovação numa das seguintes provas:</p>
-
-        <ul>
+        <ul class="check-list">
             <li><strong>Desenho</strong></li>
             <li><strong>Matemática Aplicada às Ciências Sociais</strong></li>
             <li><strong>Geometria Descritiva</strong></li>
         </ul>
+      </div>
     </section>
 
-    <hr>
+  </main>
 
-    <!-- CLASSIFICAÇÕES MÍNIMAS -->
-    <section class="info-block">
-        <h2>Classificações Mínimas</h2>
-
-        <ul>
-            <li>Nota mínima da prova de ingresso: <strong>95 pontos</strong> (0–200).</li>
-            <li>Nota mínima de candidatura: <strong>95 pontos</strong> (0–200).</li>
-        </ul>
-    </section>
-
-    <hr>
-
-    <!-- DURAÇÃO -->
-    <section class="info-block">
-        <h2>Duração do Curso</h2>
-        <p>
-            O curso tem a duração de <strong>3 anos</strong> (6 semestres), correspondendo a um total de
-            <strong>180 ECTS</strong>.
-        </p>
-    </section>
-
-    <hr>
-
-    <!-- GRAU -->
-    <section class="info-block">
-        <h2>Grau Conferido</h2>
-        <p><strong>Licenciatura em Tecnologias e Design Multimédia</strong></p>
-    </section>
+  <!-- BOTTOM INFO (DURAÇÃO E GRAU) -->
+  <footer class="ingress-footer">
+    <div class="footer-info">
+      <h3>Duração e Grau</h3>
+      <p>
+        <strong>3 anos</strong> (180 ECTS) — Licenciatura em Tecnologias e Design Multimédia
+      </p>
+    </div>
+    <div class="footer-actions">
+      <a href="{% url 'home:contactos' %}" class="btn-clean">
+        Contactar Departamento <i class="fa-solid fa-arrow-right"></i>
+      </a>
+    </div>
+  </footer>
 
 </div>
 {% endblock %}

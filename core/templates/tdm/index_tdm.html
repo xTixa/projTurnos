@@ -5,96 +5,135 @@
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/tdm/index_tdm.css' %}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 {% endblock %}
 
 {% block content %}
+<div class="ei-layout">
 
-<!-- HERO -->
-<section class="tdm-hero">
-    <div class="tdm-hero__content">
-        <h1>Tecnologias Design e Multimédia</h1>
+  <!-- HERO SECTION -->
+  <section class="ei-hero">
+    <div class="ei-hero__text">
+      <h1>Tecnologias Design e Multimédia</h1>
+      <p>
+        A licenciatura em Tecnologias Design e Multimédia forma profissionais capazes de integrar as áreas do 
+        design, desenvolvimento audiovisual, computação gráfica, animação, videojogos e comunicação digital.
+      </p>
 
-        <p>
-            A licenciatura em Tecnologias Design e Multimédia forma profissionais capazes de integrar as áreas do 
-            design, desenvolvimento audiovisual, computação gráfica, animação, videojogos e comunicação digital.
-        </p>
+      <div class="ei-hero__actions">
+        <!-- Changed to match EI button classes -->
+        <a href="{% url 'home:horarios_tdm' %}" class="btn btn-primary">
+          <i class="fa-regular fa-calendar"></i> Ver horários
+        </a>
+        <a href="{% url 'home:plano_tdm' %}" class="btn btn-ghost">
+          <i class="fa-regular fa-rectangle-list"></i> Plano curricular
+        </a>
+      </div>
+    </div>
 
-        <div class="tdm-hero__actions">
-            <a href="{% url 'home:plano' %}" class="btn btn-primary">
-                <i class="fa-solid fa-layer-group"></i> Plano Curricular
-            </a>
+    <div class="ei-hero__illustration">
+        <!-- Using TDM image -->
+      <img src="{% static 'img/tdm.png' %}" alt="Tecnologias Design e Multimédia" class="hero-photo">
+    </div>
+  </section>
 
-            <a href="https://www.estgv.ipv.pt" target="_blank" class="btn btn-ghost">
-                <i class="fa-solid fa-circle-info"></i> Mais Informações
-            </a>
+  <!-- FEATURES / SAÍDAS -->
+  <section class="ei-section">
+    <div class="ei-cards">
+      
+      <!-- Card 1: O que vais aprender -->
+      <article class="ei-card">
+        <div class="ei-card__icon blue"><i class="fa-solid fa-graduation-cap"></i></div>
+        <h3>O que vais aprender</h3>
+        <ul>
+            <li>Produção audiovisual e multimédia;</li>
+            <li>Design gráfico e interação digital;</li>
+            <li>Modelação 3D e animação;</li>
+            <li>Desenvolvimento de videojogos;</li>
+            <li>Técnicas narrativas e comunicação digital.</li>
+        </ul>
+      </article>
+
+      <!-- Card 2: Saídas Profissionais -->
+      <article class="ei-card">
+        <div class="ei-card__icon cyan"><i class="fa-solid fa-rocket"></i></div>
+        <h3>Saídas profissionais</h3>
+        <ul>
+            <li>Designer Multimédia;</li>
+            <li>Videógrafo / Editor de Vídeo;</li>
+            <li>Técnico de Áudio e Imagem;</li>
+            <li>Modelador e Animador 3D;</li>
+            <li>Desenvolvedor de jogos e conteúdo digital.</li>
+        </ul>
+      </article>
+
+      <!-- Card 3: Perfil (Added this because TDM had it) -->
+      <article class="ei-card">
+        <div class="ei-card__icon" style="background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%);"><i class="fa-solid fa-user-pen"></i></div>
+        <h3>Perfil do estudante</h3>
+        <ul>
+            <li>Criatividade e curiosidade tecnológica;</li>
+            <li>Gosto pela área visual e digital;</li>
+            <li>Interesse em aprender novas ferramentas;</li>
+            <li>Capacidade de trabalhar em equipa.</li>
+        </ul>
+      </article>
+
+    </div>
+  </section>
+
+  <!-- SHORTCUTS SECTION -->
+  <section class="ei-section">
+    <h2 class="section-title">Acede rapidamente</h2>
+
+    <div class="ei-shortcuts__grid">
+
+        <!-- Ingresso -->
+      <a href="{% url 'home:ingresso_tdm' %}" class="innovation-card accent-blue">
+        <div class="card-background-icon"><i class="fa-solid fa-graduation-cap"></i></div>
+        <div class="card-content">
+            <span class="card-label">Candidaturas</span>
+            <h3>Ingresso</h3>
+            <p>Informações de acesso, provas e prazos de candidatura.</p>
         </div>
-    </div>
-</section>
+        <div class="card-arrow"><i class="fa-solid fa-arrow-right-long"></i></div>
+      </a>
 
-<!-- SOBRE O CURSO -->
-<section class="tdm-section">
-    <h2>O Curso</h2>
-
-    <div class="tdm-grid">
-        <article class="tdm-card">
-            <h3>O que vais aprender?</h3>
-            <ul>
-                <li>Produção audiovisual e multimédia;</li>
-                <li>Design gráfico e interação digital;</li>
-                <li>Modelação 3D e animação;</li>
-                <li>Desenvolvimento de videojogos e aplicações interativas;</li>
-                <li>Fotografia, vídeo e captura digital;</li>
-                <li>Técnicas narrativas e comunicação digital.</li>
-            </ul>
-        </article>
-
-        <article class="tdm-card">
-            <h3>Perfil do estudante</h3>
-            <p>
-                Criatividade, curiosidade tecnológica, gosto pela área visual e interesse em ferramentas digitais 
-                são características valorizadas no percurso do curso.
-            </p>
-        </article>
-
-        <article class="tdm-card">
-            <h3>Saídas profissionais</h3>
-            <ul>
-                <li>Designer Multimédia</li>
-                <li>Videógrafo / Editor de Vídeo</li>
-                <li>Técnico de Áudio e Imagem</li>
-                <li>Modelador e Animador 3D</li>
-                <li>Desenvolvedor de jogos</li>
-                <li>Produtor de conteúdo digital</li>
-            </ul>
-        </article>
-    </div>
-</section>
-
-<!-- ATALHOS -->
-<section class="tdm-shortcuts">
-    <h2>Acede rapidamente</h2>
-
-    <div class="tdm-shortcuts__grid">
-
-        <a href="{% url 'home:horarios' %}" class="tdm-shortcut-card">
-            <div class="icon"><i class="fa-regular fa-calendar"></i></div>
+      <!-- Horarios -->
+      <a href="{% url 'home:horarios_tdm' %}" class="innovation-card accent-green">
+        <div class="card-background-icon"><i class="fa-regular fa-calendar"></i></div>
+        <div class="card-content">
+            <span class="card-label">Aulas</span>
             <h3>Horários</h3>
-            <p>Consulta os horários mais atualizados do curso.</p>
-        </a>
+            <p>Consulta a distribuição de turmas, salas e horários.</p>
+        </div>
+        <div class="card-arrow"><i class="fa-solid fa-arrow-right-long"></i></div>
+      </a>
 
-        <a href="{% url 'home:plano' %}" class="tdm-shortcut-card">
-            <div class="icon"><i class="fa-solid fa-list-check"></i></div>
-            <h3>Plano Curricular</h3>
-            <p>Explora todas as unidades curriculares do curso.</p>
-        </a>
+      <!-- Avaliações -->
+      <a href="{% url 'home:avaliacoes_tdm' %}" class="innovation-card accent-indigo">
+        <div class="card-background-icon"><i class="fa-regular fa-clipboard"></i></div>
+        <div class="card-content">
+            <span class="card-label">Exames</span>
+            <h3>Avaliações</h3>
+            <p>Calendário de frequências, exames e entregas.</p>
+        </div>
+        <div class="card-arrow"><i class="fa-solid fa-arrow-right-long"></i></div>
+      </a>
 
-        <a href="{% url 'home:contactos' %}" class="tdm-shortcut-card">
-            <div class="icon"><i class="fa-solid fa-address-book"></i></div>
+      <!-- Contactos -->
+      <a href="{% url 'home:contactos' %}" class="innovation-card accent-orange">
+        <div class="card-background-icon"><i class="fa-regular fa-address-card"></i></div>
+        <div class="card-content">
+            <span class="card-label">Secretaria</span>
             <h3>Contactos</h3>
-            <p>Docentes, coordenação e serviços de apoio.</p>
-        </a>
+            <p>Coordenação de curso, gabinetes e apoio.</p>
+        </div>
+        <div class="card-arrow"><i class="fa-solid fa-arrow-right-long"></i></div>
+      </a>
 
     </div>
-</section>
+  </section>
 
+</div>
 {% endblock %}

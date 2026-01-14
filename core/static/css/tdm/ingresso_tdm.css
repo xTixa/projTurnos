@@ -1,39 +1,256 @@
-.page-container {
-    padding: 25px;
-    max-width: 900px;
+/* =========================================
+   NEW MODERN INGRESSO LAYOUT - TDM VERSION
+   ========================================= */
+
+.ingress-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 2rem;
+    font-family: 'Inter', system-ui, sans-serif;
+    color: #1e293b;
+}
+
+/* --- HERO SECTION --- */
+.ingress-hero {
+    text-align: center;
+    margin-top: 1rem;
+    margin-bottom: 2rem;
+    padding: 2.5rem 2rem;
+    background: linear-gradient(135deg, #eff6ff 0%, #e0f2fe 100%);
+    border-radius: 24px;
+    border: 1px solid #bfdbfe;
+    box-shadow: 0 10px 15px -3px rgba(35, 113, 167, 0.08), 0 4px 6px -2px rgba(35, 113, 167, 0.04);
+}
+
+.badge-pill {
+    display: inline-block;
+    padding: 0.5rem 1rem;
+    background: #e0f2fe;
+    color: #0284c7;
+    border-radius: 99px;
+    font-weight: 600;
+    font-size: 0.85rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    margin-bottom: 1.5rem;
+}
+
+.ingress-hero h1 {
+    font-size: 3.5rem;
+    font-weight: 800;
+    line-height: 1.1;
+    margin-bottom: 1.5rem;
+    color: #0f172a;
+}
+
+.ingress-hero p {
+    font-size: 1.25rem;
+    line-height: 1.7;
+    color: #64748b;
+    max-width: 700px;
     margin: 0 auto;
 }
 
-.page-title {
-    font-size: 32px;
+/* --- GRID LAYOUT --- */
+.ingress-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+    gap: 2rem;
+    margin-bottom: 4rem;
+}
+
+/* CARD STYLES */
+.ingress-card {
+    background: #ffffff;
+    border-radius: 20px;
+    padding: 2.5rem;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02), 0 2px 4px -1px rgba(0, 0, 0, 0.02);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+}
+
+.ingress-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 10px 10px -5px rgba(0, 0, 0, 0.01);
+    border-color: #cbd5e1;
+}
+
+/* Highlight Card (Condições Acesso) */
+.highlight-card {
+    background: #ffffff;
+    border-color: #e2e8f0;
+}
+
+.card-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.card-header h2 {
+    font-size: 1.5rem;
     font-weight: 700;
-    color: #1e1e1e;
-    margin-bottom: 10px;
+    color: #1e293b;
+    margin: 0;
 }
 
-.intro-text {
-    font-size: 18px;
-    color: #444;
+/* Icon Boxes */
+.icon-box {
+    width: 48px;
+    height: 48px;
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.25rem;
+    box-shadow: 0 4px 6px -1px rgba(245, 158, 11, 0.2);
+}
+
+.icon-box.blue {
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.2);
+}
+
+.icon-box.green {
+    background: linear-gradient(135deg, #10b981, #059669);
+    box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.2);
+}
+
+/* Purple for TDM specific */
+.icon-box.purple {
+    background: linear-gradient(135deg, #a855f7, #9333ea);
+    box-shadow: 0 4px 6px -1px rgba(147, 51, 234, 0.2);
+}
+
+.card-body p {
+    color: #475569;
     line-height: 1.6;
-    margin-bottom: 25px;
+    margin-bottom: 1.5rem;
 }
 
-.info-block {
-    margin: 35px 0;
+/* Check List */
+.check-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
 }
 
-.info-block h2 {
-    color: #004488;
-    margin-bottom: 10px;
-    font-size: 24px;
+.check-list li {
+    padding: 0.75rem 0;
+    border-top: 1px solid #f1f5f9;
+    color: #334155;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
 }
 
-.info-block ul {
-    margin-left: 20px;
-    padding-left: 10px;
+.check-list li::before {
+    content: '\f00c';
+    font-family: 'Font Awesome 6 Free';
+    font-weight: 900;
+    color: #059669;
 }
 
-.info-block ul li {
-    margin-bottom: 6px;
-    line-height: 1.5;
+/* Custom list for Provas (bullets) */
+.custom-list {
+    list-style: disc;
+    padding-left: 1.5rem;
+    color: #64748b;
+    line-height: 1.8;
+}
+
+/* Job List (Saídas) */
+.job-list {
+    list-style: none;
+    padding: 0;
+}
+
+.job-list li {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    padding: 0;
+    background: transparent;
+    border: none;
+}
+.job-list li:hover {
+    transform: none;
+}
+
+.job-list li:last-child {
+    margin-bottom: 0;
+}
+
+.job-list li i {
+    color: #64748b;
+    font-size: 1.1rem;
+    margin-top: 0.25rem;
+    background: transparent;
+    width: auto;
+    height: auto;
+}
+
+.job-list li strong {
+    display: block;
+    color: #1e293b;
+    font-size: 1rem;
+    margin-bottom: 0.1rem;
+    font-weight: 600;
+}
+
+.job-list li span {
+    font-size: 0.85rem;
+    color: #64748b;
+}
+
+/* --- FOOTER --- */
+.ingress-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 3rem;
+    border-top: 1px solid #e2e8f0;
+    flex-wrap: wrap;
+    gap: 2rem;
+}
+
+.footer-info h3 {
+    font-size: 1.25rem;
+    margin-bottom: 0.5rem;
+    color: #0f172a;
+}
+.footer-info p {
+    color: #64748b;
+}
+
+.btn-clean {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #1e293b;
+    text-decoration: none;
+    font-weight: 600;
+    background: #f1f5f9;
+    padding: 0.75rem 1.5rem;
+    border-radius: 99px;
+    transition: all 0.2s ease;
+}
+
+.btn-clean:hover {
+    background: #e2e8f0;
+    padding-right: 2rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .ingress-hero h1 { font-size: 2.5rem; }
+    .ingress-footer { flex-direction: column; text-align: center; }
 }
