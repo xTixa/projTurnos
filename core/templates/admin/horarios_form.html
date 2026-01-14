@@ -63,7 +63,7 @@
                     <select name="id_curso" class="form-control" required>
                         <option value="">Selecione um curso</option>
                         {% for curso in cursos %}
-                        <option value="{{ curso.id_curso }}">
+                        <option value="{{ curso.id_curso }}" {% if horario and horario.id_curso.id_curso == curso.id_curso %}selected{% endif %}>
                             {{ curso.nome }} ({{ curso.grau }})
                         </option>
                         {% endfor %}

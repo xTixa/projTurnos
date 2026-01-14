@@ -19,6 +19,23 @@ from core.utils import registar_log, admin_required
 import time
 from django.db.models import Count
 
+
+def _listar_pdfs_por_ano(model_cls, course_id):
+    """Obtém o PDF mais recente por ano curricular, priorizando o curso indicado."""
+    anos = AnoCurricular.objects.all().order_by("id_anocurricular")
+    documentos = []
+
+    for ano in anos:
+        base_qs = model_cls.objects.filter(id_anocurricular=ano)
+
+        pdf = base_qs.filter(id_curso_id=course_id).order_by("-atualizado_em").first()
+        if not pdf:
+            pdf = base_qs.filter(id_curso__isnull=True).order_by("-atualizado_em").first()
+
+        documentos.append({"ano": ano, "pdf": pdf})
+
+    return documentos
+
 #view pagina inicial DI
 def index(request):
     return render(request, "di/index_di.html", {"area": "di"})
@@ -114,22 +131,8 @@ def horarios(request):
     #se o utilizador for aluno, regista a consulta na coleçao do MongoDB
     if "user_tipo" in request.session and request.session["user_tipo"] == "aluno":
         registar_consulta_aluno(request.session.get("user_id"), request.session.get("user_nome", "desconhecido"), "horarios", {"curso": "EI"})
-    
-    #obtem todos os anos curriculares
-    anos = AnoCurricular.objects.all().order_by("id_anocurricular")
 
-    #lista que guarda o horario por ano
-    horarios_por_ano = []
-
-    for ano in anos:
-        #obtem o pdf mais recente para o ano curricular
-        pdf = (HorarioPDF.objects.filter(id_anocurricular=ano).order_by("-atualizado_em").first())
-
-        #adiciona o ano e o pdf à lista
-        horarios_por_ano.append({
-            "ano": ano,
-            "pdf": pdf
-        })
+    horarios_por_ano = _listar_pdfs_por_ano(HorarioPDF, course_id=1)
 
     return render(request, "ei/horarios.html", {"horarios_por_ano": horarios_por_ano, "area": "ei"})
 
@@ -138,14 +141,10 @@ def avaliacoes(request):
     #se o utilizador for aluno, regista a consulta na coleçao do MongoDB
     if "user_tipo" in request.session and request.session["user_tipo"] == "aluno":
         registar_consulta_aluno(request.session.get("user_id"), request.session.get("user_nome", "desconhecido"), "avaliacoes", {"curso": "EI"})
-    
-    #lista estatica com os pdf das avaliacoes
-    avaliacoes_docs = [
-        {"ano": "1º Ano", "ficheiro": "avaliacoes_1ano.pdf"},
-        {"ano": "2º Ano", "ficheiro": "avaliacoes_2ano.pdf"},
-        {"ano": "3º Ano", "ficheiro": "avaliacoes_3ano.pdf"},
-    ]
-    return render(request, "ei/avaliacoes.html", {"avaliacoes_docs": avaliacoes_docs, "area": "ei"})
+
+    avaliacoes_por_ano = _listar_pdfs_por_ano(AvaliacaoPDF, course_id=1)
+
+    return render(request, "ei/avaliacoes.html", {"avaliacoes_por_ano": avaliacoes_por_ano, "area": "ei"})
 
 #view para contactos de EI
 def contactos(request):
@@ -913,7 +912,12 @@ def admin_horarios_create(request):
             return redirect("home:admin_horarios_create")
 
         #cria o registo do horario
-        HorarioPDF.objects.create(nome=nome, ficheiro=ficheiro, id_anocurricular_id=ano_id)
+        HorarioPDF.objects.create(
+            nome=nome,
+            ficheiro=ficheiro,
+            id_anocurricular_id=ano_id,
+            id_curso_id=curso_id,
+        )
 
         messages.success(request, "Horário carregado com sucesso!")
         return redirect("home:admin_horarios_list")
@@ -933,6 +937,9 @@ def admin_horarios_edit(request, id):
         
         if ano_id:
             horario.id_anocurricular_id = ano_id
+
+        if curso_id:
+            horario.id_curso_id = curso_id
 
         #se foi efetuado o upload de um pdf, este substitui o pdf atual
         if "ficheiro" in request.FILES:
@@ -977,19 +984,25 @@ def admin_avaliacoes_create(request):
         nome = request.POST.get("nome")
         ficheiro = request.FILES.get("ficheiro")
         ano_id = request.POST.get("id_anocurricular")
+        curso_id = request.POST.get("id_curso")
 
         #obriga a enviar um pdf
         if not ficheiro:
             messages.error(request, "É necessário enviar um ficheiro PDF.")
             return redirect("home:admin_avaliacoes_create")
         
-        #obriga a selecionar um ano curricular
-        if not ano_id:
-            messages.error(request, "É necessário selecionar o ano curricular.")
+        #obriga a selecionar um curso e um ano curricular
+        if not curso_id or not ano_id:
+            messages.error(request, "É necessário selecionar o curso e o ano curricular.")
             return redirect("home:admin_avaliacoes_create")
 
         #cria o regsito do pdf
-        AvaliacaoPDF.objects.create(nome=nome, ficheiro=ficheiro, id_anocurricular_id=ano_id)
+        AvaliacaoPDF.objects.create(
+            nome=nome,
+            ficheiro=ficheiro,
+            id_anocurricular_id=ano_id,
+            id_curso_id=curso_id,
+        )
 
         registar_log(request, operacao="CREATE", entidade="avaliacao_pdf", chave="novo", detalhes=f"Avaliação PDF criada: {nome}")
         messages.success(request, "Calendário de avaliações carregado com sucesso!")
@@ -1007,10 +1020,14 @@ def admin_avaliacoes_edit(request, id):
     if request.method == "POST":
         avaliacao.nome = request.POST.get("nome")
         ano_id = request.POST.get("id_anocurricular")
+        curso_id = request.POST.get("id_curso")
         
         #atualiza o ano curricular se tiver selecionado
         if ano_id:
             avaliacao.id_anocurricular_id = ano_id
+
+        if curso_id:
+            avaliacao.id_curso_id = curso_id
 
         #substitui o pdf atual pelo novo
         if "ficheiro" in request.FILES:
@@ -1113,19 +1130,7 @@ def plano_tdm(request):
 
 #view para mostrar os horarios TDM
 def horarios_tdm(request):
-    anos = AnoCurricular.objects.all().order_by("id_anocurricular")
-    
-    #lista para o pdf mais recente
-    horarios_por_ano = []
-
-    #procura o horario mais recente para cada ano curricular
-    for ano in anos:
-        pdf = (HorarioPDF.objects.filter(id_anocurricular=ano).order_by("-atualizado_em").first())
-
-        horarios_por_ano.append({
-            "ano": ano,
-            "pdf": pdf
-        })
+    horarios_por_ano = _listar_pdfs_por_ano(HorarioPDF, course_id=2)
 
     return render(request, "tdm/horarios_tdm.html", {"horarios_por_ano": horarios_por_ano, "area": "tdm"})
 
@@ -1140,7 +1145,8 @@ def saidas_tdm(request):
 
 #view avaliacoes TDM
 def avaliacoes_tdm(request):
-    return render(request, "tdm/avaliacoes_tdm.html", { "area": "tdm" })
+    avaliacoes_por_ano = _listar_pdfs_por_ano(AvaliacaoPDF, course_id=2)
+    return render(request, "tdm/avaliacoes_tdm.html", {"avaliacoes_por_ano": avaliacoes_por_ano, "area": "tdm"})
 
 #view moodle TDM
 def moodle(request):
@@ -1328,7 +1334,8 @@ def contactos_rsi(request):
 
 #view avaliaçoes RSI
 def avaliacoes_rsi(request):
-    return render(request, "rsi/avaliacoes_rsi.html", { "area": "rsi" })
+    avaliacoes_por_ano = _listar_pdfs_por_ano(AvaliacaoPDF, course_id=3)
+    return render(request, "rsi/avaliacoes_rsi.html", {"avaliacoes_por_ano": avaliacoes_por_ano, "area": "rsi"})
 
 #view para saidas profissionais RSI
 def saidas_rsi(request):
@@ -1336,7 +1343,8 @@ def saidas_rsi(request):
 
 #view horarios RSI
 def horarios_rsi(request):
-    return render(request, "rsi/horarios_rsi.html", { "area": "rsi" })
+    horarios_por_ano = _listar_pdfs_por_ano(HorarioPDF, course_id=3)
+    return render(request, "rsi/horarios_rsi.html", {"horarios_por_ano": horarios_por_ano, "area": "rsi"})
 
 #view para pagina inicial DWDM
 def index_dwdm(request):
@@ -1364,11 +1372,13 @@ def plano_dwdm(request):
 
 #view para horarios DWDM
 def horarios_dwdm(request):
-    return render(request, "dwdm/horarios_dwdm.html", { "area": "dwdm" })
+    horarios_por_ano = _listar_pdfs_por_ano(HorarioPDF, course_id=4)
+    return render(request, "dwdm/horarios_dwdm.html", {"horarios_por_ano": horarios_por_ano, "area": "dwdm"})
 
 #view para avaliacoes DWDM
 def avaliacoes_dwdm(request):
-    return render(request, "dwdm/avaliacoes_dwdm.html", { "area": "dwdm" })
+    avaliacoes_por_ano = _listar_pdfs_por_ano(AvaliacaoPDF, course_id=4)
+    return render(request, "dwdm/avaliacoes_dwdm.html", {"avaliacoes_por_ano": avaliacoes_por_ano, "area": "dwdm"})
 
 #view para contactos DWDM
 def contactos_dwdm(request):
@@ -1421,11 +1431,13 @@ def plano_curric_mestrado(request):
 
 #view horarios do mestrado
 def horarios_mestrado(request):
-    return render(request, "eisi/horarios_mestrado.html", { "area": "eisi" })
+    horarios_por_ano = _listar_pdfs_por_ano(HorarioPDF, course_id=5)
+    return render(request, "eisi/horarios_mestrado.html", {"horarios_por_ano": horarios_por_ano, "area": "eisi"})
 
 #view avaliacoes do mestrado
 def avaliacoes_mestrado(request):
-    return render(request, "eisi/avaliacoes_mestrado.html", { "area": "eisi" })
+    avaliacoes_por_ano = _listar_pdfs_por_ano(AvaliacaoPDF, course_id=5)
+    return render(request, "eisi/avaliacoes_mestrado.html", {"avaliacoes_por_ano": avaliacoes_por_ano, "area": "eisi"})
 
 #view contactos do mestrado
 def contactos_mestrado(request):

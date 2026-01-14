@@ -32,9 +32,25 @@
         <h2>Documentos Oficiais</h2>
         <p>Consulta o regulamento completo de avaliação do Mestrado.</p>
 
-        <a class="btn-download" href="#" target="_blank">
-            <i class="fa-solid fa-download"></i> Regulamento de Avaliação (PDF)
-        </a>
+        <ul class="pdf-list">
+            {% for item in avaliacoes_por_ano %}
+            <li>
+                <strong>{{ item.ano.ano_curricular }}</strong>
+                {% if item.pdf %}
+                <div class="links">
+                    <a class="btn-download" href="{{ item.pdf.ficheiro.url }}" target="_blank">
+                        <i class="fa-solid fa-eye"></i> Ver
+                    </a>
+                    <a class="btn-download" href="{{ item.pdf.ficheiro.url }}" download>
+                        <i class="fa-solid fa-download"></i> Download
+                    </a>
+                </div>
+                {% else %}
+                <span class="muted"><i class="fa-solid fa-circle-exclamation"></i> Sem ficheiro disponível</span>
+                {% endif %}
+            </li>
+            {% endfor %}
+        </ul>
     </section>
 
 </div>

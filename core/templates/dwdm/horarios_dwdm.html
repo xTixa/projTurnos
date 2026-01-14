@@ -19,8 +19,23 @@
 
     <div class="pdf-box">
         <i class="fa-solid fa-file-pdf"></i>
-        <p>O horário atualizado encontra-se disponível no ficheiro abaixo:</p>
-        <a href="#" class="pdf-link" download><i class="fa-regular fa-file-pdf"></i> Download Horário DWDM (PDF)</a>
+        <p>Consulta o horário mais recente por ano curricular.</p>
+
+        <ul class="horarios-list">
+            {% for item in horarios_por_ano %}
+            <li>
+                <strong>{{ item.ano.ano_curricular }}</strong>
+                {% if item.pdf %}
+                <div class="horario-actions">
+                    <a href="{{ item.pdf.ficheiro.url }}" class="pdf-link" target="_blank"><i class="fa-regular fa-file-pdf"></i> Ver</a>
+                    <a href="{{ item.pdf.ficheiro.url }}" class="pdf-link" download><i class="fa-solid fa-download"></i> Download</a>
+                </div>
+                {% else %}
+                <span class="muted"><i class="fa-solid fa-circle-exclamation"></i> Sem ficheiro disponível</span>
+                {% endif %}
+            </li>
+            {% endfor %}
+        </ul>
     </div>
 
 </div>

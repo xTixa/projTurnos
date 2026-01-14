@@ -70,6 +70,13 @@ class Horario(models.Model):
 class HorarioPDF(models.Model):
     nome = models.CharField(max_length=200, default="Horário Oficial")
     ficheiro = models.FileField(upload_to="horarios/")
+    id_curso = models.ForeignKey(
+        Curso,
+        models.DO_NOTHING,
+        db_column="id_curso",
+        null=True,
+        blank=True
+    )
     id_anocurricular = models.ForeignKey(
         AnoCurricular,
         models.DO_NOTHING,
@@ -80,11 +87,20 @@ class HorarioPDF(models.Model):
     atualizado_em = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f"{self.nome} - {self.id_anocurricular.ano_curricular}"
+        curso = self.id_curso.nome if self.id_curso else "Curso desconhecido"
+        ano = self.id_anocurricular.ano_curricular if self.id_anocurricular else "Ano desconhecido"
+        return f"{self.nome} - {curso} - {ano}"
 
 class AvaliacaoPDF(models.Model):
     nome = models.CharField(max_length=200, default="Calendário de Avaliações")
     ficheiro = models.FileField(upload_to="avaliacoes/")
+    id_curso = models.ForeignKey(
+        Curso,
+        models.DO_NOTHING,
+        db_column="id_curso",
+        null=True,
+        blank=True
+    )
     id_anocurricular = models.ForeignKey(
         AnoCurricular,
         models.DO_NOTHING,
@@ -95,7 +111,9 @@ class AvaliacaoPDF(models.Model):
     atualizado_em = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f"{self.nome} - {self.id_anocurricular.ano_curricular}"
+        curso = self.id_curso.nome if self.id_curso else "Curso desconhecido"
+        ano = self.id_anocurricular.ano_curricular if self.id_anocurricular else "Ano desconhecido"
+        return f"{self.nome} - {curso} - {ano}"
 
 class InscricaoTurno(models.Model):
     id_inscricao = models.AutoField(primary_key=True)

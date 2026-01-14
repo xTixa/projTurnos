@@ -13,18 +13,32 @@
 </section>
 
 <section class="avaliacoes-lista">
-  {% for doc in avaliacoes_docs %}
+  {% for item in avaliacoes_por_ano %}
   <div class="avaliacao-card">
     <div class="avaliacao-info">
       <i class="fa-solid fa-file-pdf"></i>
       <div>
-        <h3>{{ doc.ano }}</h3>
+        <h3>{{ item.ano.ano_curricular }}</h3>
         <p>Calendário e regulamento das avaliações</p>
       </div>
     </div>
-    <a href="{% static 'docs/'|add:doc.ficheiro %}" class="btn btn-primary" download>
-      <i class="fa-solid fa-download"></i> Descarregar
-    </a>
+
+    {% if item.pdf %}
+    <div class="avaliacao-actions">
+      <a href="{{ item.pdf.ficheiro.url }}" class="btn btn-primary" target="_blank">
+        <i class="fa-solid fa-eye"></i> Ver
+      </a>
+      <a href="{{ item.pdf.ficheiro.url }}" class="btn btn-ghost" download>
+        <i class="fa-solid fa-download"></i> Download
+      </a>
+    </div>
+    {% else %}
+    <div class="avaliacao-actions">
+      <span class="btn btn-disabled">
+        <i class="fa-solid fa-circle-exclamation"></i> Ainda não existe ficheiro para este ano
+      </span>
+    </div>
+    {% endif %}
   </div>
   {% endfor %}
 </section>

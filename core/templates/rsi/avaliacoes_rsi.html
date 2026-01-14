@@ -21,11 +21,20 @@
         <h2>Documentos de Avaliação</h2>
 
         <ul class="avaliacoes-list">
+            {% for item in avaliacoes_por_ano %}
             <li>
-                <a href="https://www.di.estgv.ipv.pt/Dep/di/web/docs/RSI_Avaliacoes.pdf" target="_blank">
-                    <i class="fa-regular fa-file-pdf"></i> Regulamento de Avaliação — RSI
+                {% if item.pdf %}
+                <a href="{{ item.pdf.ficheiro.url }}" target="_blank">
+                    <i class="fa-regular fa-file-pdf"></i> {{ item.ano.ano_curricular }} — Ver PDF
                 </a>
+                <a href="{{ item.pdf.ficheiro.url }}" class="download-link" download>
+                    <i class="fa-solid fa-download"></i> Download
+                </a>
+                {% else %}
+                <span class="muted"><i class="fa-solid fa-circle-exclamation"></i> Sem ficheiro disponível para {{ item.ano.ano_curricular }}</span>
+                {% endif %}
             </li>
+            {% endfor %}
         </ul>
     </div>
 

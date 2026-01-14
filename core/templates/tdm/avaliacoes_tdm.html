@@ -20,9 +20,20 @@
 
     <section class="info-block">
         <ul class="file-list">
-            <li><a href="#" target="_blank"><i class="fa-solid fa-file-pdf"></i> Avaliações — 1.º Ano</a></li>
-            <li><a href="#" target="_blank"><i class="fa-solid fa-file-pdf"></i> Avaliações — 2.º Ano</a></li>
-            <li><a href="#" target="_blank"><i class="fa-solid fa-file-pdf"></i> Avaliações — 3.º Ano</a></li>
+            {% for item in avaliacoes_por_ano %}
+            <li>
+                {% if item.pdf %}
+                <a href="{{ item.pdf.ficheiro.url }}" target="_blank">
+                    <i class="fa-solid fa-file-pdf"></i> Avaliações — {{ item.ano.ano_curricular }}
+                </a>
+                <a href="{{ item.pdf.ficheiro.url }}" class="download-link" download>
+                    <i class="fa-solid fa-download"></i> Download
+                </a>
+                {% else %}
+                <span class="muted"><i class="fa-solid fa-circle-exclamation"></i> Sem ficheiro para {{ item.ano.ano_curricular }}</span>
+                {% endif %}
+            </li>
+            {% endfor %}
         </ul>
     </section>
 

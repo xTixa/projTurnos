@@ -18,25 +18,20 @@
     </p>
 
     <div class="pdf-list">
-
+        {% for item in avaliacoes_por_ano %}
         <div class="pdf-item">
             <i class="fa-solid fa-file-pdf"></i>
-            <span>Avaliações — 1º Ano</span>
-            <a href="#" download><i class="fa-regular fa-file-pdf"></i> Download PDF</a>
+            <span>Avaliações — {{ item.ano.ano_curricular }}</span>
+            {% if item.pdf %}
+            <div class="pdf-actions">
+                <a href="{{ item.pdf.ficheiro.url }}" target="_blank"><i class="fa-regular fa-file-pdf"></i> Ver</a>
+                <a href="{{ item.pdf.ficheiro.url }}" download><i class="fa-solid fa-download"></i> Download</a>
+            </div>
+            {% else %}
+            <span class="muted"><i class="fa-solid fa-circle-exclamation"></i> Sem ficheiro disponível</span>
+            {% endif %}
         </div>
-
-        <div class="pdf-item">
-            <i class="fa-solid fa-file-pdf"></i>
-            <span>Avaliações — 2º Ano</span>
-            <a href="#" download><i class="fa-regular fa-file-pdf"></i> Download PDF</a>
-        </div>
-
-        <div class="pdf-item">
-            <i class="fa-solid fa-file-pdf"></i>
-            <span>Avaliações — 3º Ano</span>
-            <a href="#" download><i class="fa-regular fa-file-pdf"></i> Download PDF</a>
-        </div>
-
+        {% endfor %}
     </div>
 
 </div>

@@ -19,14 +19,29 @@
 
     <section class="horarios-box">
         <h2>Horários Disponíveis</h2>
-
-        <p>Podes consultar os horários atualizados no seguinte link:</p>
-
-        <a href="https://www.di.estgv.ipv.pt/horarios/index.php?curso=RSI"
-           class="btn-horarios"
-           target="_blank">
-            <i class="fa-regular fa-calendar"></i> Ver Horários RSI
-        </a>
+        <ul class="horarios-list">
+            {% for item in horarios_por_ano %}
+            <li>
+                <div class="horario-info">
+                    <i class="fa-regular fa-calendar"></i> {{ item.ano.ano_curricular }}
+                </div>
+                {% if item.pdf %}
+                <div class="horario-actions">
+                    <a href="{{ item.pdf.ficheiro.url }}" class="btn-horarios" target="_blank">
+                        <i class="fa-regular fa-file-pdf"></i> Ver PDF
+                    </a>
+                    <a href="{{ item.pdf.ficheiro.url }}" class="btn-horarios secondary" download>
+                        <i class="fa-solid fa-download"></i> Download
+                    </a>
+                </div>
+                {% else %}
+                <div class="horario-actions">
+                    <span class="muted"><i class="fa-solid fa-circle-exclamation"></i> Sem ficheiro disponível</span>
+                </div>
+                {% endif %}
+            </li>
+            {% endfor %}
+        </ul>
     </section>
 
 </div>

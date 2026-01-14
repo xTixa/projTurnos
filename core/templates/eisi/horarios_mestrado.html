@@ -24,9 +24,25 @@
     </div>
 
     <div class="download-section">
-        <a class="btn-download" href="#" target="_blank">
-            <i class="fa-solid fa-download"></i> Descarregar Horário (PDF)
-        </a>
+        <ul class="horarios-list">
+            {% for item in horarios_por_ano %}
+            <li>
+                <strong>{{ item.ano.ano_curricular }}</strong>
+                {% if item.pdf %}
+                <div class="links">
+                    <a class="btn-download" href="{{ item.pdf.ficheiro.url }}" target="_blank">
+                        <i class="fa-solid fa-eye"></i> Ver
+                    </a>
+                    <a class="btn-download" href="{{ item.pdf.ficheiro.url }}" download>
+                        <i class="fa-solid fa-download"></i> Download
+                    </a>
+                </div>
+                {% else %}
+                <span class="muted"><i class="fa-solid fa-circle-exclamation"></i> Sem ficheiro disponível</span>
+                {% endif %}
+            </li>
+            {% endfor %}
+        </ul>
     </div>
 
 </div>
