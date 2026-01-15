@@ -1,5 +1,6 @@
 {% extends "home/base.html" %}
 {% load static %}
+{% load pdf_tags %}
 
 {% block title %}Avaliações — Mestrado EISI{% endblock %}
 
@@ -53,10 +54,10 @@
 
             <div class="avaliacao-actions">
                 {% if item.pdf %}
-                <a href="{{ item.pdf.ficheiro.url }}" class="btn-download" target="_blank">
+                <a href="{% pdf_url item.pdf 'avaliacao' %}" class="btn-download" target="_blank">
                     <i class="fa-solid fa-eye"></i> <span class="btn-text">Ver</span>
                 </a>
-                <a href="{{ item.pdf.ficheiro.url }}" class="btn-download" download>
+                <a href="{% pdf_url item.pdf 'avaliacao' %}" class="btn-download" download>
                     <i class="fa-solid fa-download"></i> <span class="btn-text">Download</span>
                 </a>
                 {% else %}

@@ -1,5 +1,6 @@
 {% extends "home/base.html" %}
 {% load static %}
+{% load pdf_tags %}
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/ei/horarios.css' %}">
@@ -44,10 +45,10 @@
 
         <div class="schedule-actions">
           {% if item.pdf %}
-            <a href="{{ item.pdf.ficheiro.url }}" class="btn-download" target="_blank">
+            <a href="{% pdf_url item.pdf 'horario' %}" class="btn-download" target="_blank">
                <i class="fa-solid fa-eye"></i> <span class="btn-text">Ver</span>
             </a>
-            <a href="{{ item.pdf.ficheiro.url }}" class="btn-download" download title="Descarregar">
+            <a href="{% pdf_url item.pdf 'horario' %}" class="btn-download" download title="Descarregar">
               <i class="fa-solid fa-download"></i> <span class="btn-text">Descarregar</span>
             </a>
           {% else %}

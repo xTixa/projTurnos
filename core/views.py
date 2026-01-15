@@ -7,7 +7,7 @@ from django.shortcuts import redirect
 from django.db import models
 from .models import AnoCurricular, UnidadeCurricular, Semestre, Docente, Curso, HorarioPDF, AvaliacaoPDF, Aluno, TurnoUc, Turno, InscricaoTurno, InscritoUc, LogEvento, AuditoriaInscricao, Matricula, LecionaUc
 from .db_views import CadeirasSemestre, AlunosPorOrdemAlfabetica, Turnos, Cursos
-from django.http import JsonResponse
+from django.http import JsonResponse, FileResponse
 import json
 from django.contrib.auth.models import User
 from bd2_projeto.services.mongo_service import (
@@ -15,7 +15,15 @@ from bd2_projeto.services.mongo_service import (
     validar_inscricao_disponivel, registar_consulta_aluno,
     registar_atividade_docente, registar_erro, registar_auditoria_user
 )
-from core.utils import registar_log, admin_required
+# ==========================================
+# IMPORT DO SERVIÇO GridFS PARA PDFs
+# ==========================================
+# Importa as funções de armazenamento de PDFs no MongoDB
+from bd2_projeto.services.gridfs_service import (
+    upload_pdf_horario, upload_pdf_avaliacao,
+    download_pdf, deletar_pdf, listar_pdfs_horarios, listar_pdfs_avaliacoes
+)
+from core.utils import registar_log, admin_required, aluno_required, user_required, docente_required
 import time
 from django.db.models import Count
 
@@ -291,6 +299,7 @@ def informacoes(request):
     return render(request, "ei/informacoes.html", { "area": "ei" })
 
 #view para o perfil do user autentiasdo
+@user_required
 def perfil(request):
     user_tipo = request.session.get("user_tipo")
     user_id = request.session.get("user_id")
@@ -360,6 +369,7 @@ def perfil(request):
     return render(request, "profile/perfil.html", context)
 
 #view para inscrever o aluno nos turnos (açao)
+@aluno_required
 def inscrever_turno(request, turno_id, uc_id):
     inicio_tempo = time.time()
     resultado = None
@@ -448,6 +458,7 @@ def inscrever_turno(request, turno_id, uc_id):
         return redirect("home:inscricao_turno")
 
 #view para remover a inscriçao do turno
+@aluno_required
 def desinscrever_turno(request, turno_id, uc_id):
     if "user_tipo" not in request.session or request.session["user_tipo"] != "aluno":
         return JsonResponse({"erro": "Acesso não autorizado"}, status=403)
@@ -924,16 +935,44 @@ def admin_horarios_create(request):
             messages.error(request, "É necessário selecionar o curso e o ano curricular.")
             return redirect("home:admin_horarios_create")
 
-        #cria o registo do horario
-        HorarioPDF.objects.create(
-            nome=nome,
-            ficheiro=ficheiro,
-            id_anocurricular_id=ano_id,
-            id_curso_id=curso_id,
-        )
-
-        messages.success(request, "Horário carregado com sucesso!")
-        return redirect("home:admin_horarios_list")
+        try:
+            # ==========================================
+            # UPLOAD PARA MongoDB (GridFS)
+            # ==========================================
+            # Faz upload do PDF para o MongoDB usando GridFS
+            # O ficheiro é dividido em chunks de 64KB e armazenado
+            resultado_upload = upload_pdf_horario(
+                ficheiro_file=ficheiro,
+                nome=nome,
+                id_curso=int(curso_id),
+                id_anocurricular=int(ano_id)
+            )
+            
+            # Obtém o file_id retornado pelo GridFS
+            file_id_mongodb = resultado_upload["file_id"]
+            
+            # ==========================================
+            # GUARDAR REFERÊNCIA NA BD (Django/PostgreSQL)
+            # ==========================================
+            # Em vez de guardar o ficheiro no filesystem,
+            # guardamos apenas o ID do GridFS como referência
+            HorarioPDF.objects.create(
+                nome=nome,
+                ficheiro=f"mongodb_gridfs:{file_id_mongodb}",  # Formato especial para indicar que está no MongoDB
+                id_anocurricular_id=ano_id,
+                id_curso_id=curso_id,
+            )
+            
+            # Regista a operação no log
+            registar_log(request, operacao="CREATE", entidade="horario_pdf", chave=file_id_mongodb, detalhes=f"Horário PDF criado no MongoDB: {nome}")
+            
+            messages.success(request, "Horário carregado com sucesso no MongoDB!")
+            return redirect("home:admin_horarios_list")
+        
+        except Exception as e:
+            # Se algo correr mal, mostra a mensagem de erro
+            messages.error(request, f"Erro ao carregar horário: {str(e)}")
+            return redirect("home:admin_horarios_create")
 
     return render(request, "admin/horarios_form.html", {'cursos': cursos, 'anos_curriculares': anos_curriculares})
 
@@ -1009,17 +1048,40 @@ def admin_avaliacoes_create(request):
             messages.error(request, "É necessário selecionar o curso e o ano curricular.")
             return redirect("home:admin_avaliacoes_create")
 
-        #cria o regsito do pdf
-        AvaliacaoPDF.objects.create(
-            nome=nome,
-            ficheiro=ficheiro,
-            id_anocurricular_id=ano_id,
-            id_curso_id=curso_id,
-        )
+        try:
+            # ==========================================
+            # UPLOAD PARA MongoDB (GridFS)
+            # ==========================================
+            # Faz upload do PDF para o MongoDB usando GridFS
+            # O ficheiro é dividido em chunks e armazenado
+            resultado_upload = upload_pdf_avaliacao(
+                ficheiro_file=ficheiro,
+                nome=nome,
+                id_curso=int(curso_id),
+                id_anocurricular=int(ano_id)
+            )
+            
+            # Obtém o file_id retornado pelo GridFS
+            file_id_mongodb = resultado_upload["file_id"]
+            
+            # ==========================================
+            # GUARDAR REFERÊNCIA NA BD (Django/PostgreSQL)
+            # ==========================================
+            # Guardamos apenas o ID do GridFS como referência
+            AvaliacaoPDF.objects.create(
+                nome=nome,
+                ficheiro=f"mongodb_gridfs:{file_id_mongodb}",  # Indica que está no MongoDB
+                id_anocurricular_id=ano_id,
+                id_curso_id=curso_id,
+            )
 
-        registar_log(request, operacao="CREATE", entidade="avaliacao_pdf", chave="novo", detalhes=f"Avaliação PDF criada: {nome}")
-        messages.success(request, "Calendário de avaliações carregado com sucesso!")
-        return redirect("home:admin_avaliacoes_list")
+            registar_log(request, operacao="CREATE", entidade="avaliacao_pdf", chave=file_id_mongodb, detalhes=f"Avaliação PDF criada no MongoDB: {nome}")
+            messages.success(request, "Calendário de avaliações carregado com sucesso no MongoDB!")
+            return redirect("home:admin_avaliacoes_list")
+        
+        except Exception as e:
+            messages.error(request, f"Erro ao carregar avaliação: {str(e)}")
+            return redirect("home:admin_avaliacoes_create")
 
     return render(request, "admin/avaliacoes_form.html", {'cursos': cursos, 'anos_curriculares': anos_curriculares})
 
@@ -1058,9 +1120,31 @@ def admin_avaliacoes_edit(request, id):
 def admin_avaliacoes_delete(request, id):
     avaliacao = get_object_or_404(AvaliacaoPDF, id=id)
     nome = avaliacao.nome
-    avaliacao.delete()
-    registar_log(request, operacao="DELETE", entidade="avaliacao_pdf", chave=str(id), detalhes=f"Avaliação PDF apagada: {nome}")
-    messages.success(request, "Calendário de avaliações apagado!")
+    
+    try:
+        # ==========================================
+        # EXTRAIR ID DO MongoDB (GridFS)
+        # ==========================================
+        # Verifica se o ficheiro está no MongoDB
+        # O formato é "mongodb_gridfs:ID_DO_FICHEIRO"
+        if avaliacao.ficheiro.startswith("mongodb_gridfs:"):
+            # Extrai o ID do ficheiro
+            file_id_mongodb = avaliacao.ficheiro.replace("mongodb_gridfs:", "")
+            
+            # ==========================================
+            # DELETAR DO MongoDB (GridFS)
+            # ==========================================
+            # Remove o ficheiro do MongoDB
+            deletar_pdf(file_id_mongodb, tipo_pdf="avaliacao")
+        
+        # Remove o registo da BD
+        avaliacao.delete()
+        registar_log(request, operacao="DELETE", entidade="avaliacao_pdf", chave=str(id), detalhes=f"Avaliação PDF apagada do MongoDB: {nome}")
+        messages.success(request, "Calendário de avaliações apagado!")
+        
+    except Exception as e:
+        messages.error(request, f"Erro ao apagar avaliação: {str(e)}")
+    
     return redirect("home:admin_avaliacoes_list")
 
 #view para listar os docentes no admin
@@ -1183,6 +1267,7 @@ def moodle(request):
     return render(request, "tdm/moodle.html", { "area": "tdm" })
 
 #view para inscricao nos turnos TDM
+@aluno_required
 def inscricao_turno_tdm(request):
     if "user_tipo" not in request.session or request.session["user_tipo"] != "aluno":
         messages.error(request, "É necessário iniciar sessão como aluno.")
@@ -1259,6 +1344,7 @@ def inscricao_turno_tdm(request):
     return render(request, "tdm/inscricao_turno_tdm.html", {"turnos_info": turnos_info, "turno_escolhido": turno_escolhido, "area": "tdm"})
 
 #view para inscrevr no turno TDM
+@aluno_required
 def inscrever_turno_tdm(request, n_turno):
     if "user_tipo" not in request.session or request.session["user_tipo"] != "aluno":
         messages.error(request, "Apenas alunos podem inscrever-se em turnos.")
@@ -1675,3 +1761,63 @@ def forum(request):
 #view pagina inicial DAPE
 def dape(request):
     return render(request, "dape/dape.html")
+
+
+# ==========================================
+# VIEW PARA SERVIR PDFs DO MongoDB (GridFS)
+# ==========================================
+def servir_pdf_mongodb(request, file_id, tipo_pdf):
+    """
+    Serve PDFs armazenados no MongoDB via GridFS
+    
+    Esta view é chamada quando o Django tenta aceder a um PDF que está no MongoDB.
+    Em vez de procurar no filesystem, vai buscar ao GridFS.
+    
+    Args:
+        file_id: ID único do ficheiro no MongoDB
+        tipo_pdf: Tipo do PDF ("horario" ou "avaliacao")
+    
+    Returns:
+        FileResponse com o PDF ou erro 404
+    """
+    try:
+        # ==========================================
+        # BUSCAR PDF DO MongoDB
+        # ==========================================
+        # Usa a função download_pdf do gridfs_service
+        # Retorna o conteúdo do PDF e os metadados
+        pdf_bytes, metadata = download_pdf(file_id, tipo_pdf=tipo_pdf)
+        
+        # ==========================================
+        # PREPARAR RESPOSTA HTTP
+        # ==========================================
+        # FileResponse é a resposta do Django para ficheiros
+        # Define o tipo de conteúdo como PDF
+        response = FileResponse(
+            pdf_bytes,
+            content_type='application/pdf'
+        )
+        
+        # Define o nome do ficheiro para download
+        # Usa o nome original dos metadados se existir
+        nome_ficheiro = metadata.get("nome_ficheiro_original", f"{metadata.get('nome', 'documento')}.pdf")
+        response['Content-Disposition'] = f'inline; filename="{nome_ficheiro}"'
+        
+        # Regista o acesso ao PDF (analytics)
+        adicionar_log(
+            "download_pdf",
+            {
+                "file_id": file_id,
+                "tipo": tipo_pdf,
+                "nome": metadata.get("nome"),
+                "tamanho": metadata.get("tamanho")
+            },
+            request
+        )
+        
+        return response
+    
+    except Exception as e:
+        # Se algo correr mal, retorna erro 404
+        from django.http import Http404
+        raise Http404(f"PDF não encontrado no MongoDB: {str(e)}")
