@@ -104,6 +104,12 @@
   font-size: 0.95rem;
 }
 
+.avaliacao-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
 /* Button - Refined */
 .btn-download {
   display: inline-flex;

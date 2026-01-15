@@ -4,52 +4,80 @@
 {% block title %}Contactos — Mestrado EISI{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/eisi/contactos.css' %}">
+<link rel="stylesheet" href="{% static 'css/eisi/contactos.css' %}?v=remodel">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 {% endblock %}
 
 {% block content %}
-<div class="page-container">
+<div class="contactos-container">
 
-    <h1 class="page-title">Contactos</h1>
+    <!-- HEADER SECTION -->
+    <section class="contact-header">
+        <div class="contact-info">
+            <h1>Contactos</h1>
 
-    <p class="intro-text">
-        Para mais informações sobre o Mestrado em Engenharia Informática e Sistemas de Informação,
-        contacta o Departamento de Informática.
-    </p>
+            <p class="curso-info">Mestrado em Eng. Informática e Sist. de Informação</p>
 
-    <section class="contact-box">
-        <h2>Departamento de Informática — ESTGV</h2>
+            <p class="descricao">
+                Para mais informações sobre o curso, contacta o Departamento de Informática.
+            </p>
 
-        <p><i class="fa-solid fa-phone"></i> <strong>Telefone:</strong> 232 480 500</p>
-        <p><i class="fa-solid fa-envelope"></i> <strong>Email:</strong> di@estgv.ipv.pt</p>
-        <p><i class="fa-solid fa-location-dot"></i> <strong>Morada:</strong> Campus Politécnico, Viseu</p>
-    </section>
-
-    <section class="coord-box">
-        <h2>Coordenação do Mestrado</h2>
-
-        <p><strong>Prof. Doutor José Luís Aguiar</strong></p>
-        <p><i class="fa-solid fa-envelope"></i> jlaguiar@estgv.ipv.pt</p>
-    </section>
-
-    <section class="contact-box">
-        <h2>Corpo Docente</h2>
-        {% if docentes %}
-        <div class="docentes-grid">
-            {% for d in docentes %}
-            <div class="docente-card">
-                <h3>{{ d.nome }}</h3>
-                {% if d.email %}
-                <p>Email: <a href="mailto:{{ d.email }}">{{ d.email }}</a></p>
-                {% else %}
-                <p><em>Sem email registado</em></p>
-                {% endif %}
-            </div>
-            {% endfor %}
+            <a href="https://maps.google.com/?q=Instituto+Politécnico+de+Viseu"
+               target="_blank"
+               class="map-link">
+                <i class="fa-solid fa-location-dot"></i>
+                Ver no Google Maps
+            </a>
         </div>
-        {% else %}
-        <p>Sem docentes registados.</p>
-        {% endif %}
+
+        <iframe
+            class="contact-map"
+            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3032.5!2d-7.9201646!3d40.6439583!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0xd23370121313ff7%3A0xfb8b9b36fe071169!2sESTGV+-+Escola+Superior+de+Tecnologia+e+Gest%C3%A3o+de+Viseu!5e0!3m2!1spt-PT!2spt!4v1705325854000"
+            allowfullscreen=""
+            loading="lazy">
+        </iframe>
+    </section>
+
+    <!-- DEPARTAMENTO & COORDENAÇÃO -->
+    <h2 class="subtitulo">Contactos Institucionais</h2>
+    <section class="contacts-grid">
+        
+        <!-- Dept Info Card -->
+        <div class="contact-card">
+            <h3><i class="fa-solid fa-building"></i> Departamento de Informática</h3>
+            <p><i class="fa-solid fa-phone"></i> 232 480 500</p>
+            <p><i class="fa-solid fa-envelope"></i> <a href="mailto:di@estgv.ipv.pt">di@estgv.ipv.pt</a></p>
+            <p><i class="fa-solid fa-location-dot"></i> Campus Politécnico, Viseu</p>
+        </div>
+
+        <!-- Coordinator Card -->
+        <div class="contact-card coordinator">
+            <h3><i class="fa-solid fa-user-gear"></i> Coordenação do Mestrado</h3>
+            <p><strong>Prof. Doutor José Luís Aguiar</strong></p>
+            <p><i class="fa-solid fa-envelope"></i> 
+                <a href="mailto:jlaguiar@estgv.ipv.pt">jlaguiar@estgv.ipv.pt</a>
+            </p>
+        </div>
+
+    </section>
+
+    <!-- CORPO DOCENTE -->
+    <h2 class="subtitulo">Corpo Docente</h2>
+    <section class="contacts-grid">
+        {% for d in docentes %}
+        <div class="contact-card">
+            <h3><i class="fa-solid fa-user-tie"></i> {{ d.nome }}</h3>
+            {% if d.email %}
+            <p><i class="fa-solid fa-envelope"></i> 
+                <a href="mailto:{{ d.email }}">{{ d.email }}</a>
+            </p>
+            {% else %}
+            <p><em>Sem email registado</em></p>
+            {% endif %}
+        </div>
+        {% empty %}
+        <p>Não existem docentes registados.</p>
+        {% endfor %}
     </section>
 
 </div>
