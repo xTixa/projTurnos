@@ -1,35 +1,189 @@
-.page-container {
-    padding: 25px;
-    max-width: 900px;
-    margin: 0 auto;
+:root {
+  --brand-blue: #2563eb;
+  --brand-light: #eff6ff;
+  --brand-dark: #1e40af;
+  --text-primary: #0f172a;
+  --text-secondary: #64748b;
+  --surface: #ffffff;
+  --border: #e2e8f0;
 }
 
-.page-title {
-    font-size: 32px;
-    margin-bottom: 10px;
+.avaliacoes-container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 1rem 2rem; /* Reduced top padding */
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  color: var(--text-primary);
 }
 
-.intro-text {
-    margin-bottom: 20px;
-    font-size: 18px;
-    color: #444;
+/* HEADER */
+.simple-header {
+  text-align: center;
+  margin-top: 2rem; /* Added margin back for TDM to space it out */
+  margin-bottom: 3rem; 
 }
 
-.file-list {
-    list-style: none;
-    padding-left: 0;
+.simple-header h1 {
+  font-size: 3rem;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  margin-bottom: 0.5rem;
+  color: var(--text-primary);
 }
 
-.file-list li {
-    margin: 12px 0;
+.simple-header p {
+  font-size: 1.15rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  max-width: 600px;
+  margin: 0 auto;
 }
 
-.file-list a {
-    font-size: 18px;
-    color: #0055aa;
+/* LIST OF CARDS */
+.avaliacoes-lista {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  margin-bottom: 5rem;
 }
 
-.file-list a i {
-    margin-right: 8px;
-    color: #cc0000;
+.avaliacao-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: white;
+  border: 1px solid var(--border);
+  padding: 1.5rem; 
+  border-radius: 16px; 
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.avaliacao-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--brand-blue);
+  box-shadow: 0 10px 20px -5px rgba(37, 99, 235, 0.1);
+}
+
+/* Left Info */
+.avaliacao-info {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+}
+
+/* Icon Box - Refined */
+.icon-container {
+  width: 52px;
+  height: 52px;
+  background: #fef2f2; /* Soft Red BG for PDF */
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #fee2e2;
+}
+
+.icon-container i {
+  font-size: 1.5rem;
+  color: #ef4444; /* PDF Red */
+}
+
+.avaliacao-info div h3 {
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 0.15rem;
+}
+
+.avaliacao-info div p {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+}
+
+/* Button - Refined */
+.btn-download {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  background: white;
+  color: var(--text-primary);
+  border: 1px solid var(--border);
+  padding: 0.75rem 1.25rem;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  text-decoration: none;
+  transition: all 0.2s;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
+
+.btn-download:hover {
+  background: var(--brand-light);
+  color: var(--brand-blue);
+  border-color: var(--brand-blue);
+  transform: translateY(-1px);
+}
+
+/* Mobile Button Text Hide */
+@media (max-width: 500px) {
+  .btn-text { display: none; }
+  .btn-download { padding: 0.75rem; }
+}
+
+/* --- FOOTER --- */
+.avaliacoes-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 3rem;
+    border-top: 1px solid #e2e8f0;
+    gap: 2rem;
+    margin-top: 4rem;
+}
+
+.footer-info h3 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+}
+
+.footer-info p {
+    color: var(--text-secondary);
+    margin: 0;
+    font-size: 1rem;
+}
+
+.btn-clean {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #1e293b;
+    text-decoration: none;
+    font-weight: 600;
+    background: #f1f5f9;
+    padding: 0.75rem 1.5rem;
+    border-radius: 99px;
+    transition: all 0.2s ease;
+    box-shadow: none;
+}
+
+.btn-clean:hover {
+    background: #e2e8f0;
+    padding-right: 2rem;
+    transform: none;
+    box-shadow: none;
+}
+
+/* Responsive Footer */
+@media (max-width: 768px) {
+    .avaliacoes-footer {
+        flex-direction: column;
+        align-items: flex-start;
+        text-align: left;
+    }
 }

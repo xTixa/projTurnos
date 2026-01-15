@@ -6,17 +6,20 @@
 {% endblock %}
 
 {% block content %}
-<section class="avaliacoes-header">
-  <h1>Avaliações — Engenharia Informática</h1>
+<div class="avaliacoes-container"> <!-- Added container -->
+<header class="simple-header">
+  <h1>Avaliações</h1>
   <p>Consulta os documentos de avaliação organizados por ano letivo.  
      Cada ficheiro inclui as datas e critérios definidos para o respetivo ano.</p>
-</section>
+</header>
 
 <section class="avaliacoes-lista">
   {% for item in avaliacoes_por_ano %}
   <div class="avaliacao-card">
     <div class="avaliacao-info">
-      <i class="fa-solid fa-file-pdf"></i>
+      <div class="icon-container">
+        <i class="fa-solid fa-file-pdf"></i>
+      </div>
       <div>
         <h3>{{ item.ano.ano_curricular }}</h3>
         <p>Calendário e regulamento das avaliações</p>
@@ -24,28 +27,39 @@
     </div>
 
     {% if item.pdf %}
-    <div class="avaliacao-actions">
-      <a href="{{ item.pdf.ficheiro.url }}" class="btn btn-primary" target="_blank">
-        <i class="fa-solid fa-eye"></i> Ver
-      </a>
-      <a href="{{ item.pdf.ficheiro.url }}" class="btn btn-ghost" download>
-        <i class="fa-solid fa-download"></i> Download
-      </a>
-    </div>
+      <div class="avaliacao-actions">
+        <a href="{{ item.pdf.ficheiro.url }}" class="btn btn-primary" target="_blank">
+          <i class="fa-solid fa-eye"></i> Ver
+        </a>
+        <a href="{{ item.pdf.ficheiro.url }}" class="btn-download" download>
+          <i class="fa-solid fa-download"></i>
+          <span class="btn-text">Descarregar PDF</span>
+        </a>
+      </div>
     {% else %}
-    <div class="avaliacao-actions">
-      <span class="btn btn-disabled">
-        <i class="fa-solid fa-circle-exclamation"></i> Ainda não existe ficheiro para este ano
-      </span>
-    </div>
+      <div class="avaliacao-actions">
+        <span class="btn btn-disabled">
+          <i class="fa-solid fa-circle-exclamation"></i>
+          Ainda não existe ficheiro para este ano
+        </span>
+      </div>
     {% endif %}
   </div>
   {% endfor %}
 </section>
 
-<section class="avaliacoes-cta">
-  <h2>Dúvidas sobre avaliações?</h2>
-  <p>Contacta o teu docente responsável ou consulta o regulamento geral do curso.</p>
-  <a href="{% url 'home:contactos' %}" class="btn btn-ghost">Contactar Departamento</a>
-</section>
+<!-- BOTTOM INFO (Matching Ingresso Style) -->
+<footer class="avaliacoes-footer">
+  <div class="footer-info">
+    <h3>Dúvidas sobre avaliações?</h3>
+    <p>Contacta o teu docente responsável ou consulta o regulamento geral do curso.</p>
+  </div>
+  <div class="footer-actions">
+    <a href="{% url 'home:contactos' %}" class="btn-clean">
+      Contactar Departamento <i class="fa-solid fa-arrow-right"></i>
+    </a>
+  </div>
+</footer>
+
+</div> <!-- End container -->
 {% endblock %}

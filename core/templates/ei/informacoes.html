@@ -1,10 +1,55 @@
 {% extends 'home/base.html' %}
+{% load static %}
 
-{% block title %}Informações — Horários EI{% endblock %}
+{% block title %}Informações — Engenharia Informática{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/ei/informacoes.css' %}">
+{% endblock %}
 
 {% block sb_info_active %}is-active{% endblock %}
 
 {% block content %}
-  <h1>Informações</h1>
-  <p>Aqui podes encontrar todas as informações relevantes sobre o curso de Engenharia Informática.</p>
+<div class="info-container">
+  
+  <header class="simple-header">
+    <h1>Informações</h1>
+    <p>Tudo o que precisas de saber sobre o funcionamento do curso, regulamentos e vida académica.</p>
+  </header>
+
+  <section class="info-section">
+    <!-- Intro Highlights -->
+    <div class="intro-box">
+      <p class="lead-text">
+        A Licenciatura em Engenharia Informática da <strong>ESTGV</strong> oferece uma formação sólida e abrangente nas áreas fundamentais da computação. O curso privilegia uma <strong>abordagem prática</strong> e orientada para o mercado de trabalho.
+      </p>
+    </div>
+
+    <!-- Areas Grid -->
+    <h3 class="areas-title">Áreas de Formação</h3>
+    <div class="areas-grid">
+      <div class="area-item">
+        <div class="area-icon"><i class="fa-solid fa-code"></i></div>
+        <span>Desenvolvimento de Software</span>
+      </div>
+      <div class="area-item">
+        <div class="area-icon"><i class="fa-solid fa-server"></i></div>
+        <span>Administração de Sistemas</span>
+      </div>
+      <div class="area-item">
+        <div class="area-icon"><i class="fa-solid fa-network-wired"></i></div>
+        <span>Redes de Computadores</span>
+      </div>
+      <div class="area-item">
+        <div class="area-icon"><i class="fa-solid fa-shield-halved"></i></div>
+        <span>Cibersegurança</span>
+      </div>
+      <div class="area-item">
+        <div class="area-icon"><i class="fa-solid fa-brain"></i></div>
+        <span>Inteligência Artificial</span>
+      </div>
+    </div>
+  </section>
+
+</div>
 {% endblock %}

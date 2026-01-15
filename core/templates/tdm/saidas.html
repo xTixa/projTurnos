@@ -4,53 +4,103 @@
 {% block title %}Objetivos e Saídas Profissionais — TDM{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/tdm/saidas.css' %}">
+<link rel="stylesheet" href="{% static 'css/tdm/saidas.css' %}?v=colors_refined_v2">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 {% endblock %}
 
 {% block content %}
-<div class="page-container">
+<div class="saidas-container">
 
-    <h1 class="page-title">Objetivos e Saídas Profissionais</h1>
+    <!-- HERO SECTION -->
+    <header class="saidas-hero">
+        <span class="badge-pill">Licenciatura em TDM</span>
+        <h1>Objetivos e Saídas Profissionais</h1>
+        <p class="intro-text">
+            A Licenciatura em <strong>Tecnologias e Design Multimédia</strong> prepara profissionais com competências técnicas,
+            criativas e conceptuais para trabalhar no setor das indústrias criativas, design digital,
+            comunicação visual e produção de conteúdos multimédia.
+        </p>
+    </header>
 
-    <p class="intro-text">
-        A Licenciatura em <strong>Tecnologias e Design Multimédia</strong> prepara profissionais com competências técnicas,
-        criativas e conceptuais para trabalhar no setor das indústrias criativas, design digital,
-        comunicação visual e produção de conteúdos multimédia.
-    </p>
+    <div class="content-stack">
+        
+        <!-- OBJETIVOS CARD -->
+        <div class="info-card">
+            <div class="card-header">
+                <div class="header-icon icon-orange">
+                    <i class="fa-solid fa-bullseye"></i>
+                </div>
+                <h2 class="card-title">Objetivos do Curso</h2>
+            </div>
+            
+            <ul class="custom-list">
+                <li class="list-item">
+                    <span class="list-icon"><i class="fa-solid fa-check"></i></span>
+                    <span>Integrar conhecimentos de tecnologia e design na criação de soluções multimédia inovadoras.</span>
+                </li>
+                <li class="list-item">
+                    <span class="list-icon"><i class="fa-solid fa-check"></i></span>
+                    <span>Capacitar para o desenvolvimento de conteúdos digitais interativos e aplicações web.</span>
+                </li>
+                <li class="list-item">
+                    <span class="list-icon"><i class="fa-solid fa-check"></i></span>
+                    <span>Fomentar a criatividade, o pensamento crítico e a capacidade de resolução de problemas complexos.</span>
+                </li>
+                <li class="list-item">
+                    <span class="list-icon"><i class="fa-solid fa-check"></i></span>
+                    <span>Promover competências em comunicação visual, vídeo, animação e design gráfico.</span>
+                </li>
+                <li class="list-item">
+                    <span class="list-icon"><i class="fa-solid fa-check"></i></span>
+                    <span>Preparar profissionais aptos a trabalhar em equipas multidisciplinares e projetos em escala global.</span>
+                </li>
+            </ul>
+        </div>
 
-    <hr>
+        <!-- SAÍDAS CARD -->
+        <div class="info-card">
+            <div class="card-header">
+                <div class="header-icon icon-indigo">
+                    <i class="fa-solid fa-briefcase"></i>
+                </div>
+                <h2 class="card-title">Saídas Profissionais</h2>
+            </div>
 
-    <!-- OBJETIVOS -->
-    <section class="info-block">
-        <h2>Objetivos do Curso</h2>
-        <ul>
-            <li>Integrar conhecimentos de tecnologia e design na criação de soluções multimédia.</li>
-            <li>Capacitar para o desenvolvimento de conteúdos digitais interativos.</li>
-            <li>Fomentar a criatividade, pensamento crítico e capacidade técnica.</li>
-            <li>Promover competências em comunicação visual, design, vídeo, animação e web.</li>
-            <li>Preparar profissionais aptos a trabalhar em equipas multidisciplinares.</li>
-        </ul>
-    </section>
+            <div class="job-tags-container">
+                <div class="job-tag">
+                    <i class="fa-solid fa-pen-nib"></i> Designer Gráfico
+                </div>
+                <div class="job-tag">
+                    <i class="fa-solid fa-code"></i> Web Designer
+                </div>
+                <div class="job-tag">
+                    <i class="fa-solid fa-photo-film"></i> Produtor Multimédia
+                </div>
+                <div class="job-tag">
+                    <i class="fa-solid fa-camera"></i> Fotografia
+                </div>
+                <div class="job-tag">
+                    <i class="fa-solid fa-video"></i> Edição de Vídeo
+                </div>
+                <div class="job-tag">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i> Animação 2D/3D
+                </div>
+                <div class="job-tag">
+                    <i class="fa-solid fa-gamepad"></i> Game Design
+                </div>
+                <div class="job-tag">
+                    <i class="fa-solid fa-bullhorn"></i> Marketing Digital
+                </div>
+                <div class="job-tag">
+                    <i class="fa-solid fa-laptop-house"></i> Freelancer
+                </div>
+                <div class="job-tag">
+                    <i class="fa-solid fa-user-tie"></i> Consultoria
+                </div>
+            </div>
+        </div>
 
-    <hr>
-
-    <!-- SAÍDAS PROFISSIONAIS -->
-    <section class="info-block">
-        <h2>Saídas Profissionais</h2>
-        <p>Os licenciados em TDM podem exercer funções em diferentes áreas, tais como:</p>
-
-        <ul>
-            <li>Designer Gráfico / Designer Digital;</li>
-            <li>Web Designer e Web Developer;</li>
-            <li>Produtor de Conteúdos Multimédia;</li>
-            <li>Fotografia e Produção Visual;</li>
-            <li>Edição e produção de vídeo;</li>
-            <li>Animação 2D/3D e Motion Graphics;</li>
-            <li>Criação de conteúdos para jogos e experiências interativas;</li>
-            <li>Marketing Digital e Comunicação Visual;</li>
-            <li>Consultoria e freelancer em design multimédia.</li>
-        </ul>
-    </section>
+    </div>
 
 </div>
 {% endblock %}
