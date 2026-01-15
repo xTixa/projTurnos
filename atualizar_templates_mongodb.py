@@ -10,8 +10,10 @@ Este script:
 import os
 import re
 
-# Caminhos dos templates
-TEMPLATES_DIR = r"e:\IPV\E.I\3Ano1Sem\BD2\projetoBD2\projTurnos\core\templates"
+# Caminhos dos templates (relativos)
+# Obtém o diretório atual do script
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+TEMPLATES_DIR = os.path.join(SCRIPT_DIR, "core", "templates")
 
 # Mapeamento de ficheiros para tipo de PDF
 HORARIOS_FILES = [
@@ -37,7 +39,7 @@ def atualizar_template(filepath, tipo_pdf):
     caminho_completo = os.path.join(TEMPLATES_DIR, filepath)
     
     if not os.path.exists(caminho_completo):
-        print(f"❌ Ficheiro não encontrado: {filepath}")
+        print(f"Ficheiro não encontrado: {filepath}")
         return False
     
     # Lê o conteúdo
@@ -46,7 +48,7 @@ def atualizar_template(filepath, tipo_pdf):
     
     # Verifica se já tem o load pdf_tags
     if '{% load pdf_tags %}' in conteudo:
-        print(f"⚠️ Já atualizado: {filepath}")
+        print(f"Já atualizado: {filepath}")
         return False
     
     # Adiciona {% load pdf_tags %} após {% load static %}
@@ -66,7 +68,7 @@ def atualizar_template(filepath, tipo_pdf):
     with open(caminho_completo, 'w', encoding='utf-8') as f:
         f.write(conteudo_novo)
     
-    print(f"✅ Atualizado: {filepath}")
+    print(f"Atualizado: {filepath}")
     return True
 
 
@@ -76,16 +78,16 @@ def main():
     print("ATUALIZAÇÃO DE TEMPLATES PARA USAR MONGODB GridFS")
     print("=" * 60)
     
-    print("\n📄 Atualizando templates de HORÁRIOS...")
+    print("\nAtualizando templates de HORÁRIOS...")
     for ficheiro in HORARIOS_FILES:
         atualizar_template(ficheiro, 'horario')
     
-    print("\n📄 Atualizando templates de AVALIAÇÕES...")
+    print("\nAtualizando templates de AVALIAÇÕES...")
     for ficheiro in AVALIACOES_FILES:
         atualizar_template(ficheiro, 'avaliacao')
     
     print("\n" + "=" * 60)
-    print("✨ ATUALIZAÇÃO CONCLUÍDA!")
+    print("ATUALIZAÇÃO CONCLUÍDA!")
     print("=" * 60)
     print("\nOs templates agora usam {% pdf_url %} que:")
     print("  • Serve PDFs do MongoDB se começarem com 'mongodb_gridfs:'")

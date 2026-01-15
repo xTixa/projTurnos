@@ -13,24 +13,14 @@ from ..mongodb import db, client
 from datetime import datetime
 import io
 
-
-# ==========================================
-# INICIALIZAÇÃO DO GridFS
-# ==========================================
-
 # Cria uma instância do GridFS usando a BD "projTurnos"
 fs = GridFS(db)
 
-# GridFS alternativo para PDFs de horários (opcional, para segregação)
+# GridFS alternativo para PDFs de horários
 fs_horarios = GridFS(db, collection="horarios_pdf")
 
-# GridFS alternativo para PDFs de avaliações (opcional, para segregação)
+# GridFS alternativo para PDFs de avaliações
 fs_avaliacoes = GridFS(db, collection="avaliacoes_pdf")
-
-
-# ==========================================
-# UPLOAD DE PDFs
-# ==========================================
 
 def upload_pdf_horario(ficheiro_file, nome, id_curso, id_anocurricular):
     """
@@ -134,11 +124,6 @@ def upload_pdf_avaliacao(ficheiro_file, nome, id_curso, id_anocurricular):
         print(f"✗ Erro ao fazer upload do PDF de avaliação: {str(e)}")
         raise Exception(f"Erro ao armazenar PDF no MongoDB: {str(e)}")
 
-
-# ==========================================
-# DOWNLOAD DE PDFs
-# ==========================================
-
 def download_pdf(file_id, tipo_pdf="horario"):
     """
     Descarrega um PDF do MongoDB usando GridFS
@@ -170,11 +155,6 @@ def download_pdf(file_id, tipo_pdf="horario"):
     except Exception as e:
         print(f"✗ Erro ao descarregar PDF: {str(e)}")
         raise Exception(f"Erro ao recuperar PDF do MongoDB: {str(e)}")
-
-
-# ==========================================
-# LISTAR PDFs
-# ==========================================
 
 def listar_pdfs_horarios(id_curso=None, id_anocurricular=None, limite=10):
     """
@@ -260,11 +240,6 @@ def listar_pdfs_avaliacoes(id_curso=None, id_anocurricular=None, limite=10):
         print(f"✗ Erro ao listar PDFs de avaliações: {str(e)}")
         return []
 
-
-# ==========================================
-# DELETAR PDFs
-# ==========================================
-
 def deletar_pdf(file_id, tipo_pdf="horario"):
     """
     Deleta um PDF do MongoDB (remove ficheiro e metadados)
@@ -290,11 +265,6 @@ def deletar_pdf(file_id, tipo_pdf="horario"):
     except Exception as e:
         print(f"✗ Erro ao deletar PDF: {str(e)}")
         return False
-
-
-# ==========================================
-# ATUALIZAR METADADOS DE PDF
-# ==========================================
 
 def atualizar_metadados_pdf(file_id, nome_novo=None, tipo_pdf="horario"):
     """
@@ -337,11 +307,6 @@ def atualizar_metadados_pdf(file_id, nome_novo=None, tipo_pdf="horario"):
     except Exception as e:
         print(f"✗ Erro ao atualizar metadados: {str(e)}")
         return False
-
-
-# ==========================================
-# ESTATÍSTICAS DE ARMAZENAMENTO
-# ==========================================
 
 def obter_stats_armazenamento():
     """
