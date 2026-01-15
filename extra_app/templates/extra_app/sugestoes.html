@@ -11,9 +11,8 @@
     <a href="#sec-populares">Mais votadas</a>
     <a href="{% url 'extra_app:sugestoes_todas' %}">Todas</a>
    </div>
-    <p>Olá, {{ request.session.user_nome|default:request.user.username }}</p>
     <div class="div_imagem">
-    <img src="{% static 'img/sugestao123.png' %}" alt="Sugestão" class="sugestao-image">
+    <img src="{% static 'img/unnamed.jpg' %}" alt="Sugestão" class="sugestao-image">
     </div>
         <div class="sugestoes-scroll">
         {% for s in sugestoes %}

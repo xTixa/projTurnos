@@ -49,17 +49,14 @@
   font-weight: 600;
 }
 
-.sugestao-image {
-  width: 100px;
-  max-width: 600px;
-  height: auto;
-  display: block;
-  margin: 20px auto;
-}
-
 .div_imagem {
   text-align: center;
-  margin-bottom: 20px;
-  width: 10rem;
+  margin-bottom: 0px;
 }
+
+.sugestao-image {
+  width: 100%;
+  height: 700px;
+}
+
 
