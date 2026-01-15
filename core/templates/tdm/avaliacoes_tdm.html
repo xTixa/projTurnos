@@ -4,7 +4,7 @@
 {% block title %}Avaliações — TDM{% endblock %}
 
 {% block extra_css %}
-    <link rel="stylesheet" href="{% static 'css/tdm/avaliacoes_tdm.css' %}?v=1.1">
+    <link rel="stylesheet" href="{% static 'css/tdm/avaliacoes_tdm.css' %}?v=1.2">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 {% endblock %}
 
@@ -18,76 +18,34 @@
 
   <section class="avaliacoes-lista">
     
-    <!-- 1.º Ano -->
+    {% for item in avaliacoes_por_ano %}
     <div class="avaliacao-card">
       <div class="avaliacao-info">
         <div class="icon-container">
           <i class="fa-solid fa-file-pdf"></i>
         </div>
         <div>
-          <h3>Avaliações — 1.º Ano</h3>
-          <p>Consulta o mapa de avaliações do 1.º ano</p>
+          <h3>Avaliações — {{ item.ano.ano_curricular }}</h3>
+          <p>Consulta o mapa de avaliações do {{ item.ano.ano_curricular }}</p>
         </div>
       </div>
-      <a href="#" class="btn-download" target="_blank">
-        <i class="fa-solid fa-download"></i> <span class="btn-text">Ver Calendário</span>
-      </a>
-    </div>
-
-    <!-- 2.º Ano -->
-    <div class="avaliacao-card">
-      <div class="avaliacao-info">
-        <div class="icon-container">
-          <i class="fa-solid fa-file-pdf"></i>
-        </div>
-        <div>
-          <h3>Avaliações — 2.º Ano</h3>
-          <p>Consulta o mapa de avaliações do 2.º ano</p>
-        </div>
+      
+      {% if item.pdf %}
+      <div class="avaliacao-actions">
+        <a href="{{ item.pdf.ficheiro.url }}" class="btn-download" target="_blank">
+            <i class="fa-solid fa-eye"></i> <span class="btn-text">Ver</span>
+        </a>
+        <a href="{{ item.pdf.ficheiro.url }}" class="btn-download" download>
+            <i class="fa-solid fa-download"></i> <span class="btn-text">Descarregar</span>
+        </a>
       </div>
-      <a href="#" class="btn-download" target="_blank">
-        <i class="fa-solid fa-download"></i> <span class="btn-text">Ver Calendário</span>
-      </a>
+      {% else %}
+      <span class="btn-download" style="opacity: 0.6; cursor: default; background: #f3f4f6;">
+         <i class="fa-solid fa-circle-exclamation"></i> <span class="btn-text">Indisponível</span>
+      </span>
+      {% endif %}
     </div>
-
-    <!-- 3.º Ano -->
-    <div class="avaliacao-card">
-      <div class="avaliacao-info">
-        <div class="icon-container">
-          <i class="fa-solid fa-file-pdf"></i>
-        </div>
-        <div>
-          <h3>Avaliações — 3.º Ano</h3>
-          <p>Consulta o mapa de avaliações do 3.º ano</p>
-        </div>
-      </div>
-      <a href="#" class="btn-download" target="_blank">
-        <i class="fa-solid fa-download"></i> <span class="btn-text">Ver Calendário</span>
-      </a>
-    </div>
-
-    <section class="info-block">
-        <ul class="file-list">
-            {% for item in avaliacoes_por_ano %}
-            <li>
-                {% if item.pdf %}
-                <a href="{{ item.pdf.ficheiro.url }}" target="_blank">
-                    <i class="fa-solid fa-file-pdf"></i>
-                    Avaliações — {{ item.ano.ano_curricular }}
-                </a>
-                <a href="{{ item.pdf.ficheiro.url }}" class="download-link" download>
-                    <i class="fa-solid fa-download"></i> Download
-                </a>
-                {% else %}
-                <span class="muted">
-                    <i class="fa-solid fa-circle-exclamation"></i>
-                    Sem ficheiro para {{ item.ano.ano_curricular }}
-                </span>
-                {% endif %}
-            </li>
-            {% endfor %}
-        </ul>
-    </section>
+    {% endfor %}
 
     <!-- FOOTER -->
     <footer class="avaliacoes-footer">

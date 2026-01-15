@@ -1,40 +1,143 @@
-.page-container {
-    max-width: 900px;
-    margin: auto;
-    padding: 25px;
+:root {
+  --brand-blue: #2563eb;
+  --brand-light: #eff6ff;
+  --brand-dark: #1e40af;
+  --text-primary: #0f172a;
+  --text-secondary: #64748b;
+  --surface: #ffffff;
+  --border: #e2e8f0;
 }
 
-.page-title {
-    font-size: 32px;
-    margin-bottom: 10px;
+.moodle-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 1rem 2rem;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  color: var(--text-primary);
+  min-height: 80vh; /* Centering helper */
+  display: flex;
+  flex-direction: column;
 }
 
-.intro-text {
-    font-size: 18px;
-    color: #444;
-    margin-bottom: 25px;
+/* HEADER */
+.simple-header {
+  text-align: center;
+  margin-top: 1rem;
+  margin-bottom: 3rem;
 }
 
-.info-block h2 {
-    color: #004488;
+.simple-header h1 {
+  font-size: 3rem;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  margin-bottom: 0.5rem;
+  color: var(--text-primary);
 }
 
-.moodle-btn {
-    display: inline-block;
-    margin-top: 15px;
-    padding: 12px 20px;
-    font-size: 18px;
-    background-color: #0055aa;
-    color: white;
-    border-radius: 6px;
+.simple-header p {
+  font-size: 1.15rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+/* MOODLE CARD */
+.moodle-card {
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 3rem;
+  text-align: center;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+.moodle-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  border-color: var(--brand-blue);
+}
+
+/* Icon */
+.moodle-icon-wrapper {
+  width: 80px;
+  height: 80px;
+  background: var(--brand-light);
+  color: var(--brand-blue);
+  border-radius: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1.5rem;
+  font-size: 2.5rem;
+}
+
+.moodle-content h2 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  color: var(--text-primary);
+}
+
+.moodle-content p {
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin-bottom: 2rem;
+  max-width: 500px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Button */
+.btn-moodle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: var(--brand-blue);
+  color: white;
+  padding: 1rem 2.5rem;
+  border-radius: 99px;
+  font-weight: 600;
+  font-size: 1.1rem;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.3);
+}
+
+.btn-moodle:hover {
+  background: var(--brand-dark);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.4);
+}
+
+/* FOOTER */
+.moodle-footer {
+    display: flex;
+    justify-content: center;
+    border-top: 1px solid #e2e8f0;
+    margin-top: 4rem;
+    padding-top: 2rem;
+    text-align: center;
+}
+
+.footer-info p {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.footer-info a {
+    color: var(--brand-blue);
     text-decoration: none;
-    transition: 0.2s;
+    font-weight: 600;
 }
 
-.moodle-btn i {
-    margin-right: 8px;
+.footer-info a:hover {
+    text-decoration: underline;
 }
 
-.moodle-btn:hover {
-    background-color: #003f7a;
+/* Responsive */
+@media (max-width: 600px) {
+  .moodle-card { padding: 2rem; }
+  .simple-header h1 { font-size: 2.25rem; }
 }
