@@ -13,7 +13,7 @@
     <h1>Horários - EI</h1>
     <p>Acede aos calendários letivos e distribuições de turmas atualizados.</p>
 
-    {% if request.session.user_id %}
+    {% if request.session.user_id and pode_inscrever %}
       <div class="inscricao-wrapper">
         <a href="{% url 'home:inscricao_turno' %}" class="btn-inscricao">
           <span>Inscrever nos Turnos</span>
