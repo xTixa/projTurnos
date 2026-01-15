@@ -28,12 +28,11 @@
 
     {% if item.pdf %}
       <div class="avaliacao-actions">
-        <a href="{{ item.pdf.ficheiro.url }}" class="btn btn-primary" target="_blank">
-          <i class="fa-solid fa-eye"></i> Ver
+        <a href="{{ item.pdf.ficheiro.url }}" class="btn-download" target="_blank">
+            <i class="fa-solid fa-eye"></i> <span class="btn-text">Ver</span>
         </a>
         <a href="{{ item.pdf.ficheiro.url }}" class="btn-download" download>
-          <i class="fa-solid fa-download"></i>
-          <span class="btn-text">Descarregar PDF</span>
+            <i class="fa-solid fa-download"></i> <span class="btn-text">Descarregar</span>
         </a>
       </div>
     {% else %}

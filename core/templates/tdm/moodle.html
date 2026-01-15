@@ -4,28 +4,39 @@
 {% block title %}Moodle — TDM{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/tdm/moodle.css' %}">
+<link rel="stylesheet" href="{% static 'css/tdm/moodle.css' %}?v=remodel1.1">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 {% endblock %}
 
 {% block content %}
-<div class="page-container">
+<div class="moodle-container">
 
-    <h1 class="page-title">Moodle — TDM</h1>
+    <header class="simple-header">
+        <h1>Moodle</h1>
+        <p>A plataforma de apoio pedagógico para a tua aprendizagem.</p>
+    </header>
 
-    <p class="intro-text">
-        A plataforma Moodle é utilizada no curso de Tecnologias e Design Multimédia para apoio pedagógico,
-        partilha de conteúdos, submissão de trabalhos e comunicação entre docentes e estudantes.
-    </p>
+    <div class="moodle-card">
+        <div class="moodle-icon-wrapper">
+            <i class="fa-solid fa-graduation-cap"></i>
+        </div>
+        <div class="moodle-content">
+            <h2>Aceder ao Campus Virtual</h2>
+            <p>
+                A plataforma Moodle centraliza os conteúdos das UCs, a entrega de trabalhos e a comunicação 
+                com os docentes do curso de Tecnologias e Design Multimédia.
+            </p>
+            <a href="https://moodle.estgv.ipv.pt" target="_blank" class="btn-moodle">
+                Entrar no Moodle <i class="fa-solid fa-arrow-up-right-from-square"></i>
+            </a>
+        </div>
+    </div>
 
-    <hr>
-
-    <section class="info-block">
-        <h2>Aceder ao Moodle da ESTGV</h2>
-
-        <a class="moodle-btn" href="https://moodle.estgv.ipv.pt" target="_blank">
-            <i class="fa-solid fa-graduation-cap"></i> Aceder ao Moodle
-        </a>
-    </section>
+    <footer class="moodle-footer">
+        <div class="footer-info">
+            <p>Problemas no acesso? Contacta os <a href="{% url 'home:contactos_tdm' %}">Serviços Académicos</a> ou o Centro de Informática.</p>
+        </div>
+    </footer>
 
 </div>
 {% endblock %}

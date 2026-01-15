@@ -1,62 +1,59 @@
 {% extends "home/base.html" %}
 {% load static %}
-
-{% block title %}Contactos — TDM{% endblock %}
+{% block title %}Contactos — Tecnologia e Design Multimédia{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/tdm/contactos_tdm.css' %}">
+<link rel="stylesheet" href="{% static 'css/tdm/contactos_tdm.css' %}?v=remodel">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 {% endblock %}
 
 {% block content %}
-<div class="page-container">
 
-    <h1 class="page-title">Contactos</h1>
+<div class="contactos-container">
 
-    <p class="intro-text">
-        Informações de contacto relativas à Licenciatura em Tecnologias e Design Multimédia.
-    </p>
+<section class="contact-header">
+  <div class="contact-info">
+    <h1>Contactos</h1>
 
-    <hr>
+    <p class="curso-info"><strong>Tecnologia e Design Multimédia</strong> — Licenciatura</p>
 
-    <section class="info-block">
-        <h2>Coordenador do Curso</h2>
+    <p class="descricao">Fala connosco! Consulta abaixo os contactos da coordenação e do corpo docente do curso.</p>
 
-        <p><strong>Prof. Doutor António Marcos</strong></p>
-        <p>Email: <a href="mailto:amarcos@estgv.ipv.pt">amarcos@estgv.ipv.pt</a></p>
-    </section>
+    <a href="https://maps.google.com/?q=Instituto+Politécnico+de+Viseu"
+       target="_blank"
+       class="map-link">
+      <i class="fa-solid fa-location-dot"></i>
+      Ver no Google Maps
+    </a>
+  </div>
 
-    <hr>
+  <iframe
+    class="contact-map"
+    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3032.5!2d-7.9201646!3d40.6439583!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0xd23370121313ff7%3A0xfb8b9b36fe071169!2sESTGV+-+Escola+Superior+de+Tecnologia+e+Gest%C3%A3o+de+Viseu!5e0!3m2!1spt-PT!2spt!4v1705325854000"
+    allowfullscreen=""
+    loading="lazy">
+  </iframe>
+</section>
 
-    <section class="info-block">
-        <h2>Secretaria da ESTGV</h2>
+<h2 class="subtitulo">Corpo Docente</h2>
 
-        <p><strong>Horário:</strong> 09h00 — 12h30 / 14h00 — 17h30</p>
-        <p>Email: <a href="mailto:secretaria@estgv.ipv.pt">secretaria@estgv.ipv.pt</a></p>
-        <p>Telefone: 232 480 500</p>
-    </section>
+<section class="contacts-grid">
+  {% for d in docentes %}
+  <div class="contact-card">
+    <h3><i class="fa-solid fa-user-tie"></i> {{ d.nome }}</h3>
 
-    <hr>
-
-    <section class="info-block">
-        <h2>Corpo Docente</h2>
-
-        {% if docentes %}
-        <div class="docentes-grid">
-            {% for d in docentes %}
-            <div class="docente-card">
-                <h3>{{ d.nome }}</h3>
-                {% if d.email %}
-                <p>Email: <a href="mailto:{{ d.email }}">{{ d.email }}</a></p>
-                {% else %}
-                <p><em>Sem email registado</em></p>
-                {% endif %}
-            </div>
-            {% endfor %}
-        </div>
-        {% else %}
-        <p>Sem docentes registados.</p>
-        {% endif %}
-    </section>
+    {% if d.email %}
+      <p><i class="fa-solid fa-envelope"></i> 
+         <a href="mailto:{{ d.email }}">{{ d.email }}</a>
+      </p>
+    {% else %}
+      <p><em>Sem email registado</em></p>
+    {% endif %}
+  </div>
+  {% empty %}
+  <p>Não existem docentes registados.</p>
+  {% endfor %}
+</section>
 
 </div>
 {% endblock %}
