@@ -1,0 +1,259 @@
+body {
+  background-color: #f3f5fb;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: #111827;
+  line-height: 1.6;
+}
+
+/* Tabs consistentes com a página principal */
+.section-tabs {
+  margin: 24px 0 16px;
+  border-bottom: 2px solid #e2e8f0;
+  display: flex;
+  gap: 4px;
+}
+
+.section-tabs a {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  text-decoration: none;
+  color: #64748b;
+  border-radius: 10px 10px 0 0;
+  border: 2px solid transparent;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.section-tabs a:hover {
+  background-color: #f1f5f9;
+  color: #1e40af;
+  border-color: #c7d2fe;
+}
+
+.section-tabs a.active {
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+  color: #1d4ed8;
+  border-color: #3b82f6;
+  box-shadow: 0 -2px 10px rgba(59, 130, 246, 0.12);
+}
+
+/* Container de sugestões */
+.sugestoes-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+  padding: 1.5rem 0;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* Card de sugestão */
+.sugestao-card {
+  background-color: #ffffff;
+  border-radius: 16px;
+  padding: 1.3rem 1.4rem;
+  border: 1px solid #e5e7eb;
+  box-shadow:
+    0 8px 20px rgba(15, 23, 42, 0.06),
+    0 1px 0 rgba(255, 255, 255, 0.8);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.sugestao-card:hover {
+  transform: translateY(-4px);
+  box-shadow:
+    0 12px 30px rgba(15, 23, 42, 0.14),
+    0 4px 10px rgba(15, 23, 42, 0.06);
+}
+
+.sugestao-texto {
+  margin-bottom: 0.8rem;
+  font-size: 0.98rem;
+  line-height: 1.5;
+  color: #111827;
+}
+
+.sugestao-autor {
+  font-size: 0.82rem;
+  color: #6b7280;
+  margin-bottom: 0.9rem;
+}
+
+/* Botões like/dislike */
+.sugestao-card form {
+  display: flex;
+  gap: 0.6rem;
+}
+
+.like-btn,
+.dislike-btn {
+  flex: 1;
+  border-radius: 999px;
+  border: 1px solid #d1d5db;
+  padding: 0.4rem 0.6rem;
+  font-size: 0.85rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  background-color: #f9fafb;
+  color: #374151;
+  transition: background-color 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
+}
+
+.like-btn i,
+.dislike-btn i {
+  font-size: 0.9rem;
+}
+
+.like-btn:hover,
+.dislike-btn:hover {
+  background-color: #f3f4f6;
+  border-color: #9ca3af;
+  transform: translateY(-1px);
+}
+
+/* Estados ativos */
+.like-btn.active-like {
+  background-color: #16a34a;
+  color: #ffffff;
+  border-color: #15803d;
+}
+
+.dislike-btn.active-dislike {
+  background-color: #ef4444;
+  color: #ffffff;
+  border-color: #b91c1c;
+}
+
+/* Botão eliminar (apenas staff) */
+.delete-btn {
+  background-color: #dc2626;
+  color: white;
+  border: none;
+  padding: 0.4rem 0.9rem;
+  border-radius: 999px;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.8rem;
+  margin-top: 0.8rem;
+  margin-bottom: 0.8rem;
+  align-self: flex-start;
+  transition: background-color 0.15s ease, transform 0.1s ease, box-shadow 0.15s ease;
+}
+
+.delete-btn i {
+  font-size: 0.85rem;
+}
+
+.delete-btn:hover {
+  background-color: #b91c1c;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(185, 28, 28, 0.35);
+}
+
+/* Paginação */
+.paginacao {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 2.5rem;
+  padding: 1rem 0 2rem;
+}
+
+.paginacao-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 40px;
+  height: 40px;
+  padding: 0 0.75rem;
+  border-radius: 999px;
+  text-decoration: none;
+  color: #374151;
+  font-size: 0.9rem;
+  border: 1px solid #d1d5db;
+  background-color: #ffffff;
+  transition: all 0.15s ease;
+}
+
+.paginacao-link:hover:not(.paginacao-active) {
+  background-color: #f3f4f6;
+  border-color: #9ca3af;
+  color: #111827;
+  transform: translateY(-1px);
+}
+
+.paginacao-active {
+  background-color: #2563eb;
+  color: #ffffff;
+  border-color: #2563eb;
+  font-weight: 600;
+}
+
+.paginacao-link:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  color: #9ca3af;
+}
+
+.paginacao-texto {
+  margin: 0 1rem;
+  color: #6b7280;
+  font-size: 0.85rem;
+}
+
+/* Info texto acima da lista (se usares) */
+section p:first-of-type {
+  margin: 1rem 0 0.5rem 0;
+  font-size: 1rem;
+  color: #1f2937;
+  font-weight: 500;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .sugestoes-container {
+    grid-template-columns: repeat(auto-fit, minmax(100%, 1fr));
+    gap: 1rem;
+    padding: 0.5rem;
+  }
+
+  .paginacao {
+    flex-wrap: wrap;
+    gap: 0.3rem;
+  }
+
+  .paginacao-link {
+    min-width: 36px;
+    height: 36px;
+    padding: 0 0.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .like-btn,
+  .dislike-btn {
+    padding: 0.35rem 0.45rem;
+    font-size: 0.8rem;
+  }
+}
+
+.sugestoes-footer {
+  text-align: center;
+  margin: 2rem 0 1rem;
+  color: #9ca3af;
+  font-size: 0.85rem;
+}
