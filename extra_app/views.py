@@ -114,5 +114,26 @@ def feedback_sugestao(request, sugestao_id):
 
 
 def sugestoes_todas(request):
-    return render(request, "extra_app/sugestoes_todas.html")
+    colecao = db["sugestao"]
+    
+    if request.user.is_authenticated:
+        user_id = str(request.user.id)
+    else:
+        user_id = request.session.get("user_id")
+
+    if not user_id:
+        return redirect("home:login")
+    
+    sugestoes = list(colecao.find({})) 
+    
+    for s in sugestoes:
+        s["id"] = str(s["_id"])
+        s["user_liked"] = user_id in s.get("Like", [])
+        s["user_disliked"] = user_id in s.get("Dislike", [])
+    
+    context = {
+        "area": "extra",
+        "sugestoes": sugestoes,
+    }
+    return render(request, "extra_app/sugestoes_todas.html", context)
 
