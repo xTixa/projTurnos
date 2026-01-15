@@ -4,46 +4,59 @@
 {% block title %}BrightStart — DWDM{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/dwdm/brightstart.css' %}">
+<link rel="stylesheet" href="{% static 'css/dwdm/brightstart.css' %}?v=remodel">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 {% endblock %}
 
 {% block content %}
-<div class="page-container">
+<div class="brightstart-container">
 
-    <h1 class="page-title">Programa BrightStart</h1>
-
-    <p class="intro-text">
-        O programa <strong>BrightStart</strong> é uma iniciativa inovadora que permite aos estudantes
-        adquirirem experiência real em contexto empresarial, combinando aprendizagem académica
-        com prática profissional supervisionada.
-    </p>
-
-    <section class="info-block">
-        <h2>📌 O que é o BrightStart?</h2>
+    <!-- HEADER -->
+    <header class="simple-header">
+        <h1>Programa BrightStart</h1>
         <p>
-            O BrightStart é um programa conjunto que alia instituições de ensino e empresas,
-            permitindo aos estudantes integrarem equipas de desenvolvimento real enquanto concluem o curso.
+            Uma iniciativa inovadora que permite aos estudantes adquirirem experiência real 
+            em contexto empresarial, combinando aprendizagem académica com prática profissional supervisionada.
         </p>
-    </section>
+    </header>
 
-    <section class="info-block">
-        <h2>🎯 Objetivos do Programa</h2>
-        <ul>
-            <li>Integrar estudantes em equipas reais de projetos;</li>
-            <li>Desenvolver competências técnicas e profissionais;</li>
-            <li>Aproximar o ensino às necessidades do mercado;</li>
-            <li>Promover a empregabilidade;</li>
-            <li>Preparar os estudantes para desafios reais de TI.</li>
-        </ul>
-    </section>
+    <!-- CONTENT -->
+    <div class="brightstart-content">
+        
+        <!-- O QUE É -->
+        <section class="info-card">
+            <h2><i class="fa-solid fa-lightbulb"></i> O que é o BrightStart?</h2>
+            <p>
+                O BrightStart é um programa conjunto que alia instituições de ensino e empresas de referência,
+                permitindo aos estudantes integrarem equipas de desenvolvimento de software em projetos reais 
+                enquanto concluem o seu percurso académico. É a ponte perfeita entre a teoria da sala de aula 
+                e a prática do mercado de trabalho.
+            </p>
+        </section>
 
-    <section class="info-block">
-        <h2>🏢 Empresas Parceiras</h2>
-        <p>
-            O programa conta com a colaboração de várias empresas tecnológicas reconhecidas, que acolhem
-            alunos de DWDM em ambiente profissional.
-        </p>
-    </section>
+        <!-- OBJETIVOS -->
+        <section class="info-card">
+            <h2><i class="fa-solid fa-bullseye"></i> Objetivos do Programa</h2>
+            <ul class="styled-list">
+                <li>Integrar estudantes em equipas reais de desenvolvimento de projetos;</li>
+                <li>Desenvolver competências técnicas (hard skills) e profissionais (soft skills);</li>
+                <li>Aproximar o ensino politécnico às necessidades reais do mercado de TI;</li>
+                <li>Promover a empregabilidade imediata após a conclusão do curso;</li>
+                <li>Preparar os estudantes para os desafios de engenharia e inovação tecnológica.</li>
+            </ul>
+        </section>
+
+        <!-- PARCEIROS -->
+        <section class="info-card">
+            <h2><i class="fa-regular fa-building"></i> Empresas Parceiras</h2>
+            <p>
+                O programa conta com a colaboração de várias empresas tecnológicas de renome nacional e internacional, 
+                que acolhem alunos do curso de DWDM em ambiente profissional, proporcionando mentoria e 
+                acompanhamento contínuo.
+            </p>
+        </section>
+
+    </div>
 
 </div>
 {% endblock %}

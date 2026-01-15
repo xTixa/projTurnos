@@ -4,47 +4,77 @@
 {% block title %}Ingresso — DWDM{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/dwdm/ingresso.css' %}">
+<link rel="stylesheet" href="{% static 'css/dwdm/ingresso.css' %}?v=remodel">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 {% endblock %}
 
 {% block content %}
-<div class="page-container">
+<div class="ingress-container">
 
-    <h1 class="page-title">Ingresso</h1>
+    <!-- HERO SECTION -->
+    <header class="ingress-hero">
+        <div class="ingress-hero-content">
+            <div class="badge-pill">Candidaturas</div>
+            <h1>Ingresso</h1>
+            <p>
+                O acesso ao curso de <strong>Desenvolvimento Web e Dispositivos Móveis</strong>
+                pode ser realizado através de diferentes vias de ingresso definidas pelo IPV.
+            </p>
+        </div>
+    </header>
 
-    <p class="intro-text">
-        O acesso ao curso de <strong>Desenvolvimento Web e Dispositivos Móveis</strong>
-        pode ser realizado através de diferentes vias de ingresso definidas pelo IPV.
-    </p>
+    <!-- CONTENT GRID -->
+    <main class="ingress-grid">
 
-    <section class="info-block">
-        <h2>Vias de Acesso</h2>
-        <ul>
-            <li>Concurso Nacional de Acesso ao Ensino Superior</li>
-            <li>Concursos Especiais</li>
-            <li>Maiores de 23</li>
-            <li>Reingresso, Mudança de Curso e Transferência</li>
-        </ul>
-    </section>
+        <!-- 1. VIAS DE ACESSO -->
+        <section class="ingress-card highlight-card">
+            <div class="card-header">
+                <div class="icon-box blue"><i class="fa-solid fa-key"></i></div>
+                <h2>Vias de Acesso</h2>
+            </div>
+            <div class="card-body">
+                <ul class="check-list">
+                    <li>Concurso Nacional de Acesso ao Ensino Superior</li>
+                    <li>Concursos Especiais</li>
+                    <li>Maiores de 23</li>
+                    <li>Reingresso, Mudança de Curso e Transferência</li>
+                </ul>
+            </div>
+        </section>
 
-    <section class="info-block">
-        <h2>Documentação Necessária</h2>
-        <p>Consoante a via de ingresso, podem ser exigidos os seguintes documentos:</p>
-        <ul>
-            <li>Certificado de habilitações</li>
-            <li>Documento de identificação</li>
-            <li>Currículo académico e profissional</li>
-            <li>Provas específicas ou entrevistas, quando aplicável</li>
-        </ul>
-    </section>
+        <!-- 2. DOCUMENTAÇÃO NECESSÁRIA -->
+        <section class="ingress-card">
+            <div class="card-header">
+                <div class="icon-box purple"><i class="fa-solid fa-folder-open"></i></div>
+                <h2>Documentação Necessária</h2>
+            </div>
+            <div class="card-body">
+                <p>Consoante a via de ingresso, podem ser exigidos os seguintes documentos:</p>
+                <ul class="doc-list">
+                    <li>Certificado de habilitações</li>
+                    <li>Documento de identificação</li>
+                    <li>Currículo académico e profissional</li>
+                    <li>Provas específicas ou entrevistas, quando aplicável</li>
+                </ul>
+            </div>
+        </section>
 
-    <section class="info-block">
-        <h2>Mais Informações</h2>
-        <p>
-            Para procedimentos de candidatura, prazos e regulamentos,
-            consulta o site do IPV ou os serviços académicos.
-        </p>
-    </section>
+        <!-- 3. MAIS INFORMAÇÕES -->
+        <section class="ingress-card">
+            <div class="card-header">
+                <div class="icon-box orange"><i class="fa-solid fa-circle-info"></i></div>
+                <h2>Mais Informações</h2>
+            </div>
+            <div class="card-body">
+                <p>
+                    Para procedimentos de candidatura, prazos e regulamentos,
+                    consulta o site do IPV ou os serviços académicos.
+                </p>
+            </div>
+        </section>
+
+    </main>
 
 </div>
 {% endblock %}
+

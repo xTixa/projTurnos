@@ -4,55 +4,84 @@
 {% block title %}Contactos — DWDM{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/dwdm/contactos.css' %}">
+<link rel="stylesheet" href="{% static 'css/dwdm/contactos.css' %}?v=remodel">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 {% endblock %}
 
 {% block content %}
-<div class="page-container">
+<div class="contactos-container">
 
-    <h1 class="page-title">Contactos</h1>
+    <!-- HEADER SECTION: Intro + Map -->
+    <section class="contact-header">
+        <div class="contact-info">
+            <h1>Contactos</h1>
 
-    <p class="intro-text">
-        Para mais informações sobre o curso de <strong>Desenvolvimento Web e Dispositivos Móveis</strong>,
-        podes contactar os serviços académicos, a coordenação ou o departamento responsável.
-    </p>
+            <p class="curso-info">CTESP em Desenvolvimento Web e Dispositivos Móveis</p>
 
-    <section class="info-block">
-        <h2><i class="fa-solid fa-phone"></i> Coordenação do Curso</h2>
-        <p><strong>Coordenador:</strong> Prof. Doutor João Pedro Moreira</p>
-        <p><strong>Email:</strong> <a href="mailto:jmoreira@estgv.ipv.pt">jmoreira@estgv.ipv.pt</a></p>
+            <p class="descricao">
+                Em caso de dúvidas sobre o curso, candidaturas ou funcionamento, entra em contacto com os serviços académicos ou com a coordenação.
+            </p>
+
+            <a href="https://maps.google.com/?q=ESTGV+Viseu"
+               target="_blank"
+               class="map-link">
+                <i class="fa-solid fa-location-dot"></i>
+                Ver no Google Maps
+            </a>
+        </div>
+
+        <iframe
+            class="contact-map"
+            title="Mapa ESTGV"
+            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3032.5!2d-7.9201646!3d40.6439583!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0xd23370121313ff7%3A0xfb8b9b36fe071169!2sESTGV+-+Escola+Superior+de+Tecnologia+e+Gest%C3%A3o+de+Viseu!5e0!3m2!1spt-PT!2spt!4v1705325854000"
+            allowfullscreen=""
+            loading="lazy">
+        </iframe>
     </section>
 
-    <section class="info-block">
-        <h2><i class="fa-solid fa-building-columns"></i> Secretaria da ESTGV</h2>
-        <p><strong>Telefone:</strong> 232 419 100</p>
-        <p><strong>Email:</strong> <a href="mailto:secretaria@estgv.ipv.pt">secretaria@estgv.ipv.pt</a></p>
-        <p><strong>Horário:</strong> Dias úteis — 9h00 às 12h30 e 14h00 às 17h30</p>
+    <!-- CONTACTOS INSTITUCIONAIS -->
+    <h2 class="subtitulo">Contactos Institucionais</h2>
+    <section class="contacts-grid">
+        
+        <!-- Secretariado -->
+        <div class="contact-card">
+            <h3><i class="fa-solid fa-building-columns"></i> Secretaria da ESTGV</h3>
+            <p><i class="fa-solid fa-phone"></i> 232 419 100</p>
+            <p><i class="fa-solid fa-envelope"></i> <a href="mailto:secretaria@estgv.ipv.pt">secretaria@estgv.ipv.pt</a></p>
+            <p><i class="fa-solid fa-clock"></i> 9h00—12h30 / 14h00—17h30</p>
+        </div>
+
+        <!-- Coordenação -->
+        <div class="contact-card coordinator">
+            <h3><i class="fa-solid fa-user-gear"></i> Coordenação do Curso</h3>
+            <p><strong>Prof. Doutor João Pedro Moreira</strong></p>
+            <p><i class="fa-solid fa-envelope"></i> 
+                <a href="mailto:jmoreira@estgv.ipv.pt">jmoreira@estgv.ipv.pt</a>
+            </p>
+            <p><i class="fa-solid fa-location-dot"></i> ESTGV, Viseu</p>
+        </div>
+
     </section>
 
-    <section class="info-block">
-        <h2><i class="fa-solid fa-location-dot"></i> Localização</h2>
-        <p>Escola Superior de Tecnologia e Gestão de Viseu</p>
-        <p>Campus Politécnico • 3504-510 Viseu</p>
-    </section>
 
-    <section class="info-block">
-        <h2><i class="fa-solid fa-chalkboard-teacher"></i> Corpo Docente</h2>
+    <!-- CORPO DOCENTE -->
+    <h2 class="subtitulo">Corpo Docente</h2>
+    <section class="contacts-grid">
         {% if docentes %}
-        <div class="docentes-grid">
             {% for d in docentes %}
-            <div class="docente-card">
-                <h3>{{ d.nome }}</h3>
+            <div class="contact-card">
+                <h3><i class="fa-solid fa-user-tie"></i> {{ d.nome }}</h3>
                 {% if d.email %}
-                <p>Email: <a href="mailto:{{ d.email }}">{{ d.email }}</a></p>
+                <p><i class="fa-solid fa-envelope"></i> 
+                    <a href="mailto:{{ d.email }}">{{ d.email }}</a>
+                </p>
                 {% else %}
                 <p><em>Sem email registado</em></p>
                 {% endif %}
             </div>
             {% endfor %}
-        </div>
         {% else %}
-        <p>Sem docentes registados.</p>
+        <p>Não existem registos de docentes no momento.</p>
         {% endif %}
     </section>
 

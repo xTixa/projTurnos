@@ -4,71 +4,108 @@
 {% block title %}DWDM — Desenvolvimento Web e Dispositivos Móveis{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/dwdm/index.css' %}">
+<link rel="stylesheet" href="{% static 'css/dwdm/index.css' %}?v=remodel">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 {% endblock %}
 
 {% block content %}
-<div class="page-container">
+<div class="ei-layout">
 
-    <section class="hero">
-        <h1>Desenvolvimento Web e Dispositivos Móveis</h1>
-        <p>
-            O curso de DWDM aposta na formação tecnológica orientada para o mercado digital,
-            combinando competências de programação web, aplicações móveis, bases de dados,
-            computação na cloud e design de interfaces.
-        </p>
-    </section>
-
-    <section class="info-grid">
-
-        <div class="card">
-            <h2>Áreas de Formação</h2>
-            <ul>
-                <li>Programação Web (Frontend e Backend)</li>
-                <li>Desenvolvimento de Apps Móveis</li>
-                <li>Bases de Dados e APIs</li>
-                <li>Cloud & DevOps</li>
-                <li>UX/UI & Design Responsivo</li>
-            </ul>
-        </div>
-
-        <div class="card">
-            <h2>Perfil do Estudante</h2>
+    <!-- HERO SECTION -->
+    <section class="ei-hero">
+        <div class="ei-hero__text">
+            <h1>Desenvolvimento Web e Dispositivos Móveis</h1>
             <p>
-                Estudantes que pretendem desenvolver software moderno, aplicações móveis
-                e plataformas web, com forte ligação à indústria tecnológica.
+                O curso de DWDM aposta na formação tecnológica orientada para o mercado digital,
+                combinando competências de programação web, aplicações móveis, bases de dados,
+                computação na cloud e design de interfaces.
             </p>
+            <div class="ei-hero__actions">
+                <a href="{% url 'home:horarios_dwdm' %}" class="btn btn-primary">
+                  <i class="fa-regular fa-calendar"></i> Ver horários
+                </a>
+                <a href="{% url 'home:plano_dwdm' %}" class="btn btn-ghost">
+                  <i class="fa-regular fa-rectangle-list"></i> Plano curricular
+                </a>
+            </div>
         </div>
-
+        <div class="ei-hero__illustration">
+            <img src="{% static 'img/dwdm.png' %}" alt="DWDM" class="hero-photo" onerror="this.onerror=null; this.src='https://placehold.co/400x300?text=DWDM';">
+        </div>
     </section>
 
-    <section class="shortcuts">
-        <h2>Aceder rapidamente</h2>
+    <!-- FEATURES / INFO CARDS -->
+    <section class="ei-section">
+        <div class="ei-cards">
+            
+            <article class="ei-card">
+                <div class="ei-card__icon blue"><i class="fa-solid fa-code"></i></div>
+                <h3>Áreas de Formação</h3>
+                <ul>
+                    <li>Programação Web (Frontend e Backend)</li>
+                    <li>Desenvolvimento de Apps Móveis</li>
+                    <li>Bases de Dados e APIs</li>
+                    <li>Cloud & DevOps</li>
+                    <li>UX/UI & Design Responsivo</li>
+                </ul>
+            </article>
 
-        <div class="shortcut-grid">
+            <article class="ei-card">
+                <div class="ei-card__icon purple"><i class="fa-solid fa-user-graduate"></i></div>
+                <h3>Perfil do Estudante</h3>
+                <p>
+                    Estudantes que pretendem desenvolver software moderno, aplicações móveis
+                    e plataformas web, com forte ligação à indústria tecnológica.
+                </p>
+            </article>
 
-            <a href="{% url 'home:ingresso_dwdm' %}" class="shortcut-card">
-                <i class="fa-solid fa-graduation-cap"></i>
-                <h3>Ingresso</h3>
-                <p>Condições de acesso e documentação.</p>
+        </div>
+    </section>
+
+    <!-- SHORTCUTS SECTION -->
+    <section class="ei-section">
+        <h2 class="section-title">Aceder rapidamente</h2>
+
+        <div class="ei-shortcuts__grid">
+
+            <a href="{% url 'home:ingresso_dwdm' %}" class="innovation-card accent-blue">
+                <div class="card-background-icon"><i class="fa-solid fa-graduation-cap"></i></div>
+                <div class="card-content">
+                    <span class="card-label">Candidaturas</span>
+                    <h3>Ingresso</h3>
+                    <p>Condições de acesso e documentação.</p>
+                </div>
+                <div class="card-arrow"><i class="fa-solid fa-arrow-right-long"></i></div>
             </a>
 
-            <a href="{% url 'home:plano_dwdm' %}" class="shortcut-card">
-                <i class="fa-solid fa-rectangle-list"></i>
-                <h3>Plano Curricular</h3>
-                <p>Estrutura do curso e unidades curriculares.</p>
+            <a href="{% url 'home:saidas_dwdm' %}" class="innovation-card accent-green">
+                <div class="card-background-icon"><i class="fa-solid fa-briefcase"></i></div>
+                <div class="card-content">
+                    <span class="card-label">Carreiras</span>
+                    <h3>Saídas Profissionais</h3>
+                    <p>Carreiras e perfis de empregabilidade.</p>
+                </div>
+                <div class="card-arrow"><i class="fa-solid fa-arrow-right-long"></i></div>
             </a>
 
-            <a href="{% url 'home:saidas_dwdm' %}" class="shortcut-card">
-                <i class="fa-solid fa-briefcase"></i>
-                <h3>Saídas Profissionais</h3>
-                <p>Carreiras e perfis de empregabilidade.</p>
+            <a href="{% url 'home:plano_dwdm' %}" class="innovation-card accent-indigo">
+                <div class="card-background-icon"><i class="fa-solid fa-rectangle-list"></i></div>
+                <div class="card-content">
+                    <span class="card-label">Estudos</span>
+                    <h3>Plano Curricular</h3>
+                    <p>Estrutura do curso e unidades curriculares.</p>
+                </div>
+                <div class="card-arrow"><i class="fa-solid fa-arrow-right-long"></i></div>
             </a>
 
-            <a href="{% url 'home:contactos_dwdm' %}" class="shortcut-card">
-                <i class="fa-regular fa-address-card"></i>
-                <h3>Contactos</h3>
-                <p>Equipa do curso e secretaria.</p>
+            <a href="{% url 'home:contactos_dwdm' %}" class="innovation-card accent-orange">
+                <div class="card-background-icon"><i class="fa-regular fa-address-card"></i></div>
+                <div class="card-content">
+                    <span class="card-label">Equipa</span>
+                    <h3>Contactos</h3>
+                    <p>Equipa do curso e secretaria.</p>
+                </div>
+                <div class="card-arrow"><i class="fa-solid fa-arrow-right-long"></i></div>
             </a>
 
         </div>
@@ -76,3 +113,4 @@
 
 </div>
 {% endblock %}
+
