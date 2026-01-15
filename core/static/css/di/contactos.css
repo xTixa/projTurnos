@@ -91,40 +91,41 @@
 /* Map Iframe */
 .contact-map {
   width: 100%;
-  height: 350px; /* Taller to accommodate dept info */
+  height: 280px;
   border: none;
   border-radius: 12px;
   box-shadow: inset 0 0 0 1px rgba(0,0,0,0.1);
 }
 
-/* ===== GRID SECTIONS ===== */
+/* ===== DOCENTES GRID ===== */
 .subtitulo {
-  font-size: 1.75rem;
+  font-size: 1.5rem;
   font-weight: 700;
   color: var(--text-primary);
   margin-bottom: 1.5rem;
-  margin-top: 3rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid var(--brand-light);
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: 0.5rem;
 }
 
-.subtitulo::after {
-  content: "";
-  flex: 1;
-  height: 1px;
-  background: var(--border);
-  margin-top: 5px;
+.subtitulo::before {
+  content: '';
+  display: block;
+  width: 6px;
+  height: 24px;
+  background: var(--brand-blue);
+  border-radius: 4px;
 }
 
 .contacts-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: 1.5rem;
-  margin-bottom: 4rem;
 }
 
-/* DOCENTE CARD - Centered Profile Style (Matched to EI) */
+/* DOCENTE CARD - Centered Profile Style */
 .contact-card {
   background: white;
   border: 1px solid var(--border);
@@ -147,7 +148,7 @@
   transform: translateY(-3px);
 }
 
-/* Hide the old decorative left border if any */
+/* Hide the old decorative left border */
 .contact-card::before { display: none; }
 
 /* Name Section */
@@ -213,67 +214,47 @@
   background: #f8fafc;
 }
 
-/* Hide the standalone icon inside 'p' since we have a clean pill design */
+/* Hide the standalone icon since it's redundant or hard to align beautifully with the pill */
 .contact-card p i {
   display: none;
 }
 
-/* Highlight Card for Coordinator */
-.contact-card.coordinator {
-    border-color: var(--brand-blue);
-    background: var(--brand-light);
+/* Empty State */
+.contacts-grid p:only-child {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 3rem;
+  background: #f8fafc;
+  border-radius: 12px;
+  color: var(--text-secondary);
+  border: 1px dashed var(--border);
 }
 
-.contact-card.coordinator:hover {
-    background: white;
-}
-
-.contact-card.coordinator h3 {
-    color: var(--brand-dark);
-}
-
-.contact-card.coordinator h3 i {
-    background: white;
-    color: var(--brand-dark);
-}
-
-.contact-card.coordinator:hover h3 i {
-    background: var(--brand-dark);
-    color: white;
-}
-
-/* Mobile */
-@media (max-width: 800px) {
+/* Mobile Responsiveness */
+@media (max-width: 900px) {
   .contact-header {
     grid-template-columns: 1fr;
-    gap: 1.5rem;
+    gap: 2rem;
+    text-align: center;
   }
-}
+  
+  .contact-info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .descricao {
+    margin-left: auto;
+    margin-right: auto;
+  }
 
-    text-decoration: none;
-    font-weight: 600;
-}
+  .contact-map {
+    height: 300px;
+    width: 100%;
+  }
 
-.btn-site:hover {
-    background: #003f87;
-}
-
-/* Docentes grid */
-.docentes-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-    gap: 16px;
-    margin-top: 12px;
-}
-
-.docente-card {
-    border: 1px solid #d8e6ff;
-    border-radius: 8px;
-    padding: 12px 14px;
-    background: #fff;
-}
-
-.docente-card h3 {
-    font-size: 16px;
-    margin: 0 0 6px 0;
+  .contacts-grid {
+    grid-template-columns: 1fr;
+  }
 }

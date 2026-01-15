@@ -1,36 +1,140 @@
+/* =========================================
+   SAÍDAS PROFISSIONAIS MODERN LAYOUT - RSI (Based on EISI Destinatários)
+   ========================================= */
+
 .page-container {
-    padding: 25px;
-    max-width: 900px;
-    margin: auto;
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 2rem;
+    font-family: 'Inter', system-ui, sans-serif;
+    color: #1e293b;
+    min-height: 80vh;
+}
+
+/* --- HERO SECTION --- */
+.page-header {
+    text-align: center;
+    margin-top: 1rem;
+    margin-bottom: 3rem;
+    padding: 3rem 2rem;
+    background-color: #eff6ff; /* Blue Tint */
+    border-radius: 24px;
+    border: 1px solid #bfdbfe;
+    box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.1);
 }
 
 .page-title {
-    font-size: 34px;
-    font-weight: 700;
-    margin-bottom: 10px;
+    font-size: 3rem;
+    font-weight: 800;
+    line-height: 1.1;
+    margin-bottom: 1.5rem;
+    color: #0f172a; /* Dark Blue/Slate */
+    letter-spacing: -0.03em;
 }
 
 .intro-text {
-    font-size: 18px;
-    margin-bottom: 25px;
-    color: #444;
+    font-size: 1.25rem;
+    line-height: 1.7;
+    color: #4b5563;
+    max-width: 700px;
+    margin: 0 auto;
 }
 
-.info-block {
-    margin: 35px 0;
+/* --- GRID LAYOUT --- */
+.career-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 2rem;
+    margin-bottom: 4rem;
 }
 
-.info-block h2 {
-    font-size: 24px;
-    color: #0057b8;
-    margin-bottom: 10px;
+.detail-card {
+    background: #ffffff;
+    border-radius: 20px;
+    padding: 2.5rem;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
-.info-block ul {
-    padding-left: 20px;
+.detail-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05);
 }
 
-.info-block ul li {
-    margin-bottom: 6px;
+.detail-card h2 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 2rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.detail-card h2 i {
+    color: #2563eb; /* Blue */
+    background: #eff6ff;
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    font-size: 1.25rem;
+    box-shadow: 0 2px 4px rgba(59, 130, 246, 0.1);
+}
+
+/* LIST STYLING */
+.check-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.check-list li {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    padding: 1rem;
+    background: #f8fafc;
+    border-radius: 12px;
+    color: #334155;
+    font-size: 1rem;
     line-height: 1.5;
+    border: 1px solid transparent;
+    transition: all 0.2s ease;
+}
+
+.check-list li:hover {
+    background: #ffffff;
+    border-color: #bfdbfe;
+    box-shadow: 0 4px 6px -2px rgba(0,0,0,0.05);
+}
+
+.check-list li::before {
+    content: '\f00c'; /* Font Awesome Check */
+    font-family: 'Font Awesome 6 Free';
+    font-weight: 900;
+    color: #2563eb;
+    margin-top: 3px;
+    flex-shrink: 0;
+}
+
+/* MARKET GRID FOR COMPACT ITEMS */
+.market-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+@media (max-width: 600px) {
+    .market-grid {
+        grid-template-columns: 1fr;
+    }
+    .career-grid {
+        grid-template-columns: 1fr;
+    }
 }

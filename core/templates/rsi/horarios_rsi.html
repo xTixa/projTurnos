@@ -4,46 +4,58 @@
 {% block title %}Horários — Redes e Sistemas Informáticos{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/rsi/horarios.css' %}">
+<link rel="stylesheet" href="{% static 'css/rsi/horarios.css' %}?v=remodel">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 {% endblock %}
 
 {% block content %}
+<div class="horarios-container">
 
-<div class="page-container">
+    <!-- HEADER -->
+    <header class="simple-header">
+        <h1>Horários</h1>
+        <p>
+            Os horários do CTESP em <strong>Redes e Sistemas Informáticos</strong> são disponibilizados no início de cada semestre e podem ser sujeitos a ajustamentos.
+        </p>
+    </header>
 
-    <h1 class="page-title">Horários</h1>
-
-    <p class="intro-text">
-        Os horários da licenciatura em <strong>Redes e Sistemas Informáticos</strong> são disponibilizados no início de cada semestre e podem ser sujeitos a ajustamentos.
-    </p>
-
-    <section class="horarios-box">
-        <h2>Horários Disponíveis</h2>
-        <ul class="horarios-list">
-            {% for item in horarios_por_ano %}
-            <li>
-                <div class="horario-info">
-                    <i class="fa-regular fa-calendar"></i> {{ item.ano.ano_curricular }}
+    <!-- CLEAN ROWS LAYOUT -->
+    <div class="schedules-list">
+        {% for item in horarios_por_ano %}
+        {% if forloop.counter <= 2 %}
+        <div class="schedule-card">
+            
+            <div class="schedule-info">
+                <div class="icon-container">
+                    <i class="fa-regular fa-calendar-days"></i>
                 </div>
+                <div>
+                    <h2 class="year-title">{{ item.ano.ano_curricular }}</h2>
+                    {% if item.pdf %}
+                        <span class="status-badge available">Disponível</span>
+                    {% else %}
+                        <span class="status-badge pending">Pendente</span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="schedule-actions">
                 {% if item.pdf %}
-                <div class="horario-actions">
-                    <a href="{{ item.pdf.ficheiro.url }}" class="btn-horarios" target="_blank">
-                        <i class="fa-regular fa-file-pdf"></i> Ver PDF
-                    </a>
-                    <a href="{{ item.pdf.ficheiro.url }}" class="btn-horarios secondary" download>
-                        <i class="fa-solid fa-download"></i> Download
-                    </a>
-                </div>
+                <a href="{{ item.pdf.ficheiro.url }}" class="btn-download" target="_blank">
+                    <i class="fa-solid fa-eye"></i> <span class="btn-text">Ver</span>
+                </a>
+                <a href="{{ item.pdf.ficheiro.url }}" class="btn-download" download title="Descarregar">
+                    <i class="fa-solid fa-download"></i> <span class="btn-text">Download</span>
+                </a>
                 {% else %}
-                <div class="horario-actions">
-                    <span class="muted"><i class="fa-solid fa-circle-exclamation"></i> Sem ficheiro disponível</span>
-                </div>
+                <span class="disabled-msg">---</span>
                 {% endif %}
-            </li>
-            {% endfor %}
-        </ul>
-    </section>
+            </div>
+
+        </div>
+        {% endif %}
+        {% endfor %}
+    </div>
 
 </div>
-
 {% endblock %}

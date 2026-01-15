@@ -3,52 +3,53 @@
 {% block title %}Contactos — Departamento de Informática{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/ei/contactos.css' %}">
+<link rel="stylesheet" href="{% static 'css/di/contactos.css' %}?v=remodel">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 {% endblock %}
 
 {% block content %}
+<div class="contactos-container">
 
-<section class="contact-header">
-	<div class="contact-info">
-		<h1>Contactos</h1>
-		<p class="descricao">Departamento de Informática — Coordenação e Corpo Docente</p>
+    <section class="contact-header">
+        <div class="contact-info">
+            <h1>Contactos</h1>
+            <p class="descricao">Departamento de Informática — Coordenação e Corpo Docente</p>
 
-		<a href="https://maps.google.com/?q=Instituto+Politécnico+de+Viseu"
-			 target="_blank"
-			 class="map-link">
-			<i class="fa-solid fa-location-dot"></i>
-			Ver no Google Maps
-		</a>
-	</div>
+            <a href="https://maps.google.com/?q=Instituto+Politécnico+de+Viseu"
+               target="_blank"
+               class="map-link">
+                <i class="fa-solid fa-location-dot"></i>
+                Ver no Google Maps
+            </a>
+        </div>
 
-	<iframe
-		class="contact-map"
-		src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2999.2201410576503!2d-7.9135!3d40.6565!2m3!1f0!2f0!3f0!
-			3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0xd23367657e9b8db%3A0x3adaf227ddc7ba2!
-			2sInstituto%20Polit%C3%A9cnico%20de%20Viseu!5e0!3m2!1spt-PT!2spt!4v00000000000"
-		allowfullscreen=""
-		loading="lazy">
-	</iframe>
-</section>
+        <iframe
+            class="contact-map"
+            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3032.5!2d-7.9201646!3d40.6439583!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0xd23370121313ff7%3A0xfb8b9b36fe071169!2sESTGV+-+Escola+Superior+de+Tecnologia+e+Gest%C3%A3o+de+Viseu!5e0!3m2!1spt-PT!2spt!4v1705325854000"
+            allowfullscreen=""
+            loading="lazy">
+        </iframe>
+    </section>
 
-<h2 class="subtitulo">Corpo Docente</h2>
+    <h2 class="subtitulo">Corpo Docente</h2>
 
-<section class="contacts-grid">
-	{% for d in docentes %}
-	<div class="contact-card">
-		<h3><i class="fa-solid fa-user-tie"></i> {{ d.nome }}</h3>
+    <section class="contacts-grid">
+        {% for d in docentes %}
+        <div class="contact-card">
+            <h3><i class="fa-solid fa-user-tie"></i> {{ d.nome }}</h3>
 
-		{% if d.email %}
-			<p><i class="fa-solid fa-envelope"></i> 
-				 <a href="mailto:{{ d.email }}">{{ d.email }}</a>
-			</p>
-		{% else %}
-			<p><em>Sem email registado</em></p>
-		{% endif %}
-	</div>
-	{% empty %}
-	<p>Não existem docentes registados.</p>
-	{% endfor %}
-</section>
+            {% if d.email %}
+            <p>
+                <a href="mailto:{{ d.email }}">{{ d.email }}</a>
+            </p>
+            {% else %}
+            <p><em>Sem email registado</em></p>
+            {% endif %}
+        </div>
+        {% empty %}
+        <p>Não existem docentes registados.</p>
+        {% endfor %}
+    </section>
 
+</div>
 {% endblock %}

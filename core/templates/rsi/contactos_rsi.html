@@ -4,54 +4,86 @@
 {% block title %}Contactos — Redes e Sistemas Informáticos{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/rsi/contactos.css' %}">
+<link rel="stylesheet" href="{% static 'css/rsi/contactos.css' %}?v=remodel">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 {% endblock %}
 
 {% block content %}
-<div class="page-container">
+<div class="contactos-container">
 
-    <h1 class="page-title">Contactos</h1>
+    <!-- HEADER SECTION -->
+    <section class="contact-header">
+        <div class="contact-info">
+            <h1>Contactos</h1>
 
-    <p class="intro-text">
-        Para esclarecimentos, apoio académico ou informações gerais sobre o curso
-        de <strong>Redes e Sistemas Informáticos</strong>, utiliza os contactos abaixo.
-    </p>
+            <p class="curso-info">CTESP em Redes e Sistemas Informáticos</p>
 
-    <section class="contact-box">
-        <h2>Coordenador do Curso</h2>
-        <p><strong>Nome:</strong> Eng. João Silva</p>
-        <p><strong>Email:</strong> <a href="mailto:joao.silva@estgv.ipv.pt">joao.silva@estgv.ipv.pt</a></p>
+            <p class="descricao">
+                Para esclarecimentos, apoio académico ou informações gerais sobre o curso,
+                utiliza os contactos abaixo ou visita o Departamento.
+            </p>
+
+            <a href="https://www.google.com/maps?q=ESTGV+Viseu"
+               target="_blank"
+               class="map-link">
+                <i class="fa-solid fa-location-dot"></i>
+                Ver no Google Maps
+            </a>
+            
+            <a href="https://www.di.estgv.ipv.pt" target="_blank" class="map-link" style="margin-left: 0.5rem;">
+                <i class="fa-solid fa-globe"></i> Website do DI
+            </a>
+        </div>
+
+        <iframe
+            class="contact-map"
+            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3032.5!2d-7.9201646!3d40.6439583!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0xd23370121313ff7%3A0xfb8b9b36fe071169!2sESTGV+-+Escola+Superior+de+Tecnologia+e+Gest%C3%A3o+de+Viseu!5e0!3m2!1spt-PT!2spt!4v1705325854000"
+            allowfullscreen=""
+            loading="lazy">
+        </iframe>
     </section>
 
-    <section class="contact-box">
-        <h2>Secretaria — ESTGV</h2>
-        <p><strong>Email:</strong> <a href="mailto:secretaria@estgv.ipv.pt">secretaria@estgv.ipv.pt</a></p>
-        <p><strong>Telefone:</strong> 232 480 563</p>
-        <p><strong>Horário:</strong> Dias úteis, 9h00 — 17h30</p>
+    <!-- DEPARTAMENTO & COORDENAÇÃO -->
+    <h2 class="subtitulo">Contactos Institucionais</h2>
+    <section class="contacts-grid">
+        
+        <!-- Secretaria Info Card -->
+        <div class="contact-card">
+            <h3><i class="fa-solid fa-building-columns"></i> Secretaria ESTGV</h3>
+            <p><i class="fa-solid fa-phone"></i> 232 480 563</p>
+            <p><i class="fa-solid fa-envelope"></i> <a href="mailto:secretaria@estgv.ipv.pt">secretaria@estgv.ipv.pt</a></p>
+            <p style="font-size: 0.9rem; color: #64748b; margin-top: 5px;">Dias úteis, 9h00 — 17h30</p>
+        </div>
+
+        <!-- Coordinator Card -->
+        <div class="contact-card coordinator">
+            <h3><i class="fa-solid fa-user-gear"></i> Coordenação do Curso</h3>
+            <p style="font-size: 1.1rem; font-weight: 600;">Eng. João Silva</p>
+            <p><i class="fa-solid fa-envelope"></i> 
+                <a href="mailto:joao.silva@estgv.ipv.pt">joao.silva@estgv.ipv.pt</a>
+            </p>
+        </div>
+
     </section>
 
-    <section class="contact-box">
-        <h2>Website Oficial</h2>
-        <a href="https://www.di.estgv.ipv.pt" target="_blank" class="btn-site">
-            <i class="fa-solid fa-globe"></i> Aceder ao Site do DI
-        </a>
-    </section>
-
-    <section class="contact-box">
-        <h2>Corpo Docente</h2>
+    <!-- CORPO DOCENTE -->
+    <h2 class="subtitulo">Corpo Docente</h2>
+    <section class="contacts-grid">
         {% if docentes %}
-        <div class="docentes-grid">
             {% for d in docentes %}
-            <div class="docente-card">
-                <h3>{{ d.nome }}</h3>
+            <div class="contact-card">
+                <h3><i class="fa-solid fa-user-tie"></i> {{ d.nome }}</h3>
                 {% if d.email %}
-                <p>Email: <a href="mailto:{{ d.email }}">{{ d.email }}</a></p>
+                <p> 
+                    <a href="mailto:{{ d.email }}">
+                        <i class="fa-solid fa-envelope" style="display:inline; margin-right:5px;"></i> {{ d.email }}
+                    </a>
+                </p>
                 {% else %}
                 <p><em>Sem email registado</em></p>
                 {% endif %}
             </div>
             {% endfor %}
-        </div>
         {% else %}
         <p>Sem docentes registados.</p>
         {% endif %}
@@ -59,3 +91,4 @@
 
 </div>
 {% endblock %}
+

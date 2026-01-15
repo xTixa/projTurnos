@@ -4,49 +4,57 @@
 {% block title %}Saídas Profissionais — Redes e Sistemas Informáticos{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/rsi/saidas.css' %}">
+<link rel="stylesheet" href="{% static 'css/rsi/saidas.css' %}?v=remodel">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 {% endblock %}
 
 {% block content %}
 <div class="page-container">
 
-    <h1 class="page-title">Saídas Profissionais</h1>
-
-    <p class="intro-text">
-        A Licenciatura em <strong>Redes e Sistemas Informáticos (RSI)</strong> prepara profissionais para um vasto leque
-        de funções técnicas e especializadas na área das tecnologias de informação, com forte procura no mercado nacional e internacional.
-    </p>
-
-    <section class="info-block">
-        <h2>Áreas de Atividade</h2>
-        <ul>
-            <li>Administração de sistemas Linux e Windows;</li>
-            <li>Administração e gestão de redes de computadores;</li>
-            <li>Segurança informática e cibersegurança;</li>
-            <li>Gestão e manutenção de infraestruturas tecnológicas;</li>
-            <li>Suporte técnico avançado e helpdesk especializado;</li>
-            <li>Gestão de servidores, backups e serviços empresariais;</li>
-            <li>Virtualização, cloud computing e administração de datacenters;</li>
-            <li>Análise, diagnóstico e resolução de incidentes de TI;</li>
-            <li>Monitorização e auditoria de sistemas;</li>
-            <li>Configuração de firewalls, routers e equipamentos de rede.</li>
-        </ul>
-    </section>
-
-    <section class="info-block">
-        <h2>Mercado de Trabalho</h2>
-        <p>
-            Os diplomados encontram oportunidades em:
+    <!-- HERO SECTION -->
+    <div class="page-header">
+        <h1 class="page-title">Saídas Profissionais</h1>
+        <p class="intro-text">
+            O CTESP em <strong>Redes e Sistemas Informáticos (RSI)</strong> prepara profissionais para um vasto leque
+            de funções técnicas e especializadas na área das tecnologias de informação, com forte procura no mercado nacional e internacional.
         </p>
-        <ul>
-            <li>Empresas de tecnologias de informação;</li>
-            <li>Centros de dados e provedores de serviços cloud;</li>
-            <li>Entidades públicas e privadas com infraestruturas tecnológicas;</li>
-            <li>Empresas de telecomunicações;</li>
-            <li>Equipas de segurança informática e resposta a incidentes;</li>
-            <li>Startups tecnológicas e consultoria em TI.</li>
-        </ul>
-    </section>
+    </div>
+
+    <!-- CONTENT GRID -->
+    <div class="career-grid">
+
+        <!-- Areas de Atividade -->
+        <section class="detail-card">
+            <h2><i class="fa-solid fa-list-check"></i> Áreas de Atividade</h2>
+            <ul class="check-list">
+                <li>Administração de sistemas Linux e Windows;</li>
+                <li>Administração e gestão de redes de computadores;</li>
+                <li>Segurança informática e cibersegurança;</li>
+                <li>Gestão e manutenção de infraestruturas tecnológicas;</li>
+                <li>Suporte técnico avançado e helpdesk especializado;</li>
+                <li>Gestão de servidores, backups e serviços empresariais;</li>
+                <li>Virtualização, cloud computing e administração de datacenters;</li>
+                <li>Análise, diagnóstico e resolução de incidentes de TI;</li>
+                <li>Monitorização e auditoria de sistemas;</li>
+                <li>Configuração de firewalls, routers e equipamentos de rede.</li>
+            </ul>
+        </section>
+
+        <!-- Mercado de Trabalho -->
+        <section class="detail-card">
+            <h2><i class="fa-solid fa-building-user"></i> Mercado de Trabalho</h2>
+            <p style="margin-bottom: 1.5rem; color: #64748b;">Os diplomados encontram oportunidades em:</p>
+            <ul class="check-list">
+                <li>Empresas de tecnologias de informação;</li>
+                <li>Centros de dados e provedores de serviços cloud;</li>
+                <li>Entidades públicas e privadas com infraestruturas tecnológicas;</li>
+                <li>Empresas de telecomunicações;</li>
+                <li>Equipas de segurança informática e resposta a incidentes;</li>
+                <li>Startups tecnológicas e consultoria em TI.</li>
+            </ul>
+        </section>
+
+    </div>
 
 </div>
 {% endblock %}

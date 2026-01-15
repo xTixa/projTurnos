@@ -4,50 +4,67 @@
 {% block title %}Estágio em Empresa — Redes e Sistemas Informáticos{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/rsi/estagio.css' %}">
+<link rel="stylesheet" href="{% static 'css/rsi/estagio.css' %}?v=remodel">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 {% endblock %}
 
 {% block content %}
-<div class="page-container">
+<div class="estagio-container">
 
-    <h1 class="page-title">Estágio em Empresa</h1>
-
-    <p class="intro-text">
-        No último semestre do curso, os alunos realizam um <strong>Estágio em Empresa</strong>,
-        uma componente fundamental para aplicar conhecimentos adquiridos, integrar equipas reais
-        e ganhar experiência profissional na área das tecnologias de informação.
-    </p>
-
-    <section class="info-box">
-        <h2>Objetivos do Estágio</h2>
-        <ul>
-            <li>Aplicar conhecimentos de redes, sistemas e segurança em contexto real.</li>
-            <li>Integrar equipas técnicas e participar em projetos profissionais.</li>
-            <li>Desenvolver competências de comunicação, gestão e autonomia.</li>
-            <li>Facilitar a transição para o mercado de trabalho.</li>
-        </ul>
-    </section>
-
-    <section class="info-box">
-        <h2>Parceiros de Estágio</h2>
+    <header class="estagio-header">
+        <h1>Estágio em Empresa</h1>
         <p>
-            O curso possui parcerias com múltiplas empresas da região e do país, incluindo:
+            No último semestre do curso, os alunos realizam um <strong>Estágio em Empresa</strong>,
+            uma componente fundamental para aplicar conhecimentos adquiridos, integrar equipas reais
+            e ganhar experiência profissional na área das tecnologias de informação.
         </p>
-        <ul>
-            <li>Empresas de TI e fornecedores de serviços de rede</li>
-            <li>Empresas de Cloud e Data Centers</li>
-            <li>Equipas de suporte técnico e administração de sistemas</li>
-            <li>Empresas especializadas em cibersegurança</li>
-        </ul>
-    </section>
+    </header>
 
-    <section class="info-box">
-        <h2>Informações Adicionais</h2>
-        <p>
-            Para saber mais sobre o processo de candidatura, critérios e regulamentos,
-            consulta os serviços académicos ou o coordenador do curso.
-        </p>
-    </section>
+    <div class="estagio-grid">
+
+        <!-- Objetivos -->
+        <article class="info-card">
+            <h2><i class="fa-solid fa-bullseye"></i> Objetivos do Estágio</h2>
+            <ul class="styled-list">
+                <li>Aplicar conhecimentos de redes, sistemas e segurança em contexto real.</li>
+                <li>Integrar equipas técnicas e participar em projetos profissionais.</li>
+                <li>Desenvolver competências de comunicação, gestão e autonomia.</li>
+                <li>Facilitar a transição para o mercado de trabalho.</li>
+            </ul>
+        </article>
+
+        <!-- Informações Adicionais (Moved up to balance grid) -->
+        <article class="info-card">
+            <h2><i class="fa-solid fa-circle-info"></i> Informações Adicionais</h2>
+            <p class="text-content">
+                Para saber mais sobre o processo de candidatura, critérios e regulamentos,
+                consulta os serviços académicos ou o coordenador do curso.
+            </p>
+            <hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 1.5rem 0;">
+            <p class="text-content">
+                O estágio é supervisionado por um orientador da empresa e um docente do curso,
+                garantindo o acompanhamento pedagógico e profissional.
+            </p>
+        </article>
+
+
+        <!-- Parceiros -->
+        <article class="info-card full-width-card">
+            <h2><i class="fa-solid fa-handshake"></i> Parceiros de Estágio</h2>
+            <p class="text-content" style="margin-bottom: 2rem;">
+                O curso possui parcerias com múltiplas empresas da região e do país, oferecendo oportunidades em diversos setores:
+            </p>
+            <ul class="styled-list partners-grid">
+                <li><i class="fa-solid fa-network-wired"></i> Empresas de TI e redes</li>
+                <li><i class="fa-solid fa-server"></i> Cloud e Data Centers</li>
+                <li><i class="fa-solid fa-headset"></i> Suporte e Administração</li>
+                <li><i class="fa-solid fa-shield-halved"></i> Cibersegurança</li>
+            </ul>
+        </article>
+
+
+    </div>
 
 </div>
 {% endblock %}
+

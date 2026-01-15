@@ -1,46 +1,175 @@
-.page-container {
-    padding: 25px;
-    max-width: 900px;
-    margin: auto;
+
+:root {
+  --bg-body: #ffffff;
+  --surface: #ffffff;
+  
+  --brand-blue: #2563eb;
+  --brand-light: #eff6ff;
+  --brand-dark: #1e40af;
+  
+  --text-primary: #0f172a;
+  --text-secondary: #64748b;
 }
 
-.page-title {
-    font-size: 34px;
-    font-weight: 700;
-    color: #004a80;
-    margin-bottom: 10px;
+/* Page Layout */
+.horarios-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 0 2rem;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  color: var(--text-primary);
+  min-height: 100vh;
 }
 
-.intro-text {
-    font-size: 18px;
-    margin-bottom: 25px;
-    color: #444;
-    line-height: 1.6;
+/* Header */
+.simple-header {
+  text-align: center;
+  margin-top: 2rem;
+  margin-bottom: 4rem;
 }
 
-.horarios-box {
-    background: #f5f8ff;
-    padding: 25px;
-    border-left: 4px solid #0057b8;
-    border-radius: 6px;
+.simple-header h1 {
+  font-size: 3rem;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  margin-bottom: 0.5rem;
+  color: var(--text-primary);
 }
 
-.horarios-box h2 {
-    color: #003366;
-    margin-bottom: 15px;
+.simple-header p {
+  font-size: 1.15rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
 }
 
-.btn-horarios {
-    display: inline-block;
-    background: #0057b8;
-    color: white;
-    padding: 12px 18px;
-    border-radius: 6px;
-    text-decoration: none;
-    font-weight: 600;
-    margin-top: 10px;
+/* -- NEW LIST STYLE (Consistent with Avaliacoes) -- */
+.schedules-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
 }
 
-.btn-horarios:hover {
-    background: #003f87;
+.schedule-card {
+  background: white;
+  border-radius: 16px; 
+  padding: 1.5rem; 
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border: 1px solid #e2e8f0;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Hover Effect */
+.schedule-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--brand-blue);
+  box-shadow: 0 10px 20px -5px rgba(37, 99, 235, 0.1);
+}
+
+/* Left Content Wrapper */
+.schedule-info {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+}
+
+/* Icon Container */
+.icon-container {
+  width: 52px;
+  height: 52px;
+  background: #eff6ff; /* Blue BG */
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #dbeafe;
+}
+
+.icon-container i {
+  font-size: 1.5rem;
+  color: var(--brand-blue);
+}
+
+.year-title {
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 0.25rem;
+}
+
+/* Status Badge */
+.status-badge {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.2rem 0.6rem;
+  border-radius: 6px;
+  display: inline-block;
+}
+
+.status-badge.available {
+  background: #ecfdf5;
+  color: #059669;
+}
+
+.status-badge.pending {
+  background: #f1f5f9;
+  color: #64748b;
+}
+
+/* Actions Right */
+.schedule-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+/* Primary Button (View) */
+.btn-download {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  background: white;
+  color: var(--text-primary);
+  border: 1px solid #e2e8f0;
+  padding: 0.75rem 1.25rem;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  text-decoration: none;
+  transition: all 0.2s;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
+
+.btn-download:hover {
+  background: var(--brand-light);
+  color: var(--brand-blue);
+  border-color: var(--brand-blue);
+}
+
+.disabled-msg {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+/* Responsive */
+@media (max-width: 650px) {
+  .schedule-card {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1.5rem;
+  }
+  
+  .schedule-actions {
+    width: 100%;
+    justify-content: stretch;
+  }
+  
+  .btn-download {
+    flex: 1;
+    justify-content: center;
+  }
 }

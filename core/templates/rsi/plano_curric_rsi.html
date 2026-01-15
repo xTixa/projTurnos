@@ -4,39 +4,85 @@
 {% block title %}Plano Curricular — Redes e Sistemas Informáticos{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/rsi/plano.css' %}">
+<link rel="stylesheet" href="{% static 'css/rsi/plano.css' %}?v=remodel">
 {% endblock %}
 
 {% block content %}
-<section class="plano-hero">
-  <h1>Plano Curricular</h1>
-  <p>Consulta as Unidades Curriculares de cada ano e semestre do curso.</p>
-</section>
+<div class="plano-wrapper">
 
-<section class="plano-section">
-  {% for ano, semestres in plano.items %}
-  <div class="ano-bloco animate">
-    <h2>{{ ano }}</h2>
+  <!-- MINIMAL HEADER -->
+  <header class="simple-header">
+    <h1>Plano Curricular</h1>
+    <p>Consulta as Unidades Curriculares de cada ano e semestre do curso.</p>
+  </header>
 
-    <div class="semestres-lado-a-lado">
-      {% for semestre, unidades in semestres.items %}
-      <div class="semestre-coluna">
-        <h3>{{ semestre }}</h3>
-        <div class="uc-grid">
-          {% for uc in unidades %}
-          <div class="uc-card">
-            <h4>{{ uc.nome }}</h4>
-            <span class="ects">{{ uc.ects }} ECTS</span>
-          </div>
-          {% endfor %}
-        </div>
-      </div>
+  <!-- CONTENT GRID -->
+  <main class="plano-content">
+
+    <!-- Year Navigation Tabs -->
+    <div class="nav-tabs">
+      {% for ano, semestres in plano.items %}
+      <button class="tab-btn {% if forloop.first %}active{% endif %}" onclick="switchYear('year-{{ forloop.counter }}', this)">
+        {{ ano }}
+      </button>
       {% endfor %}
     </div>
 
-  </div>
-  {% empty %}
-    <p class="placeholder">Nenhuma unidade curricular disponível.</p>
-  {% endfor %}
-</section>
+    {% for ano, semestres in plano.items %}
+    <section id="year-{{ forloop.counter }}" class="year-section fade-in {% if not forloop.first %}hidden{% endif %}">
+      
+      <!-- SEMESTERS GRID -->
+      <div class="semesters-grid">
+        {% for semestre, unidades in semestres.items %}
+        <div class="semester-group">
+          <h3 class="semester-title">{{ semestre }}</h3>
+          
+          <div class="ucs-list">
+            {% for uc in unidades %}
+            <div class="uc-card">
+              <div class="uc-content">
+                <h4>{{ uc.nome }}</h4>
+              </div>
+              <span class="ects-pill">{{ uc.ects }} ECTS</span>
+            </div>
+            {% endfor %}
+          </div>
+
+        </div>
+        {% endfor %}
+      </div>
+
+    </section>
+    {% empty %}
+      <div class="empty-msg">
+        <p>Nenhuma unidade curricular disponível.</p>
+      </div>
+    {% endfor %}
+  </main>
+</div>
+
+<script>
+  function switchYear(targetId, btnElement) {
+    // Hide all sections
+    document.querySelectorAll('.year-section').forEach(el => {
+      el.classList.add('hidden');
+    });
+    
+    // Deactivate all buttons
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.classList.remove('active');
+    });
+
+    // Show target
+    const target = document.getElementById(targetId);
+    if(target) {
+      target.classList.remove('hidden');
+      target.classList.remove('fade-in');
+      void target.offsetWidth; // trigger reflow
+      target.classList.add('fade-in');
+    }
+    
+    btnElement.classList.add('active');
+  }
+</script>
 {% endblock %}
