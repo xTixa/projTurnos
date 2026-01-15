@@ -11,6 +11,7 @@
 from gridfs import GridFS
 from ..mongodb import db, client
 from datetime import datetime
+from bson.objectid import ObjectId
 import io
 
 # Cria uma instância do GridFS usando a BD "projTurnos"
@@ -129,7 +130,7 @@ def download_pdf(file_id, tipo_pdf="horario"):
     Descarrega um PDF do MongoDB usando GridFS
     
     Args:
-        file_id: ID único do ficheiro (retornado no upload)
+        file_id: ID único do ficheiro (retornado no upload, em formato string ou ObjectId)
         tipo_pdf: Tipo do PDF ("horario" ou "avaliacao") para saber qual GridFS usar
     
     Returns:
@@ -137,6 +138,10 @@ def download_pdf(file_id, tipo_pdf="horario"):
         Pode ser usado diretamente em HttpResponse
     """
     try:
+        # Se file_id for string, converte para ObjectId
+        if isinstance(file_id, str):
+            file_id = ObjectId(file_id)
+        
         # Escolhe o GridFS correto baseado no tipo
         gridfs_instance = fs_horarios if tipo_pdf == "horario" else fs_avaliacoes
         
@@ -252,6 +257,11 @@ def deletar_pdf(file_id, tipo_pdf="horario"):
         True se deletado com sucesso, False caso contrário
     """
     try:
+        
+        # Se file_id for string, converte para ObjectId
+        if isinstance(file_id, str):
+            file_id = ObjectId(file_id)
+        
         # Escolhe o GridFS correto
         gridfs_instance = fs_horarios if tipo_pdf == "horario" else fs_avaliacoes
         
@@ -279,6 +289,11 @@ def atualizar_metadados_pdf(file_id, nome_novo=None, tipo_pdf="horario"):
         Metadados atualizados
     """
     try:
+        
+        # Se file_id for string, converte para ObjectId
+        if isinstance(file_id, str):
+            file_id = ObjectId(file_id)
+        
         # Escolhe a coleção de ficheiros correta
         colecao_ficheiros = db.horarios_pdf_files if tipo_pdf == "horario" else db.avaliacoes_pdf_files
         
