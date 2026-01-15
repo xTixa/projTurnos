@@ -1,5 +1,6 @@
 {% extends "home/base.html" %}
 {% load static %}
+{% load pdf_tags %}
 
 {% block title %}Horários — DWDM{% endblock %}
 
@@ -27,8 +28,8 @@
                 <strong>{{ item.ano.ano_curricular }}</strong>
                 {% if item.pdf %}
                 <div class="horario-actions">
-                    <a href="{{ item.pdf.ficheiro.url }}" class="pdf-link" target="_blank"><i class="fa-regular fa-file-pdf"></i> Ver</a>
-                    <a href="{{ item.pdf.ficheiro.url }}" class="pdf-link" download><i class="fa-solid fa-download"></i> Download</a>
+                    <a href="{% pdf_url item.pdf 'horario' %}" class="pdf-link" target="_blank"><i class="fa-regular fa-file-pdf"></i> Ver</a>
+                    <a href="{% pdf_url item.pdf 'horario' %}" class="pdf-link" download><i class="fa-solid fa-download"></i> Download</a>
                 </div>
                 {% else %}
                 <span class="muted"><i class="fa-solid fa-circle-exclamation"></i> Sem ficheiro disponível</span>

@@ -4,39 +4,60 @@
 {% block title %}Acesso ao Mestrado EISI{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/eisi/ingresso_mestrado.css' %}">
+<link rel="stylesheet" href="{% static 'css/eisi/ingresso_mestrado.css' %}?v=remodel">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 {% endblock %}
 
 {% block content %}
-<div class="page-container">
+<div class="ingress-container">
 
-    <h1 class="page-title">Acesso ao Mestrado</h1>
+    <!-- HERO SECTION -->
+    <header class="ingress-hero">
+        <div class="ingress-hero-content">
+            <div class="badge-pill">Mestrado em Engenharia Informática e Sistemas de Informação</div>
+            <h1>Acesso ao Mestrado</h1>
+            <p>
+                O ingresso no Mestrado em Engenharia Informática e Sistemas de Informação pode ser realizado por titulares de cursos superiores 
+                na área da Informática, Computação e áreas afins.
+            </p>
+        </div>
+    </header>
 
-    <p class="intro-text">
-        O ingresso no Mestrado em Engenharia Informática e Sistemas de Informação pode ser realizado por titulares de cursos superiores 
-        na área da Informática, Computação e áreas afins.
-    </p>
+    <!-- MAIN CONTENT GRID -->
+    <main class="ingress-grid">
 
-    <hr>
+        <!-- 1. CONDIÇÕES DE ACESSO -->
+        <section class="ingress-card highlight-card">
+            <div class="card-header">
+                <div class="icon-box blue"><i class="fa-solid fa-key"></i></div>
+                <h2>Condições de Acesso</h2>
+            </div>
+            <div class="card-body">
+                <ul class="check-list">
+                    <li>Licenciatura na área de Informática, Engenharia Informática ou similar;</li>
+                    <li>Outros licenciados podem ser admitidos mediante análise curricular;</li>
+                    <li>Preferência a candidatos com experiência profissional na área.</li>
+                </ul>
+            </div>
+        </section>
 
-    <section class="info-block">
-        <h2>Condições de Acesso</h2>
-        <ul>
-            <li>Licenciatura na área de Informática, Engenharia Informática ou similar;</li>
-            <li>Outros licenciados podem ser admitidos mediante análise curricular;</li>
-            <li>Preferência a candidatos com experiência profissional na área.</li>
-        </ul>
-    </section>
+        <!-- 2. DOCUMENTOS NECESSÁRIOS -->
+        <section class="ingress-card">
+            <div class="card-header">
+                <div class="icon-box purple"><i class="fa-solid fa-folder-open"></i></div>
+                <h2>Documentos Necessários</h2>
+            </div>
+            <div class="card-body">
+                <ul class="doc-list">
+                    <li>Certificado de habilitações</li>
+                    <li>Curriculum Vitae</li>
+                    <li>Documento de identificação</li>
+                    <li>Ficha de candidatura</li>
+                </ul>
+            </div>
+        </section>
 
-    <section class="info-block">
-        <h2>Documentos Necessários</h2>
-        <ul>
-            <li>Certificado de habilitações</li>
-            <li>Curriculum Vitae</li>
-            <li>Documento de identificação</li>
-            <li>Ficha de candidatura</li>
-        </ul>
-    </section>
+    </main>
 
 </div>
 {% endblock %}

@@ -1,71 +1,114 @@
-{% extends "home/base.html" %}
+{% extends 'home/base.html' %}
 {% load static %}
 
 {% block title %}Mestrado EISI — ESTGV{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/eisi/index_mestrado.css' %}">
+<link rel="stylesheet" href="{% static 'css/eisi/index_mestrado.css' %}?v=remodel">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 {% endblock %}
 
 {% block content %}
+<div class="ei-layout">
 
-<div class="page-container">
-
-    <h1 class="page-title">Mestrado em Engenharia Informática e Sistemas de Informação</h1>
-
-    <p class="intro-text">
+  <!-- HERO SECTION -->
+  <section class="ei-hero">
+    <div class="ei-hero__text">
+      <h1>Mestrado em Engenharia Informática e Sistemas de Informação</h1>
+      <p>
         O Mestrado em Engenharia Informática e Sistemas de Informação (EISI) tem como objetivo aprofundar
         competências avançadas em engenharia informática, inovação tecnológica e desenvolvimento de sistemas,
         preparando os estudantes para desafios profissionais e investigação avançada.
-    </p>
+      </p>
 
-    <section class="info-cards">
-        <div class="card">
-            <h3>Horário Pós-Laboral</h3>
-            <p>Flexibilidade para estudantes que trabalham.</p>
+      <div class="ei-hero__actions">
+        <a href="{% url 'home:horarios_mestrado' %}" class="btn btn-primary">
+          <i class="fa-regular fa-calendar"></i> Ver horários
+        </a>
+        <a href="{% url 'home:plano_curric_mestrado' %}" class="btn btn-ghost">
+          <i class="fa-regular fa-rectangle-list"></i> Plano curricular
+        </a>
+      </div>
+    </div>
+
+    <div class="ei-hero__illustration">
+      <img src="{% static 'img/eisi.png' %}" alt="EISI" class="hero-photo">
+    </div>
+  </section>
+
+  <!-- FEATURES / INFO CARDS -->
+  <section class="ei-section">
+    <div class="ei-cards">
+      
+      <article class="ei-card">
+        <div class="ei-card__icon blue"><i class="fa-solid fa-graduation-cap"></i></div>
+        <h3>Horário Pós-Laboral</h3>
+        <p>Flexibilidade para estudantes que trabalham.</p>
+      </article>
+
+      <article class="ei-card">
+        <div class="ei-card__icon cyan"><i class="fa-solid fa-microchip"></i></div>
+        <h3>Competências Avançadas</h3>
+        <p>Engenharia de software, IA, sistemas distribuídos e mais.</p>
+      </article>
+
+      <article class="ei-card">
+        <div class="ei-card__icon purple"><i class="fa-solid fa-handshake"></i></div>
+        <h3>Ligação Empresarial</h3>
+        <p>Projetos reais com empresas tecnológicas.</p>
+      </article>
+
+    </div>
+  </section>
+
+  <!-- SHORTCUTS SECTION -->
+  <section class="ei-section">
+    <h2 class="section-title">Acede rapidamente</h2>
+
+    <div class="ei-shortcuts__grid">
+
+      <a href="{% url 'home:ingresso_mestrado' %}" class="innovation-card accent-blue">
+        <div class="card-background-icon"><i class="fa-solid fa-door-open"></i></div>
+        <div class="card-content">
+            <span class="card-label">Candidaturas</span>
+            <h3>Acesso e Ingresso</h3>
+            <p>Consulta as condições de acesso, critérios de seriação e vagas disponíveis.</p>
         </div>
+        <div class="card-arrow"><i class="fa-solid fa-arrow-right-long"></i></div>
+      </a>
 
-        <div class="card">
-            <h3>Competências Avançadas</h3>
-            <p>Engenharia de software, IA, sistemas distribuídos e mais.</p>
+      <a href="{% url 'home:destinatarios_mestrado' %}" class="innovation-card accent-green">
+        <div class="card-background-icon"><i class="fa-solid fa-users"></i></div>
+        <div class="card-content">
+            <span class="card-label">Público-Alvo</span>
+            <h3>Destinatários</h3>
+            <p>A quem se destina este mestrado? Descobre o perfil de estudante que procuramos.</p>
         </div>
+        <div class="card-arrow"><i class="fa-solid fa-arrow-right-long"></i></div>
+      </a>
 
-        <div class="card">
-            <h3>Ligação Empresarial</h3>
-            <p>Projetos reais com empresas tecnológicas.</p>
+      <a href="{% url 'home:plano_curric_mestrado' %}" class="innovation-card accent-indigo">
+        <div class="card-background-icon"><i class="fa-solid fa-rectangle-list"></i></div>
+        <div class="card-content">
+            <span class="card-label">Estudos</span>
+            <h3>Plano Curricular</h3>
+            <p>Conhece as unidades curriculares, ECTS e a organização dos semestres.</p>
         </div>
-    </section>
+        <div class="card-arrow"><i class="fa-solid fa-arrow-right-long"></i></div>
+      </a>
 
-    <hr>
-
-    <section class="links-section">
-        <h2>Acede rapidamente</h2>
-
-        <div class="link-grid">
-
-            <a class="link-card" href="{% url 'home:ingresso_mestrado' %}">
-                <i class="fa-solid fa-door-open"></i>
-                <span>Acesso e Ingresso</span>
-            </a>
-
-            <a class="link-card" href="{% url 'home:destinatarios_mestrado' %}">
-                <i class="fa-solid fa-users"></i>
-                <span>Destinatários</span>
-            </a>
-
-            <a class="link-card" href="{% url 'home:plano_curric_mestrado' %}">
-                <i class="fa-solid fa-rectangle-list"></i>
-                <span>Plano Curricular</span>
-            </a>
-
-            <a class="link-card" href="{% url 'home:testemunho_mestrado' %}">
-                <i class="fa-solid fa-comment-dots"></i>
-                <span>Testemunhos</span>
-            </a>
-
+      <a href="{% url 'home:testemunho_mestrado' %}" class="innovation-card accent-blue">
+        <div class="card-background-icon"><i class="fa-solid fa-comment-dots"></i></div>
+        <div class="card-content">
+            <span class="card-label">Alunos</span>
+            <h3>Testemunhos</h3>
+            <p>Lê a opinião dos nossos antigos alunos e o seu percurso profissional.</p>
         </div>
-    </section>
+        <div class="card-arrow"><i class="fa-solid fa-arrow-right-long"></i></div>
+      </a>
+
+    </div>
+  </section>
 
 </div>
-
 {% endblock %}

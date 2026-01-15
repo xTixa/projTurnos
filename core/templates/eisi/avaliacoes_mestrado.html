@@ -1,57 +1,76 @@
 {% extends "home/base.html" %}
 {% load static %}
+{% load pdf_tags %}
 
 {% block title %}Avaliações — Mestrado EISI{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/eisi/avaliacoes.css' %}">
+<link rel="stylesheet" href="{% static 'css/eisi/avaliacoes.css' %}?v=remodel">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 {% endblock %}
 
 {% block content %}
-<div class="page-container">
+<div class="avaliacoes-container">
 
-    <h1 class="page-title">Avaliações</h1>
+    <!-- HEADER -->
+    <header class="simple-header">
+        <h1>Avaliações</h1>
+        <p>
+            Os métodos de avaliação incluem exames, trabalhos práticos, projetos laboratoriais
+            e apresentação/discussão pública de trabalho desenvolvido.
+        </p>
+    </header>
 
-    <p class="intro-text">
-        Os métodos de avaliação incluem exames, trabalhos práticos, projetos laboratoriais
-        e apresentação/discussão pública de trabalho desenvolvido.
-    </p>
-
-    <section class="info-block">
-        <h2>Componentes de Avaliação</h2>
-        <ul>
-            <li>Trabalhos de investigação;</li>
-            <li>Projetos práticos;</li>
-            <li>Apresentações técnicas;</li>
-            <li>Avaliação contínua nas unidades curriculares;</li>
-            <li>Defesa pública do Projeto / Dissertação.</li>
-        </ul>
+    <!-- COMPONENTES DE AVALIAÇÃO (New Section to keep content) -->
+    <section class="info-card-section">
+        <div class="info-card">
+            <h2><i class="fa-solid fa-list-check"></i> Componentes de Avaliação</h2>
+            <ul class="styled-list">
+                <li>Trabalhos de investigação;</li>
+                <li>Projetos práticos;</li>
+                <li>Apresentações técnicas;</li>
+                <li>Avaliação contínua nas unidades curriculares;</li>
+                <li>Defesa pública do Projeto / Dissertação.</li>
+            </ul>
+        </div>
     </section>
 
-    <section class="info-block">
-        <h2>Documentos Oficiais</h2>
-        <p>Consulta o regulamento completo de avaliação do Mestrado.</p>
-
-        <ul class="pdf-list">
-            {% for item in avaliacoes_por_ano %}
-            <li>
-                <strong>{{ item.ano.ano_curricular }}</strong>
-                {% if item.pdf %}
-                <div class="links">
-                    <a class="btn-download" href="{{ item.pdf.ficheiro.url }}" target="_blank">
-                        <i class="fa-solid fa-eye"></i> Ver
-                    </a>
-                    <a class="btn-download" href="{{ item.pdf.ficheiro.url }}" download>
-                        <i class="fa-solid fa-download"></i> Download
-                    </a>
+    <!-- DOCUMENTOS OFICIAIS -->
+    <h2 class="section-subtitle">Documentos Oficiais</h2>
+    <div class="avaliacoes-lista">
+        {% for item in avaliacoes_por_ano %}
+        {% if forloop.counter <= 2 %}
+        <div class="avaliacao-card">
+            
+            <div class="avaliacao-info">
+                <div class="icon-container">
+                    <i class="fa-solid fa-file-pdf"></i>
                 </div>
+                <div>
+                    <h3>{{ item.ano.ano_curricular }}</h3>
+                    <p>Calendário e regulamento das avaliações</p>
+                </div>
+            </div>
+
+            <div class="avaliacao-actions">
+                {% if item.pdf %}
+                <a href="{% pdf_url item.pdf 'avaliacao' %}" class="btn-download" target="_blank">
+                    <i class="fa-solid fa-eye"></i> <span class="btn-text">Ver</span>
+                </a>
+                <a href="{% pdf_url item.pdf 'avaliacao' %}" class="btn-download" download>
+                    <i class="fa-solid fa-download"></i> <span class="btn-text">Download</span>
+                </a>
                 {% else %}
-                <span class="muted"><i class="fa-solid fa-circle-exclamation"></i> Sem ficheiro disponível</span>
+                <span class="btn-disabled">
+                    <i class="fa-solid fa-circle-exclamation"></i> Pendente
+                </span>
                 {% endif %}
-            </li>
-            {% endfor %}
-        </ul>
-    </section>
+            </div>
+
+        </div>
+        {% endif %}
+        {% endfor %}
+    </div>
 
 </div>
 {% endblock %}

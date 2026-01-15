@@ -1,5 +1,6 @@
 {% extends "home/base.html" %}
 {% load static %}
+{% load pdf_tags %}
 
 {% block title %}Horários — Tecnologia e Design Multimédia{% endblock %}
 
@@ -16,9 +17,9 @@
     <h1>Horários — TDM</h1>
     <p>Acede aos calendários letivos e distribuições de turmas atualizados.</p>
 
-    {% if request.session.user_id %}
+    {% if pode_inscrever %}
       <div class="inscricao-wrapper">
-        <a href="{% url 'home:inscricao_turno' %}" class="btn-inscricao">
+        <a href="{% url 'home:inscricao_turno_tdm' %}" class="btn-inscricao">
           <i class="fa-solid fa-check"></i>
           <span>Inscrever-me no Turno</span>
         </a>
@@ -47,10 +48,10 @@
 
         <div class="schedule-actions">
           {% if item.pdf %}
-            <a href="{{ item.pdf.ficheiro.url }}" class="btn-download" target="_blank">
+            <a href="{% pdf_url item.pdf 'horario' %}" class="btn-download" target="_blank">
                <i class="fa-solid fa-eye"></i> <span class="btn-text">Ver</span>
             </a>
-            <a href="{{ item.pdf.ficheiro.url }}" class="btn-download" download title="Descarregar">
+            <a href="{% pdf_url item.pdf 'horario' %}" class="btn-download" download title="Descarregar">
               <i class="fa-solid fa-download"></i> <span class="btn-text">Descarregar</span>
             </a>
           {% else %}

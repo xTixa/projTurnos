@@ -1,25 +1,49 @@
 {% extends "home/base.html" %}
 {% load static %}
 
-{% block title %}Redes e Sistemas Informáticos — ESTGV{% endblock %}
+{% block title %}Início — Redes e Sistemas Informáticos{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/rsi/index.css' %}">
+<link rel="stylesheet" href="{% static 'css/rsi/index.css' %}?v=remodel">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 {% endblock %}
 
 {% block content %}
-<div class="page-container">
+<div class="rsi-layout">
 
-    <h1 class="page-title">Redes e Sistemas Informáticos (RSI)</h1>
-
-    <p class="intro-text">
+  <!-- HERO SECTION -->
+  <section class="rsi-hero">
+    <div class="rsi-hero__text">
+      <h1>Redes e Sistemas Informáticos</h1>
+      <p>
         O curso de <strong>Redes e Sistemas Informáticos (RSI)</strong> forma profissionais altamente qualificados
         nas áreas de administração de sistemas, redes de computadores, segurança informática,
         infraestrutura tecnológica e serviços cloud.
-    </p>
+      </p>
 
-    <section class="highlight-box">
-        <h2>O que vais aprender</h2>
+      <div class="rsi-hero__actions">
+        <!-- Shortcuts based on user content and standard practices -->
+        <a href="{% url 'home:horarios_rsi' %}" class="btn btn-primary">
+          <i class="fa-regular fa-calendar"></i> Ver horários
+        </a>
+        <a href="{% url 'home:plano_curric_rsi' %}" class="btn btn-ghost">
+          <i class="fa-solid fa-list-check"></i> Plano curricular
+        </a>
+      </div>
+    </div>
+
+    <div class="rsi-hero__illustration">
+      <img src="{% static 'img/rsi.png' %}" alt="RSI" class="hero-photo">
+    </div>
+  </section>
+
+  <!-- FEATURES (O que vais aprender) -->
+  <section class="rsi-section">
+    <div class="rsi-cards half-layout">
+      
+      <article class="rsi-card">
+        <div class="rsi-card__icon blue"><i class="fa-solid fa-network-wired"></i></div>
+        <h3>O que vais aprender</h3>
         <ul>
             <li>Administração de sistemas Linux e Windows;</li>
             <li>Configuração e manutenção de redes de computadores;</li>
@@ -27,14 +51,59 @@
             <li>Virtualização e computação em nuvem;</li>
             <li>Serviços de diretório, servidores e gestão de infraestrutura.</li>
         </ul>
-    </section>
+      </article>
 
-    <section class="quick-links">
-        <a href="{% url 'home:ingresso_rsi' %}" class="btn-link">Ingresso</a>
-        <a href="{% url 'home:saidas_rsi' %}" class="btn-link">Saídas Profissionais</a>
-        <a href="{% url 'home:plano_curric_rsi' %}" class="btn-link">Plano Curricular</a>
-        <a href="{% url 'home:contactos_rsi' %}" class="btn-link">Contactos</a>
-    </section>
+    </div>
+  </section>
+
+  <!-- SHORTCUTS (Ingresso, Saídas, etc) -->
+  <section class="rsi-section">
+    <h2 class="section-title">Acede rapidamente</h2>
+
+    <div class="rsi-shortcuts__grid">
+
+      <a href="{% url 'home:ingresso_rsi' %}" class="innovation-card accent-blue">
+        <div class="card-background-icon"><i class="fa-solid fa-graduation-cap"></i></div>
+        <div class="card-content">
+            <span class="card-label">Candidaturas</span>
+            <h3>Ingresso</h3>
+            <p>Informações de acesso, provas e prazos.</p>
+        </div>
+        <div class="card-arrow"><i class="fa-solid fa-arrow-right-long"></i></div>
+      </a>
+
+      <a href="{% url 'home:saidas_rsi' %}" class="innovation-card accent-green">
+        <div class="card-background-icon"><i class="fa-solid fa-rocket"></i></div>
+        <div class="card-content">
+            <span class="card-label">Outcomes</span>
+            <h3>Saídas Profissionais</h3>
+            <p>Descobre as oportunidades de carreira.</p>
+        </div>
+        <div class="card-arrow"><i class="fa-solid fa-arrow-right-long"></i></div>
+      </a>
+
+      <a href="{% url 'home:horarios_rsi' %}" class="innovation-card accent-indigo">
+        <div class="card-background-icon"><i class="fa-regular fa-calendar"></i></div>
+        <div class="card-content">
+            <span class="card-label">Aulas</span>
+            <h3>Horários</h3>
+            <p>Consulta a distribuição de turmas e salas.</p>
+        </div>
+        <div class="card-arrow"><i class="fa-solid fa-arrow-right-long"></i></div>
+      </a>
+      
+       <a href="{% url 'home:avaliacoes_rsi' %}" class="innovation-card accent-blue">
+        <div class="card-background-icon"><i class="fa-regular fa-clipboard"></i></div>
+        <div class="card-content">
+            <span class="card-label">Exames</span>
+            <h3>Avaliações</h3>
+            <p>Calendários e épocas de avaliação.</p>
+        </div>
+        <div class="card-arrow"><i class="fa-solid fa-arrow-right-long"></i></div>
+      </a>
+
+    </div>
+  </section>
 
 </div>
 {% endblock %}

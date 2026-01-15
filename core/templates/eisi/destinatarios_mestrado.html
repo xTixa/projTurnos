@@ -4,28 +4,34 @@
 {% block title %}Destinatários — EISI{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/eisi/destinatarios.css' %}">
+<link rel="stylesheet" href="{% static 'css/eisi/destinatarios.css' %}?v=remodel">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 {% endblock %}
 
 {% block content %}
 <div class="page-container">
 
-    <h1 class="page-title">Destinatários</h1>
+    <!-- HERO SECTION -->
+    <div class="page-header">
+        <h1 class="page-title">Destinatários</h1>
+        <p class="intro-text">
+            O mestrado destina-se a profissionais e licenciados que pretendem aprofundar competências em 
+            engenharia informática, tecnologias avançadas e sistemas de informação.
+        </p>
+    </div>
 
-    <p class="intro-text">
-        O mestrado destina-se a profissionais e licenciados que pretendem aprofundar competências em 
-        engenharia informática, tecnologias avançadas e sistemas de informação.
-    </p>
-
-    <section class="info-block">
-        <h2>Destina-se a:</h2>
-        <ul>
-            <li>Licenciados em Engenharia Informática ou áreas similares;</li>
-            <li>Profissionais que pretendem evoluir para funções de maior responsabilidade técnica;</li>
-            <li>Interessados em investigação e desenvolvimento tecnológico;</li>
-            <li>Quem procura atualização em inteligência artificial, software e sistemas.</li>
-        </ul>
-    </section>
+    <!-- MAIN CONTENT CARD -->
+    <div class="content-wrapper">
+        <section class="detail-card">
+            <h2><i class="fa-solid fa-users-viewfinder"></i> Perfil do Candidato</h2>
+            <ul class="check-list">
+                <li>Licenciados em Engenharia Informática ou áreas similares;</li>
+                <li>Profissionais que pretendem evoluir para funções de maior responsabilidade técnica;</li>
+                <li>Interessados em investigação e desenvolvimento tecnológico;</li>
+                <li>Quem procura atualização em inteligência artificial, software e sistemas.</li>
+            </ul>
+        </section>
+    </div>
 
 </div>
 {% endblock %}

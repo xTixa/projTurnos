@@ -1,42 +1,77 @@
 {% extends "home/base.html" %}
 {% load static %}
+{% load pdf_tags %}
 
 {% block title %}Avaliações — Redes e Sistemas Informáticos{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/rsi/avaliacoes.css' %}">
+<link rel="stylesheet" href="{% static 'css/rsi/avaliacoes.css' %}?v=remodel">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 {% endblock %}
 
 {% block content %}
-<div class="page-container">
+<div class="avaliacoes-container">
 
-    <h1 class="page-title">Avaliações</h1>
+    <!-- HEADER -->
+    <header class="simple-header">
+        <h1>Avaliações</h1>
+        <p>
+            Consulta a documentação oficial relativa às avaliações do CTESP em
+            <strong>Redes e Sistemas Informáticos</strong>.
+        </p>
+    </header>
 
-    <p class="intro-text">
-        Consulta a documentação oficial relativa às avaliações da licenciatura em
-        <strong>Redes e Sistemas Informáticos</strong>.
-    </p>
+    <!-- COMPONENTES DE AVALIAÇÃO -->
+    <section class="info-card-section">
+        <div class="info-card">
+            <h2><i class="fa-solid fa-list-check"></i> Componentes de Avaliação</h2>
+            <ul class="styled-list">
+                <li>Projetos práticos e laboratoriais;</li>
+                <li>Frequências e Exames;</li>
+                <li>Trabalhos de grupo;</li>
+                <li>Avaliação contínua;</li>
+                <li>Projeto final de curso.</li>
+            </ul>
+        </div>
+    </section>
 
-    <div class="avaliacoes-box">
-        <h2>Documentos de Avaliação</h2>
+    <!-- DOCUMENTOS OFICIAIS -->
+    <h2 class="section-subtitle">Documentos Oficiais</h2>
+    <div class="avaliacoes-lista">
+        {% for item in avaliacoes_por_ano %}
+        {% if forloop.counter <= 2 %}
+        <div class="avaliacao-card">
+            
+            <div class="avaliacao-info">
+                <div class="icon-container">
+                    <i class="fa-solid fa-file-pdf"></i>
+                </div>
+                <div>
+                    <h3>{{ item.ano.ano_curricular }}</h3>
+                    <p>Calendário e mapas de avaliação</p>
+                </div>
+            </div>
 
-        <ul class="avaliacoes-list">
-            {% for item in avaliacoes_por_ano %}
-            <li>
+            <div class="avaliacao-actions">
                 {% if item.pdf %}
-                <a href="{{ item.pdf.ficheiro.url }}" target="_blank">
-                    <i class="fa-regular fa-file-pdf"></i> {{ item.ano.ano_curricular }} — Ver PDF
+                <a href="{% pdf_url item.pdf 'avaliacao' %}" class="btn-download" target="_blank">
+                    <i class="fa-solid fa-eye"></i> <span class="btn-text">Ver</span>
                 </a>
-                <a href="{{ item.pdf.ficheiro.url }}" class="download-link" download>
-                    <i class="fa-solid fa-download"></i> Download
+                <a href="{% pdf_url item.pdf 'avaliacao' %}" class="btn-download" download>
+                    <i class="fa-solid fa-download"></i> <span class="btn-text">Download</span>
                 </a>
                 {% else %}
-                <span class="muted"><i class="fa-solid fa-circle-exclamation"></i> Sem ficheiro disponível para {{ item.ano.ano_curricular }}</span>
+                <span class="btn-disabled">
+                    <i class="fa-solid fa-circle-exclamation"></i> Pendente
+                </span>
                 {% endif %}
-            </li>
-            {% endfor %}
-        </ul>
+            </div>
+
+        </div>
+        {% endif %}
+        {% endfor %}
     </div>
 
 </div>
 {% endblock %}
+

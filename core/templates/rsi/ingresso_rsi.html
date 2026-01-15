@@ -4,45 +4,88 @@
 {% block title %}Ingresso — Redes e Sistemas Informáticos{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/rsi/ingresso.css' %}">
+<link rel="stylesheet" href="{% static 'css/rsi/ingresso.css' %}?v=remodel">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 {% endblock %}
 
 {% block content %}
-<div class="page-container">
+<div class="ingress-container">
 
-    <h1 class="page-title">Ingresso</h1>
+    <!-- HERO SECTION -->
+    <header class="ingress-hero">
+        <div class="badge-pill">CTESP em Redes e Sistemas Informáticos</div>
+        <h1>Ingresso</h1>
+        <p>
+            O curso de RSI admite estudantes através dos regimes gerais e especiais de acesso
+            ao ensino superior, seguindo as normas da ESTGV.
+        </p>
+    </header>
 
-    <p class="intro-text">
-        O curso de RSI admite estudantes através dos regimes gerais e especiais de acesso
-        ao ensino superior, seguindo as normas da ESTGV.
-    </p>
+    <!-- MAIN GRID -->
+    <main class="ingress-grid">
 
-    <section class="info-block">
-        <h2>Condições de Acesso</h2>
-        <ul>
-            <li>Concurso Nacional de Acesso ao Ensino Superior;</li>
-            <li>Maiores de 23 anos;</li>
-            <li>Titulares de cursos profissionais ou superiores;</li>
-            <li>Transferência, mudança de curso ou reingresso.</li>
-        </ul>
-    </section>
+        <!-- 1. CONDIÇÕES ACESSO -->
+        <section class="ingress-card highlight-card">
+            <div class="card-header">
+                <div class="icon-box"><i class="fa-solid fa-key"></i></div>
+                <h2>Condições de Acesso</h2>
+            </div>
+            <div class="card-body">
+                <p>O acesso pode ser realizado através das seguintes modalidades:</p>
+                <ul class="check-list">
+                    <li>Concurso Nacional de Acesso ao Ensino Superior;</li>
+                    <li>Maiores de 23 anos;</li>
+                    <li>Titulares de cursos profissionais ou superiores;</li>
+                    <li>Transferência, mudança de curso ou reingresso.</li>
+                </ul>
+            </div>
+        </section>
 
-    <section class="info-block">
-        <h2>Provas de Ingresso</h2>
-        <ul>
-            <li>Matemática A;</li>
-            <li>Física e Química A;</li>
-            <li>Matemática Aplicada às Ciências Sociais.</li>
-        </ul>
-    </section>
+        <!-- 2. PROVAS DE INGRESSO -->
+        <section class="ingress-card">
+            <div class="card-header">
+                <div class="icon-box blue"><i class="fa-solid fa-file-contract"></i></div>
+                <h2>Provas de Ingresso</h2>
+            </div>
+            <div class="card-body">
+                <p>Uma das seguintes provas:</p>
+                <ul class="check-list">
+                    <li>Matemática A;</li>
+                    <li>Física e Química A;</li>
+                    <li>Matemática Aplicada às Ciências Sociais.</li>
+                </ul>
+            </div>
+        </section>
 
-    <section class="info-block">
-        <h2>Classificações Mínimas</h2>
-        <ul>
-            <li>Prova de ingresso: <strong>95 pontos</strong></li>
-            <li>Nota de candidatura: <strong>95 pontos</strong></li>
-        </ul>
-    </section>
+        <!-- 3. CLASSIFICAÇÕES MÍNIMAS -->
+        <section class="ingress-card">
+            <div class="card-header">
+                <div class="icon-box green"><i class="fa-solid fa-ranking-star"></i></div>
+                <h2>Classificações Mínimas</h2>
+            </div>
+            <div class="card-body">
+                <p>Para a candidatura ser considerada, são exigidas as notas mínimas:</p>
+                <ul class="check-list">
+                    <li><strong>Prova de Ingresso:</strong> 95 pontos</li>
+                    <li><strong>Nota de Candidatura:</strong> 95 pontos</li>
+                </ul>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="ingress-footer">
+        <div class="footer-info">
+            <h3>Dúvidas sobre o acesso?</h3>
+            <p>Contacta os serviços académicos ou a direção de curso.</p>
+        </div>
+        <div class="footer-actions">
+            <a href="{% url 'home:contactos_rsi' %}" class="btn-clean">
+                Ver Contactos <i class="fa-solid fa-arrow-right"></i>
+            </a>
+        </div>
+    </footer>
 
 </div>
 {% endblock %}
