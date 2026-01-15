@@ -76,6 +76,13 @@ urlpatterns = [
     # MONGO TESTE
     path("testar-mongo/", testar_mongo, name="testar_mongo"),
 
+    # ==========================================
+    # SERVIR PDFs DO MongoDB (GridFS)
+    # ==========================================
+    # Esta rota captura pedidos de PDFs armazenados no MongoDB
+    # Formato: /pdf-mongodb/horario/FILE_ID/ ou /pdf-mongodb/avaliacao/FILE_ID/
+    path("pdf-mongodb/<str:tipo_pdf>/<str:file_id>/", views.servir_pdf_mongodb, name="servir_pdf_mongodb"),
+
 
     #DI
     path("di/", views.index_di, name="index_di"),
