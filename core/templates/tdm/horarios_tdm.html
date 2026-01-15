@@ -16,9 +16,9 @@
     <h1>Horários — TDM</h1>
     <p>Consulta aqui os horários.</p>
 
-    {% if request.session.user_id %}
+    {% if pode_inscrever %}
       <div class="inscricao-wrapper">
-        <a href="{% url 'home:inscricao_turno' %}" class="btn-inscricao">
+        <a href="{% url 'home:inscricao_turno_tdm' %}" class="btn-inscricao">
           <i class="fa-solid fa-check"></i>
           <span>Inscrever-me no Turno</span>
         </a>

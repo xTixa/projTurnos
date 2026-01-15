@@ -133,8 +133,21 @@ def horarios(request):
         registar_consulta_aluno(request.session.get("user_id"), request.session.get("user_nome", "desconhecido"), "horarios", {"curso": "EI"})
 
     horarios_por_ano = _listar_pdfs_por_ano(HorarioPDF, course_id=1)
+    
+    # Verificar se o aluno pertence ao curso de EI (id_curso = 1)
+    pode_inscrever = False
+    if "user_tipo" in request.session and request.session["user_tipo"] == "aluno":
+        try:
+            aluno = Aluno.objects.get(n_mecanografico=request.session["user_id"])
+            pode_inscrever = (aluno.id_curso_id == 1)  # Apenas alunos de EI
+        except Aluno.DoesNotExist:
+            pass
 
-    return render(request, "ei/horarios.html", {"horarios_por_ano": horarios_por_ano, "area": "ei"})
+    return render(request, "ei/horarios.html", {
+        "horarios_por_ano": horarios_por_ano,
+        "area": "ei",
+        "pode_inscrever": pode_inscrever
+    })
 
 #view para avaliacoes de EI
 def avaliacoes(request):
@@ -1130,9 +1143,26 @@ def plano_tdm(request):
 
 #view para mostrar os horarios TDM
 def horarios_tdm(request):
+    #se o utilizador for aluno, regista a consulta na coleçao do MongoDB
+    if "user_tipo" in request.session and request.session["user_tipo"] == "aluno":
+        registar_consulta_aluno(request.session.get("user_id"), request.session.get("user_nome", "desconhecido"), "horarios", {"curso": "TDM"})
+    
     horarios_por_ano = _listar_pdfs_por_ano(HorarioPDF, course_id=2)
+    
+    # Verificar se o aluno pertence ao curso de TDM (id_curso = 2)
+    pode_inscrever = False
+    if "user_tipo" in request.session and request.session["user_tipo"] == "aluno":
+        try:
+            aluno = Aluno.objects.get(n_mecanografico=request.session["user_id"])
+            pode_inscrever = (aluno.id_curso_id == 2)  # Apenas alunos de TDM
+        except Aluno.DoesNotExist:
+            pass
 
-    return render(request, "tdm/horarios_tdm.html", {"horarios_por_ano": horarios_por_ano, "area": "tdm"})
+    return render(request, "tdm/horarios_tdm.html", {
+        "horarios_por_ano": horarios_por_ano, 
+        "area": "tdm",
+        "pode_inscrever": pode_inscrever
+    })
 
 #view contactos TDM
 def contactos_tdm(request):

@@ -30,11 +30,13 @@
         </a>
     </li>
 
+    {% if is_aluno_tdm %}
     <li class="menu__item {% if request.resolver_match.url_name == 'inscricao_turno_tdm' %}is-active{% endif %}">
         <a href="{% url 'home:inscricao_turno_tdm' %}">
             <i class="fa-solid fa-calendar-check"></i> Inscrição em Turnos
         </a>
     </li>
+    {% endif %}
 
     <li class="menu__item {% if request.resolver_match.url_name == 'avaliacoes_tdm' %}is-active{% endif %}">
         <a href="{% url 'home:avaliacoes_tdm' %}">
