@@ -14,7 +14,8 @@ from bd2_projeto.services.mongo_service import (
     adicionar_log, listar_eventos_mongo, listar_logs, registar_auditoria_inscricao,
     validar_inscricao_disponivel, registar_consulta_aluno,
     registar_atividade_docente, registar_erro, registar_auditoria_user,
-    criar_proposta_estagio, listar_propostas_estagio, atualizar_proposta_estagio, deletar_proposta_estagio
+    criar_proposta_estagio, listar_propostas_estagio, atualizar_proposta_estagio, deletar_proposta_estagio,
+    adicionar_favorito, remover_favorito, verificar_favorito, listar_favoritos
 )
 # ==========================================
 # IMPORT DO SERVIÇO GridFS PARA PDFs
@@ -1764,6 +1765,16 @@ def dape(request):
     # Busca todas as propostas de estágio do MongoDB
     propostas = listar_propostas_estagio()
     
+    # Define proposta_id para todas as propostas
+    for proposta in propostas:
+        proposta["proposta_id"] = str(proposta.get("id_proposta", proposta.get("_id", "")))
+    
+    # Se o usuário for aluno, verifica quais propostas são favoritas
+    if request.session.get("user_tipo") == "aluno":
+        aluno_id = request.session.get("user_id")
+        for proposta in propostas:
+            proposta["is_favorito"] = verificar_favorito(aluno_id, proposta["proposta_id"])
+    
     # Regista a consulta para analytics
     adicionar_log(
         "visualizar_propostas_estagio",
@@ -1973,3 +1984,65 @@ def deletar_proposta_estagio_view(request, titulo):
         messages.error(request, "Erro ao deletar proposta de estágio.")
     
     return redirect("home:listar_propostas_estagio")
+
+# ==========================================
+# VIEWS PARA FAVORITOS
+# ==========================================
+
+def favoritos_view(request):
+    """View para mostrar as propostas favoritas do aluno"""
+    if request.session.get("user_tipo") != "aluno":
+        messages.error(request, "Apenas alunos podem ver seus favoritos.")
+        return redirect("home:index")
+    
+    aluno_id = request.session.get("user_id")
+    
+    # Busca propostas favoritas
+    propostas_favoritas = listar_favoritos(aluno_id)
+    
+    # Adiciona proposta_id para cada proposta
+    for proposta in propostas_favoritas:
+        proposta["proposta_id"] = str(proposta.get("id_proposta", proposta.get("_id", "")))
+    
+    # Regista consulta
+    adicionar_log(
+        "visualizar_favoritos",
+        {"aluno_id": aluno_id, "total_favoritos": len(propostas_favoritas)},
+        request
+    )
+    
+    return render(request, "dape/favoritos.html", {
+        "propostas": propostas_favoritas,
+        "area": "dape"
+    })
+
+def toggle_favorito_view(request):
+    """View para adicionar/remover favorito via AJAX"""
+    print("toggle_favorito_view called")
+    try:
+        if request.method == "POST" and request.session.get("user_tipo") == "aluno":
+            proposta_id = request.POST.get("proposta_id")
+            aluno_id = request.session.get("user_id")
+            print(f"proposta_id: {proposta_id}, aluno_id: {aluno_id}")
+            
+            if proposta_id and aluno_id:
+                # Verifica se já é favorito
+                is_favorito = verificar_favorito(aluno_id, proposta_id)
+                print(f"is_favorito: {is_favorito}")
+                
+                if is_favorito:
+                    # Remove dos favoritos
+                    remover_favorito(aluno_id, proposta_id)
+                    adicionar_log("remover_favorito", {"aluno_id": aluno_id, "proposta_id": proposta_id}, request)
+                    return JsonResponse({"success": True, "action": "removed"})
+                else:
+                    # Adiciona aos favoritos
+                    adicionar_favorito(aluno_id, proposta_id)
+                    adicionar_log("adicionar_favorito", {"aluno_id": aluno_id, "proposta_id": proposta_id}, request)
+                    return JsonResponse({"success": True, "action": "added"})
+        
+        print("Invalid request")
+        return JsonResponse({"success": False, "error": "Invalid request"})
+    except Exception as e:
+        print(f"Exception in toggle_favorito_view: {e}")
+        return JsonResponse({"success": False, "error": str(e)})

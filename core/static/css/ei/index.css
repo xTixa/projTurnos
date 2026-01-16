@@ -318,11 +318,32 @@ body .main-content {
     color: #ff6b6b;
 }
 
+.btn-fav.favorited {
+    color: #ff6b6b;
+}
+
+.btn-fav.favorited:hover {
+    color: #ff4757;
+}
+
 /* Card vazio */
 .ei-card.empty {
     text-align: center;
     color: var(--text-muted);
     font-style: italic;
+}
+
+.empty-state {
+    padding: 2rem;
+}
+
+.empty-state h3 {
+    color: var(--text-main);
+    margin-bottom: 0.5rem;
+}
+
+.empty-state p {
+    margin-bottom: 1rem;
 }
 
 /* ===========================

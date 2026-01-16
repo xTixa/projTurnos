@@ -1,28 +1,27 @@
 {% extends 'home/base.html' %}
 {% load static %}
 
-{% block title %}Propostas para Projeto/Estágio — Engenharia Informática{% endblock %}
+{% block title %}Favoritos — Engenharia Informática{% endblock %}
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/ei/index.css' %}?v=19">
 {% endblock %}
 
 {% block content %}
-{% csrf_token %}
 <div class="ei-layout">
 
   <!-- HERO SECTION -->
   <section class="ei-hero">
     <div class="ei-hero__text">
-      <h1>Propostas para Projeto/Estágio</h1>
-      <p>{{ propostas|length }} oportunidades disponíveis para estudantes de Engenharia Informática</p>
+      <h1>Propostas Favoritas</h1>
+      <p>{{ propostas|length }} propostas guardadas nos seus favoritos</p>
     </div>
     <div class="ei-hero__illustration">
-      <img src="{% static 'img/dape.png' %}" alt="Propostas DAPE" class="hero-photo">
+      <img src="{% static 'img/dape.png' %}" alt="Favoritos DAPE" class="hero-photo">
     </div>
   </section>
 
-  <!-- PROPOSTAS EM CARDS -->
+  <!-- PROPOSTAS FAVORITAS EM CARDS -->
   <section class="ei-section">
     <div class="ei-cards">
       {% for proposta in propostas %}
@@ -58,16 +57,21 @@
             <i class="fa-regular fa-envelope"></i> Contactar
           </a>
           {% endif %}
-          {% if request.session.user_tipo == "aluno" %}
-          <button class="btn-fav {% if proposta.is_favorito %}favorited{% endif %}" data-proposta-id="{{ proposta.proposta_id }}">
-            <i class="fa-{% if proposta.is_favorito %}solid{% else %}regular{% endif %} fa-star"></i>
+          <button class="btn-fav favorited" data-proposta-id="{{ proposta.proposta_id }}">
+            <i class="fa-solid fa-star"></i>
           </button>
-          {% endif %}
         </div>
       </article>
       {% empty %}
       <article class="ei-card empty">
-        <p>Nenhuma proposta disponível no momento.</p>
+        <div class="empty-state">
+          <i class="fa-regular fa-star fa-3x" style="color: #ddd; margin-bottom: 1rem;"></i>
+          <h3>Ainda não tem favoritos</h3>
+          <p>Volte à página principal e clique na estrela das propostas que lhe interessam.</p>
+          <a href="{% url 'home:index_dape' %}" class="btn btn-primary" style="margin-top: 1rem;">
+            Ver Propostas Disponíveis
+          </a>
+        </div>
       </article>
       {% endfor %}
     </div>
@@ -121,6 +125,15 @@ document.addEventListener('DOMContentLoaded', function() {
                         icon.classList.toggle('fa-solid');
                         icon.classList.toggle('fa-regular');
                         console.error('Erro ao atualizar favorito');
+                    } else {
+                        // On success, remove the card from the page
+                        this.closest('article').remove();
+                        // Update the count in the hero
+                        const heroP = document.querySelector('.ei-hero__text p');
+                        if (heroP) {
+                            const currentCount = parseInt(heroP.textContent.match(/\d+/)[0]);
+                            heroP.textContent = heroP.textContent.replace(/\d+/, currentCount - 1);
+                        }
                     }
                 })
                 .catch(error => {

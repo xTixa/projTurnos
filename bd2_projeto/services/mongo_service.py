@@ -36,6 +36,11 @@ def criar_indices():
         db.proposta_estagio.create_index("status")
         db.proposta_estagio.create_index([("aluno_id", 1), ("timestamp", -1)])
         
+        # Índices para favoritos
+        db.favoritos.create_index("aluno_id")
+        db.favoritos.create_index("proposta_id")
+        db.favoritos.create_index([("aluno_id", 1), ("proposta_id", 1)], unique=True)
+        
         print("✓ Índices MongoDB criados com sucesso")
     except Exception as e:
         print(f"⚠ Erro ao criar índices: {str(e)}")
@@ -251,6 +256,73 @@ def deletar_proposta_estagio(aluno_id, titulo):
     """
     result = db.proposta_estagio.delete_one({"aluno_id": aluno_id, "titulo": titulo})
     return result.deleted_count > 0
+
+# ==========================================
+# FAVORITOS
+# ==========================================
+
+def adicionar_favorito(aluno_id, proposta_id):
+    """
+    Adiciona uma proposta aos favoritos do aluno
+    
+    Args:
+        aluno_id: ID do aluno
+        proposta_id: ID da proposta (usando _id do MongoDB)
+    """
+    favorito = {
+        "aluno_id": aluno_id,
+        "proposta_id": proposta_id,
+        "timestamp": datetime.now(),
+        "data_formatada": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    }
+    
+    # Evita duplicatas
+    db.favoritos.update_one(
+        {"aluno_id": aluno_id, "proposta_id": proposta_id},
+        {"$set": favorito},
+        upsert=True
+    )
+    return True
+
+def remover_favorito(aluno_id, proposta_id):
+    """
+    Remove uma proposta dos favoritos do aluno
+    
+    Args:
+        aluno_id: ID do aluno
+        proposta_id: ID da proposta
+    """
+    result = db.favoritos.delete_one({"aluno_id": aluno_id, "proposta_id": proposta_id})
+    return result.deleted_count > 0
+
+def verificar_favorito(aluno_id, proposta_id):
+    """
+    Verifica se uma proposta é favorita do aluno
+    
+    Args:
+        aluno_id: ID do aluno
+        proposta_id: ID da proposta
+    """
+    return db.favoritos.find_one({"aluno_id": aluno_id, "proposta_id": proposta_id}) is not None
+
+def listar_favoritos(aluno_id):
+    """
+    Lista todas as propostas favoritas de um aluno
+    
+    Args:
+        aluno_id: ID do aluno
+    """
+    # Busca os favoritos do aluno
+    favoritos = list(db.favoritos.find({"aluno_id": aluno_id}, {"_id": 0, "proposta_id": 1}))
+    
+    if not favoritos:
+        return []
+    
+    # Busca as propostas correspondentes
+    proposta_ids = [int(fav["proposta_id"]) for fav in favoritos]
+    propostas = list(db.proposta_estagio.find({"id_proposta": {"$in": proposta_ids}}))
+    
+    return propostas
 
 # ==========================================
 # AGGREGATIONS — ANÁLISE DE DADOS

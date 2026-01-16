@@ -149,5 +149,7 @@ urlpatterns = [
     path("proposta-estagio/listar/", views.listar_propostas_estagio_view, name="listar_propostas_estagio"),
     path("proposta-estagio/atualizar/<str:titulo>/", views.atualizar_proposta_estagio_view, name="atualizar_proposta_estagio"),
     path("proposta-estagio/deletar/<str:titulo>/", views.deletar_proposta_estagio_view, name="deletar_proposta_estagio"),
+    path("favoritos/", views.favoritos_view, name="favoritos"),
+    path("api/favoritos/toggle/", views.toggle_favorito_view, name="toggle_favorito"),
 ]
 
