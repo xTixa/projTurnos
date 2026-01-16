@@ -10,16 +10,8 @@
 {% block content %}
 <div class="ei-layout">
 
-  <!-- HERO SECTION -->
-  <section class="ei-hero">
-    <div class="ei-hero__text">
-      <h1>Propostas Favoritas</h1>
-      <p>{{ propostas|length }} propostas guardadas nos seus favoritos</p>
-    </div>
-    <div class="ei-hero__illustration">
-      <img src="{% static 'img/dape.png' %}" alt="Favoritos DAPE" class="hero-photo">
-    </div>
-  </section>
+  <h1 style="font-size: 2.75rem; font-weight: 800; color: #0f172a; margin-bottom: 1.25rem; line-height: 1.2; letter-spacing: -0.02em; text-align: left;">Propostas Favoritas</h1>
+  <p style="font-size: 1.125rem; line-height: 1.7; color: #64748b; margin-bottom: 2rem; text-align: left;">{{ propostas|length }} propostas guardadas nos seus favoritos</p>
 
   <!-- PROPOSTAS FAVORITAS EM CARDS -->
   <section class="ei-section">

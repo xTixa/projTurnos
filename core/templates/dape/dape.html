@@ -11,16 +11,8 @@
 {% csrf_token %}
 <div class="ei-layout">
 
-  <!-- HERO SECTION -->
-  <section class="ei-hero">
-    <div class="ei-hero__text">
-      <h1>Propostas para Projeto/Estágio</h1>
-      <p>{{ propostas|length }} oportunidades disponíveis para estudantes de Engenharia Informática</p>
-    </div>
-    <div class="ei-hero__illustration">
-      <img src="{% static 'img/dape.png' %}" alt="Propostas DAPE" class="hero-photo">
-    </div>
-  </section>
+  <h1 style="font-size: 2.75rem; font-weight: 800; color: #0f172a; margin-bottom: 1.25rem; line-height: 1.2; letter-spacing: -0.02em; text-align: left;">Propostas para Projeto/Estágio</h1>
+  <p style="font-size: 1.125rem; line-height: 1.7; color: #64748b; margin-bottom: 2rem; text-align: left;">{{ propostas|length }} propostas disponíveis</p>
 
   <!-- PROPOSTAS EM CARDS -->
   <section class="ei-section">
@@ -58,6 +50,7 @@
             <i class="fa-regular fa-envelope"></i> Contactar
           </a>
           {% endif %}
+
           {% if request.session.user_tipo == "aluno" %}
           <button class="btn-fav {% if proposta.is_favorito %}favorited{% endif %}" data-proposta-id="{{ proposta.proposta_id }}">
             <i class="fa-{% if proposta.is_favorito %}solid{% else %}regular{% endif %} fa-star"></i>
