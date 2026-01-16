@@ -1,0 +1,27 @@
+<ul class="menu">
+
+    <li class="menu__item {% if request.resolver_match.url_name == 'index_dape' %}is-active{% endif %}">
+        <a href="{% url 'home:index_dape' %}">
+            <i class="fa-solid fa-house"></i> Home
+        </a>
+    </li>
+
+    <li class="menu__item">
+        <a href="#">
+            <i class="fa-regular fa-file"></i> Documentos
+        </a>
+    </li>
+
+    <li class="menu__item">
+        <a href="#">
+            <i class="fa-regular fa-star"></i> Favoritos
+        </a>
+    </li>
+
+    <li class="menu__item">
+        <a href="#">
+            <i class="fa-regular fa-address-book"></i> Contactos
+        </a>
+    </li>
+
+</ul>

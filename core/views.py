@@ -1771,7 +1771,10 @@ def dape(request):
         request
     )
     
-    return render(request, "dape/dape.html", {"propostas": propostas})
+    return render(request, "dape/dape.html", {
+        "propostas": propostas,
+        "area": "dape"
+    })
 
 
 # ==========================================
