@@ -1,0 +1,72 @@
+{% extends 'home/base.html' %}
+{% load static %}
+
+{% block title %}Propostas para Projeto/Estágio — Engenharia Informática{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/ei/index.css' %}?v=19">
+{% endblock %}
+
+{% block content %}
+<div class="ei-layout">
+
+  <!-- HERO SECTION -->
+  <section class="ei-hero">
+    <div class="ei-hero__text">
+      <h1>Propostas para Projeto/Estágio</h1>
+      <p>{{ propostas|length }} oportunidades disponíveis para estudantes de Engenharia Informática</p>
+    </div>
+    <div class="ei-hero__illustration">
+      <img src="{% static 'img/dape.png' %}" alt="Propostas DAPE" class="hero-photo">
+    </div>
+  </section>
+
+  <!-- PROPOSTAS EM CARDS -->
+  <section class="ei-section">
+    <div class="ei-cards">
+      {% for proposta in propostas %}
+      <article class="ei-card">
+        <div class="ei-card__logo">
+          <!-- Logo da empresa baseado na entidade -->
+          {% if proposta.entidade|lower == "critical software sa" %}
+            <img src="{% static 'img/empresas/critical.png' %}" alt="{{ proposta.entidade }}">
+          {% elif proposta.entidade|lower == "deloitte" %}
+            <img src="{% static 'img/empresas/deloitte.png' %}" alt="{{ proposta.entidade }}">
+          {% else %}
+            <!-- Logo placeholder para empresas sem logo específico -->
+            <div class="logo-placeholder">
+              <i class="fa-solid fa-building"></i>
+            </div>
+          {% endif %}
+        </div>
+        <h3>{{ proposta.titulo }}</h3>
+        <p class="entidade">{{ proposta.entidade }}</p>
+
+        {% if proposta.requisitos %}
+        <p class="requisitos"><strong>Requisitos:</strong> {{ proposta.requisitos }}</p>
+        {% endif %}
+
+        {% if proposta.modelo %}
+        <p class="modelo"><strong>Modelo:</strong> {{ proposta.modelo }}</p>
+        {% endif %}
+
+        <div class="card-actions">
+          <a href="#" class="btn btn-primary btn-sm">Ver detalhes</a>
+          {% if proposta.email %}
+          <a href="mailto:{{ proposta.email }}" class="btn btn-secondary btn-sm">
+            <i class="fa-regular fa-envelope"></i> Contactar
+          </a>
+          {% endif %}
+          <button class="btn-fav"><i class="fa-regular fa-star"></i></button>
+        </div>
+      </article>
+      {% empty %}
+      <article class="ei-card empty">
+        <p>Nenhuma proposta disponível no momento.</p>
+      </article>
+      {% endfor %}
+    </div>
+  </section>
+
+</div>
+{% endblock %}

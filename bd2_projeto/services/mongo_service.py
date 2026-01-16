@@ -30,9 +30,11 @@ def criar_indices():
         db.atividades_docentes.create_index("timestamp")
         db.atividades_docentes.create_index("docente_id")
         
-        # Índices para erros
-        db.erros.create_index("timestamp")
-        db.erros.create_index("funcao")
+        # Índices para propostas de estágio
+        db.proposta_estagio.create_index("timestamp")
+        db.proposta_estagio.create_index("aluno_id")
+        db.proposta_estagio.create_index("status")
+        db.proposta_estagio.create_index([("aluno_id", 1), ("timestamp", -1)])
         
         print("✓ Índices MongoDB criados com sucesso")
     except Exception as e:
@@ -178,6 +180,77 @@ def registar_atividade_docente(docente_id, docente_nome, tipo_atividade, detalhe
     }
     db.atividades_docentes.insert_one(atividade)
     return atividade
+
+# ==========================================
+# PROPOSTAS DE ESTÁGIO
+# ==========================================
+
+def criar_proposta_estagio(aluno_id, aluno_nome, titulo, descricao, empresa, orientador=None, status="pendente"):
+    """
+    Cria uma nova proposta de estágio
+    
+    Args:
+        aluno_id: ID do aluno
+        aluno_nome: Nome do aluno
+        titulo: Título da proposta
+        descricao: Descrição detalhada
+        empresa: Nome da empresa
+        orientador: Nome do orientador (opcional)
+        status: Status inicial ('pendente', 'aprovada', 'rejeitada')
+    """
+    proposta = {
+        "aluno_id": aluno_id,
+        "aluno_nome": aluno_nome,
+        "titulo": titulo,
+        "descricao": descricao,
+        "empresa": empresa,
+        "orientador": orientador,
+        "status": status,
+        "timestamp": datetime.now(),
+        "data_formatada": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    }
+    result = db.proposta_estagio.insert_one(proposta)
+    proposta["_id"] = result.inserted_id
+    return proposta
+
+def listar_propostas_estagio(filtro=None, limite=100):
+    """
+    Lista propostas de estágio com filtro opcional
+    
+    Args:
+        filtro: Dict com filtros (ex: {"status": "pendente"})
+        limite: Número máximo de propostas a retornar
+    """
+    return list(db.proposta_estagio.find(filtro or {}, {"_id": 0}).sort("timestamp", -1).limit(limite))
+
+def atualizar_proposta_estagio(aluno_id, titulo, updates):
+    """
+    Atualiza uma proposta de estágio
+    
+    Args:
+        aluno_id: ID do aluno
+        titulo: Título da proposta (para identificar)
+        updates: Dict com campos a atualizar
+    """
+    updates["timestamp"] = datetime.now()
+    updates["data_formatada"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    
+    result = db.proposta_estagio.update_one(
+        {"aluno_id": aluno_id, "titulo": titulo},
+        {"$set": updates}
+    )
+    return result.modified_count > 0
+
+def deletar_proposta_estagio(aluno_id, titulo):
+    """
+    Deleta uma proposta de estágio
+    
+    Args:
+        aluno_id: ID do aluno
+        titulo: Título da proposta
+    """
+    result = db.proposta_estagio.delete_one({"aluno_id": aluno_id, "titulo": titulo})
+    return result.deleted_count > 0
 
 # ==========================================
 # AGGREGATIONS — ANÁLISE DE DADOS
