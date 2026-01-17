@@ -206,6 +206,37 @@ body .main-content {
 .ei-card__icon.cyan { background: linear-gradient(135deg, #06b6d4, #0891b2); box-shadow: 0 4px 10px rgba(8, 145, 178, 0.3); }
 .ei-card__icon.blue { background: linear-gradient(135deg, #3b82f6, #2563eb); box-shadow: 0 4px 10px rgba(37, 99, 235, 0.3); }
 
+/* Logo da empresa nos cards */
+.ei-card__logo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 80px;
+    height: 80px;
+    margin-bottom: 1.5rem;
+    border-radius: var(--radius-md);
+    overflow: hidden;
+}
+
+.ei-card__logo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: var(--radius-md);
+}
+
+/* Placeholder para empresas sem logo */
+.logo-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, var(--primary-light), var(--primary));
+    color: white;
+    font-size: 2rem;
+}
+
 .ei-card h3 {
     font-size: 1.25rem;
     font-weight: 700;
@@ -237,6 +268,81 @@ body .main-content {
     font-size: 0.85rem;
 }
 
+/* Estilos específicos para propostas DAPE */
+.ei-card .entidade {
+    font-size: 1rem;
+    color: var(--primary);
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.ei-card .requisitos,
+.ei-card .modelo {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    margin-bottom: 0.5rem;
+    line-height: 1.4;
+}
+
+.ei-card .requisitos strong,
+.ei-card .modelo strong {
+    color: var(--text-main);
+}
+
+.card-actions {
+    margin-top: auto;
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.card-actions .btn {
+    font-size: 0.85rem;
+    padding: 0.5rem 0.75rem;
+}
+
+.btn-fav {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: var(--radius-sm);
+    transition: color 0.2s ease;
+}
+
+.btn-fav:hover {
+    color: #ff6b6b;
+}
+
+.btn-fav.favorited {
+    color: #ff6b6b;
+}
+
+.btn-fav.favorited:hover {
+    color: #ff4757;
+}
+
+/* Card vazio */
+.ei-card.empty {
+    text-align: center;
+    color: var(--text-muted);
+    font-style: italic;
+}
+
+.empty-state {
+    padding: 2rem;
+}
+
+.empty-state h3 {
+    color: var(--text-main);
+    margin-bottom: 0.5rem;
+}
+
+.empty-state p {
+    margin-bottom: 1rem;
+}
 
 /* ===========================
    INNOVATION CARDS (New Shortcuts)

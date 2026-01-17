@@ -13,7 +13,9 @@ from django.contrib.auth.models import User
 from bd2_projeto.services.mongo_service import (
     adicionar_log, listar_eventos_mongo, listar_logs, registar_auditoria_inscricao,
     validar_inscricao_disponivel, registar_consulta_aluno,
-    registar_atividade_docente, registar_erro, registar_auditoria_user
+    registar_atividade_docente, registar_erro, registar_auditoria_user,
+    criar_proposta_estagio, listar_propostas_estagio, atualizar_proposta_estagio, deletar_proposta_estagio,
+    adicionar_favorito, remover_favorito, verificar_favorito, listar_favoritos
 )
 # ==========================================
 # IMPORT DO SERVIÇO GridFS PARA PDFs
@@ -1760,7 +1762,36 @@ def forum(request):
 
 #view pagina inicial DAPE
 def dape(request):
-    return render(request, "dape/dape.html")
+    # Busca todas as propostas de estágio do MongoDB
+    propostas = listar_propostas_estagio()
+    
+    # Define proposta_id para todas as propostas
+    for proposta in propostas:
+        proposta["proposta_id"] = str(proposta.get("id_proposta", proposta.get("_id", "")))
+    
+    # Se o usuário for aluno, verifica quais propostas são favoritas
+    if request.session.get("user_tipo") == "aluno":
+        aluno_id = request.session.get("user_id")
+        for proposta in propostas:
+            proposta["is_favorito"] = verificar_favorito(aluno_id, proposta["proposta_id"])
+    
+    # Regista a consulta para analytics
+    adicionar_log(
+        "visualizar_propostas_estagio",
+        {"total_propostas": len(propostas)},
+        request
+    )
+    
+    return render(request, "dape/dape.html", {
+        "propostas": propostas,
+        "area": "dape"
+    })
+
+# View para contactos DAPE
+def contactos_dape(request):
+    return render(request, "dape/contactos.html", {
+        "area": "dape"
+    })
 
 
 # ==========================================
@@ -1821,3 +1852,203 @@ def servir_pdf_mongodb(request, file_id, tipo_pdf):
         # Se algo correr mal, retorna erro 404
         from django.http import Http404
         raise Http404(f"PDF não encontrado no MongoDB: {str(e)}")
+
+# ==========================================
+# VIEWS PARA PROPOSTAS DE ESTÁGIO
+# ==========================================
+
+@login_required
+def criar_proposta_estagio_view(request):
+    """View para criar uma nova proposta de estágio"""
+    if request.method == "POST":
+        titulo = request.POST.get("titulo")
+        descricao = request.POST.get("descricao")
+        empresa = request.POST.get("empresa")
+        orientador = request.POST.get("orientador")
+        
+        # Verifica se é aluno (baseado na sessão)
+        if request.session.get("user_tipo") != "aluno":
+            messages.error(request, "Apenas alunos podem criar propostas de estágio.")
+            return redirect("home:index")
+        
+        aluno_id = request.session.get("user_id")
+        aluno_nome = request.session.get("user_nome")
+        
+        # Cria a proposta no MongoDB
+        proposta = criar_proposta_estagio(
+            aluno_id=aluno_id,
+            aluno_nome=aluno_nome,
+            titulo=titulo,
+            descricao=descricao,
+            empresa=empresa,
+            orientador=orientador
+        )
+        
+        # Regista log da criação
+        adicionar_log(
+            "criar_proposta_estagio",
+            {
+                "aluno_id": aluno_id,
+                "titulo": titulo,
+                "empresa": empresa
+            },
+            request
+        )
+        
+        messages.success(request, "Proposta de estágio criada com sucesso!")
+        return redirect("home:listar_propostas_estagio")
+    
+    return render(request, "proposta_estagio/criar.html")
+
+@login_required
+def listar_propostas_estagio_view(request):
+    """View para listar propostas de estágio do aluno"""
+    if request.session.get("user_tipo") != "aluno":
+        messages.error(request, "Apenas alunos podem ver suas propostas de estágio.")
+        return redirect("home:index")
+    
+    aluno_id = request.session.get("user_id")
+    
+    # Lista propostas do aluno
+    propostas = listar_propostas_estagio({"aluno_id": aluno_id})
+    
+    # Regista consulta
+    adicionar_log(
+        "listar_propostas_estagio",
+        {"aluno_id": aluno_id, "total_propostas": len(propostas)},
+        request
+    )
+    
+    return render(request, "dape/dape.html", {"propostas": propostas})
+
+@login_required
+def atualizar_proposta_estagio_view(request, titulo):
+    """View para atualizar uma proposta de estágio"""
+    if request.session.get("user_tipo") != "aluno":
+        messages.error(request, "Apenas alunos podem atualizar propostas de estágio.")
+        return redirect("home:index")
+    
+    aluno_id = request.session.get("user_id")
+    
+    if request.method == "POST":
+        updates = {}
+        if request.POST.get("titulo"):
+            updates["titulo"] = request.POST.get("titulo")
+        if request.POST.get("descricao"):
+            updates["descricao"] = request.POST.get("descricao")
+        if request.POST.get("empresa"):
+            updates["empresa"] = request.POST.get("empresa")
+        if request.POST.get("orientador"):
+            updates["orientador"] = request.POST.get("orientador")
+        
+        # Atualiza a proposta
+        sucesso = atualizar_proposta_estagio(aluno_id, titulo, updates)
+        
+        if sucesso:
+            # Regista log da atualização
+            adicionar_log(
+                "atualizar_proposta_estagio",
+                {"aluno_id": aluno_id, "titulo_antigo": titulo, "updates": updates},
+                request
+            )
+            messages.success(request, "Proposta de estágio atualizada com sucesso!")
+        else:
+            messages.error(request, "Erro ao atualizar proposta de estágio.")
+        
+        return redirect("home:listar_propostas_estagio")
+    
+    # Busca a proposta atual para preencher o formulário
+    propostas = listar_propostas_estagio({"aluno_id": aluno_id, "titulo": titulo})
+    if not propostas:
+        messages.error(request, "Proposta não encontrada.")
+        return redirect("home:listar_propostas_estagio")
+    
+    proposta = propostas[0]
+    return render(request, "dape/dape.html", {"proposta": proposta})
+
+@login_required
+def deletar_proposta_estagio_view(request, titulo):
+    """View para deletar uma proposta de estágio"""
+    if request.session.get("user_tipo") != "aluno":
+        messages.error(request, "Apenas alunos podem deletar propostas de estágio.")
+        return redirect("home:index")
+    
+    aluno_id = request.session.get("user_id")
+    
+    # Deleta a proposta
+    sucesso = deletar_proposta_estagio(aluno_id, titulo)
+    
+    if sucesso:
+        # Regista log da deleção
+        adicionar_log(
+            "deletar_proposta_estagio",
+            {"aluno_id": aluno_id, "titulo": titulo},
+            request
+        )
+        messages.success(request, "Proposta de estágio deletada com sucesso!")
+    else:
+        messages.error(request, "Erro ao deletar proposta de estágio.")
+    
+    return redirect("home:listar_propostas_estagio")
+
+# ==========================================
+# VIEWS PARA FAVORITOS
+# ==========================================
+
+def favoritos_view(request):
+    """View para mostrar as propostas favoritas do aluno"""
+    if request.session.get("user_tipo") != "aluno":
+        messages.error(request, "Apenas alunos podem ver seus favoritos.")
+        return redirect("home:index")
+    
+    aluno_id = request.session.get("user_id")
+    
+    # Busca propostas favoritas
+    propostas_favoritas = listar_favoritos(aluno_id)
+    
+    # Adiciona proposta_id para cada proposta
+    for proposta in propostas_favoritas:
+        proposta["proposta_id"] = str(proposta.get("id_proposta", proposta.get("_id", "")))
+    
+    # Regista consulta
+    adicionar_log(
+        "visualizar_favoritos",
+        {"aluno_id": aluno_id, "total_favoritos": len(propostas_favoritas)},
+        request
+    )
+    
+    return render(request, "dape/favoritos.html", {
+        "propostas": propostas_favoritas,
+        "area": "dape"
+    })
+
+def toggle_favorito_view(request):
+    """View para adicionar/remover favorito via AJAX"""
+    print("toggle_favorito_view called")
+    try:
+        if request.method == "POST" and request.session.get("user_tipo") == "aluno":
+            proposta_id = request.POST.get("proposta_id")
+            aluno_id = request.session.get("user_id")
+            print(f"proposta_id: {proposta_id}, aluno_id: {aluno_id}")
+            
+            if proposta_id and aluno_id:
+                # Verifica se já é favorito
+                is_favorito = verificar_favorito(aluno_id, proposta_id)
+                print(f"is_favorito: {is_favorito}")
+                
+                if is_favorito:
+                    # Remove dos favoritos
+                    remover_favorito(aluno_id, proposta_id)
+                    adicionar_log("remover_favorito", {"aluno_id": aluno_id, "proposta_id": proposta_id}, request)
+                    return JsonResponse({"success": True, "action": "removed"})
+                else:
+                    # Adiciona aos favoritos
+                    adicionar_favorito(aluno_id, proposta_id)
+                    adicionar_log("adicionar_favorito", {"aluno_id": aluno_id, "proposta_id": proposta_id}, request)
+                    return JsonResponse({"success": True, "action": "added"})
+        
+        print("Invalid request")
+        return JsonResponse({"success": False, "error": "Invalid request"})
+    except Exception as e:
+        print(f"Exception in toggle_favorito_view: {e}")
+        return JsonResponse({"success": False, "error": str(e)})
