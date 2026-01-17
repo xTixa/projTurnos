@@ -19,11 +19,9 @@
       {% for proposta in propostas %}
       <article class="ei-card">
         <div class="ei-card__logo">
-          <!-- Logo da empresa baseado na entidade -->
-          {% if proposta.entidade|lower == "critical software sa" %}
-            <img src="{% static 'img/empresas/critical.png' %}" alt="{{ proposta.entidade }}">
-          {% elif proposta.entidade|lower == "deloitte" %}
-            <img src="{% static 'img/empresas/deloitte.png' %}" alt="{{ proposta.entidade }}">
+          <!-- Logo da empresa baseado no campo logo -->
+          {% if proposta.logo %}
+            <img src="{% static 'img/empresas/'|add:proposta.logo|add:'.png' %}" alt="{{ proposta.entidade }}">
           {% else %}
             <!-- Logo placeholder para empresas sem logo específico -->
             <div class="logo-placeholder">
