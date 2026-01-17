@@ -143,6 +143,7 @@ urlpatterns = [
 
     # DAPE
     path("dape/", views.dape, name="index_dape"),
+    path("dape/contactos/", views.contactos_dape, name="contactos_dape"),
 
     # Propostas de Estágio
     path("proposta-estagio/criar/", views.criar_proposta_estagio_view, name="criar_proposta_estagio"),

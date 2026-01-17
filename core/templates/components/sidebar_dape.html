@@ -18,8 +18,8 @@
         </a>
     </li>
 
-    <li class="menu__item">
-        <a href="#">
+    <li class="menu__item {% if request.resolver_match.url_name == 'contactos_dape' %}is-active{% endif %}">
+        <a href="{% url 'home:contactos_dape' %}">
             <i class="fa-regular fa-address-book"></i> Contactos
         </a>
     </li>
