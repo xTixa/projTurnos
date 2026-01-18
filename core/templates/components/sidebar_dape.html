@@ -6,8 +6,8 @@
         </a>
     </li>
 
-    <li class="menu__item">
-        <a href="#">
+    <li class="menu__item {% if request.resolver_match.url_name == 'documentos_dape' %}is-active{% endif %}">
+        <a href="{% url 'home:documentos_dape' %}">
             <i class="fa-regular fa-file"></i> Documentos
         </a>
     </li>

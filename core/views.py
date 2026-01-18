@@ -1793,6 +1793,12 @@ def contactos_dape(request):
         "area": "dape"
     })
 
+# View para documentos DAPE
+def documentos_dape(request):
+    return render(request, "dape/documentos.html", {
+        "area": "dape"
+    })
+
 
 # ==========================================
 # VIEW PARA SERVIR PDFs DO MongoDB (GridFS)
