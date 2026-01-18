@@ -153,5 +153,7 @@ urlpatterns = [
     path("proposta-estagio/deletar/<str:titulo>/", views.deletar_proposta_estagio_view, name="deletar_proposta_estagio"),
     path("favoritos/", views.favoritos_view, name="favoritos"),
     path("api/favoritos/toggle/", views.toggle_favorito_view, name="toggle_favorito"),
+    path("proposta/<int:id_proposta>/", views.proposta_detalhes, name="proposta_detalhes"
+),
 ]
 

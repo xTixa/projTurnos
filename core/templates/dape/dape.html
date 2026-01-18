@@ -42,7 +42,14 @@
         {% endif %}
 
         <div class="card-actions">
-          <a href="#" class="btn btn-primary btn-sm">Ver detalhes</a>
+        <a
+          href="{% url 'home:proposta_detalhes' proposta.proposta_id %}"
+          class="btn btn-primary btn-sm"
+        >
+          Ver detalhes
+        </a>
+
+
           {% if proposta.email %}
           <a href="mailto:{{ proposta.email }}" class="btn btn-secondary btn-sm">
             <i class="fa-regular fa-envelope"></i> Contactar

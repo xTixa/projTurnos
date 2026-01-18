@@ -2058,3 +2058,43 @@ def toggle_favorito_view(request):
     except Exception as e:
         print(f"Exception in toggle_favorito_view: {e}")
         return JsonResponse({"success": False, "error": str(e)})
+    
+from django.http import Http404
+
+def proposta_detalhes(request, id_proposta):
+    """
+    View para mostrar os detalhes de uma proposta de estágio
+    (dados vêm do MongoDB)
+    """
+
+    # Buscar todas as propostas do MongoDB
+    propostas = listar_propostas_estagio()
+
+    # Encontrar a proposta correta pelo id_proposta
+    proposta = next(
+        (p for p in propostas if str(p.get("id_proposta")) == str(id_proposta)),
+        None
+    )
+
+    if not proposta:
+        raise Http404("Proposta não encontrada")
+
+    # Normalizar ID (como fazes no dape)
+    proposta["proposta_id"] = str(proposta.get("id_proposta", proposta.get("_id", "")))
+
+    # Verificar favorito (se aluno)
+    if request.session.get("user_tipo") == "aluno":
+        aluno_id = request.session.get("user_id")
+        proposta["is_favorito"] = verificar_favorito(aluno_id, proposta["proposta_id"])
+
+    # Registar acesso
+    adicionar_log(
+        "visualizar_detalhes_proposta",
+        {"proposta_id": proposta["proposta_id"]},
+        request
+    )
+
+    return render(request, "dape/detalhes.html", {
+        "proposta": proposta,
+        "area": "dape"
+    })

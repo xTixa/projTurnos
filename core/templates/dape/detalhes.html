@@ -1,0 +1,77 @@
+{% extends "home/base.html" %}
+{% load static %}
+
+{% block title %}
+{{ proposta.titulo }} — Detalhes da Proposta
+{% endblock %}
+
+{% block content %}
+<div class="ei-layout">
+
+  <article class="ei-card animate" style="max-width: 920px; margin: 0 auto;">
+
+    <!-- Cabeçalho -->
+    <section style="display:flex; gap:20px; align-items:center; margin-bottom:24px;">
+      <div>
+        {% if proposta.logo %}
+          <img src="{% static 'img/empresas/'|add:proposta.logo|add:'.png' %}"
+               alt="{{ proposta.entidade }}"
+               style="max-width:88px; max-height:88px; object-fit:contain;">
+        {% else %}
+          <div class="logo-placeholder">
+            <i class="fa-solid fa-building"></i>
+          </div>
+        {% endif %}
+      </div>
+
+      <div>
+        <h1 style="font-size:1.9rem; margin-bottom:4px;">
+          {{ proposta.titulo }}
+        </h1>
+        <p class="entidade">{{ proposta.entidade }}</p>
+      </div>
+    </section>
+
+    <!-- Info principal -->
+    <section style="margin:20px 0;">
+      <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:12px 24px;">
+        {% if proposta.modelo %}
+          <div><strong>Modelo:</strong> {{ proposta.modelo }}</div>
+        {% endif %}
+        {% if proposta.requisitos %}
+          <div><strong>Requisitos:</strong> {{ proposta.requisitos }}</div>
+        {% endif %}
+        <div><strong>Orientador:</strong> {{ proposta.orientador_empresa }}</div>
+        <div><strong>Telefone:</strong> {{ proposta.telefone }}</div>
+        <div>
+          <strong>Email:</strong>
+          <a href="mailto:{{ proposta.email }}">{{ proposta.email }}</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- Descrição -->
+    <section style="margin-top:28px;">
+      <h2 style="font-size:1.25rem; margin-bottom:10px;">Descrição do Projeto</h2>
+      <p style="line-height:1.7; color:#334155;">
+        {{ proposta.descricao }}
+      </p>
+    </section>
+
+    <!-- Ações -->
+    <section style="display:flex; gap:12px; margin-top:32px; flex-wrap:wrap;">
+      <a href="{% url 'home:index_dape' %}" class="btn btn-secondary">
+        ← Voltar às propostas
+      </a>
+
+      {% if proposta.email %}
+      <a href="mailto:{{ proposta.email }}" class="btn btn-primary">
+        <i class="fa-regular fa-envelope"></i> Contactar
+      </a>
+      {% endif %}
+    </section>
+
+  </article>
+
+</div>
+{% endblock %}
