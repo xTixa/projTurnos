@@ -832,7 +832,7 @@ def admin_users_delete(request, id):
             total_matriculas = matriculas.count()
             matriculas.delete()
             
-            #remove as inscriçoes nos turnos em que o aluno esta inscrito
+            #remove as inscriçoes do aluno no turno
             inscricoes_turno = InscricaoTurno.objects.filter(n_mecanografico=user)
             total_inscricoes = inscricoes_turno.count()
             inscricoes_turno.delete()
@@ -1575,7 +1575,7 @@ def contactos_mestrado(request):
 def admin_uc_list(request):
     ucs = UnidadeCurricular.objects.all().order_by("id_unidadecurricular")
 
-    #filtro
+    # filtro
     ano = request.GET.get('ano')
     semestre = request.GET.get('semestre')
     curso = request.GET.get('curso')
@@ -1589,11 +1589,11 @@ def admin_uc_list(request):
     if curso:
         ucs = ucs.filter(id_curso_id=curso)
 
-    #carrega as listas para agrupar por filtros
+    # carrega as listas para agrupar por filtros
     anos = AnoCurricular.objects.all()
     semestres = Semestre.objects.all()
     cursos = Curso.objects.all()
-
+    #...
     return render(request, "admin/uc_list.html", {
         "ucs": ucs,
         "anos": anos,

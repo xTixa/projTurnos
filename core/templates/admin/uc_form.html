@@ -16,109 +16,105 @@
 	</p>
 {% endif %}
 
-<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 20px;">
-	<div class="card">
-		<h3><i class="fa-solid fa-pen"></i> Dados da UC</h3>
-		<form method="post">
-			{% csrf_token %}
-			<input type="hidden" name="action" value="update_uc">
+<form method="post">
+	{% csrf_token %}
+	<input type="hidden" name="action" value="update_uc">
 
-			<label for="nome">Nome</label>
-			<input type="text" id="nome" name="nome" value="{% if uc %}{{ uc.nome }}{% endif %}" required>
+	<label for="nome">Nome</label>
+	<input type="text" id="nome" name="nome" value="{% if uc %}{{ uc.nome }}{% endif %}" required>
 
-			<label for="ects">ECTS</label>
-			<input type="number" step="0.5" min="0" id="ects" name="ects" value="{% if uc %}{{ uc.ects|stringformat:"g" }}{% endif %}" required>
+	<label for="ects">ECTS</label>
+	<input type="number" step="0.5" min="0" id="ects" name="ects" value="{% if uc %}{{ uc.ects|stringformat:"g" }}{% endif %}" required>
 
-			<label for="curso">Curso</label>
-			<select name="curso" id="curso" required>
-				<option value="">Selecionar Curso</option>
-				{% for c in cursos %}
-				<option value="{{ c.id_curso }}" {% if uc and uc.id_curso.id_curso == c.id_curso %}selected{% endif %}>{{ c.nome }}</option>
-				{% endfor %}
-			</select>
+	<label for="curso">Curso</label>
+	<select name="curso" id="curso" required>
+		<option value="">Selecionar Curso</option>
+		{% for c in cursos %}
+		<option value="{{ c.id_curso }}" {% if uc and uc.id_curso.id_curso == c.id_curso %}selected{% endif %}>{{ c.nome }}</option>
+		{% endfor %}
+	</select>
 
-			<label for="ano">Ano Curricular</label>
-			<select name="ano" id="ano" required>
-				<option value="">Selecionar Ano</option>
-				{% for a in anos %}
-				<option value="{{ a.id_anocurricular }}" {% if uc and uc.id_anocurricular.id_anocurricular == a.id_anocurricular %}selected{% endif %}>{{ a.ano_curricular }}</option>
-				{% endfor %}
-			</select>
+	<label for="ano">Ano Curricular</label>
+	<select name="ano" id="ano" required>
+		<option value="">Selecionar Ano</option>
+		{% for a in anos %}
+		<option value="{{ a.id_anocurricular }}" {% if uc and uc.id_anocurricular.id_anocurricular == a.id_anocurricular %}selected{% endif %}>{{ a.ano_curricular }}</option>
+		{% endfor %}
+	</select>
 
-			<label for="semestre">Semestre</label>
-			<select name="semestre" id="semestre" required>
-				<option value="">Selecionar Semestre</option>
-				{% for s in semestres %}
-				<option value="{{ s.id_semestre }}" {% if uc and uc.id_semestre.id_semestre == s.id_semestre %}selected{% endif %}>{{ s.semestre }}º Semestre</option>
-				{% endfor %}
-			</select>
+	<label for="semestre">Semestre</label>
+	<select name="semestre" id="semestre" required>
+		<option value="">Selecionar Semestre</option>
+		{% for s in semestres %}
+		<option value="{{ s.id_semestre }}" {% if uc and uc.id_semestre.id_semestre == s.id_semestre %}selected{% endif %}>{{ s.semestre }}º Semestre</option>
+		{% endfor %}
+	</select>
 
-			<div style="display: flex; gap: 10px; margin-top: 20px;">
-				<button type="submit" class="btn btn-primary">
-					<i class="fa-solid fa-save"></i> Guardar
-				</button>
-				<a href="{% url 'home:admin_uc_list' %}" class="btn btn-secondary">
-					<i class="fa-solid fa-arrow-left"></i> Voltar
-				</a>
-			</div>
-		</form>
+	<div style="margin-top: 20px;">
+		<button type="submit" class="btn btn-primary">
+			<i class="fa-solid fa-save"></i> Guardar
+		</button>
+		<a href="{% url 'home:admin_uc_list' %}" class="btn btn-secondary">
+			<i class="fa-solid fa-arrow-left"></i> Voltar
+		</a>
 	</div>
+</form>
 
-	<div class="card">
-		<h3><i class="fa-solid fa-people-arrows"></i> Turnos ({{ turnos_count }})</h3>
+{% if uc %}
+<hr>
+<h2>Turnos desta UC</h2>
+{% if turnos_uc and turnos_uc|length > 0 %}
+<table border="1" cellpadding="6" style="margin-bottom: 1em;">
+	<tr>
+		<th>Nº Turno</th>
+		<th>Tipo</th>
+		<th>Capacidade</th>
+		<th>Hora Início</th>
+		<th>Hora Fim</th>
+		<th>Ações</th>
+	</tr>
+	{% for t in turnos_uc %}
+	<tr>
+		<td>{{ t.id_turno.n_turno }}</td>
+		<td>{{ t.id_turno.tipo }}</td>
+		<td>{{ t.id_turno.capacidade }}</td>
+		<td>{{ t.hora_inicio|default_if_none:"" }}</td>
+		<td>{{ t.hora_fim|default_if_none:"" }}</td>
+		<td>
+			<form method="post" style="display:inline;">
+				{% csrf_token %}
+				<input type="hidden" name="action" value="delete_turno">
+				<input type="hidden" name="turno_id" value="{{ t.id_turno.id_turno }}">
+				<button type="submit" onclick="return confirm('Remover este turno?');">Remover</button>
+			</form>
+		</td>
+	</tr>
+	{% endfor %}
+</table>
+{% else %}
+<p>Não existem turnos associados a esta UC.</p>
+{% endif %}
 
-		{% if turnos_count %}
-			<table class="admin-table" style="font-size: 0.95rem; margin-bottom: 20px;">
-				<thead>
-					<tr>
-						<th>#</th>
-						<th>Tipo</th>
-						<th>Cap.</th>
-						<th>Hora</th>
-						<th></th>
-					</tr>
-				</thead>
-				<tbody>
-					{% for t in turnos_uc %}
-						<form method="post">
-							{% csrf_token %}
-							<input type="hidden" name="turno_id" value="{{ t.id_turno.id_turno }}">
-							<tr>
-								<td><input type="number" name="n_turno" value="{{ t.id_turno.n_turno }}" style="width: 50px;" required></td>
-								<td><input type="text" name="tipo" value="{{ t.id_turno.tipo }}" style="width: 100%;" required></td>
-								<td><input type="number" name="capacidade" value="{{ t.id_turno.capacidade }}" style="width: 60px;" min="0" required></td>
-								<td style="white-space: nowrap;">
-									<input type="time" name="hora_inicio" value="{{ t.hora_inicio|time:'H:i' }}" required>
-									–
-									<input type="time" name="hora_fim" value="{{ t.hora_fim|time:'H:i' }}" required>
-								</td>
-								<td style="white-space: nowrap;">
-									<button type="submit" name="action" value="update_turno" class="edit-btn"><i class="fa-solid fa-save"></i></button>
-									<button type="submit" name="action" value="delete_turno" class="delete-btn" onclick="return confirm('Remover turno?');"><i class="fa-solid fa-trash"></i></button>
-								</td>
-							</tr>
-						</form>
-					{% endfor %}
-				</tbody>
-			</table>
-		{% else %}
-			<p class="text-muted">Nenhum turno associado.</p>
-		{% endif %}
-
-		<hr>
-		<h4 style="margin-top: 20px; margin-bottom: 10px;"><i class="fa-solid fa-plus"></i> Adicionar turno</h4>
-		<form method="post" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-			{% csrf_token %}
-			<input type="hidden" name="action" value="add_turno">
-			<input type="number" name="n_turno" placeholder="Nº" min="1" required>
-			<input type="text" name="tipo" placeholder="Tipo" required>
-			<input type="number" name="capacidade" placeholder="Capacidade" min="0" required>
-			<input type="time" name="hora_inicio" required>
-			<input type="time" name="hora_fim" required>
-			<button type="submit" class="btn btn-primary" style="grid-column: 1 / -1;">
-				<i class="fa-solid fa-plus"></i> Adicionar
-			</button>
-		</form>
-	</div>
-</div>
+<h3>Adicionar novo turno</h3>
+<form method="post">
+	{% csrf_token %}
+	<input type="hidden" name="action" value="add_turno">
+	<label for="n_turno">Nº Turno</label>
+	<input type="text" name="n_turno" id="n_turno" required>
+	<label for="tipo">Tipo</label>
+	<select name="tipo" id="tipo" required>
+		<option value="">Selecionar tipo</option>
+		<option value="T">Teórico</option>
+		<option value="TP">Teórico-Prático</option>
+		<option value="PL">Laboratório</option>
+	</select>
+	<label for="capacidade">Capacidade</label>
+	<input type="number" name="capacidade" id="capacidade" min="1" required>
+	<label for="hora_inicio">Hora Início</label>
+	<input type="time" name="hora_inicio" id="hora_inicio" required>
+	<label for="hora_fim">Hora Fim</label>
+	<input type="time" name="hora_fim" id="hora_fim" required>
+	<button type="submit">Adicionar Turno</button>
+</form>
+{% endif %}
 {% endblock %}
