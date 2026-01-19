@@ -877,7 +877,9 @@ def admin_users_delete(request, id):
 
 #view para listar todos os turnos no admin
 def admin_turnos_list(request):
-    turnos = Turnos.objects.all().order_by("id_turno")
+    # Filtra apenas os turnos que não estão associados a nenhuma UC
+    # (Ou seja, exclui os turnos criados automaticamente pelo Criar/Editar UC)
+    turnos = Turno.objects.filter(turnouc__isnull=True).order_by("id_turno")
     return render(request, "admin/turnos_list.html", {"turnos": turnos})
 
 #view para criar um novo turno
@@ -1136,9 +1138,9 @@ def admin_avaliacoes_delete(request, id):
         # ==========================================
         # Verifica se o ficheiro está no MongoDB
         # O formato é "mongodb_gridfs:ID_DO_FICHEIRO"
-        if avaliacao.ficheiro.startswith("mongodb_gridfs:"):
+        if avaliacao.ficheiro and avaliacao.ficheiro.name.startswith("mongodb_gridfs:"):
             # Extrai o ID do ficheiro
-            file_id_mongodb = avaliacao.ficheiro.replace("mongodb_gridfs:", "")
+            file_id_mongodb = avaliacao.ficheiro.name.replace("mongodb_gridfs:", "")
             
             # ==========================================
             # DELETAR DO MongoDB (GridFS)
@@ -1607,15 +1609,40 @@ def admin_uc_create(request):
     if request.method == "POST":
         nome = request.POST.get("nome")
         ects = request.POST.get("ects")
+        id_curso = request.POST.get("curso")
+        id_ano = request.POST.get("ano")
+        id_semestre = request.POST.get("semestre")
 
-        #cria UC com nome e ects
-        uc = UnidadeCurricular.objects.create(nome=nome, ects=ects,)
+        curso = get_object_or_404(Curso, pk=id_curso)
+        ano = get_object_or_404(AnoCurricular, pk=id_ano)
+        semestre = get_object_or_404(Semestre, pk=id_semestre)
+
+        #cria UC com nome e ects e chaves estrangeiras
+        uc = UnidadeCurricular.objects.create(
+            nome=nome, 
+            ects=ects,
+            id_curso=curso,
+            id_anocurricular=ano,
+            id_semestre=semestre
+        )
 
         registar_log( request, operacao="CREATE", entidade="unidade_curricular", chave=str(uc.id_unidadecurricular), detalhes=f"UC criada: {uc.nome}")
         messages.success(request, "Unidade Curricular criada com sucesso!")
         return redirect("home:admin_uc_list")
 
-    return render(request, "admin/uc_form.html", {"uc": None, "turnos_uc": [], "turnos_count": 0,},)
+    # Passar listas para o form
+    cursos = Curso.objects.all()
+    anos = AnoCurricular.objects.all()
+    semestres = Semestre.objects.all()
+
+    return render(request, "admin/uc_form.html", {
+        "uc": None, 
+        "turnos_uc": [], 
+        "turnos_count": 0,
+        "cursos": cursos,
+        "anos": anos,
+        "semestres": semestres,
+    })
 
 #view para editar UC
 def admin_uc_edit(request, id):
@@ -1632,6 +1659,15 @@ def admin_uc_edit(request, id):
         if action == "update_uc":
             uc.nome = request.POST.get("nome")
             uc.ects = request.POST.get("ects")
+            
+            # Atualizar FKs se forem enviadas
+            if request.POST.get("curso"):
+                uc.id_curso = get_object_or_404(Curso, pk=request.POST.get("curso"))
+            if request.POST.get("ano"):
+                uc.id_anocurricular = get_object_or_404(AnoCurricular, pk=request.POST.get("ano"))
+            if request.POST.get("semestre"):
+                uc.id_semestre = get_object_or_404(Semestre, pk=request.POST.get("semestre"))
+                
             uc.save()
 
             registar_log(request, operacao="UPDATE", entidade="unidade_curricular", chave=str(uc.id_unidadecurricular), detalhes=f"UC atualizada: {uc.nome}",)
@@ -1687,15 +1723,45 @@ def admin_uc_edit(request, id):
             messages.success(request, "Turno removido!")
             return redirect("home:admin_uc_edit", id=uc.id_unidadecurricular)
 
-    return render(request, "admin/uc_form.html", {"uc": uc, "turnos_uc": turnos_uc, "turnos_count": turnos_count,},)
+    # Passar listas para os selects
+    cursos = Curso.objects.all()
+    anos = AnoCurricular.objects.all()
+    semestres = Semestre.objects.all()
+
+    return render(request, "admin/uc_form.html", {
+        "uc": uc, 
+        "turnos_uc": turnos_uc, 
+        "turnos_count": turnos_count,
+        "cursos": cursos,
+        "anos": anos,
+        "semestres": semestres,
+    })
 
 #view para apagar UC
 def admin_uc_delete(request, id):
     uc = get_object_or_404(UnidadeCurricular, id_unidadecurricular=id)
+
+    # =========================================================================
+    # CASCATA MANUAL: APAGAR TURNOS ASSOCIADOS
+    # =========================================================================
+    # Como as tabelas são `managed = False` e usam DO_NOTHING, precisamos
+    # apagar manualmente os turnos associados para não deixar lixo na BD.
+    turnos_associados = TurnoUc.objects.filter(id_unidadecurricular=uc)
+    
+    count_t = 0
+    for tu in turnos_associados:
+        turno_pai = tu.id_turno
+        # Apagar a relação (embora .delete() no turno pai pudesse tratar disso se houvesse cascade na BD)
+        tu.delete()
+        # Apagar a entidade Turno propriamente dita
+        if turno_pai:
+            turno_pai.delete()
+            count_t += 1
+            
     uc.delete()
 
-    registar_log( request, operacao="DELETE", entidade="unidade_curricular", chave=str(uc.id_unidadecurricular), detalhes=f"UC apagada: {uc.nome}")
-    messages.success(request, "Unidade Curricular apagada!")
+    registar_log( request, operacao="DELETE", entidade="unidade_curricular", chave=str(uc.id_unidadecurricular), detalhes=f"UC apagada: {uc.nome} (e {count_t} turnos associados)")
+    messages.success(request, f"Unidade Curricular apagada! ({count_t} turnos removidos)")
     return redirect("home:admin_uc_list")
 
 #view para listar logs unificados entre SQL e MOJGO
