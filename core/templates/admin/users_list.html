@@ -1,37 +1,113 @@
 {% extends "../home/base.html" %}
 
+{% load static %}
+
 {% block content %}
-<h1>Gerir Utilizadores</h1>
+<link rel="stylesheet" href="{% static 'css/admin/users_form.css' %}">
 
-<a href="{% url 'home:admin_users_create' %}" class="btn-create">+ Novo Utilizador</a>
+<div class="users-container">
+    <h1>Gerir Utilizadores</h1>
 
-<table class="admin-table">
-    <thead>
-        <tr>
-            <th>ID</th>
-            <th>Username</th>
-            <th>Email</th>
-            <th>Ações</th>
-        </tr>
-    </thead>
+    <!-- Botão para criar novo utilizador -->
+    <div class="action-buttons">
+        <a href="#novo-form" class="btn-create" id="btn-novo-user">+ Novo Utilizador</a>
+    </div>
 
-    <tbody>
-        {% for u in users %}
-        <tr>
-            <td>{{ u.id }}</td>
-            <td>{{ u.username }}</td>
-            <td>{{ u.email }}</td>
+    <!-- FORMULÁRIO PARA CRIAR NOVO UTILIZADOR -->
+    <div class="form-section" id="novo-form" style="display:none;">
+        <h2>Novo Utilizador (Admin)</h2>
+        
+        <form method="post" action="{% url 'home:admin_users_create' %}" class="user-form">
+            {% csrf_token %}
 
-            <td>
-                <a href="{% url 'home:admin_users_edit' u.id %}" class="edit-btn">
-                    <i class="fa-regular fa-pen-to-square"></i> Editar
-                </a>
-                <a href="{% url 'home:admin_users_delete' u.id %}" class="delete-btn" onclick="return confirm('Apagar?');">
-                    <i class="fa-solid fa-trash"></i> Apagar
-                </a>
-            </td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
+            <div class="form-group">
+                <label for="username">Username:</label>
+                <input type="text" id="username" name="username" placeholder="Digite o username" required>
+            </div>
+
+            <div class="form-group">
+                <label for="email">Email:</label>
+                <input type="email" id="email" name="email" placeholder="Digite o email" required>
+            </div>
+
+            <div class="form-group">
+                <label for="password">Password:</label>
+                <input type="password" id="password" name="password" placeholder="Digite a password" required>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn-save">Guardar</button>
+                <button type="button" class="btn-cancel" onclick="toggleFormulario()">Cancelar</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- LISTA DE UTILIZADORES -->
+    <div class="list-section">
+        <h2>Lista de Utilizadores</h2>
+
+        {% if users %}
+            <div class="table-info">Total: <strong>{{ users|length }}</strong> utilizador(es)</div>
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Username</th>
+                        <th>Email</th>
+                        <th>Tipo</th>
+                        <th>Status</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for u in users %}
+                    <tr>
+                        <td><strong>{{ u.id }}</strong></td>
+                        <td>{{ u.username }}</td>
+                        <td>{{ u.email|default:"—" }}</td>
+                        <td>
+                            <span class="badge badge-{{ u.tipo|lower }}">{{ u.tipo }}</span>
+                        </td>
+                        <td>
+                            {% if u.is_active %}
+                                <span class="status-active">✓ Ativo</span>
+                            {% else %}
+                                <span class="status-inactive">✗ Inativo</span>
+                            {% endif %}
+                        </td>
+                        <td class="actions-cell">
+                            <a href="{% url 'home:admin_users_edit' u.id %}" class="btn-edit" title="Editar utilizador">
+                                <i class="fa-regular fa-pen-to-square"></i> Editar
+                            </a>
+                            <a href="{% url 'home:admin_users_delete' u.id %}" class="btn-delete" 
+                               onclick="return confirm('Tem a certeza que deseja apagar o utilizador {{ u.username }}?');" 
+                               title="Apagar utilizador">
+                                <i class="fa-solid fa-trash"></i> Apagar
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p class="no-data">Nenhum utilizador encontrado.</p>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+    // Toggle formulário
+    function toggleFormulario() {
+        var formSection = document.getElementById('novo-form');
+        formSection.style.display = formSection.style.display === 'none' ? 'block' : 'none';
+    }
+
+    // Clique no botão
+    document.getElementById('btn-novo-user').addEventListener('click', function(e) {
+        e.preventDefault();
+        toggleFormulario();
+    });
+</script>
+
 {% endblock %}
