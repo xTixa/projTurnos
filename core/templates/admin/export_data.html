@@ -1,0 +1,274 @@
+{% extends "../home/base.html" %}
+{% load static %}
+
+{% block title %}Exportar Dados - Admin{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/admin/export.css' %}">
+{% endblock %}
+
+{% block content %}
+<h1>Exportação de Dados</h1>
+<p class="section-description">Exporte dados do sistema em formato CSV ou JSON para análise e integração.</p>
+
+    <!-- Exportação de Dados Gerais -->
+    <section class="export-section">
+        <h2>
+            <i class="fas fa-database"></i>
+            Dados Gerais
+        </h2>
+        
+        <div class="export-grid">
+            <!-- Alunos -->
+            <div class="export-card">
+                <div class="export-header">
+                    <i class="fas fa-user-graduate"></i>
+                    <h3>Alunos</h3>
+                </div>
+                <div class="export-buttons">
+                    <a href="{% url 'home:export_alunos_csv' %}" class="export-btn csv">
+                        <i class="fas fa-file-csv"></i>
+                        <span>CSV</span>
+                    </a>
+                    <a href="{% url 'home:export_alunos_json' %}" class="export-btn json">
+                        <i class="fas fa-file-code"></i>
+                        <span>JSON</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Turnos -->
+            <div class="export-card">
+                <div class="export-header">
+                    <i class="fas fa-clock"></i>
+                    <h3>Turnos</h3>
+                </div>
+                <div class="export-buttons">
+                    <a href="{% url 'home:export_turnos_csv' %}" class="export-btn csv">
+                        <i class="fas fa-file-csv"></i>
+                        <span>CSV</span>
+                    </a>
+                    <a href="{% url 'home:export_turnos_json' %}" class="export-btn json">
+                        <i class="fas fa-file-code"></i>
+                        <span>JSON</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Inscrições -->
+            <div class="export-card">
+                <div class="export-header">
+                    <i class="fas fa-clipboard-check"></i>
+                    <h3>Inscrições</h3>
+                </div>
+                <div class="export-buttons">
+                    <a href="{% url 'home:export_inscricoes_csv' %}" class="export-btn csv">
+                        <i class="fas fa-file-csv"></i>
+                        <span>CSV</span>
+                    </a>
+                    <a href="{% url 'home:export_inscricoes_json' %}" class="export-btn json">
+                        <i class="fas fa-file-code"></i>
+                        <span>JSON</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Unidades Curriculares -->
+            <div class="export-card">
+                <div class="export-header">
+                    <i class="fas fa-book"></i>
+                    <h3>Unidades Curriculares</h3>
+                </div>
+                <div class="export-buttons">
+                    <a href="{% url 'home:export_ucs_csv' %}" class="export-btn csv">
+                        <i class="fas fa-file-csv"></i>
+                        <span>CSV</span>
+                    </a>
+                    <a href="{% url 'home:export_ucs_json' %}" class="export-btn json">
+                        <i class="fas fa-file-code"></i>
+                        <span>JSON</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Vistas Materializadas -->
+    <section class="export-section">
+        <div class="section-header">
+            <h2>
+                <i class="fas fa-chart-line"></i>
+                Vistas Materializadas (Estatísticas)
+            </h2>
+            <button type="button" class="update-btn" onclick="atualizarVistas()">
+                <i class="fas fa-sync-alt"></i>
+                <span>Atualizar Vistas</span>
+            </button>
+        </div>
+
+        <div class="info-box">
+            <i class="fas fa-info-circle"></i>
+            <p><strong>Nota:</strong> As vistas materializadas contêm dados pré-calculados. Clique em "Atualizar Vistas" para obter os dados mais recentes antes de exportar.</p>
+        </div>
+
+        <div class="export-grid">
+            <!-- Estatísticas de Turnos -->
+            <div class="export-card">
+                <div class="export-header">
+                    <i class="fas fa-chart-bar"></i>
+                    <h3>Estatísticas de Turnos</h3>
+                    <p class="export-description">Ocupação, vagas, taxa de preenchimento</p>
+                </div>
+                <div class="export-buttons">
+                    <a href="{% url 'home:export_mv_estatisticas_csv' %}" class="export-btn csv">
+                        <i class="fas fa-file-csv"></i>
+                        <span>CSV</span>
+                    </a>
+                    <a href="{% url 'home:export_mv_estatisticas_json' %}" class="export-btn json">
+                        <i class="fas fa-file-code"></i>
+                        <span>JSON</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- UCs Mais Procuradas -->
+            <div class="export-card">
+                <div class="export-header">
+                    <i class="fas fa-fire"></i>
+                    <h3>UCs Mais Procuradas</h3>
+                    <p class="export-description">Ranking de popularidade por UC</p>
+                </div>
+                <div class="export-buttons">
+                    <a href="{% url 'home:export_mv_ucs_procuradas_csv' %}" class="export-btn csv">
+                        <i class="fas fa-file-csv"></i>
+                        <span>CSV</span>
+                    </a>
+                    <a href="{% url 'home:export_mv_ucs_procuradas_json' %}" class="export-btn json">
+                        <i class="fas fa-file-code"></i>
+                        <span>JSON</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Resumo por Aluno -->
+            <div class="export-card">
+                <div class="export-header">
+                    <i class="fas fa-users"></i>
+                    <h3>Resumo por Aluno</h3>
+                    <p class="export-description">Inscrições, ECTS, atividade</p>
+                </div>
+                <div class="export-buttons">
+                    <a href="{% url 'home:export_mv_resumo_alunos_csv' %}" class="export-btn csv">
+                        <i class="fas fa-file-csv"></i>
+                        <span>CSV</span>
+                    </a>
+                    <a href="{% url 'home:export_mv_resumo_alunos_json' %}" class="export-btn json">
+                        <i class="fas fa-file-code"></i>
+                        <span>JSON</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Sobre os Formatos -->
+    <section class="export-section">
+        <h2>
+            <i class="fas fa-question-circle"></i>
+            Sobre os Formatos
+        </h2>
+
+        <div class="export-grid">
+            <div class="export-card">
+                <div class="export-header">
+                    <i class="fas fa-file-csv"></i>
+                    <h3>Formato CSV</h3>
+                </div>
+                <div class="format-info">
+                    <p><strong>O que é:</strong> Comma-Separated Values - formato de texto simples</p>
+                    <ul>
+                        <li>Compatible com Excel, Google Sheets</li>
+                        <li>Fácil de processar com scripts</li>
+                        <li>Tamanho de ficheiro reduzido</li>
+                        <li>Ideal para análises em folhas de cálculo</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="export-card">
+                <div class="export-header">
+                    <i class="fas fa-file-code"></i>
+                    <h3>Formato JSON</h3>
+                </div>
+                <div class="format-info">
+                    <p><strong>O que é:</strong> JavaScript Object Notation - formato estruturado</p>
+                    <ul>
+                        <li>Preserva estrutura e tipos de dados</li>
+                        <li>Suportado por APIs e linguagens modernas</li>
+                        <li>Ideal para integração com sistemas</li>
+                        <li>Legível para humanos e máquinas</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="info-box">
+            <i class="fas fa-lightbulb"></i>
+            <p><strong>Dica:</strong> Use CSV para análises em Excel. Use JSON para integração com sistemas externos.</p>
+        </div>
+    </section>
+</div>
+
+<script>
+function atualizarVistas() {
+    if (!confirm('Tem certeza que deseja atualizar todas as vistas materializadas? Este processo pode demorar alguns segundos.')) {
+        return;
+    }
+
+    const btn = event.target.closest('button');
+    const originalContent = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Atualizando...';
+
+    fetch("{% url 'home:refresh_materialized_views' %}", {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': '{{ csrf_token }}',
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            alert('✓ Vistas materializadas atualizadas com sucesso!');
+        } else {
+            alert('✗ Erro ao atualizar vistas: ' + data.message);
+        }
+    })
+    .catch(error => {
+        alert('✗ Erro de conexão: ' + error);
+    })
+    .finally(() => {
+        btn.disabled = false;
+        btn.innerHTML = originalContent;
+    });
+}
+</script>
+
+<style>
+.export-card {
+    transition: all 0.3s ease;
+    height: 100%;
+}
+
+.export-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.btn-outline-success:hover,
+.btn-outline-info:hover {
+    transform: scale(1.05);
+}
+</style>
+{% endblock %}

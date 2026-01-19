@@ -2,6 +2,7 @@ from django.urls import path
 from django.contrib.auth import views as auth_views
 from . import views
 from . import analytics_views
+from . import export_views
 from core.views import testar_mongo
 
 app_name = "home"
@@ -26,6 +27,7 @@ urlpatterns = [
     # Painel Admin
     path("admin-panel/", views.admin_dashboard, name="admin_dashboard"),
     path("admin-panel/logs/", views.admin_logs_list, name="admin_logs_list"),
+    path("admin-panel/export/", views.admin_export_data, name="admin_export_data"),
     
     # ANALYTICS — ANÁLISE DE DADOS (MongoDB)
     path("admin-panel/analytics/inscricoes/", analytics_views.analytics_inscricoes, name="analytics_inscricoes"),
@@ -33,6 +35,30 @@ urlpatterns = [
     path("api/analytics/taxa-sucesso/", analytics_views.analytics_api_taxa_sucesso, name="api_taxa_sucesso"),
     path("api/analytics/alunos-ativos/", analytics_views.analytics_api_alunos_ativos, name="api_alunos_ativos"),
     path("api/analytics/ucs-procuradas/", analytics_views.analytics_api_ucs_procuradas, name="api_ucs_procuradas"),
+
+    # ==========================================
+    # EXPORTAÇÃO DE DADOS - CSV e JSON
+    # ==========================================
+    # Exportação geral
+    path("admin-panel/export/alunos/csv/", export_views.exportar_alunos_csv, name="export_alunos_csv"),
+    path("admin-panel/export/alunos/json/", export_views.exportar_alunos_json, name="export_alunos_json"),
+    path("admin-panel/export/turnos/csv/", export_views.exportar_turnos_csv, name="export_turnos_csv"),
+    path("admin-panel/export/turnos/json/", export_views.exportar_turnos_json, name="export_turnos_json"),
+    path("admin-panel/export/inscricoes/csv/", export_views.exportar_inscricoes_csv, name="export_inscricoes_csv"),
+    path("admin-panel/export/inscricoes/json/", export_views.exportar_inscricoes_json, name="export_inscricoes_json"),
+    path("admin-panel/export/ucs/csv/", export_views.exportar_ucs_csv, name="export_ucs_csv"),
+    path("admin-panel/export/ucs/json/", export_views.exportar_ucs_json, name="export_ucs_json"),
+    
+    # Exportação de vistas materializadas
+    path("admin-panel/export/mv/estatisticas-turno/csv/", export_views.exportar_mv_estatisticas_turno_csv, name="export_mv_estatisticas_csv"),
+    path("admin-panel/export/mv/estatisticas-turno/json/", export_views.exportar_mv_estatisticas_turno_json, name="export_mv_estatisticas_json"),
+    path("admin-panel/export/mv/ucs-procuradas/csv/", export_views.exportar_mv_ucs_procuradas_csv, name="export_mv_ucs_procuradas_csv"),
+    path("admin-panel/export/mv/ucs-procuradas/json/", export_views.exportar_mv_ucs_procuradas_json, name="export_mv_ucs_procuradas_json"),
+    path("admin-panel/export/mv/resumo-alunos/csv/", export_views.exportar_mv_resumo_alunos_csv, name="export_mv_resumo_alunos_csv"),
+    path("admin-panel/export/mv/resumo-alunos/json/", export_views.exportar_mv_resumo_alunos_json, name="export_mv_resumo_alunos_json"),
+    
+    # Atualizar vistas materializadas
+    path("admin-panel/export/mv/refresh/", export_views.atualizar_vistas_materializadas, name="refresh_materialized_views"),
 
     # ADMIN – UNIDADE CURRICULAR
     path("admin-panel/uc/", views.admin_uc_list, name="admin_uc_list"),

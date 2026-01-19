@@ -613,6 +613,13 @@ def admin_dashboard(request):
         "vagas_disponiveis": vagas_disponiveis,
     })
 
+
+#view para a página de exportação de dados
+@admin_required
+def admin_export_data(request):
+    return render(request, "admin/export_data.html")
+
+
 #view para listar os utilizadores admin, alunos e docentes
 def admin_users_list(request):
     django_users = User.objects.all().values('id', 'username', 'email', 'date_joined', 'is_active', 'is_staff').annotate(tipo=models.Value('Admin', output_field=models.CharField()))
@@ -736,7 +743,7 @@ def admin_users_edit(request, id):
     
     #senao encontrar nenhum, volta apenas apra a ista de users
     if not user:
-        return redirect("admin_users_list")
+        return redirect("home:admin_users_list")
 
     #pedido post para editar os dados
     if request.method == "POST":
@@ -901,7 +908,7 @@ def admin_turnos_edit(request, id):
         registar_log(request, operacao="UPDATE", entidade="turno", chave=str(turno.id_turno), detalhes=f"Turno atualizado: {turno.tipo} (nº {turno.n_turno})")
 
         messages.success(request, "Turno atualizado!")
-        return redirect("admin_turnos_list")
+        return redirect("home:admin_turnos_list")
 
     #se for get, apenas mostra o form preenchido
     return render(request, "admin/turnos_form.html", {"turno": turno})
@@ -912,7 +919,7 @@ def admin_turnos_delete(request, id):
     turno.delete()
     registar_log(request, operacao="DELETE", entidade="turno", chave=str(turno.id_turno), detalhes=f"Turno apagado: {turno.tipo} (nº {turno.n_turno})")
     messages.success(request, "Turno apagado!")
-    return redirect("admin_turnos_list")
+    return redirect("home:admin_turnos_list")
 
 #view para upload pdf com o horario
 def admin_horarios_create(request):
