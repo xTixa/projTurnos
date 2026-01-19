@@ -1,125 +1,64 @@
 {% extends 'home/base.html' %}
 {% load static %}
 
-{% block title %}Contactos — Engenharia Informática{% endblock %}
+{% block title %}Contactos — Estágios e Projetos{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/ei/index.css' %}?v=19">
-<style>
-.contacto-formatting {
-    max-width: 800px;
-    margin: 0 auto;
-    padding: 2rem;
-}
-
-.contacto-formatting .titulos {
-    font-size: 2.75rem;
-    font-weight: 800;
-    color: #0f172a;
-    margin-bottom: 2rem;
-    text-align: left;
-}
-
-.contacto-formatting-div {
-    display: flex;
-    align-items: flex-start;
-    gap: 1rem;
-    margin-bottom: 2rem;
-    padding: 1.5rem;
-    background: #ffffff;
-    border-radius: 16px;
-    box-shadow: 0 10px 15px -3px rgba(35, 113, 167, 0.08), 0 4px 6px -2px rgba(35, 113, 167, 0.04);
-    border: 1px solid #bfdbfe;
-}
-
-.contacto-formatting-div i {
-    font-size: 1.5rem;
-    color: #2371a7;
-    margin-top: 0.25rem;
-}
-
-.contacto-texto h5 {
-    font-size: 1.125rem;
-    font-weight: 600;
-    color: #0f172a;
-    margin: 0 0 0.5rem 0;
-}
-
-.contacto-texto h6 {
-    font-size: 1rem;
-    color: #64748b;
-    margin: 0 0 0.5rem 0;
-}
-
-.contacto-texto p {
-    font-size: 1rem;
-    color: #64748b;
-    margin: 0;
-}
-
-.contacto-texto a {
-    color: #2371a7;
-    text-decoration: none;
-}
-
-.contacto-texto a:hover {
-    text-decoration: underline;
-}
-</style>
+<link rel="stylesheet" href="{% static 'css/ei/contactos.css' %}">
 {% endblock %}
 
 {% block content %}
-<div class="ei-layout">
 
-  <h1 style="font-size: 2.75rem; font-weight: 800; color: #0f172a; margin-bottom: 1.25rem; line-height: 1.2; letter-spacing: -0.02em; text-align: left;">Contactos</h1>
-  <p style="font-size: 1.125rem; line-height: 1.7; color: #64748b; margin-bottom: 2rem; text-align: left;">Informações de contacto para estágios e projetos</p>
+<div class="contactos-container">
 
-  <section class="contacto-formatting" id="contactos">
-    <div class="contacto-formatting-div">
-      <i class="fa-solid fa-location-arrow"></i>
-      <div class="contacto-texto">
-        <h5>Localização</h5>
-        <p>Instituto Politécnico de Viseu</p>
-        <p>Escola Superior de Tecnologia e Gestão de Viseu</p>
-        <p>Campus Politécnico 3505-510 Viseu</p>
-      </div>
+  <section class="contact-header">
+    <div class="contact-info">
+      <h1>Contactos</h1>
+      <p class="curso-info"><strong>Estágios e Projetos</strong> — DAPE</p>
+      <p class="descricao">Informações de contacto para estágios e projetos do Departamento de Informática.</p>
+      <a href="https://maps.google.com/?q=Instituto+Politécnico+de+Viseu" target="_blank" class="map-link">
+        <i class="fa-solid fa-location-dot"></i>
+        Ver no Google Maps
+      </a>
     </div>
 
-    <div class="contacto-formatting-div">
-      <i class="fa-solid fa-phone"></i>
-      <div class="contacto-texto">
-        <h5>Telefone</h5>
-        <p>+351 232 480 000</p>
-      </div>
+    <iframe
+      class="contact-map"
+      src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3032.5!2d-7.9201646!3d40.6439583!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0xd23370121313ff7%3A0xfb8b9b36fe071169!2sESTGV+-+Escola+Superior+de+Tecnologia+e+Gest%C3%A3o+de+Viseu!5e0!3m2!1spt-PT!2spt!4v1705325854000"
+      allowfullscreen=""
+      loading="lazy">
+    </iframe>
+  </section>
+
+  <h2 class="subtitulo">Contactos Úteis</h2>
+
+  <section class="contacts-grid">
+    <div class="contact-card">
+      <h3><i class="fa-solid fa-building"></i> Localização</h3>
+      <p class="contact-detail">Instituto Politécnico de Viseu</p>
+      <p class="contact-detail">Escola Superior de Tecnologia e Gestão de Viseu</p>
+      <p class="contact-detail">Campus Politécnico 3505-510 Viseu</p>
     </div>
 
-    <div class="contacto-formatting-div">
-      <i class="fa-solid fa-envelope"></i>
-      <div class="contacto-texto">
-        <h5>Comissão de Estágios</h5>
-        <h6>
-          <a href="mailto:diestagios@estgv.ipv.pt">
-            diestagios@estgv.ipv.pt
-          </a>
-        </h6>
-        <br>
+    <div class="contact-card">
+      <h3><i class="fa-solid fa-phone"></i> Telefone</h3>
+      <p><a href="tel:+351232480000">+351 232 480 000</a></p>
+    </div>
 
-        <h5>Departamento de Informática</h5>
-        <h6>
-          <a href="mailto:sec-di@estgv.ipv.pt">
-            sec-di@estgv.ipv.pt
-          </a>
-        </h6>
-        <br>
+    <div class="contact-card">
+      <h3><i class="fa-solid fa-graduation-cap"></i> Comissão de Estágios</h3>
+      <p><a href="mailto:diestagios@estgv.ipv.pt">diestagios@estgv.ipv.pt</a></p>
+    </div>
 
-        <h5>Diretor de Departamento</h5>
-        <p>Filipe Caldeira</p>
-        <h6>
-          <a href="mailto:filipe.caldeira@estgv.ipv.pt">
-            filipe.caldeira@estgv.ipv.pt
-          </a>
-        </h6>
-      </div>
+    <div class="contact-card">
+      <h3><i class="fa-solid fa-building-columns"></i> Departamento de Informática</h3>
+      <p><a href="mailto:sec-di@estgv.ipv.pt">sec-di@estgv.ipv.pt</a></p>
+    </div>
+
+    <div class="contact-card">
+      <h3><i class="fa-solid fa-user-tie"></i> Diretor de Departamento</h3>
+      <p class="contact-detail">Filipe Caldeira</p>
+      <p><a href="mailto:filipe.caldeira@estgv.ipv.pt">filipe.caldeira@estgv.ipv.pt</a></p>
     </div>
   </section>
 

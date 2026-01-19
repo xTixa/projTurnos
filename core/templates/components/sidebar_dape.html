@@ -12,10 +12,16 @@
         </a>
     </li>
 
-    <li class="menu__item">
+    <li class="menu__item {% if request.resolver_match.url_name == 'favoritos' %}is-active{% endif %}">
+        {% if request.session.user_tipo == "aluno" %}
         <a href="{% url 'home:favoritos' %}">
             <i class="fa-regular fa-star"></i> Favoritos
         </a>
+        {% else %}
+        <a href="{% url 'home:login' %}">
+            <i class="fa-regular fa-star"></i> Favoritos
+        </a>
+        {% endif %}
     </li>
 
     <li class="menu__item {% if request.resolver_match.url_name == 'contactos_dape' %}is-active{% endif %}">
