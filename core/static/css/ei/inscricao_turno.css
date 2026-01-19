@@ -1,211 +1,291 @@
-/* ============================
-   ESTILOS GERAIS
-============================ */
-body {
-  background: #f5f7fa;
-  font-family: "Inter", sans-serif;
-  color: #1a1a1a;
+:root {
+  --brand-blue: #2563eb;
+  --brand-light: #eff6ff;
+  --brand-dark: #1e40af;
+  --text-primary: #0f172a;
+  --text-secondary: #64748b;
+  --surface: #ffffff;
+  --border: #e2e8f0;
+}
+
+/* Page Reset & Spacing */
+.inscricao-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1rem 2rem;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  color: var(--text-primary);
+  min-height: 100vh;
 }
 
 /* Header */
-.turno-header {
-  background: linear-gradient(135deg, #e8f2ff, #f5faff);
-  padding: 35px;
-  border-radius: 14px;
-  margin-bottom: 30px;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+.simple-header {
+  text-align: center;
+  margin-bottom: 2.5rem;
+  margin-top: 1.5rem;
 }
 
-.turno-header h1 {
-  font-size: 32px;
-  color: #2365d8;
-  margin-bottom: 10px;
+.simple-header h1 {
+  font-size: 2.5rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  margin-bottom: 0.5rem;
+  color: var(--text-primary);
 }
 
-.turno-header p {
-  font-size: 16px;
-  color: #444;
+.simple-header p {
+  font-size: 1.1rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  max-width: 600px;
+  margin: 0 auto;
 }
 
-/* ============================
-   LISTA DE UC + TURNOS
-============================ */
+/* LISTA DE UC + TURNOS */
 .turnos-lista {
   display: flex;
   flex-direction: column;
-  gap: 25px;
+  gap: 1.5rem;
+  margin-bottom: 4rem;
+  max-width: 900px; /* Limit width for better readability */
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .uc-card {
   background: white;
-  padding: 25px;
-  border-radius: 14px;
-  box-shadow: 0 3px 12px rgba(0,0,0,0.07);
-  border-left: 6px solid #2365d8;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.03);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: box-shadow 0.2s ease;
 }
 
+.uc-card:hover {
+  box-shadow: 0 8px 16px rgba(0,0,0,0.06);
+  border-color: #cbd5e1;
+}
+
+/* Title Section */
 .uc-card h3 {
-  margin-bottom: 15px;
-  color: #2365d8;
-  font-size: 22px;
-}
-
-.uc-turnos {
+  background: #f1f5f9; /* Slate-100 - Mais escuro para contraste */
+  padding: 1rem 1.5rem;
+  margin: 0;
+  color: #0f172a; /* Slate-900 - Texto mais forte */
+  font-size: 1.15rem;
+  font-weight: 700;
+  border-bottom: 1px solid #cbd5e1;
   display: flex;
   align-items: center;
-  gap: 15px;
 }
 
-/* Dropdown de turnos */
+/* Remove decorative icon */
+.uc-card h3::before {
+    content: none;
+}
+
+/* Status Badge - Highlight Enrolled Turn */
+.status-inscrito {
+  background-color: #f0fdf4; /* green-50 */
+  color: #166534; /* green-800 */
+  padding: 0.75rem 1.5rem;
+  border-bottom: 1px solid #dcfce7;
+  font-size: 0.95rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  animation: fadeIn 0.3s ease-in;
+}
+
+.status-inscrito i {
+  font-size: 1.1rem;
+  color: #16a34a; /* green-600 */
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* Form Section */
+.uc-turnos {
+  padding: 1.5rem;
+  display: grid;
+  grid-template-columns: 1fr 150px; /* Inputs take space, Button fixed width */
+  gap: 1rem;
+  align-items: end;
+}
+
+.uc-turnos label {
+    grid-column: 1 / -1; /* Label spans full width */
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin-bottom: -0.5rem;
+}
+
+/* Dropdown */
 .turno-select {
-  padding: 10px 14px;
-  border-radius: 10px;
-  border: 1px solid #d0d7e0;
-  background: #fafbfc;
-  color: #333;
-  font-size: 15px;
-  min-width: 250px;
-  transition: border 0.2s, box-shadow 0.2s;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background-color: white;
+  color: var(--text-primary);
+  font-size: 0.95rem;
+  height: 48px; /* Fixed height for alignment */
 }
 
 .turno-select:focus {
   outline: none;
-  border-color: #2365d8;
-  box-shadow: 0 0 0 3px rgba(35, 101, 216, 0.2);
+  border-color: var(--brand-blue);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
 }
 
-/* Opções */
-.option-esgotado {
-  color: #b91c1c;
-  background: #fee2e2;
-}
-
-.option-vagas {
-  color: #065f46;
-  background: #d1fae5;
-}
-
-.option-inscrito {
-  color: #0369a1;
-  background: #e0f2fe;
-  font-weight: 600;
-}
-
-/* Botão de inscrever */
+/* Button */
 .btn-inscrever {
-  padding: 10px 18px;
-  font-size: 15px;
-  border-radius: 10px;
-  display: flex;
+  height: 48px;
+  justify-content: center;
+  padding: 0 1.5rem;
+  font-size: 0.95rem;
+  border-radius: 8px;
+  display: inline-flex;
   align-items: center;
-  gap: 8px;
-  transition: 0.2s;
+  gap: 0.5rem;
+  background: #0f172a; /* Slate 900 - Dark Button */
+  color: white;
+  border: none;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-top: 0;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
 .btn-inscrever:not(:disabled):hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+  background: #334155; /* Slate 700 */
+  box-shadow: 0 4px 6px rgba(0,0,0,0.15);
+  transform: translateY(-1px);
+}
+
+.btn-inscrever i {
+    color: white; /* Ensure icon is white */
 }
 
 .btn-inscrever:disabled {
-  opacity: 0.4;
+  background: #e2e8f0;
+  color: #94a3b8;
   cursor: not-allowed;
 }
 
-/* ============================
-   TURNOS INSCRITOS
-============================ */
+/* Responsive adjustment for form */
+@media (max-width: 600px) {
+  .uc-turnos {
+      grid-template-columns: 1fr; /* Stack vertically on mobile */
+  }
+  .btn-inscrever {
+      width: 100%;
+  }
+}
+
+
+
+/* TURNOS INSCRITOS */
 .turnos-inscritos {
-  margin-top: 15px;
-  padding: 12px 15px;
-  background: #f0f9ff;
-  border-left: 4px solid #0284c7;
+  margin-top: 1.5rem;
+  padding: 1rem 1.5rem;
+  background: #f8fafc; /* Slate-50 - Mais neutro */
+  border: 1px solid #e2e8f0; /* Slate-200 */
   border-radius: 8px;
+  animation: fadeIn 0.3s ease-in;
 }
 
 .inscrito-info {
   margin: 0;
-  color: #0369a1;
-  font-size: 15px;
+  color: #475569; /* Slate-600 */
+  font-size: 0.95rem;
   font-weight: 500;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 1rem;
   justify-content: space-between;
   flex-wrap: wrap;
 }
 
-.inscrito-info i {
-  color: #16a34a;
-  font-size: 16px;
+.inscrito-info i.fa-circle-check {
+  color: #0f172a; /* Slate-900 - Igual ao botão de inscrever */
+  font-size: 1.1rem;
 }
 
 .btn-remover {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 6px 10px;
-  background: #ef4444;
-  color: white;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: white;
+  color: #ef4444;
+  border: 1px solid #fee2e2;
   border-radius: 6px;
   text-decoration: none;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
+  font-weight: 600;
   cursor: pointer;
-  transition: 0.2s;
-  border: none;
+  transition: all 0.2s;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
 }
 
 .btn-remover:hover {
-  background: #dc2626;
-  transform: translateY(-1px);
+  background: #fef2f2;
+  border-color: #ef4444;
 }
 
-/* ============================
-   ALERTA DE CONFLITOS
-============================ */
+/* ALERTA DE CONFLITOS */
 .alert {
-  padding: 15px 18px;
+  padding: 1rem 1.25rem;
   border-radius: 12px;
   border-left: 4px solid;
   display: flex;
-  gap: 12px;
+  gap: 1rem;
   align-items: flex-start;
+  margin-bottom: 2rem;
+  max-width: 800px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .alert-warning {
-  background: #fef3c7;
+  background: #fffbeb;
   border-color: #f59e0b;
   color: #92400e;
+  box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
 }
 
 .alert-warning i {
   color: #f59e0b;
   margin-top: 2px;
+  font-size: 1.2rem;
 }
 
 .alert-warning strong {
-  color: #78350f;
+  display: block;
+  font-size: 1.05rem;
+  margin-bottom: 0.25rem;
+  color: #7c2d12;
 }
 
-.alert-warning p {
-  margin: 8px 0 0;
-  font-size: 0.95rem;
-  line-height: 1.4;
-}
-
-/* ============================
-   MENSAGEM SUCESSO
-============================ */
+/* Mensagem Sucesso */
 .mensagem {
-  margin-top: 25px;
-  padding: 14px 20px;
-  background: #d1fae5;
+  margin-top: 1.5rem;
+  padding: 1rem 1.25rem;
+  background: #ecfdf5;
   color: #065f46;
-  border-left: 5px solid #10b981;
+  border: 1px solid #a7f3d0;
   border-radius: 10px;
   font-weight: 600;
   display: flex;
-  gap: 10px;
+  gap: 1rem;
   align-items: center;
   width: fit-content;
   animation: fadeIn 0.4s ease-out;

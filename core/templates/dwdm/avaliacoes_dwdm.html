@@ -5,33 +5,55 @@
 {% block title %}Avaliações — DWDM{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/dwdm/avaliacoes.css' %}">
+<link rel="stylesheet" href="{% static 'css/dwdm/avaliacoes.css' %}?v=remodel">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 {% endblock %}
 
 {% block content %}
-<div class="page-container">
+<div class="avaliacoes-container">
 
-    <h1 class="page-title">Avaliações</h1>
+    <!-- HEADER -->
+    <header class="simple-header">
+        <h1>Avaliações</h1>
+        <p>
+            Consulta a documentação oficial relativa às avaliações do curso de
+            <strong>Desenvolvimento Web e Dispositivos Móveis</strong>.
+        </p>
+    </header>
 
-    <p class="intro-text">
-        Aqui encontras os documentos oficiais com as avaliações previstas
-        para cada unidade curricular do curso de <strong>DWDM</strong>.
-    </p>
-
-    <div class="pdf-list">
+    <!-- DOCUMENTOS OFICIAIS -->
+    <div class="avaliacoes-lista">
         {% for item in avaliacoes_por_ano %}
-        <div class="pdf-item">
-            <i class="fa-solid fa-file-pdf"></i>
-            <span>Avaliações — {{ item.ano.ano_curricular }}</span>
-            {% if item.pdf %}
-            <div class="pdf-actions">
-                <a href="{% pdf_url item.pdf 'avaliacao' %}" target="_blank"><i class="fa-regular fa-file-pdf"></i> Ver</a>
-                <a href="{% pdf_url item.pdf 'avaliacao' %}" download><i class="fa-solid fa-download"></i> Download</a>
+        {% if forloop.counter <= 2 %}
+        <div class="avaliacao-card">
+            
+            <div class="avaliacao-info">
+                <div class="icon-container">
+                    <i class="fa-solid fa-file-pdf"></i>
+                </div>
+                <div>
+                    <h3>{{ item.ano.ano_curricular }}</h3>
+                    <p>Calendário e mapas de avaliação</p>
+                </div>
             </div>
-            {% else %}
-            <span class="muted"><i class="fa-solid fa-circle-exclamation"></i> Sem ficheiro disponível</span>
-            {% endif %}
+
+            <div class="avaliacao-actions">
+                {% if item.pdf %}
+                <a href="{{ item.pdf.ficheiro.url }}" class="btn-download" target="_blank">
+                    <i class="fa-solid fa-eye"></i> <span class="btn-text">Ver</span>
+                </a>
+                <a href="{{ item.pdf.ficheiro.url }}" class="btn-download" download title="Descarregar">
+                    <i class="fa-solid fa-download"></i> <span class="btn-text">Download</span>
+                </a>
+                {% else %}
+                <span class="btn-disabled">
+                    <i class="fa-solid fa-circle-exclamation"></i> Pendente
+                </span>
+                {% endif %}
+            </div>
+
         </div>
+        {% endif %}
         {% endfor %}
     </div>
 

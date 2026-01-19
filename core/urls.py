@@ -169,5 +169,17 @@ urlpatterns = [
 
     # DAPE
     path("dape/", views.dape, name="index_dape"),
+    path("dape/contactos/", views.contactos_dape, name="contactos_dape"),
+    path("dape/documentos/", views.documentos_dape, name="documentos_dape"),
+
+    # Propostas de Estágio
+    path("proposta-estagio/criar/", views.criar_proposta_estagio_view, name="criar_proposta_estagio"),
+    path("proposta-estagio/listar/", views.listar_propostas_estagio_view, name="listar_propostas_estagio"),
+    path("proposta-estagio/atualizar/<str:titulo>/", views.atualizar_proposta_estagio_view, name="atualizar_proposta_estagio"),
+    path("proposta-estagio/deletar/<str:titulo>/", views.deletar_proposta_estagio_view, name="deletar_proposta_estagio"),
+    path("favoritos/", views.favoritos_view, name="favoritos"),
+    path("api/favoritos/toggle/", views.toggle_favorito_view, name="toggle_favorito"),
+    path("proposta/<int:id_proposta>/", views.proposta_detalhes, name="proposta_detalhes"
+),
 ]
 

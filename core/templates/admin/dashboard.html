@@ -26,55 +26,85 @@
 <section class="stats-section">
         <div class="stats-grid">
 
-                <div class="stat-card">
-                        <i class="fa-solid fa-users"></i>
-                        <h3>{{ total_users }}</h3>1
-                        <p>Utilizadores</p>
+                <div class="stat-card stat-c-blue">
+                        <div class="icon-box">
+                            <i class="fa-solid fa-users"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3>{{ total_users }}</h3>
+                            <p>Utilizadores</p>
+                        </div>
                 </div>
 
-                <div class="stat-card">
-                        <i class="fa-solid fa-clock"></i>
-                        <h3>{{ total_turnos }}</h3>
-                        <p>Turnos</p>
+                <div class="stat-card stat-c-emerald">
+                        <div class="icon-box">
+                            <i class="fa-solid fa-clock"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3>{{ total_turnos }}</h3>
+                            <p>Turnos</p>
+                        </div>
                 </div>
 
-                <div class="stat-card">
-                        <i class="fa-solid fa-graduation-cap"></i>
-                        <h3>{{ total_ucs }}</h3>
-                        <p>Unidades Curriculares</p>
+                <div class="stat-card stat-c-violet">
+                        <div class="icon-box">
+                             <i class="fa-solid fa-graduation-cap"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3>{{ total_ucs }}</h3>
+                            <p>Unidades Curriculares</p>
+                        </div>
                 </div>
 
-                <div class="stat-card">
-                        <i class="fa-solid fa-book"></i>
-                        <h3>{{ total_cursos }}</h3>
-                        <p>Cursos</p>
+                <div class="stat-card stat-c-amber">
+                        <div class="icon-box">
+                            <i class="fa-solid fa-book"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3>{{ total_cursos }}</h3>
+                            <p>Cursos</p>
+                        </div>
                 </div>
 
-                <div class="stat-card">
-                        <i class="fa-solid fa-calendar"></i>
-                        <h3>{{ total_horarios }}</h3>
-                        <p>Horários PDF</p>
+                <div class="stat-card stat-c-cyan">
+                        <div class="icon-box">
+                            <i class="fa-solid fa-calendar"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3>{{ total_horarios }}</h3>
+                            <p>Horários PDF</p>
+                        </div>
                 </div>
 
-        <div class="stat-card">
-            <i class="fa-solid fa-file-lines"></i>
-            <h3>{{ total_avaliacoes }}</h3>
-            <p>Avaliações PDF</p>
-        </div>
+                <div class="stat-card stat-c-rose">
+                    <div class="icon-box">
+                        <i class="fa-solid fa-file-lines"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>{{ total_avaliacoes }}</h3>
+                        <p>Avaliações PDF</p>
+                    </div>
+                </div>
 
         </div>
         <!-- End of stats-grid -->
 
         <h2>Estatísticas</h2>
 
-        <div class="chart-card">
-                <h3>Alunos inscritos por UC</h3>
-                <canvas id="chartAlunos"></canvas>
-        </div>
+        <div class="charts-wrapper">
+            <div class="chart-card">
+                    <h3>Alunos inscritos por UC</h3>
+                    <div class="chart-container">
+                        <canvas id="chartAlunos"></canvas>
+                    </div>
+            </div>
 
-        <div class="chart-card">
-                <h3>Turnos disponíveis vs ocupados</h3>
-                <canvas id="chartTurnos"></canvas>
+            <div class="chart-card">
+                    <h3>Turnos disponíveis vs ocupados</h3>
+                    <div class="chart-container">
+                        <canvas id="chartTurnos"></canvas>
+                    </div>
+            </div>
         </div>
 
 </section>
@@ -133,8 +163,6 @@
         <a href="{% url 'home:admin_turnos_create' %}">+ Criar Turno</a>
         <a href="{% url 'home:admin_horarios_create' %}">+ Carregar Horário PDF</a>
         <a href="{% url 'home:admin_avaliacoes_create' %}">+ Carregar Avaliações PDF</a>
-        <a href="{% url 'home:analytics_inscricoes' %}"><i class="fa-solid fa-arrow-right"></i> Ver Analytics</a>
-        <a href="{% url 'home:admin_logs_list' %}"><i class="fa-solid fa-arrow-right"></i> Ver Logs</a>
 </div>
 
 {% endblock %}

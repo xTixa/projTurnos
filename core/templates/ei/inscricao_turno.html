@@ -3,18 +3,22 @@
 {% block title %}Inscrição em Turnos{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/ei/inscricao_turno.css' %}">
+<link rel="stylesheet" href="{% static 'css/ei/inscricao_turno.css' %}?v=remodel">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 {% endblock %}
 
 {% block content %}
 
-<section class="turno-header">
+<div class="inscricao-container">
+
+<header class="simple-header">
     <h1>Inscrição em Turnos</h1>
     <p>
         Seleciona a unidade curricular e o turno que pretendes frequentar.
         As vagas são atualizadas em tempo real.
     </p>
-</section>
+</header>
+
 
 <!-- Alerta de conflitos -->
 <div id="conflito-alert" class="alert alert-warning" style="display: none; margin-bottom: 20px;">
@@ -58,13 +62,10 @@
                             data-uc-nome="{{ uc.nome }}"
                             data-tipo="{{ t.tipo }}"
                             data-turno-nome="{{ t.nome }}">
-                        {{ t.nome }} — {{ t.horario }} —
-                        {% if t.ja_inscrito %}
-                            <i class="fa-solid fa-check"></i> Já inscrito
-                        {% elif t.vagas == 0 %}
-                            Esgotado
-                        {% else %}
-                            {{ t.vagas }} vaga{{ t.vagas|pluralize:"s" }}
+                        {{ t.nome }} ({{ t.horario }})
+                        {% if t.ja_inscrito %} — INSCRITO
+                        {% elif t.vagas == 0 %} — ESGOTADO
+                        {% else %} — {{ t.vagas }} vaga{{ t.vagas|pluralize:"s" }}
                         {% endif %}
                     </option>
                 {% endfor %}
@@ -144,6 +145,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
+</div>
 {% endblock %}
 
 {% block extra_scripts %}

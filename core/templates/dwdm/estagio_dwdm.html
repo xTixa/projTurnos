@@ -4,46 +4,62 @@
 {% block title %}Estágio — DWDM{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/dwdm/estagio.css' %}">
+<link rel="stylesheet" href="{% static 'css/dwdm/estagio.css' %}?v=remodel">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 {% endblock %}
 
 {% block content %}
-<div class="page-container">
+<div class="estagio-container">
 
-    <h1 class="page-title">Estágio em Empresa</h1>
-
-    <p class="intro-text">
-        O estágio curricular do curso de <strong>Desenvolvimento Web e Dispositivos Móveis</strong>
-        permite aos estudantes aplicar os conhecimentos adquiridos em contexto real de trabalho.
-    </p>
-
-    <section class="info-block">
-        <h2>🎓 Objetivos do Estágio</h2>
-        <ul>
-            <li>Aplicar conhecimentos adquiridos ao longo do curso;</li>
-            <li>Participar em projetos reais de desenvolvimento Web e Mobile;</li>
-            <li>Desenvolver competências profissionais e de equipa;</li>
-            <li>Promover a inserção no mercado de trabalho.</li>
-        </ul>
-    </section>
-
-    <section class="info-block">
-        <h2>🏢 Onde pode ser realizado?</h2>
+    <!-- HEADER -->
+    <header class="estagio-header">
+        <h1>Estágio em Empresa</h1>
         <p>
-            O estágio pode ser realizado em empresas tecnológicas, gabinetes de desenvolvimento,
-            startups ou instituições que necessitem de soluções digitais.
+            O estágio curricular do curso de <strong>Desenvolvimento Web e Dispositivos Móveis</strong>
+            permite aos estudantes aplicar os conhecimentos adquiridos em contexto real de trabalho,
+            integrando equipas profissionais e desenvolvendo soluções tecnológicas.
         </p>
-    </section>
+    </header>
 
-    <section class="info-block">
-        <h2>📝 Documentação Necessária</h2>
-        <ul>
-            <li>Plano de estágio;</li>
-            <li>Declaração de acolhimento da empresa;</li>
-            <li>Relatório final de estágio;</li>
-            <li>Avaliação da entidade de acolhimento.</li>
-        </ul>
-    </section>
+    <!-- CONTENT GRID -->
+    <div class="estagio-grid">
+
+        <!-- Objetivos -->
+        <article class="info-card">
+            <h2><i class="fa-solid fa-bullseye"></i> Objetivos do Estágio</h2>
+            <ul class="styled-list">
+                <li>Aplicar conhecimentos adquiridos ao longo do curso;</li>
+                <li>Participar em projetos reais de desenvolvimento Web e Mobile;</li>
+                <li>Desenvolver competências profissionais e de equipa;</li>
+                <li>Promover a inserção no mercado de trabalho.</li>
+            </ul>
+        </article>
+
+        <!-- Onde realizar -->
+        <article class="info-card">
+            <h2><i class="fa-solid fa-building"></i> Local de Estágio</h2>
+            <p class="text-content">
+                O estágio pode ser realizado em empresas tecnológicas, gabinetes de desenvolvimento software,
+                startups, agências digitais ou em departamentos de informática de instituições 
+                que necessitem de soluções web e móveis.
+            </p>
+        </article>
+
+        <!-- Documentação -->
+        <article class="info-card full-width-card">
+            <h2><i class="fa-solid fa-file-contract"></i> Documentação Necessária</h2>
+            <p class="text-content" style="margin-bottom: 2rem;">
+                Para a formalização e conclusão do estágio, é obrigatória a entrega dos seguintes documentos:
+            </p>
+            <ul class="styled-list" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem;">
+                <li>Planificação detalhada do estágio;</li>
+                <li>Declaração de acolhimento emitida pela empresa;</li>
+                <li>Relatório final de estágio (técnico e reflexivo);</li>
+                <li>Ficha de avaliação preenchida pela entidade de acolhimento.</li>
+            </ul>
+        </article>
+
+    </div>
 
 </div>
 {% endblock %}

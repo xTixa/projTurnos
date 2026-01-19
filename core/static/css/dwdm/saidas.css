@@ -1,41 +1,132 @@
+/* =========================================
+   SAÍDAS PROFISSIONAIS MODERN LAYOUT - DWDM
+   ========================================= */
+
 .page-container {
-    padding: 25px;
-    max-width: 900px;
-    margin: auto;
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 2rem;
+    font-family: 'Inter', system-ui, sans-serif;
+    color: #1e293b;
+    min-height: 80vh;
+}
+
+/* --- HERO SECTION --- */
+.page-header {
+    text-align: center;
+    margin-top: 1rem;
+    margin-bottom: 3rem;
+    padding: 3rem 2rem;
+    background-color: #eff6ff; /* Blue 50 */
+    border-radius: 24px;
+    border: 1px solid #bfdbfe; /* Blue 200 */
+    box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.1);
 }
 
 .page-title {
-    font-size: 34px;
-    font-weight: 700;
-    color: #003366;
-    margin-bottom: 15px;
+    font-size: 3rem;
+    font-weight: 800;
+    line-height: 1.1;
+    margin-bottom: 1.5rem;
+    color: #0f172a; /* Dark Slate / Black */
+    letter-spacing: -0.03em;
 }
 
 .intro-text {
-    font-size: 18px;
-    margin-bottom: 25px;
-    color: #444;
+    font-size: 1.25rem;
+    line-height: 1.7;
+    color: #475569;
+    max-width: 700px;
+    margin: 0 auto;
 }
 
-.info-box {
-    background: #eef4ff;
-    padding: 25px;
-    border-left: 4px solid #0057b8;
-    border-radius: 6px;
-    margin-bottom: 25px;
+/* --- GRID LAYOUT --- */
+.career-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 2rem;
+    margin-bottom: 4rem;
 }
 
-.info-box h2 {
-    font-size: 24px;
-    margin-bottom: 10px;
-    color: #003366;
+.detail-card {
+    background: #ffffff;
+    border-radius: 20px;
+    padding: 2.5rem;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
-.info-box ul {
-    padding-left: 22px;
+.detail-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05);
 }
 
-.info-box li {
-    margin-bottom: 8px;
-    line-height: 1.5;
+.detail-card h2 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 2rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
 }
+
+.detail-card h2 i {
+    color: #2563eb; /* Blue 600 */
+    background: #eff6ff; /* Blue 50 */
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    font-size: 1.25rem;
+    box-shadow: 0 2px 4px rgba(37, 99, 235, 0.1);
+}
+
+/* LIST STYLING */
+.check-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.check-list li {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    padding: 1rem;
+    background: #f8fafc;
+    border-radius: 12px;
+    color: #334155;
+    font-weight: 500;
+    border: 1px solid transparent;
+    transition: all 0.2s;
+}
+
+.check-list li:hover {
+    background: #eff6ff;
+    border-color: #bfdbfe;
+}
+
+.check-list li::before {
+    content: '\f00c'; /* FontAwesome Check */
+    font-family: "Font Awesome 6 Free";
+    font-weight: 900;
+    color: #2563eb; /* Blue 600 */
+    margin-top: 3px;
+    font-size: 1.1em;
+}
+
+/* RESPONSIVE */
+@media (max-width: 768px) {
+    .page-title { font-size: 2.25rem; }
+    .page-container { padding: 1rem; }
+    .career-grid { grid-template-columns: 1fr; }
+    .detail-card { padding: 1.5rem; }
+}
+

@@ -2,38 +2,44 @@
 {% load static %} 
 {% block title %}Sugestões{% endblock %}
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/sugestoes/CSS_sugestoes.css' %}"> 
+<link rel="stylesheet" href="{% static 'css/sugestoes/CSS_sugestoes_todas.css' %}"> 
 {% endblock %} 
 {% block sb_info_active %}is-active{% endblock %}
 {% block content %}
    <div class="section-tabs">
     <a href="{% url 'extra_app:sugestao' %}">Sugerir</a>
-    <a href="#sec-populares">Mais votadas</a>
     <a href="{% url 'extra_app:sugestoes_todas' %}" class="active">Todas</a>
    </div>
-    <p>Olá, {{ request.session.user_nome|default:request.user.username }}</p>
-        <div class="sugestoes-scroll">
+       <div class="sugestoes-container">
         {% for s in sugestoes %}
             <div class="sugestao-card">
-                <p>{{ s.texto }}</p>
-                <small>{{ s.autor_nome }}</small>
-                <form action="{% url 'extra_app:feedback_sugestao' s.id %}" method="post">
-                    {% csrf_token %}
-                    <button class="like-btn {% if s.user_liked %}active-like{% endif %}"
-                            type="submit" name="acao" value="like">
-                    {{ s.Like|length }}
-                    <i class="fa fa-thumbs-up"></i>
-                    </button>
-
-                    <button class="dislike-btn {% if s.user_disliked %}active-dislike{% endif %}"
-                            type="submit" name="acao" value="dislike">
-                    {{ s.Dislike|length }}
-                    <i class="fa fa-thumbs-down"></i>
-                    </button>
-                </form>
+            <p class="sugestao-texto">{{ s.texto }}</p>
+            <small class="sugestao-autor">Enviada por {{ s.autor_nome }}</small>
+            {% if request.user.is_authenticated and request.user.is_staff %}
+            <a href="{% url 'extra_app:sugestoes_eliminar' s.id %}" 
+            class="delete-btn"
+            onclick="return confirm('Eliminar esta sugestão?\n{{ s.texto|truncatechars:50 }}')">
+                <i class="fa fa-trash"></i> Eliminar
+            </a>
+            {% endif %}
+            <form action="{% url 'extra_app:feedback_sugestao' s.id %}" method="post">
+                {% csrf_token %}
+                <button class="like-btn {% if s.user_liked %}active-like{% endif %}"
+                        type="submit" name="acao" value="like">
+                {{ s.Like|length }} <i class="fa fa-thumbs-up"></i>
+                </button>
+                <button class="dislike-btn {% if s.user_disliked %}active-dislike{% endif %}"
+                        type="submit" name="acao" value="dislike">
+                {{ s.Dislike|length }} <i class="fa fa-thumbs-down"></i>
+                </button>
+            </form>
             </div>
         {% endfor %}
-        </div>
-            </form>
-            
+        {% if sugestoes|length == 0 %}
+            <p>Ainda não há sugestões. <a href="{% url 'extra_app:sugestao' %}">Envia a primeira sugestão!</a></p>
+        {% endif %}
+        <footer class="sugestoes-footer">
+          <p>Não encontraste a tua sugestão? <a href="{% url 'extra_app:sugestao' %}">Envia-a aqui!</a></p> 
+          <footer>
+       </div>
 {% endblock %}

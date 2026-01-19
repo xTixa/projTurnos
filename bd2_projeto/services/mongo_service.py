@@ -30,9 +30,16 @@ def criar_indices():
         db.atividades_docentes.create_index("timestamp")
         db.atividades_docentes.create_index("docente_id")
         
-        # Índices para erros
-        db.erros.create_index("timestamp")
-        db.erros.create_index("funcao")
+        # Índices para propostas de estágio
+        db.proposta_estagio.create_index("timestamp")
+        db.proposta_estagio.create_index("aluno_id")
+        db.proposta_estagio.create_index("status")
+        db.proposta_estagio.create_index([("aluno_id", 1), ("timestamp", -1)])
+        
+        # Índices para favoritos
+        db.favoritos.create_index("aluno_id")
+        db.favoritos.create_index("proposta_id")
+        db.favoritos.create_index([("aluno_id", 1), ("proposta_id", 1)], unique=True)
         
         print("✓ Índices MongoDB criados com sucesso")
     except Exception as e:
@@ -178,6 +185,144 @@ def registar_atividade_docente(docente_id, docente_nome, tipo_atividade, detalhe
     }
     db.atividades_docentes.insert_one(atividade)
     return atividade
+
+# ==========================================
+# PROPOSTAS DE ESTÁGIO
+# ==========================================
+
+def criar_proposta_estagio(aluno_id, aluno_nome, titulo, descricao, empresa, orientador=None, status="pendente"):
+    """
+    Cria uma nova proposta de estágio
+    
+    Args:
+        aluno_id: ID do aluno
+        aluno_nome: Nome do aluno
+        titulo: Título da proposta
+        descricao: Descrição detalhada
+        empresa: Nome da empresa
+        orientador: Nome do orientador (opcional)
+        status: Status inicial ('pendente', 'aprovada', 'rejeitada')
+    """
+    proposta = {
+        "aluno_id": aluno_id,
+        "aluno_nome": aluno_nome,
+        "titulo": titulo,
+        "descricao": descricao,
+        "empresa": empresa,
+        "orientador": orientador,
+        "status": status,
+        "timestamp": datetime.now(),
+        "data_formatada": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    }
+    result = db.proposta_estagio.insert_one(proposta)
+    proposta["_id"] = result.inserted_id
+    return proposta
+
+def listar_propostas_estagio(filtro=None, limite=100):
+    """
+    Lista propostas de estágio com filtro opcional
+    
+    Args:
+        filtro: Dict com filtros (ex: {"status": "pendente"})
+        limite: Número máximo de propostas a retornar
+    """
+    return list(db.proposta_estagio.find(filtro or {}, {"_id": 0}).sort("timestamp", -1).limit(limite))
+
+def atualizar_proposta_estagio(aluno_id, titulo, updates):
+    """
+    Atualiza uma proposta de estágio
+    
+    Args:
+        aluno_id: ID do aluno
+        titulo: Título da proposta (para identificar)
+        updates: Dict com campos a atualizar
+    """
+    updates["timestamp"] = datetime.now()
+    updates["data_formatada"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    
+    result = db.proposta_estagio.update_one(
+        {"aluno_id": aluno_id, "titulo": titulo},
+        {"$set": updates}
+    )
+    return result.modified_count > 0
+
+def deletar_proposta_estagio(aluno_id, titulo):
+    """
+    Deleta uma proposta de estágio
+    
+    Args:
+        aluno_id: ID do aluno
+        titulo: Título da proposta
+    """
+    result = db.proposta_estagio.delete_one({"aluno_id": aluno_id, "titulo": titulo})
+    return result.deleted_count > 0
+
+# ==========================================
+# FAVORITOS
+# ==========================================
+
+def adicionar_favorito(aluno_id, proposta_id):
+    """
+    Adiciona uma proposta aos favoritos do aluno
+    
+    Args:
+        aluno_id: ID do aluno
+        proposta_id: ID da proposta (usando _id do MongoDB)
+    """
+    favorito = {
+        "aluno_id": aluno_id,
+        "proposta_id": proposta_id,
+        "timestamp": datetime.now(),
+        "data_formatada": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    }
+    
+    # Evita duplicatas
+    db.favoritos.update_one(
+        {"aluno_id": aluno_id, "proposta_id": proposta_id},
+        {"$set": favorito},
+        upsert=True
+    )
+    return True
+
+def remover_favorito(aluno_id, proposta_id):
+    """
+    Remove uma proposta dos favoritos do aluno
+    
+    Args:
+        aluno_id: ID do aluno
+        proposta_id: ID da proposta
+    """
+    result = db.favoritos.delete_one({"aluno_id": aluno_id, "proposta_id": proposta_id})
+    return result.deleted_count > 0
+
+def verificar_favorito(aluno_id, proposta_id):
+    """
+    Verifica se uma proposta é favorita do aluno
+    
+    Args:
+        aluno_id: ID do aluno
+        proposta_id: ID da proposta
+    """
+    return db.favoritos.find_one({"aluno_id": aluno_id, "proposta_id": proposta_id}) is not None
+
+def listar_favoritos(aluno_id):
+    """
+    Lista todas as propostas favoritas de um aluno
+    
+    Args:
+        aluno_id: ID do aluno
+    """
+    # Busca os favoritos do aluno
+    favoritos = list(db.favoritos.find({"aluno_id": aluno_id}, {"_id": 0, "proposta_id": 1}))
+    
+    if not favoritos:
+        return []
+    
+    # Busca as propostas correspondentes
+    proposta_ids = [int(fav["proposta_id"]) for fav in favoritos]
+    propostas = list(db.proposta_estagio.find({"id_proposta": {"$in": proposta_ids}}))
+    
+    return propostas
 
 # ==========================================
 # AGGREGATIONS — ANÁLISE DE DADOS

@@ -1,0 +1,46 @@
+{% extends 'home/base.html' %}
+{% load static %}
+
+{% block title %}Documentos — Engenharia Informática{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/ei/index.css' %}?v=19">
+{% endblock %}
+
+{% block content %}
+{% csrf_token %}
+<div class="ei-layout">
+
+  <h1 style="font-size: 2.75rem; font-weight: 800; color: #0f172a; margin-bottom: 1.25rem; line-height: 1.2; letter-spacing: -0.02em; text-align: left;">Documentos</h1>
+  <p style="font-size: 1.125rem; line-height: 1.7; color: #64748b; margin-bottom: 2rem; text-align: left;">Documentos importantes para o projeto/estágio</p>
+
+  <!-- DOCUMENTOS EM CARDS -->
+  <section class="ei-section">
+    <div class="ei-shortcuts__grid">
+
+      <a href="{{ MEDIA_URL }}dape/CAA_2Sem.pdf" class="innovation-card accent-green" target="_blank">
+        <div class="card-background-icon"><i class="fa-regular fa-calendar"></i></div>
+        <div class="card-content">
+            <span class="card-label">Atividades</span>
+            <h3>Calendário de Atividades</h3>
+            <p>Consulte o calendário oficial das atividades do projeto/estágio, incluindo prazos importantes e datas de entrega.</p>
+        </div>
+        <div class="card-arrow"><i class="fa-solid fa-arrow-right-long"></i></div>
+      </a>
+
+      <a href="{{ MEDIA_URL }}dape/normas.pdf" class="innovation-card accent-indigo" target="_blank">
+        <div class="card-background-icon"><i class="fa-regular fa-clipboard"></i></div>
+        <div class="card-content">
+            <span class="card-label">Relatórios</span>
+            <h3>Normas de Escrita de Relatórios</h3>
+            <p>Guia completo com as normas e diretrizes para a redação e formatação de relatórios do projeto/estágio.</p>
+        </div>
+        <div class="card-arrow"><i class="fa-solid fa-arrow-right-long"></i></div>
+      </a>
+
+    </div>
+  </section>
+
+</div>
+
+{% endblock %}
