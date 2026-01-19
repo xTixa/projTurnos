@@ -262,3 +262,118 @@ class AuditoriaInscricao(models.Model):
     
     def __str__(self):
         return f"{self.n_mecanografico} — {self.id_unidadecurricular.nome} ({self.resultado})" if self.n_mecanografico else "Auditoria desconhecida"
+
+
+# ==========================================
+# VISTAS MATERIALIZADAS
+# ==========================================
+
+class MvEstatisticasTurno(models.Model):
+    """Vista materializada: Estatísticas de ocupação por turno"""
+    id_turno = models.IntegerField(primary_key=True)
+    n_turno = models.IntegerField()
+    tipo = models.CharField(max_length=255)
+    capacidade = models.IntegerField()
+    id_unidadecurricular = models.IntegerField()
+    uc_nome = models.CharField(max_length=255)
+    ects = models.FloatField()
+    curso_nome = models.CharField(max_length=255)
+    ano_curricular = models.CharField(max_length=255)
+    total_inscritos = models.IntegerField()
+    vagas_disponiveis = models.IntegerField()
+    taxa_ocupacao_percent = models.DecimalField(max_digits=5, decimal_places=2)
+    turno_cheio = models.BooleanField()
+    hora_inicio = models.TimeField()
+    hora_fim = models.TimeField()
+
+    class Meta:
+        managed = False
+        db_table = 'mv_estatisticas_turno'
+
+
+class MvResumoInscricoesAluno(models.Model):
+    """Vista materializada: Resumo de inscrições por aluno"""
+    n_mecanografico = models.IntegerField(primary_key=True)
+    aluno_nome = models.CharField(max_length=255)
+    aluno_email = models.CharField(max_length=255)
+    curso_nome = models.CharField(max_length=255)
+    ano_curricular = models.CharField(max_length=255)
+    total_ucs_inscritas = models.IntegerField()
+    total_turnos_inscritos = models.IntegerField()
+    total_ects = models.FloatField()
+    primeira_inscricao = models.DateField(null=True)
+    ultima_inscricao = models.DateField(null=True)
+    dias_com_atividade = models.IntegerField()
+
+    class Meta:
+        managed = False
+        db_table = 'mv_resumo_inscricoes_aluno'
+
+
+class MvUcsMaisProcuradas(models.Model):
+    """Vista materializada: UCs mais procuradas"""
+    id_unidadecurricular = models.IntegerField(primary_key=True)
+    uc_nome = models.CharField(max_length=255)
+    ects = models.FloatField()
+    curso_nome = models.CharField(max_length=255)
+    ano_curricular = models.CharField(max_length=255)
+    semestre = models.CharField(max_length=255)
+    total_alunos_inscritos = models.IntegerField()
+    total_turnos_com_inscricoes = models.IntegerField()
+    total_inscricoes = models.IntegerField()
+    capacidade_total_turnos = models.IntegerField()
+    taxa_preenchimento_global_percent = models.DecimalField(max_digits=5, decimal_places=2)
+
+    class Meta:
+        managed = False
+        db_table = 'mv_ucs_mais_procuradas'
+
+
+class MvCargaDocentes(models.Model):
+    """Vista materializada: Carga horária dos docentes"""
+    id_docente = models.IntegerField(primary_key=True)
+    docente_nome = models.CharField(max_length=255)
+    docente_email = models.CharField(max_length=255)
+    total_ucs = models.IntegerField()
+    total_ects_lecionados = models.FloatField()
+    total_turnos = models.IntegerField()
+    total_alunos_distintos = models.IntegerField()
+    ucs_lecionadas = models.TextField()
+
+    class Meta:
+        managed = False
+        db_table = 'mv_carga_docentes'
+
+
+class MvInscricoesPorDia(models.Model):
+    """Vista materializada: Histórico de inscrições por dia"""
+    data = models.DateField(primary_key=True)
+    total_inscricoes = models.IntegerField()
+    alunos_distintos = models.IntegerField()
+    ucs_distintas = models.IntegerField()
+    turnos_distintos = models.IntegerField()
+    dia_semana = models.IntegerField()
+    hora_pico = models.IntegerField()
+    nome_dia_semana = models.CharField(max_length=50)
+
+    class Meta:
+        managed = False
+        db_table = 'mv_inscricoes_por_dia'
+
+
+class MvConflitosHorario(models.Model):
+    """Vista materializada: Conflitos de horário entre turnos"""
+    n_mecanografico = models.IntegerField()
+    aluno_nome = models.CharField(max_length=255)
+    turno1_id = models.IntegerField()
+    uc1_nome = models.CharField(max_length=255)
+    turno1_inicio = models.TimeField()
+    turno1_fim = models.TimeField()
+    turno2_id = models.IntegerField()
+    uc2_nome = models.CharField(max_length=255)
+    turno2_inicio = models.TimeField()
+    turno2_fim = models.TimeField()
+
+    class Meta:
+        managed = False
+        db_table = 'mv_conflitos_horario'

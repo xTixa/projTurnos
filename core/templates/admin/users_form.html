@@ -6,15 +6,18 @@
 <link rel="stylesheet" href="{% static 'css/admin/users_form.css' %}">
 
 <div class="users-container">
-    <h1>Gerir Utilizadores</h1>
-
-    <!-- Botão para criar novo utilizador -->
-    <div class="action-buttons">
-        <a href="#novo-form" class="btn-create" id="btn-novo-user">+ Novo Utilizador</a>
-    </div>
+    {% if user %}
+        <!-- MODO EDIÇÃO -->
+        <h1>Editar Utilizador</h1>
+        <div class="edit-badge">Modo: <strong>{{ user.tipo }}</strong></div>
+    {% else %}
+        <!-- MODO CRIAÇÃO -->
+        <h1>Criar Novo Utilizador</h1>
+        <div class="create-badge">Modo: <strong>Novo Admin</strong></div>
+    {% endif %}
 
     <!-- FORMULÁRIO (CREATE/UPDATE) -->
-    <div class="form-section" id="novo-form" style="display:none;">
+    <div class="form-section" id="novo-form">
         <h2>{% if user %}Editar Utilizador ({{ user.tipo }}){% else %}Novo Utilizador (Admin){% endif %}</h2>
         
         <form method="post" class="user-form">
@@ -43,12 +46,17 @@
 
             <div class="form-actions">
                 <button type="submit" class="btn-save">Guardar</button>
-                <button type="button" class="btn-cancel" onclick="document.getElementById('novo-form').style.display='none';">Cancelar</button>
+                {% if user %}
+                    <a href="{% url 'home:admin_users_list' %}" class="btn-cancel">Cancelar</a>
+                {% else %}
+                    <a href="{% url 'home:admin_users_list' %}" class="btn-cancel">Voltar</a>
+                {% endif %}
             </div>
         </form>
     </div>
 
     <!-- LISTA DE UTILIZADORES -->
+    {% if user %}
     <div class="list-section">
         <h2>Lista de Utilizadores</h2>
 
@@ -139,22 +147,28 @@
             <p class="no-data">Nenhum utilizador encontrado.</p>
         {% endif %}
     </div>
+    {% endif %}
 </div>
 
 <script>
-    // Mostrar/ocultar formulário
-    document.getElementById('btn-novo-user').addEventListener('click', function(e) {
-        e.preventDefault();
-        var formSection = document.getElementById('novo-form');
-        formSection.style.display = formSection.style.display === 'none' ? 'block' : 'none';
-    });
-
-    // Se for edição, manter o formulário visível
-    {% if user %}
-        document.getElementById('novo-form').style.display = 'block';
-    {% endif %}
-
-    // Funções de filtro
+    // Se for criação (sem user), o formulário fica sempre visível
+    // Se for edição (com user), também fica visível
+    // A lista apenas aparece em modo edição (quando existe user)
+    
+    // Permitir pesquisa ao digitar
+    const searchInput = document.getElementById('search-user');
+    const filterTipo = document.getElementById('filter-tipo');
+    const filterStatus = document.getElementById('filter-status');
+    
+    if (searchInput) {
+        searchInput.addEventListener('keyup', aplicarFiltros);
+    }
+    if (filterTipo) {
+        filterTipo.addEventListener('change', aplicarFiltros);
+    }
+    if (filterStatus) {
+        filterStatus.addEventListener('change', aplicarFiltros);
+    }
     function aplicarFiltros() {
         const searchTerm = document.getElementById('search-user').value.toLowerCase();
         const tipoFilter = document.getElementById('filter-tipo').value.toLowerCase();

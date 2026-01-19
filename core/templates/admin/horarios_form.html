@@ -1,132 +1,289 @@
 {% extends "../home/base.html" %}
-
 {% load static %}
+{% load pdf_tags %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/admin/horarios_form.css' %}">
+<style>
+    .horario-form-wrapper {
+        max-width: 650px;
+        margin: 18px auto 0 auto;
+        background: #fff;
+        border-radius: 18px;
+        box-shadow: 0 8px 32px -8px #2563eb22;
+        padding: 2.5rem 2.5rem 2rem 2.5rem;
+        border: 1px solid #e5e7eb;
+    }
+    .horario-form-title {
+        text-align: center;
+        font-size: 1.35rem;
+        font-weight: 800;
+        color: #1e293b;
+        margin-bottom: 0.7rem;
+        letter-spacing: 0.01em;
+    }
+    .horario-form-desc {
+        text-align: center;
+        color: #64748b;
+        font-size: 1.01rem;
+        margin-bottom: 2.2rem;
+    }
+    .horario-form-group {
+        margin-bottom: 1.5rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.3rem;
+    }
+    .horario-form-label {
+        font-size: 0.98rem;
+        font-weight: 600;
+        color: #2563eb;
+        margin-bottom: 0.2rem;
+    }
+    .horario-form-input, .horario-form-select {
+        padding: 0.85rem 1rem;
+        border: 2px solid #e5e7eb;
+        border-radius: 8px;
+        font-size: 1rem;
+        background: #f9fafb;
+        transition: border 0.2s;
+    }
+    .horario-form-input:focus, .horario-form-select:focus {
+        border-color: #2563eb;
+        background: #fff;
+        outline: none;
+    }
+    .horario-form-upload {
+        border: 2px dashed #cbd5e1;
+        border-radius: 10px;
+        background: #f8fafc;
+        padding: 1.5rem 1rem 1.2rem 1rem;
+        text-align: center;
+        cursor: pointer;
+        transition: border 0.2s, background 0.2s;
+        margin-bottom: 0.2rem;
+        position: relative;
+        min-height: 110px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
+    .horario-form-upload:hover {
+        border-color: #2563eb;
+        background: #eff6ff;
+    }
+    .horario-form-upload input[type="file"] {
+        opacity: 0;
+        width: 100%;
+        height: 100%;
+        position: absolute;
+        left: 0; top: 0;
+        cursor: pointer;
+        z-index: 2;
+    }
+    .horario-form-upload .upload-icon {
+        font-size: 2.5rem;
+        color: #2563eb;
+        margin-bottom: 0.3rem;
+    }
+    .horario-form-upload .upload-text {
+        color: #64748b;
+        font-size: 1rem;
+        margin-bottom: 0.2rem;
+    }
+    .file-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: #2563eb;
+        color: #fff;
+        border-radius: 20px;
+        padding: 0.35rem 1rem 0.35rem 0.8rem;
+        font-size: 0.98rem;
+        font-weight: 500;
+        margin-top: 0.7rem;
+        margin-bottom: 0.2rem;
+        box-shadow: 0 2px 8px -2px #2563eb22;
+        position: relative;
+        max-width: 90%;
+        word-break: break-all;
+    }
+    .file-chip .fa-file-pdf {
+        color: #fff;
+        font-size: 1.1em;
+    }
+    .file-chip .remove-file {
+        background: none;
+        border: none;
+        color: #fff;
+        margin-left: 8px;
+        font-size: 1.1em;
+        cursor: pointer;
+        transition: color 0.2s;
+        padding: 0 4px;
+    }
+    .file-chip .remove-file:hover {
+        color: #f87171;
+    }
+    .horario-form-current-file {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: #f1f5f9;
+        border: 1px solid #cbd5e1;
+        border-radius: 20px;
+        padding: 0.35rem 1rem 0.35rem 0.8rem;
+        color: #2563eb;
+        text-decoration: none;
+        font-size: 0.97rem;
+        margin-bottom: 0.7rem;
+        margin-top: 0.2rem;
+        word-break: break-all;
+    }
+    .horario-form-current-file .fa-file-pdf {
+        color: #ef4444;
+    }
+    .horario-form-current-file .fa-external-link-alt {
+        color: #64748b;
+        font-size: 0.95em;
+    }
+    .horario-form-actions {
+        display: flex;
+        gap: 10px;
+        justify-content: center;
+        margin-top: 2.2rem;
+    }
+    .horario-form-btn-primary {
+        background: linear-gradient(90deg, #2563eb 60%, #1d4ed8 100%);
+        color: white;
+        font-weight: 700;
+        border: none;
+        border-radius: 8px;
+        padding: 0.85rem 2.2rem;
+        font-size: 1.08rem;
+        box-shadow: 0 2px 8px -2px #2563eb22;
+        transition: background 0.2s, box-shadow 0.2s, transform 0.1s;
+    }
+    .horario-form-btn-primary:hover {
+        background: #1d4ed8;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 18px -2px #2563eb33;
+    }
+    .horario-form-btn-secondary {
+        background: #f3f4f6;
+        color: #374151;
+        border-radius: 8px;
+        padding: 0.85rem 2.2rem;
+        font-size: 1.08rem;
+        border: none;
+        transition: background 0.2s, transform 0.1s;
+    }
+    .horario-form-btn-secondary:hover {
+        background: #e5e7eb;
+        transform: translateY(-2px);
+    }
+    @media (max-width: 900px) {
+        .horario-form-wrapper {
+            max-width: 98vw;
+            padding: 1.2rem 0.5rem;
+        }
+    }
+    @media (max-width: 600px) {
+        .horario-form-actions {
+            flex-direction: column;
+        }
+        .horario-form-btn-primary, .horario-form-btn-secondary {
+            width: 100%;
+            justify-content: center;
+        }
+    }
+</style>
 {% endblock %}
 
 {% block content %}
-<div class="form-container">
-    <div class="form-header">
-        <i class="fa-solid fa-calendar-days"></i>
-        <h1>{% if horario %}Editar Horário{% else %}Novo Horário{% endif %}</h1>
-        <p>{% if horario %}Atualizar as informações do horário{% else %}Adicionar um novo horário ao sistema{% endif %}</p>
-    </div>
-
-    {% if horario %}
-    <div class="alert alert-info">
-        <i class="fa-solid fa-circle-info"></i>
-        <span>A editar um horário existente. Deixe o campo de ficheiro vazio para manter o atual.</span>
-    </div>
+<div class="horario-form-wrapper">
+    <div class="horario-form-title">{% if horario %}Editar Horário{% else %}Novo Horário{% endif %}</div>
+    <div class="horario-form-desc">{% if horario %}Atualize as informações do horário abaixo.{% else %}Adicione um novo horário ao sistema.{% endif %}</div>
+    {% if horario and horario.ficheiro %}
+    <a href="{% pdf_url horario 'horario' %}" target="_blank" class="horario-form-current-file">
+        <i class="fa-solid fa-file-pdf"></i>
+        <span>Ficheiro atual</span>
+        <i class="fa-solid fa-external-link-alt"></i>
+    </a>
     {% endif %}
-
-    <div class="form-card">
-        <form method="POST" enctype="multipart/form-data">
-            {% csrf_token %}
-
-            <!-- Informações Básicas -->
-            <div class="form-section">
-                <div class="form-section-title">
-                    <i class="fa-solid fa-info-circle"></i>
-                    <span>Informações Básicas</span>
-                </div>
-
-                <div class="form-group">
-                    <label>
-                        <i class="fa-solid fa-tag"></i>
-                        Nome do Horário
-                    </label>
-                    <input 
-                        type="text" 
-                        name="nome" 
-                        class="form-control" 
-                        value="{{ horario.nome|default:'' }}"
-                        placeholder="Ex: Horário do 1º Ano - 1º Semestre"
-                        required
-                    >
-                </div>
+    <form method="POST" enctype="multipart/form-data" id="horario-form">
+        {% csrf_token %}
+        <div class="horario-form-group">
+            <label class="horario-form-label" for="id_nome">Nome do Horário</label>
+            <input type="text" name="nome" id="id_nome" class="horario-form-input" value="{{ horario.nome|default:'' }}" placeholder="Ex: Horário do 1º Ano - 1º Semestre" required>
+        </div>
+        <div class="horario-form-group">
+            <label class="horario-form-label" for="id_curso">Curso</label>
+            <select name="id_curso" id="id_curso" class="horario-form-select" required>
+                <option value="" disabled {% if not horario %}selected{% endif %}>Selecione um curso</option>
+                {% for curso in cursos %}
+                <option value="{{ curso.id_curso }}" {% if horario and horario.id_curso.id_curso == curso.id_curso %}selected{% endif %}>{{ curso.nome }} ({{ curso.grau }})</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="horario-form-group">
+            <label class="horario-form-label" for="id_anocurricular">Ano Curricular</label>
+            <select name="id_anocurricular" id="id_anocurricular" class="horario-form-select" required>
+                <option value="" disabled {% if not horario %}selected{% endif %}>Selecione um ano</option>
+                {% for ano in anos_curriculares %}
+                <option value="{{ ano.id_anocurricular }}" {% if horario and horario.id_anocurricular.id_anocurricular == ano.id_anocurricular %}selected{% endif %}>{{ ano.ano_curricular }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="horario-form-group">
+            <label class="horario-form-label">Ficheiro PDF</label>
+            <div class="horario-form-upload" id="upload-area">
+                <span class="upload-icon"><i class="fa-solid fa-cloud-arrow-up"></i></span>
+                <span class="upload-text">Clique ou arraste o ficheiro PDF aqui</span>
+                <span class="upload-text">Tamanho máximo: 10MB</span>
+                <input type="file" name="ficheiro" id="id_ficheiro" accept="application/pdf" {% if not horario %}required{% endif %}>
             </div>
-
-            <!-- Seleção de Curso e Ano -->
-            <div class="form-section">
-                <div class="form-section-title">
-                    <i class="fa-solid fa-graduation-cap"></i>
-                    <span>Curso e Ano Curricular</span>
-                </div>
-
-                <div class="form-group">
-                    <label>
-                        <i class="fa-solid fa-book"></i>
-                        Curso
-                    </label>
-                    <select name="id_curso" class="form-control" required>
-                        <option value="">Selecione um curso</option>
-                        {% for curso in cursos %}
-                        <option value="{{ curso.id_curso }}" {% if horario and horario.id_curso.id_curso == curso.id_curso %}selected{% endif %}>
-                            {{ curso.nome }} ({{ curso.grau }})
-                        </option>
-                        {% endfor %}
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label>
-                        <i class="fa-solid fa-layer-group"></i>
-                        Ano Curricular
-                    </label>
-                    <select name="id_anocurricular" class="form-control" required>
-                        <option value="">Selecione um ano</option>
-                        {% for ano in anos_curriculares %}
-                        <option value="{{ ano.id_anocurricular }}" 
-                            {% if horario and horario.id_anocurricular.id_anocurricular == ano.id_anocurricular %}selected{% endif %}>
-                            {{ ano.ano_curricular }}
-                        </option>
-                        {% endfor %}
-                    </select>
-                </div>
-            </div>
-
-            <!-- Upload de Ficheiro -->
-            <div class="form-section">
-                <div class="form-section-title">
-                    <i class="fa-solid fa-file-pdf"></i>
-                    <span>Ficheiro PDF</span>
-                </div>
-
-                {% if horario and horario.ficheiro %}
-                <a href="{{ horario.ficheiro.url }}" target="_blank" class="current-file">
-                    <i class="fa-solid fa-file-pdf"></i>
-                    <span>Ver ficheiro atual</span>
-                    <i class="fa-solid fa-external-link-alt"></i>
-                </a>
-                {% endif %}
-
-                <div class="file-upload-area">
-                    <i class="fa-solid fa-cloud-arrow-up"></i>
-                    <p class="file-info">Clique ou arraste o ficheiro PDF aqui</p>
-                    <p>Tamanho máximo: 10MB</p>
-                    <input 
-                        type="file" 
-                        name="ficheiro" 
-                        accept="application/pdf"
-                        {% if not horario %}required{% endif %}
-                    >
-                </div>
-            </div>
-
-            <!-- Botões de Ação -->
-            <div class="form-actions">
-                <button type="submit" class="btn btn-primary">
-                    <i class="fa-solid fa-save"></i>
-                    {% if horario %}Atualizar Horário{% else %}Criar Horário{% endif %}
-                </button>
-                <a href="{% url 'home:admin_horarios_list' %}" class="btn btn-secondary">
-                    <i class="fa-solid fa-times"></i>
-                    Cancelar
-                </a>
-            </div>
-        </form>
-    </div>
+            <div id="file-chip-container" style="margin-top: 0.7rem;"></div>
+        </div>
+        <div class="horario-form-actions">
+            <button type="submit" class="horario-form-btn-primary">
+                <i class="fa-solid fa-save"></i>
+                {% if horario %}Atualizar Horário{% else %}Criar Horário{% endif %}
+            </button>
+            <a href="{% url 'home:admin_horarios_list' %}" class="horario-form-btn-secondary">
+                <i class="fa-solid fa-times"></i>
+                Cancelar
+            </a>
+        </div>
+    </form>
 </div>
+<script>
+    // Feedback visual do ficheiro selecionado com chip e opção de remover
+    document.addEventListener('DOMContentLoaded', function() {
+        var input = document.getElementById('id_ficheiro');
+        var chipContainer = document.getElementById('file-chip-container');
+        function renderChip(fileName) {
+            chipContainer.innerHTML =
+                '<span class="file-chip">' +
+                '<i class="fa-solid fa-file-pdf"></i> ' +
+                fileName +
+                '<button type="button" class="remove-file" title="Remover ficheiro">' +
+                '<i class="fa-solid fa-xmark"></i></button>' +
+                '</span>';
+            chipContainer.querySelector('.remove-file').onclick = function() {
+                input.value = '';
+                chipContainer.innerHTML = '';
+            };
+        }
+        if(input) {
+            input.addEventListener('change', function() {
+                if (input.files && input.files.length > 0) {
+                    renderChip(input.files[0].name);
+                } else {
+                    chipContainer.innerHTML = '';
+                }
+            });
+        }
+    });
+</script>
 {% endblock %}

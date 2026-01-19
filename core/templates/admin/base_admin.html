@@ -3,10 +3,11 @@
 <html lang="pt">
 <head>
     <meta charset="UTF-8">
-    <title>Admin Panel — ESTGV</title>
+    <title>{% block title %}Admin Panel — ESTGV{% endblock %}</title>
 
     <link rel="stylesheet" href="{% static 'css/admin/admin.css' %}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    {% block extra_css %}{% endblock %}
 </head>
 
 <body>
@@ -49,10 +50,15 @@
                class="nav-item {% if 'admin_logs' in request.resolver_match.url_name %}active{% endif %}">
                <i class="fa-solid fa-clipboard-list"></i> <span>Logs</span>
             </a>
+
+            <a href="{% url 'home:admin_export_data' %}"
+               class="nav-item {% if 'admin_export' in request.resolver_match.url_name %}active{% endif %}">
+               <i class="fa-solid fa-download"></i> <span>Exportar Dados</span>
+            </a>
         </nav>
 
         <div class="sidebar-bottom">
-            <a href="{% url 'home:admin_logout' %}" class="logout-btn">
+            <a href="{% url 'home:logout' %}" class="logout-btn">
                 <i class="fa-solid fa-right-from-bracket"></i> Logout
             </a>
         </div>
