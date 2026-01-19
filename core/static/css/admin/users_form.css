@@ -11,6 +11,28 @@
     margin-bottom: 20px;
 }
 
+/* BADGES PARA MODO */
+.edit-badge, .create-badge {
+    display: inline-block;
+    padding: 8px 12px;
+    border-radius: 4px;
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 20px;
+}
+
+.edit-badge {
+    background-color: #e3f2fd;
+    border-left: 4px solid #1976d2;
+    color: #1976d2;
+}
+
+.create-badge {
+    background-color: #e8f5e9;
+    border-left: 4px solid #388e3c;
+    color: #388e3c;
+}
+
 /* ============================================
    BOTÕES
    ============================================ */
