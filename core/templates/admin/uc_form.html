@@ -27,7 +27,31 @@
 			<input type="text" id="nome" name="nome" value="{% if uc %}{{ uc.nome }}{% endif %}" required>
 
 			<label for="ects">ECTS</label>
-			<input type="number" step="0.5" min="0" id="ects" name="ects" value="{% if uc %}{{ uc.ects }}{% endif %}" required>
+			<input type="number" step="0.5" min="0" id="ects" name="ects" value="{% if uc %}{{ uc.ects|stringformat:"g" }}{% endif %}" required>
+
+			<label for="curso">Curso</label>
+			<select name="curso" id="curso" required>
+				<option value="">Selecionar Curso</option>
+				{% for c in cursos %}
+				<option value="{{ c.id_curso }}" {% if uc and uc.id_curso.id_curso == c.id_curso %}selected{% endif %}>{{ c.nome }}</option>
+				{% endfor %}
+			</select>
+
+			<label for="ano">Ano Curricular</label>
+			<select name="ano" id="ano" required>
+				<option value="">Selecionar Ano</option>
+				{% for a in anos %}
+				<option value="{{ a.id_anocurricular }}" {% if uc and uc.id_anocurricular.id_anocurricular == a.id_anocurricular %}selected{% endif %}>{{ a.ano_curricular }}</option>
+				{% endfor %}
+			</select>
+
+			<label for="semestre">Semestre</label>
+			<select name="semestre" id="semestre" required>
+				<option value="">Selecionar Semestre</option>
+				{% for s in semestres %}
+				<option value="{{ s.id_semestre }}" {% if uc and uc.id_semestre.id_semestre == s.id_semestre %}selected{% endif %}>{{ s.semestre }}º Semestre</option>
+				{% endfor %}
+			</select>
 
 			<div style="display: flex; gap: 10px; margin-top: 20px;">
 				<button type="submit" class="btn btn-primary">

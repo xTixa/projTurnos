@@ -1,4 +1,5 @@
 {% extends "../home/base.html" %}
+{% load pdf_tags %}
 
 {% block content %}
 <h1>Gerir Horários (PDF)</h1>
@@ -22,7 +23,7 @@
         <tr>
             <td>{{ h.id }}</td>
             <td>{{ h.nome }}</td>
-            <td><a href="{{ h.ficheiro.url }}" target="_blank">Abrir</a></td>
+            <td><a href="{% pdf_url h 'horario' %}" target="_blank">Abrir</a></td>
             <td>{{ h.atualizado_em|date:"d/m/Y H:i" }}</td>
             <td>
                      <a href="{% url 'home:admin_horarios_edit' h.id %}" class="edit-btn"><i class="fa-regular fa-pen-to-square"></i></a>

@@ -1,6 +1,7 @@
 {% extends "../home/base.html" %}
 
 {% load static %}
+{% load pdf_tags %}
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/admin/horarios_form.css' %}">
@@ -95,7 +96,7 @@
                 </div>
 
                 {% if horario and horario.ficheiro %}
-                <a href="{{ horario.ficheiro.url }}" target="_blank" class="current-file">
+                <a href="{% pdf_url horario 'horario' %}" target="_blank" class="current-file">
                     <i class="fa-solid fa-file-pdf"></i>
                     <span>Ver ficheiro atual</span>
                     <i class="fa-solid fa-external-link-alt"></i>
