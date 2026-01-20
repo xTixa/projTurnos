@@ -180,7 +180,7 @@ def eliminar_pdf(file_id, tipo_pdf="horario"):
         # Escolhe o GridFS correto
         gridfs_instance = fs_horarios if tipo_pdf == "horario" else fs_avaliacoes
         
-        # Deleta o ficheiro (também apaga automaticamente chunks relacionados)
+        # Elimina o ficheiro (também apaga automaticamente chunks relacionados)
         gridfs_instance.delete(file_id)
         
         print(f"PDF {file_id} eliminado do MongoDB")
