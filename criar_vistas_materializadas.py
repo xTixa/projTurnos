@@ -23,7 +23,7 @@ def executar_sql_file(arquivo_sql):
         with open(arquivo_sql, 'r', encoding='utf-8') as f:
             sql = f.read()
         
-        print(f"📄 A ler ficheiro: {arquivo_sql}")
+        print(f"A ler ficheiro: {arquivo_sql}")
         
         with connection.cursor() as cursor:
             # Divide o SQL em statements individuais (separados por ;)
@@ -36,24 +36,24 @@ def executar_sql_file(arquivo_sql):
                     continue
                 
                 try:
-                    print(f"⏳ Executando statement {i}/{total}...")
+                    print(f"Executando statement {i}/{total}...")
                     cursor.execute(statement)
-                    print(f"✅ Statement {i}/{total} executado com sucesso")
+                    print(f"Statement {i}/{total} executado com sucesso")
                 except Exception as e:
                     # Se falhar, tenta continuar (pode ser DROP de algo que não existe)
-                    print(f"⚠️  Aviso no statement {i}: {str(e)[:100]}")
+                    print(f"Aviso no statement {i}: {str(e)[:100]}")
         
-        print("✅ Ficheiro SQL executado com sucesso!")
+        print("Ficheiro SQL executado com sucesso!")
         return True
         
     except Exception as e:
-        print(f"❌ Erro ao executar SQL: {str(e)}")
+        print(f"Erro ao executar SQL: {str(e)}")
         return False
 
 
 def atualizar_vistas():
     """Atualiza todas as vistas materializadas"""
-    print("\n🔄 A atualizar vistas materializadas...")
+    print("\nA atualizar vistas materializadas...")
     
     vistas = [
         'mv_estatisticas_turno',
@@ -67,18 +67,18 @@ def atualizar_vistas():
     with connection.cursor() as cursor:
         for vista in vistas:
             try:
-                print(f"⏳ Atualizando {vista}...")
+                print(f"Atualizando {vista}...")
                 cursor.execute(f"REFRESH MATERIALIZED VIEW CONCURRENTLY {vista}")
-                print(f"✅ {vista} atualizada")
+                print(f"{vista} atualizada")
             except Exception as e:
-                print(f"❌ Erro ao atualizar {vista}: {str(e)}")
+                print(f"Erro ao atualizar {vista}: {str(e)}")
     
-    print("✅ Todas as vistas foram atualizadas!")
+    print("Todas as vistas foram atualizadas!")
 
 
 def verificar_vistas():
     """Verifica se as vistas materializadas existem"""
-    print("\n🔍 A verificar vistas materializadas...")
+    print("\nA verificar vistas materializadas...")
     
     with connection.cursor() as cursor:
         cursor.execute("""
@@ -91,18 +91,18 @@ def verificar_vistas():
         vistas = cursor.fetchall()
         
         if vistas:
-            print(f"\n✅ {len(vistas)} vistas materializadas encontradas:")
+            print(f"\n{len(vistas)} vistas materializadas encontradas:")
             for i, (nome,) in enumerate(vistas, 1):
                 print(f"  {i}. {nome}")
         else:
-            print("❌ Nenhuma vista materializada encontrada!")
+            print("Nenhuma vista materializada encontrada!")
         
         return len(vistas) > 0
 
 
 def mostrar_estatisticas():
     """Mostra algumas estatísticas das vistas"""
-    print("\n📊 Estatísticas das Vistas:")
+    print("\nEstatísticas das Vistas:")
     
     try:
         with connection.cursor() as cursor:
@@ -137,19 +137,19 @@ def mostrar_estatisticas():
             print(f"  - Alunos com conflitos: {alunos_conflito}")
             
     except Exception as e:
-        print(f"❌ Erro ao obter estatísticas: {str(e)}")
+        print(f"Erro ao obter estatísticas: {str(e)}")
 
 
 def main():
     print("=" * 60)
-    print("🚀 GESTOR DE VISTAS MATERIALIZADAS - Projeto BD2")
+    print("GESTOR DE VISTAS MATERIALIZADAS - Projeto BD2")
     print("=" * 60)
     
     # Caminho para o ficheiro SQL
     sql_path = Path(__file__).parent / 'core' / 'sql' / 'materialized_views.sql'
     
     if not sql_path.exists():
-        print(f"❌ Ficheiro SQL não encontrado: {sql_path}")
+        print(f"Ficheiro SQL não encontrado: {sql_path}")
         return
     
     print("\nOpções:")
@@ -165,8 +165,8 @@ def main():
     if escolha == '1':
         print("\n" + "=" * 60)
         if executar_sql_file(sql_path):
-            print("\n✅ Vistas materializadas criadas com sucesso!")
-            print("💡 Dica: Execute a opção 2 para atualizar os dados.")
+            print("\nVistas materializadas criadas com sucesso!")
+            print("Dica: Execute a opção 2 para atualizar os dados.")
     
     elif escolha == '2':
         atualizar_vistas()
@@ -179,7 +179,7 @@ def main():
     
     elif escolha == '5':
         print("\n" + "=" * 60)
-        print("📦 Executando processo completo...")
+        print("Executando processo completo...")
         print("=" * 60)
         
         # 1. Criar vistas
@@ -192,26 +192,26 @@ def main():
             mostrar_estatisticas()
             
             print("\n" + "=" * 60)
-            print("✅ PROCESSO COMPLETO FINALIZADO!")
+            print("PROCESSO COMPLETO FINALIZADO!")
             print("=" * 60)
-            print("\n💡 Próximos passos:")
+            print("\nPróximos passos:")
             print("   - Aceda ao painel admin: /admin-panel/export/")
             print("   - Exporte dados em CSV ou JSON")
             print("   - Configure atualizações automáticas (ver README)")
     
     elif escolha == '0':
-        print("👋 Até breve!")
+        print("Até breve!")
     
     else:
-        print("❌ Opção inválida!")
+        print("Opção inválida!")
 
 
 if __name__ == '__main__':
     try:
         main()
     except KeyboardInterrupt:
-        print("\n\n👋 Operação cancelada pelo utilizador.")
+        print("\n\nOperação cancelada pelo utilizador.")
     except Exception as e:
-        print(f"\n❌ Erro inesperado: {str(e)}")
+        print(f"\nErro inesperado: {str(e)}")
         import traceback
         traceback.print_exc()
