@@ -15,7 +15,9 @@ from bd2_projeto.services.mongo_service import (
     validar_inscricao_disponivel, registar_consulta_aluno,
     registar_atividade_docente, registar_erro, registar_auditoria_user,
     criar_proposta_estagio, listar_propostas_estagio, atualizar_proposta_estagio, deletar_proposta_estagio,
-    adicionar_favorito, remover_favorito, verificar_favorito, listar_favoritos
+    adicionar_favorito, remover_favorito, verificar_favorito, listar_favoritos,
+    atribuir_aluno_proposta, remover_atribuicao_proposta, obter_aluno_atribuido, verificar_aluno_tem_proposta,
+    criar_proposta_admin, obter_proposta_por_id, atualizar_proposta_admin, deletar_proposta_por_id
 )
 # ==========================================
 # IMPORT DO SERVIÇO GridFS PARA PDFs
@@ -64,6 +66,10 @@ def login_view(request):
             login(request, user)
 
             if user.is_staff:
+                request.session["user_tipo"] = "admin"
+                request.session["user_id"] = user.id
+                request.session["user_nome"] = user.username
+                request.session["user_email"] = user.email
                 return redirect("home:admin_dashboard")
 
             return redirect("home:index")
@@ -832,7 +838,7 @@ def admin_users_delete(request, id):
             total_matriculas = matriculas.count()
             matriculas.delete()
             
-            #remove as inscriçoes nos turnos em que o aluno esta inscrito
+            #remove as inscriçoes do aluno no turno
             inscricoes_turno = InscricaoTurno.objects.filter(n_mecanografico=user)
             total_inscricoes = inscricoes_turno.count()
             inscricoes_turno.delete()
@@ -1575,7 +1581,7 @@ def contactos_mestrado(request):
 def admin_uc_list(request):
     ucs = UnidadeCurricular.objects.all().order_by("id_unidadecurricular")
 
-    #filtro
+    # filtro
     ano = request.GET.get('ano')
     semestre = request.GET.get('semestre')
     curso = request.GET.get('curso')
@@ -1589,11 +1595,11 @@ def admin_uc_list(request):
     if curso:
         ucs = ucs.filter(id_curso_id=curso)
 
-    #carrega as listas para agrupar por filtros
+    # carrega as listas para agrupar por filtros
     anos = AnoCurricular.objects.all()
     semestres = Semestre.objects.all()
     cursos = Curso.objects.all()
-
+    #...
     return render(request, "admin/uc_list.html", {
         "ucs": ucs,
         "anos": anos,
@@ -1838,15 +1844,37 @@ def dape(request):
     # Busca todas as propostas de estágio do MongoDB
     propostas = listar_propostas_estagio()
     
-    # Define proposta_id para todas as propostas
+    # Define proposta_id para todas as propostas e conta disponíveis
+    propostas_disponiveis = 0
     for proposta in propostas:
         proposta["proposta_id"] = str(proposta.get("id_proposta", proposta.get("_id", "")))
+        proposta["is_minha_proposta"] = False  # Inicializa
+        # Conta apenas propostas não atribuídas
+        if not proposta.get("aluno_atribuido"):
+            propostas_disponiveis += 1
     
-    # Se o usuário for aluno, verifica quais propostas são favoritas
+    # Se o usuário for aluno, verifica quais propostas são favoritas e qual está atribuída
     if request.session.get("user_tipo") == "aluno":
         aluno_id = request.session.get("user_id")
+        proposta_atribuida = None
+        outras_propostas = []
+        
         for proposta in propostas:
             proposta["is_favorito"] = verificar_favorito(aluno_id, proposta["proposta_id"])
+            
+            # Verifica se esta proposta está atribuída ao aluno logado
+            aluno_atribuido = proposta.get("aluno_atribuido")
+            if aluno_atribuido and str(aluno_atribuido.get("n_mecanografico")) == str(aluno_id):
+                proposta["is_minha_proposta"] = True
+                proposta_atribuida = proposta
+            else:
+                outras_propostas.append(proposta)
+        
+        # Coloca a proposta atribuída primeiro
+        if proposta_atribuida:
+            propostas = [proposta_atribuida] + outras_propostas
+        else:
+            propostas = outras_propostas
     
     # Regista a consulta para analytics
     adicionar_log(
@@ -1857,6 +1885,7 @@ def dape(request):
     
     return render(request, "dape/dape.html", {
         "propostas": propostas,
+        "propostas_disponiveis": propostas_disponiveis,
         "area": "dape"
     })
 
@@ -2160,6 +2189,9 @@ def proposta_detalhes(request, id_proposta):
         aluno_id = request.session.get("user_id")
         proposta["is_favorito"] = verificar_favorito(aluno_id, proposta["proposta_id"])
 
+    # Obter aluno atribuído (se existir)
+    aluno_atribuido = obter_aluno_atribuido(proposta["proposta_id"])
+    
     # Registar acesso
     adicionar_log(
         "visualizar_detalhes_proposta",
@@ -2169,5 +2201,192 @@ def proposta_detalhes(request, id_proposta):
 
     return render(request, "dape/detalhes.html", {
         "proposta": proposta,
+        "aluno_atribuido": aluno_atribuido,
         "area": "dape"
     })
+
+def atribuir_aluno_view(request, id_proposta):
+    """
+    View para atribuir um aluno a uma proposta de estágio (apenas admin)
+    """
+    # Verificar se é admin
+    if request.session.get("user_tipo") != "admin":
+        messages.error(request, "Apenas administradores podem atribuir alunos a propostas.")
+        return redirect("home:proposta_detalhes", id_proposta=id_proposta)
+    
+    if request.method == "POST":
+        n_mecanografico = request.POST.get("n_mecanografico", "").strip()
+        acao = request.POST.get("acao", "atribuir")
+        
+        if acao == "remover":
+            # Remover atribuição
+            sucesso = remover_atribuicao_proposta(id_proposta)
+            if sucesso:
+                adicionar_log(
+                    "remover_atribuicao_proposta",
+                    {"proposta_id": id_proposta},
+                    request
+                )
+                messages.success(request, "Atribuição removida com sucesso!")
+            else:
+                messages.error(request, "Erro ao remover atribuição.")
+        elif n_mecanografico:
+            # Buscar nome do aluno
+            try:
+                aluno = Aluno.objects.get(n_mecanografico=n_mecanografico)
+                aluno_nome = aluno.nome
+            except Aluno.DoesNotExist:
+                messages.error(request, f"Aluno com número mecanográfico {n_mecanografico} não encontrado.")
+                return redirect("home:proposta_detalhes", id_proposta=id_proposta)
+            
+            # Verificar se o aluno já tem uma proposta atribuída
+            proposta_existente = verificar_aluno_tem_proposta(n_mecanografico)
+            if proposta_existente:
+                messages.error(
+                    request, 
+                    f"O aluno {aluno_nome} já tem uma proposta atribuída: '{proposta_existente.get('titulo')}' ({proposta_existente.get('entidade')}). "
+                    f"Remova essa atribuição primeiro antes de atribuir uma nova proposta."
+                )
+                return redirect("home:proposta_detalhes", id_proposta=id_proposta)
+            
+            # Atribuir aluno à proposta
+            sucesso = atribuir_aluno_proposta(id_proposta, n_mecanografico, aluno_nome)
+            if sucesso:
+                adicionar_log(
+                    "atribuir_aluno_proposta",
+                    {
+                        "proposta_id": id_proposta,
+                        "aluno_n_mecanografico": n_mecanografico,
+                        "aluno_nome": aluno_nome
+                    },
+                    request
+                )
+                messages.success(request, f"Aluno {aluno_nome} atribuído com sucesso!")
+            else:
+                messages.error(request, "Erro ao atribuir aluno à proposta.")
+        else:
+            messages.error(request, "Número mecanográfico é obrigatório.")
+    
+    return redirect("home:proposta_detalhes", id_proposta=id_proposta)
+
+
+# ==========================================
+# VIEWS ADMIN - GESTÃO PROPOSTAS DAPE
+# ==========================================
+
+@admin_required
+def admin_dape_list(request):
+    """Lista todas as propostas DAPE para gestão"""
+    propostas = listar_propostas_estagio()
+    
+    # Adiciona o ID formatado para cada proposta
+    for proposta in propostas:
+        proposta["proposta_id"] = str(proposta.get("id_proposta", ""))
+    
+    return render(request, "admin/dape_list.html", {
+        "propostas": propostas,
+        "total_propostas": len(propostas)
+    })
+
+
+@admin_required
+def admin_dape_create(request):
+    """Cria uma nova proposta DAPE"""
+    if request.method == "POST":
+        titulo = request.POST.get("titulo")
+        entidade = request.POST.get("entidade")
+        descricao = request.POST.get("descricao")
+        requisitos = request.POST.get("requisitos")
+        modelo = request.POST.get("modelo")
+        orientador_empresa = request.POST.get("orientador_empresa")
+        telefone = request.POST.get("telefone")
+        email = request.POST.get("email")
+        logo = request.POST.get("logo")
+        
+        proposta = criar_proposta_admin(
+            titulo=titulo,
+            entidade=entidade,
+            descricao=descricao,
+            requisitos=requisitos,
+            modelo=modelo,
+            orientador_empresa=orientador_empresa,
+            telefone=telefone,
+            email=email,
+            logo=logo
+        )
+        
+        if proposta:
+            adicionar_log(
+                "admin_criar_proposta",
+                {"titulo": titulo, "entidade": entidade},
+                request
+            )
+            messages.success(request, f"Proposta '{titulo}' criada com sucesso!")
+            return redirect("home:admin_dape_list")
+        else:
+            messages.error(request, "Erro ao criar proposta.")
+    
+    return render(request, "admin/dape_form.html", {"proposta": None})
+
+
+@admin_required
+def admin_dape_edit(request, id):
+    """Edita uma proposta DAPE existente"""
+    proposta = obter_proposta_por_id(id)
+    
+    if not proposta:
+        messages.error(request, "Proposta não encontrada.")
+        return redirect("home:admin_dape_list")
+    
+    if request.method == "POST":
+        updates = {
+            "titulo": request.POST.get("titulo"),
+            "entidade": request.POST.get("entidade"),
+            "descricao": request.POST.get("descricao"),
+            "requisitos": request.POST.get("requisitos"),
+            "modelo": request.POST.get("modelo"),
+            "orientador_empresa": request.POST.get("orientador_empresa"),
+            "telefone": request.POST.get("telefone"),
+            "email": request.POST.get("email"),
+            "logo": request.POST.get("logo")
+        }
+        
+        sucesso = atualizar_proposta_admin(id, updates)
+        
+        if sucesso:
+            adicionar_log(
+                "admin_editar_proposta",
+                {"id": id, "titulo": updates["titulo"]},
+                request
+            )
+            messages.success(request, f"Proposta '{updates['titulo']}' atualizada com sucesso!")
+            return redirect("home:admin_dape_list")
+        else:
+            messages.error(request, "Erro ao atualizar proposta.")
+    
+    return render(request, "admin/dape_form.html", {"proposta": proposta})
+
+
+@admin_required
+def admin_dape_delete(request, id):
+    """Deleta uma proposta DAPE"""
+    proposta = obter_proposta_por_id(id)
+    
+    if proposta:
+        titulo = proposta.get("titulo", "Desconhecido")
+        sucesso = deletar_proposta_por_id(id)
+        
+        if sucesso:
+            adicionar_log(
+                "admin_deletar_proposta",
+                {"id": id, "titulo": titulo},
+                request
+            )
+            messages.success(request, f"Proposta '{titulo}' eliminada com sucesso!")
+        else:
+            messages.error(request, "Erro ao eliminar proposta.")
+    else:
+        messages.error(request, "Proposta não encontrada.")
+    
+    return redirect("home:admin_dape_list")
+

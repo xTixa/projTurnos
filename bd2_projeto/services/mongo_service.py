@@ -3,7 +3,12 @@ from datetime import datetime
 import time
 import json
 
+# ==========================================
+# INICIALIZAÇÃO — ÍNDICES
+# ==========================================
+
 def criar_indices():
+    """Cria índices necessários nas coleções MongoDB"""
     try:
         # Índices para logs
         db.logs.create_index("timestamp")
@@ -36,12 +41,23 @@ def criar_indices():
         db.favoritos.create_index("proposta_id")
         db.favoritos.create_index([("aluno_id", 1), ("proposta_id", 1)], unique=True)
         
-        print("Índices criados")
+        print("✓ Índices MongoDB criados com sucesso")
     except Exception as e:
-        print(f"Erro ao criar índices: {str(e)}")
+        print(f"⚠ Erro ao criar índices: {str(e)}")
+
+# ==========================================
+# LOGS COM CONTEXTO COMPLETO
+# ==========================================
 
 def adicionar_log(acao, detalhes=None, request=None):
-
+    """
+    Adiciona log com contexto completo (IP, user-agent, duração)
+    
+    Args:
+        acao: Tipo de ação (ex: 'inscricao_turno', 'consulta_plano')
+        detalhes: Dict com dados adicionais
+        request: Objeto request do Django (para capturar contexto)
+    """
     log = {
         "acao": acao,
         "detalhes": detalhes or {},
@@ -63,11 +79,32 @@ def adicionar_log(acao, detalhes=None, request=None):
     return log
 
 def listar_logs(filtro=None, limite=100):
+    """
+    Lista logs com filtro opcional
+    
+    Args:
+        filtro: Dict com filtros (ex: {"acao": "inscricao_turno"})
+        limite: Número máximo de logs a retornar
+    """
     return list(db.logs.find(filtro or {}, {"_id": 0}).sort("timestamp", -1).limit(limite))
 
+# ==========================================
+# AUDITORIA DE INSCRIÇÕES
+# ==========================================
 
 def registar_auditoria_inscricao(aluno_id, turno_id, uc_id, uc_nome, resultado, motivo_rejeicao=None, tempo_ms=0):
-
+    """
+    Registra tentativa de inscrição em turno (para análise)
+    
+    Args:
+        aluno_id: ID do aluno
+        turno_id: ID do turno
+        uc_id: ID da UC
+        uc_nome: Nome da UC
+        resultado: 'sucesso', 'turno_cheio', 'conflito_horario', 'nao_autorizado'
+        motivo_rejeicao: Descrição detalhada se rejeitado
+        tempo_ms: Tempo de processamento em millisegundos
+    """
     auditoria = {
         "aluno_id": aluno_id,
         "turno_id": turno_id,
@@ -83,7 +120,10 @@ def registar_auditoria_inscricao(aluno_id, turno_id, uc_id, uc_nome, resultado, 
     return auditoria
 
 def validar_inscricao_disponivel(aluno_id, turno_id):
-
+    """
+    Valida se aluno pode se inscrever (sem duplicatas)
+    Retorna (pode_inscrever: bool, motivo: str)
+    """
     # Verificar se já tem inscrição neste turno
     existe = db.auditoria_inscricoes.find_one({
         "aluno_id": aluno_id,
@@ -96,8 +136,20 @@ def validar_inscricao_disponivel(aluno_id, turno_id):
     
     return True, "Pode inscrever"
 
-def registar_consulta_aluno(aluno_id, aluno_nome, tipo_consulta, detalhes=None):
+# ==========================================
+# LOGGING DE CONSULTAS
+# ==========================================
 
+def registar_consulta_aluno(aluno_id, aluno_nome, tipo_consulta, detalhes=None):
+    """
+    Registra quando aluno consulta plano, horários, etc
+    
+    Args:
+        aluno_id: N_mecanografico do aluno
+        aluno_nome: Nome do aluno
+        tipo_consulta: 'plano_curricular', 'horarios', 'avaliacoes', 'contactos'
+        detalhes: Info adicional (ex: qual curso consultou)
+    """
     consulta = {
         "aluno_id": aluno_id,
         "aluno_nome": aluno_nome,
@@ -109,8 +161,20 @@ def registar_consulta_aluno(aluno_id, aluno_nome, tipo_consulta, detalhes=None):
     db.consultas_alunos.insert_one(consulta)
     return consulta
 
-def registar_atividade_docente(docente_id, docente_nome, tipo_atividade, detalhes=None):
+# ==========================================
+# LOGGING DE ATIVIDADES DOCENTES
+# ==========================================
 
+def registar_atividade_docente(docente_id, docente_nome, tipo_atividade, detalhes=None):
+    """
+    Registra atividades de docentes (aulas lecionadas, atualizações, etc)
+    
+    Args:
+        docente_id: ID do docente
+        docente_nome: Nome do docente
+        tipo_atividade: 'aula_lecionada', 'ausencia', 'atualizacao_grades', etc
+        detalhes: Info adicional
+    """
     atividade = {
         "docente_id": docente_id,
         "docente_nome": docente_nome,
@@ -122,8 +186,23 @@ def registar_atividade_docente(docente_id, docente_nome, tipo_atividade, detalhe
     db.atividades_docentes.insert_one(atividade)
     return atividade
 
-def criar_proposta_estagio(aluno_id, aluno_nome, titulo, descricao, empresa, orientador=None, status="pendente"):
+# ==========================================
+# PROPOSTAS DE ESTÁGIO
+# ==========================================
 
+def criar_proposta_estagio(aluno_id, aluno_nome, titulo, descricao, empresa, orientador=None, status="pendente"):
+    """
+    Cria uma nova proposta de estágio
+    
+    Args:
+        aluno_id: ID do aluno
+        aluno_nome: Nome do aluno
+        titulo: Título da proposta
+        descricao: Descrição detalhada
+        empresa: Nome da empresa
+        orientador: Nome do orientador (opcional)
+        status: Status inicial ('pendente', 'aprovada', 'rejeitada')
+    """
     proposta = {
         "aluno_id": aluno_id,
         "aluno_nome": aluno_nome,
@@ -140,10 +219,24 @@ def criar_proposta_estagio(aluno_id, aluno_nome, titulo, descricao, empresa, ori
     return proposta
 
 def listar_propostas_estagio(filtro=None, limite=100):
+    """
+    Lista propostas de estágio com filtro opcional
+    
+    Args:
+        filtro: Dict com filtros (ex: {"status": "pendente"})
+        limite: Número máximo de propostas a retornar
+    """
     return list(db.proposta_estagio.find(filtro or {}, {"_id": 0}).sort("timestamp", -1).limit(limite))
 
 def atualizar_proposta_estagio(aluno_id, titulo, updates):
-
+    """
+    Atualiza uma proposta de estágio
+    
+    Args:
+        aluno_id: ID do aluno
+        titulo: Título da proposta (para identificar)
+        updates: Dict com campos a atualizar
+    """
     updates["timestamp"] = datetime.now()
     updates["data_formatada"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     
@@ -153,11 +246,29 @@ def atualizar_proposta_estagio(aluno_id, titulo, updates):
     )
     return result.modified_count > 0
 
-def eliminar_proposta_estagio(aluno_id, titulo):
+def deletar_proposta_estagio(aluno_id, titulo):
+    """
+    Deleta uma proposta de estágio
+    
+    Args:
+        aluno_id: ID do aluno
+        titulo: Título da proposta
+    """
     result = db.proposta_estagio.delete_one({"aluno_id": aluno_id, "titulo": titulo})
     return result.deleted_count > 0
 
+# ==========================================
+# FAVORITOS
+# ==========================================
+
 def adicionar_favorito(aluno_id, proposta_id):
+    """
+    Adiciona uma proposta aos favoritos do aluno
+    
+    Args:
+        aluno_id: ID do aluno
+        proposta_id: ID da proposta (usando _id do MongoDB)
+    """
     favorito = {
         "aluno_id": aluno_id,
         "proposta_id": proposta_id,
@@ -174,27 +285,54 @@ def adicionar_favorito(aluno_id, proposta_id):
     return True
 
 def remover_favorito(aluno_id, proposta_id):
+    """
+    Remove uma proposta dos favoritos do aluno
+    
+    Args:
+        aluno_id: ID do aluno
+        proposta_id: ID da proposta
+    """
     result = db.favoritos.delete_one({"aluno_id": aluno_id, "proposta_id": proposta_id})
     return result.deleted_count > 0
 
 def verificar_favorito(aluno_id, proposta_id):
+    """
+    Verifica se uma proposta é favorita do aluno
+    
+    Args:
+        aluno_id: ID do aluno
+        proposta_id: ID da proposta
+    """
     return db.favoritos.find_one({"aluno_id": aluno_id, "proposta_id": proposta_id}) is not None
 
 def listar_favoritos(aluno_id):
-    # Procura os favoritos do aluno
+    """
+    Lista todas as propostas favoritas de um aluno
+    
+    Args:
+        aluno_id: ID do aluno
+    """
+    # Busca os favoritos do aluno
     favoritos = list(db.favoritos.find({"aluno_id": aluno_id}, {"_id": 0, "proposta_id": 1}))
     
     if not favoritos:
         return []
     
-    # Procura as propostas correspondentes
+    # Busca as propostas correspondentes
     proposta_ids = [int(fav["proposta_id"]) for fav in favoritos]
     propostas = list(db.proposta_estagio.find({"id_proposta": {"$in": proposta_ids}}))
     
     return propostas
 
-def analisar_taxa_sucesso_inscricoes(filtro_uc_id=None):
+# ==========================================
+# AGGREGATIONS — ANÁLISE DE DADOS
+# ==========================================
 
+def analisar_taxa_sucesso_inscricoes(filtro_uc_id=None):
+    """
+    Analisa taxa de sucesso de inscrições por resultado
+    Retorna estatísticas agrupadas
+    """
     pipeline = [
         {
             "$group": {
@@ -215,7 +353,9 @@ def analisar_taxa_sucesso_inscricoes(filtro_uc_id=None):
     return list(db.auditoria_inscricoes.aggregate(pipeline))
 
 def analisar_inscricoes_por_dia():
-
+    """
+    Análise temporal: quantas inscrições por dia
+    """
     pipeline = [
         {
             "$group": {
@@ -240,7 +380,9 @@ def analisar_inscricoes_por_dia():
     return list(db.auditoria_inscricoes.aggregate(pipeline))
 
 def analisar_alunos_mais_ativos():
-
+    """
+    Quais alunos fizeram mais tentativas de inscrição
+    """
     pipeline = [
         {
             "$group": {
@@ -268,7 +410,9 @@ def analisar_alunos_mais_ativos():
     return list(db.auditoria_inscricoes.aggregate(pipeline))
 
 def analisar_ucs_mais_procuradas():
-
+    """
+    Quais UCs têm mais inscrições/tentativas
+    """
     pipeline = [
         {
             "$group": {
@@ -291,6 +435,9 @@ def analisar_ucs_mais_procuradas():
     return list(db.auditoria_inscricoes.aggregate(pipeline))
 
 def analisar_turnos_sobrecarregados():
+    """
+    Quais turnos têm mais rejeições por 'turno_cheio'
+    """
     pipeline = [
         {
             "$match": {"resultado": "turno_cheio"}
@@ -307,8 +454,14 @@ def analisar_turnos_sobrecarregados():
     ]
     return list(db.auditoria_inscricoes.aggregate(pipeline))
 
-def registar_erro(funcao, erro_msg, detalhes=None):
+# ==========================================
+# LOGGING DE ERROS
+# ==========================================
 
+def registar_erro(funcao, erro_msg, detalhes=None):
+    """
+    Registra erros ocorridos no sistema para análise
+    """
     erro = {
         "funcao": funcao,
         "erro_msg": erro_msg,
@@ -318,6 +471,10 @@ def registar_erro(funcao, erro_msg, detalhes=None):
     }
     db.erros.insert_one(erro)
     return erro
+
+# ==========================================
+# AGREGAÇÃO DE LOGS (MÚLTIPLAS COLEÇÕES)
+# ==========================================
 
 def _parse_ts(doc):
     ts = doc.get("timestamp") or doc.get("data_formatada")
@@ -343,7 +500,10 @@ def _str_val(val):
 
 
 def listar_eventos_mongo(filtro_acao=None, filtro_entidade=None, limite=500):
-
+    """
+    Consolida eventos das coleções Mongo (logs, consultas_alunos, atividades_docentes,
+    auditoria_inscricoes, erros) para exibição unificada.
+    """
     eventos = []
     limite = 1000 if limite > 1000 else (100 if limite < 1 else limite)
 
@@ -446,8 +606,21 @@ def listar_eventos_mongo(filtro_acao=None, filtro_entidade=None, limite=500):
     eventos = sorted(eventos, key=lambda e: e.get("data") or datetime.min, reverse=True)
     return eventos[:limite]
 
-def registar_auditoria_user(operacao, user_id, user_tipo, detalhes=None, request=None):
+# ==========================================
+# AUDITORIA DE CRUD DE USERS
+# ==========================================
 
+def registar_auditoria_user(operacao, user_id, user_tipo, detalhes=None, request=None):
+    """
+    Registra operações CRUD de utilizadores no MongoDB
+    
+    Args:
+        operacao: 'CREATE', 'UPDATE', 'DELETE'
+        user_id: ID do utilizador
+        user_tipo: Tipo ('Admin', 'Aluno', 'Docente')
+        detalhes: Dict com campos alterados (username, email, etc)
+        request: Objeto request do Django
+    """
     auditoria = {
         "operacao": operacao,
         "user_id": user_id,
@@ -468,4 +641,11 @@ def registar_auditoria_user(operacao, user_id, user_tipo, detalhes=None, request
     return auditoria
 
 def listar_auditoria_users(filtro=None, limite=100):
+    """
+    Lista auditoria de users com filtro opcional
+    
+    Args:
+        filtro: Dict com filtros (ex: {"operacao": "CREATE"})
+        limite: Número máximo de logs a retornar
+    """
     return list(db.auditoria_users.find(filtro or {}, {"_id": 0}).sort("timestamp", -1).limit(limite))

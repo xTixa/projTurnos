@@ -154,6 +154,11 @@
                 <p>Logs</p>
         </a>
 
+        <a href="{% url 'home:admin_dape_list' %}" class="card">
+                <i class="fa-solid fa-briefcase"></i>
+                <p>Propostas DAPE</p>
+        </a>
+
 </div>
 
 <!-- QUICK ACTIONS -->
@@ -163,6 +168,7 @@
         <a href="{% url 'home:admin_turnos_create' %}">+ Criar Turno</a>
         <a href="{% url 'home:admin_horarios_create' %}">+ Carregar Horário PDF</a>
         <a href="{% url 'home:admin_avaliacoes_create' %}">+ Carregar Avaliações PDF</a>
+        <a href="{% url 'home:admin_dape_create' %}">+ Nova Proposta DAPE</a>
 </div>
 
 {% endblock %}

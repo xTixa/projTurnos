@@ -51,6 +51,11 @@
                <i class="fa-solid fa-clipboard-list"></i> <span>Logs</span>
             </a>
 
+            <a href="{% url 'home:admin_dape_list' %}"
+               class="nav-item {% if 'admin_dape' in request.resolver_match.url_name %}active{% endif %}">
+               <i class="fa-solid fa-briefcase"></i> <span>Propostas DAPE</span>
+            </a>
+
             <a href="{% url 'home:admin_export_data' %}"
                class="nav-item {% if 'admin_export' in request.resolver_match.url_name %}active{% endif %}">
                <i class="fa-solid fa-download"></i> <span>Exportar Dados</span>

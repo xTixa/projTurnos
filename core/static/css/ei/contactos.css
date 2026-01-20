@@ -219,6 +219,18 @@
   display: none;
 }
 
+/* Contact detail text (non-link) */
+.contact-card .contact-detail {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+  line-height: 1.5;
+  background: none;
+  padding: 0;
+  border: none;
+  border-radius: 0;
+}
+
 /* Empty State */
 .contacts-grid p:only-child {
   grid-column: 1 / -1;

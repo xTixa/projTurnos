@@ -1,0 +1,176 @@
+{% extends "../home/base.html" %}
+{% load static %}
+
+{% block title %}{% if proposta %}Editar Proposta{% else %}Nova Proposta{% endif %} — Admin Panel{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/admin/users_form.css' %}">
+
+<div class="users-container">
+    <h1>
+        <i class="fa-solid fa-{% if proposta %}pen-to-square{% else %}plus{% endif %}"></i>
+        {% if proposta %}Editar Proposta{% else %}Nova Proposta{% endif %}
+    </h1>
+
+    {% if proposta %}
+    <div class="edit-badge">
+        <i class="fa-solid fa-info-circle"></i> A editar: <strong>{{ proposta.titulo }}</strong> (ID: #{{ proposta.id_proposta }})
+    </div>
+    {% else %}
+    <div class="create-badge">
+        <i class="fa-solid fa-plus-circle"></i> Criar nova proposta de estágio/projeto
+    </div>
+    {% endif %}
+
+    {% if messages %}
+    <div class="messages-container">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="form-section">
+        <h2>Informações da Proposta</h2>
+        
+        <form method="post" class="user-form">
+            {% csrf_token %}
+
+            <div class="form-group">
+                <label for="titulo">Título *</label>
+                <input type="text" id="titulo" name="titulo" 
+                       value="{{ proposta.titulo|default:'' }}" 
+                       placeholder="Ex: Desenvolvimento de aplicação web"
+                       required>
+            </div>
+
+            <div class="form-group">
+                <label for="entidade">Empresa/Entidade *</label>
+                <input type="text" id="entidade" name="entidade" 
+                       value="{{ proposta.entidade|default:'' }}" 
+                       placeholder="Ex: Nome da Empresa"
+                       required>
+            </div>
+
+            <div class="form-group">
+                <label for="modelo">Modelo de Trabalho</label>
+                <select id="modelo" name="modelo">
+                    <option value="">Selecionar modelo</option>
+                    <option value="Presencial" {% if proposta.modelo == "Presencial" %}selected{% endif %}>Presencial</option>
+                    <option value="Remoto" {% if proposta.modelo == "Remoto" %}selected{% endif %}>Remoto</option>
+                    <option value="Híbrido" {% if proposta.modelo == "Híbrido" %}selected{% endif %}>Híbrido</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="descricao">Descrição</label>
+                <textarea id="descricao" name="descricao" rows="4"
+                          placeholder="Descreva a proposta de estágio/projeto...">{{ proposta.descricao|default:'' }}</textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="requisitos">Requisitos</label>
+                <textarea id="requisitos" name="requisitos" rows="4"
+                          placeholder="Lista de requisitos e competências necessárias...">{{ proposta.requisitos|default:'' }}</textarea>
+            </div>
+
+            <h2 style="margin-top: 30px;">Informações de Contacto</h2>
+
+            <div class="form-group">
+                <label for="orientador_empresa">Orientador na Empresa</label>
+                <input type="text" id="orientador_empresa" name="orientador_empresa" 
+                       value="{{ proposta.orientador_empresa|default:'' }}" 
+                       placeholder="Nome do orientador">
+            </div>
+
+            <div class="form-group">
+                <label for="telefone">Telefone</label>
+                <input type="tel" id="telefone" name="telefone" 
+                       value="{{ proposta.telefone|default:'' }}" 
+                       placeholder="+351 000 000 000">
+            </div>
+
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" 
+                       value="{{ proposta.email|default:'' }}" 
+                       placeholder="contacto@empresa.pt">
+            </div>
+
+            <div class="form-group">
+                <label for="logo">Logo (nome do ficheiro)</label>
+                <input type="text" id="logo" name="logo" 
+                       value="{{ proposta.logo|default:'' }}" 
+                       placeholder="nome_do_ficheiro">
+                <small style="color: #666; display: block; margin-top: 5px;">
+                    Nome do ficheiro em /static/img/empresas/ (sem extensão .png)
+                </small>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn-save">
+                    <i class="fa-solid fa-save"></i>
+                    {% if proposta %}Guardar Alterações{% else %}Criar Proposta{% endif %}
+                </button>
+                <a href="{% url 'home:admin_dape_list' %}" class="btn-cancel">
+                    <i class="fa-solid fa-times"></i> Cancelar
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+    .form-group textarea {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 14px;
+        box-sizing: border-box;
+        font-family: inherit;
+        resize: vertical;
+    }
+    .form-group textarea:focus {
+        outline: none;
+        border-color: #007bff;
+        box-shadow: 0 0 5px rgba(0, 123, 255, 0.2);
+    }
+    .form-group select {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 14px;
+        box-sizing: border-box;
+        background-color: white;
+    }
+    .form-group select:focus {
+        outline: none;
+        border-color: #007bff;
+        box-shadow: 0 0 5px rgba(0, 123, 255, 0.2);
+    }
+    
+    /* Alerts */
+    .messages-container {
+        margin-bottom: 20px;
+    }
+    .alert {
+        padding: 12px 15px;
+        border-radius: 4px;
+        margin-bottom: 10px;
+        font-size: 14px;
+    }
+    .alert-success {
+        background-color: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+    }
+    .alert-error {
+        background-color: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+    }
+</style>
+
+{% endblock %}

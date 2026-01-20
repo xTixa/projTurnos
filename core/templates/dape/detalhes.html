@@ -1,77 +1,177 @@
 {% extends "home/base.html" %}
 {% load static %}
 
-{% block title %}
-{{ proposta.titulo }} — Detalhes da Proposta
+{% block title %}{{ proposta.titulo }} — Detalhes{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/ei/index.css' %}?v=20">
 {% endblock %}
 
 {% block content %}
+{% csrf_token %}
 <div class="ei-layout">
 
-  <article class="ei-card animate" style="max-width: 920px; margin: 0 auto;">
+  <div class="detail-container">
+    <!-- Back Link -->
+    <a href="{% url 'home:index_dape' %}" class="back-link">
+      <i class="fa-solid fa-arrow-left"></i> Voltar às propostas
+    </a>
 
-    <!-- Cabeçalho -->
-    <section style="display:flex; gap:20px; align-items:center; margin-bottom:24px;">
-      <div>
+    <!-- Header -->
+    <header class="detail-header">
+      <div class="detail-header__logo">
         {% if proposta.logo %}
-          <img src="{% static 'img/empresas/'|add:proposta.logo|add:'.png' %}"
-               alt="{{ proposta.entidade }}"
-               style="max-width:88px; max-height:88px; object-fit:contain;">
+          <img src="{% static 'img/empresas/'|add:proposta.logo|add:'.png' %}" alt="{{ proposta.entidade }}">
         {% else %}
-          <div class="logo-placeholder">
-            <i class="fa-solid fa-building"></i>
-          </div>
+          <div class="logo-placeholder"><i class="fa-solid fa-building"></i></div>
         {% endif %}
       </div>
-
-      <div>
-        <h1 style="font-size:1.9rem; margin-bottom:4px;">
-          {{ proposta.titulo }}
-        </h1>
-        <p class="entidade">{{ proposta.entidade }}</p>
-      </div>
-    </section>
-
-    <!-- Info principal -->
-    <section style="margin:20px 0;">
-      <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:12px 24px;">
+      <div class="detail-header__info">
+        <h1>{{ proposta.titulo }}</h1>
+        <p class="detail-company">{{ proposta.entidade }}</p>
         {% if proposta.modelo %}
-          <div><strong>Modelo:</strong> {{ proposta.modelo }}</div>
+        <span class="detail-tag">{{ proposta.modelo }}</span>
         {% endif %}
-        {% if proposta.requisitos %}
-          <div><strong>Requisitos:</strong> {{ proposta.requisitos }}</div>
-        {% endif %}
-        <div><strong>Orientador:</strong> {{ proposta.orientador_empresa }}</div>
-        <div><strong>Telefone:</strong> {{ proposta.telefone }}</div>
-        <div>
-          <strong>Email:</strong>
-          <a href="mailto:{{ proposta.email }}">{{ proposta.email }}</a>
-        </div>
       </div>
-    </section>
+      {% if request.session.user_tipo == "aluno" %}
+      <button class="detail-fav {% if proposta.is_favorito %}active{% endif %}" data-proposta-id="{{ proposta.proposta_id }}" aria-label="Guardar proposta">
+        <i class="fa-{% if proposta.is_favorito %}solid{% else %}regular{% endif %} fa-star"></i>
+      </button>
+      {% endif %}
+    </header>
 
-    <!-- Descrição -->
-    <section style="margin-top:28px;">
-      <h2 style="font-size:1.25rem; margin-bottom:10px;">Descrição do Projeto</h2>
-      <p style="line-height:1.7; color:#334155;">
-        {{ proposta.descricao }}
-      </p>
-    </section>
+    <!-- Content Grid -->
+    <div class="detail-content">
+      <!-- Info Section -->
+      <section class="detail-info">
+        <h2>Informações</h2>
+        <dl class="detail-list">
+          {% if proposta.requisitos %}
+          <div class="detail-item">
+            <dt><i class="fa-solid fa-list-check"></i> Requisitos</dt>
+            <dd>{{ proposta.requisitos }}</dd>
+          </div>
+          {% endif %}
+          <div class="detail-item">
+            <dt><i class="fa-solid fa-user-tie"></i> Orientador</dt>
+            <dd>{{ proposta.orientador_empresa }}</dd>
+          </div>
+          <div class="detail-item">
+            <dt><i class="fa-solid fa-phone"></i> Telefone</dt>
+            <dd>{{ proposta.telefone }}</dd>
+          </div>
+          <div class="detail-item">
+            <dt><i class="fa-solid fa-envelope"></i> Email</dt>
+            <dd><a href="mailto:{{ proposta.email }}">{{ proposta.email }}</a></dd>
+          </div>
+        </dl>
+      </section>
 
-    <!-- Ações -->
-    <section style="display:flex; gap:12px; margin-top:32px; flex-wrap:wrap;">
-      <a href="{% url 'home:index_dape' %}" class="btn btn-secondary">
-        ← Voltar às propostas
-      </a>
+      <!-- Description Section -->
+      <section class="detail-description">
+        <h2>Descrição do Projeto</h2>
+        <div class="detail-text">{{ proposta.descricao|linebreaks }}</div>
+      </section>
 
+      <!-- Aluno Atribuído Section -->
+      <section class="detail-assignment">
+        <h2>Aluno Atribuído</h2>
+        {% if aluno_atribuido %}
+        <div class="assignment-card assigned">
+          <div class="assignment-icon">
+            <i class="fa-solid fa-user-graduate"></i>
+          </div>
+          <div class="assignment-info">
+            <span class="assignment-name">{{ aluno_atribuido.nome }}</span>
+            <span class="assignment-id">Nº {{ aluno_atribuido.n_mecanografico }}</span>
+            {% if aluno_atribuido.data_formatada %}
+            <span class="assignment-date">Atribuído em {{ aluno_atribuido.data_formatada }}</span>
+            {% endif %}
+          </div>
+          {% if request.session.user_tipo == "admin" %}
+          <form method="post" action="{% url 'home:atribuir_aluno' proposta.proposta_id %}" class="assignment-remove">
+            {% csrf_token %}
+            <input type="hidden" name="acao" value="remover">
+            <button type="submit" class="btn-remove" title="Remover atribuição">
+              <i class="fa-solid fa-times"></i>
+            </button>
+          </form>
+          {% endif %}
+        </div>
+        {% else %}
+        <div class="assignment-card empty">
+          <div class="assignment-icon">
+            <i class="fa-regular fa-user"></i>
+          </div>
+          <span class="assignment-empty-text">Nenhum aluno atribuído</span>
+        </div>
+        {% endif %}
+
+        {% if request.session.user_tipo == "admin" and not aluno_atribuido %}
+        <form method="post" action="{% url 'home:atribuir_aluno' proposta.proposta_id %}" class="assignment-form">
+          {% csrf_token %}
+          <div class="form-group">
+            <label for="n_mecanografico">Atribuir aluno (nº mecanográfico)</label>
+            <div class="form-row">
+              <input type="text" name="n_mecanografico" id="n_mecanografico" placeholder="Ex: 12345" required>
+              <button type="submit" class="btn btn-primary btn-sm">
+                <i class="fa-solid fa-user-plus"></i> Atribuir
+              </button>
+            </div>
+          </div>
+        </form>
+        {% endif %}
+      </section>
+    </div>
+
+    <!-- Actions -->
+    <footer class="detail-actions">
       {% if proposta.email %}
       <a href="mailto:{{ proposta.email }}" class="btn btn-primary">
-        <i class="fa-regular fa-envelope"></i> Contactar
+        <i class="fa-solid fa-envelope"></i> Contactar Empresa
       </a>
       {% endif %}
-    </section>
-
-  </article>
+    </footer>
+  </div>
 
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const favBtn = document.querySelector('.detail-fav');
+    if (favBtn) {
+        favBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            const id = this.dataset.propostaId;
+            const icon = this.querySelector('i');
+            
+            this.classList.toggle('active');
+            icon.classList.toggle('fa-solid');
+            icon.classList.toggle('fa-regular');
+            
+            fetch('{% url "home:toggle_favorito" %}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                },
+                body: 'proposta_id=' + encodeURIComponent(id)
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (!data.success) {
+                    this.classList.toggle('active');
+                    icon.classList.toggle('fa-solid');
+                    icon.classList.toggle('fa-regular');
+                }
+            })
+            .catch(() => {
+                this.classList.toggle('active');
+                icon.classList.toggle('fa-solid');
+                icon.classList.toggle('fa-regular');
+            });
+        });
+    }
+});
+</script>
 {% endblock %}
