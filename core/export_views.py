@@ -1,5 +1,7 @@
 import csv
 import json
+import xml.etree.ElementTree as ET
+from xml.dom import minidom
 from datetime import datetime
 from django.http import HttpResponse, JsonResponse
 from django.contrib.auth.decorators import login_required
@@ -11,6 +13,12 @@ from core.models import (
     MvCargaDocentes, MvInscricoesPorDia, MvConflitosHorario
 )
 from core.utils import admin_required
+
+def criar_xml_formatado(root):
+    """Formata XML de forma legível"""
+    rough_string = ET.tostring(root, encoding='unicode')
+    reparsed = minidom.parseString(rough_string)
+    return reparsed.toprettyxml(indent="  ", encoding='utf-8')
 
 def refresh_materialized_view(view_name):
     """Atualiza uma vista materializada"""
@@ -241,6 +249,191 @@ def exportar_ucs_json(request):
         content_type='application/json; charset=utf-8'
     )
     response['Content-Disposition'] = f'attachment; filename="ucs_{datetime.now().strftime("%Y%m%d_%H%M%S")}.json"'
+    return response
+
+# ==========================================
+# VIEWS DE EXPORTAÇÃO XML
+# ==========================================
+
+@admin_required
+def exportar_alunos_xml(request):
+    """Exporta lista de alunos para XML"""
+    root = ET.Element('alunos')
+    root.set('exportado_em', datetime.now().isoformat())
+    
+    alunos = Aluno.objects.select_related('id_curso', 'id_anocurricular').all()
+    for aluno in alunos:
+        aluno_elem = ET.SubElement(root, 'aluno')
+        ET.SubElement(aluno_elem, 'n_mecanografico').text = str(aluno.n_mecanografico)
+        ET.SubElement(aluno_elem, 'nome').text = aluno.nome
+        ET.SubElement(aluno_elem, 'email').text = aluno.email or ''
+        ET.SubElement(aluno_elem, 'curso').text = aluno.id_curso.nome if aluno.id_curso else ''
+        ET.SubElement(aluno_elem, 'ano_curricular').text = str(aluno.id_anocurricular.ano_curricular) if aluno.id_anocurricular else ''
+    
+    xml_content = criar_xml_formatado(root)
+    response = HttpResponse(xml_content, content_type='application/xml; charset=utf-8')
+    response['Content-Disposition'] = f'attachment; filename="alunos_{datetime.now().strftime("%Y%m%d_%H%M%S")}.xml"'
+    return response
+
+@admin_required
+def exportar_turnos_xml(request):
+    """Exporta lista de turnos para XML"""
+    root = ET.Element('turnos')
+    root.set('exportado_em', datetime.now().isoformat())
+    
+    turnos = Turno.objects.all()
+    for turno in turnos:
+        try:
+            turno_uc = turno.turnouc
+            uc_nome = turno_uc.id_unidadecurricular.nome if turno_uc else ''
+            hora_inicio = str(turno_uc.hora_inicio) if turno_uc else ''
+            hora_fim = str(turno_uc.hora_fim) if turno_uc else ''
+        except:
+            uc_nome = ''
+            hora_inicio = ''
+            hora_fim = ''
+        
+        turno_elem = ET.SubElement(root, 'turno')
+        ET.SubElement(turno_elem, 'id_turno').text = str(turno.id_turno)
+        ET.SubElement(turno_elem, 'n_turno').text = str(turno.n_turno)
+        ET.SubElement(turno_elem, 'tipo').text = turno.tipo or ''
+        ET.SubElement(turno_elem, 'capacidade').text = str(turno.capacidade)
+        ET.SubElement(turno_elem, 'uc').text = uc_nome
+        ET.SubElement(turno_elem, 'hora_inicio').text = hora_inicio
+        ET.SubElement(turno_elem, 'hora_fim').text = hora_fim
+    
+    xml_content = criar_xml_formatado(root)
+    response = HttpResponse(xml_content, content_type='application/xml; charset=utf-8')
+    response['Content-Disposition'] = f'attachment; filename="turnos_{datetime.now().strftime("%Y%m%d_%H%M%S")}.xml"'
+    return response
+
+@admin_required
+def exportar_inscricoes_xml(request):
+    """Exporta lista de inscrições para XML"""
+    root = ET.Element('inscricoes')
+    root.set('exportado_em', datetime.now().isoformat())
+    
+    inscricoes = InscricaoTurno.objects.select_related(
+        'n_mecanografico', 'id_turno', 'id_unidadecurricular'
+    ).all()
+    
+    for inscricao in inscricoes:
+        inscricao_elem = ET.SubElement(root, 'inscricao')
+        ET.SubElement(inscricao_elem, 'id_inscricao').text = str(inscricao.id_inscricao)
+        ET.SubElement(inscricao_elem, 'data_inscricao').text = str(inscricao.data_inscricao)
+        ET.SubElement(inscricao_elem, 'n_mecanografico').text = str(inscricao.n_mecanografico.n_mecanografico) if inscricao.n_mecanografico else ''
+        ET.SubElement(inscricao_elem, 'aluno_nome').text = inscricao.n_mecanografico.nome if inscricao.n_mecanografico else ''
+        ET.SubElement(inscricao_elem, 'uc_nome').text = inscricao.id_unidadecurricular.nome if inscricao.id_unidadecurricular else ''
+        ET.SubElement(inscricao_elem, 'turno_numero').text = str(inscricao.id_turno.n_turno) if inscricao.id_turno else ''
+        ET.SubElement(inscricao_elem, 'turno_tipo').text = inscricao.id_turno.tipo if inscricao.id_turno else ''
+    
+    xml_content = criar_xml_formatado(root)
+    response = HttpResponse(xml_content, content_type='application/xml; charset=utf-8')
+    response['Content-Disposition'] = f'attachment; filename="inscricoes_{datetime.now().strftime("%Y%m%d_%H%M%S")}.xml"'
+    return response
+
+@admin_required
+def exportar_ucs_xml(request):
+    """Exporta lista de UCs para XML"""
+    root = ET.Element('unidades_curriculares')
+    root.set('exportado_em', datetime.now().isoformat())
+    
+    ucs = UnidadeCurricular.objects.select_related(
+        'id_curso', 'id_anocurricular', 'id_semestre'
+    ).all()
+    
+    for uc in ucs:
+        uc_elem = ET.SubElement(root, 'unidade_curricular')
+        ET.SubElement(uc_elem, 'id_unidadecurricular').text = str(uc.id_unidadecurricular)
+        ET.SubElement(uc_elem, 'nome').text = uc.nome
+        ET.SubElement(uc_elem, 'ects').text = str(uc.ects)
+        ET.SubElement(uc_elem, 'curso').text = uc.id_curso.nome if uc.id_curso else ''
+        ET.SubElement(uc_elem, 'ano_curricular').text = str(uc.id_anocurricular.ano_curricular) if uc.id_anocurricular else ''
+        ET.SubElement(uc_elem, 'semestre').text = str(uc.id_semestre.semestre) if uc.id_semestre else ''
+    
+    xml_content = criar_xml_formatado(root)
+    response = HttpResponse(xml_content, content_type='application/xml; charset=utf-8')
+    response['Content-Disposition'] = f'attachment; filename="ucs_{datetime.now().strftime("%Y%m%d_%H%M%S")}.xml"'
+    return response
+
+@admin_required
+def exportar_mv_estatisticas_xml(request):
+    """Exporta estatísticas de turnos (vista materializada) para XML"""
+    refresh_materialized_view('mv_estatisticas_turno')
+    
+    root = ET.Element('estatisticas_turnos')
+    root.set('exportado_em', datetime.now().isoformat())
+    
+    estatisticas = MvEstatisticasTurno.objects.all()
+    
+    for stat in estatisticas:
+        stat_elem = ET.SubElement(root, 'estatistica')
+        ET.SubElement(stat_elem, 'id_turno').text = str(stat.id_turno)
+        ET.SubElement(stat_elem, 'n_turno').text = str(stat.n_turno)
+        ET.SubElement(stat_elem, 'tipo_turno').text = stat.tipo_turno or ''
+        ET.SubElement(stat_elem, 'uc_nome').text = stat.uc_nome or ''
+        ET.SubElement(stat_elem, 'capacidade').text = str(stat.capacidade)
+        ET.SubElement(stat_elem, 'total_inscritos').text = str(stat.total_inscritos or 0)
+        ET.SubElement(stat_elem, 'vagas_disponiveis').text = str(stat.vagas_disponiveis or 0)
+        ET.SubElement(stat_elem, 'taxa_ocupacao').text = str(stat.taxa_ocupacao or 0)
+    
+    xml_content = criar_xml_formatado(root)
+    response = HttpResponse(xml_content, content_type='application/xml; charset=utf-8')
+    response['Content-Disposition'] = f'attachment; filename="estatisticas_turnos_{datetime.now().strftime("%Y%m%d_%H%M%S")}.xml"'
+    return response
+
+@admin_required
+def exportar_mv_ucs_procuradas_xml(request):
+    """Exporta UCs mais procuradas (vista materializada) para XML"""
+    refresh_materialized_view('mv_ucs_mais_procuradas')
+    
+    root = ET.Element('ucs_mais_procuradas')
+    root.set('exportado_em', datetime.now().isoformat())
+    
+    ucs = MvUcsMaisProcuradas.objects.all()
+    
+    for uc in ucs:
+        uc_elem = ET.SubElement(root, 'uc')
+        ET.SubElement(uc_elem, 'id_unidadecurricular').text = str(uc.id_unidadecurricular)
+        ET.SubElement(uc_elem, 'uc_nome').text = uc.uc_nome or ''
+        ET.SubElement(uc_elem, 'curso_nome').text = uc.curso_nome or ''
+        ET.SubElement(uc_elem, 'ano_curricular').text = str(uc.ano_curricular or '')
+        ET.SubElement(uc_elem, 'total_inscricoes').text = str(uc.total_inscricoes or 0)
+        ET.SubElement(uc_elem, 'alunos_unicos').text = str(uc.alunos_unicos or 0)
+        ET.SubElement(uc_elem, 'media_inscricoes_aluno').text = str(uc.media_inscricoes_aluno or 0)
+    
+    xml_content = criar_xml_formatado(root)
+    response = HttpResponse(xml_content, content_type='application/xml; charset=utf-8')
+    response['Content-Disposition'] = f'attachment; filename="ucs_procuradas_{datetime.now().strftime("%Y%m%d_%H%M%S")}.xml"'
+    return response
+
+@admin_required
+def exportar_mv_resumo_alunos_xml(request):
+    """Exporta resumo de inscrições por aluno (vista materializada) para XML"""
+    refresh_materialized_view('mv_resumo_inscricoes_aluno')
+    
+    root = ET.Element('resumo_alunos')
+    root.set('exportado_em', datetime.now().isoformat())
+    
+    alunos = MvResumoInscricoesAluno.objects.all()
+    
+    for aluno in alunos:
+        aluno_elem = ET.SubElement(root, 'aluno')
+        ET.SubElement(aluno_elem, 'n_mecanografico').text = str(aluno.n_mecanografico)
+        ET.SubElement(aluno_elem, 'aluno_nome').text = aluno.aluno_nome or ''
+        ET.SubElement(aluno_elem, 'aluno_email').text = aluno.aluno_email or ''
+        ET.SubElement(aluno_elem, 'curso_nome').text = aluno.curso_nome or ''
+        ET.SubElement(aluno_elem, 'ano_curricular').text = str(aluno.ano_curricular or '')
+        ET.SubElement(aluno_elem, 'total_ucs_inscritas').text = str(aluno.total_ucs_inscritas or 0)
+        ET.SubElement(aluno_elem, 'total_turnos_inscritos').text = str(aluno.total_turnos_inscritos or 0)
+        ET.SubElement(aluno_elem, 'total_ects').text = str(aluno.total_ects or 0)
+        ET.SubElement(aluno_elem, 'primeira_inscricao').text = str(aluno.primeira_inscricao) if aluno.primeira_inscricao else ''
+        ET.SubElement(aluno_elem, 'ultima_inscricao').text = str(aluno.ultima_inscricao) if aluno.ultima_inscricao else ''
+        ET.SubElement(aluno_elem, 'dias_com_atividade').text = str(aluno.dias_com_atividade or 0)
+    
+    xml_content = criar_xml_formatado(root)
+    response = HttpResponse(xml_content, content_type='application/xml; charset=utf-8')
+    response['Content-Disposition'] = f'attachment; filename="resumo_alunos_{datetime.now().strftime("%Y%m%d_%H%M%S")}.xml"'
     return response
 
 @admin_required

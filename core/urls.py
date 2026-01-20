@@ -39,20 +39,27 @@ urlpatterns = [
     # Exportação geral
     path("admin-panel/export/alunos/csv/", export_views.exportar_alunos_csv, name="export_alunos_csv"),
     path("admin-panel/export/alunos/json/", export_views.exportar_alunos_json, name="export_alunos_json"),
+    path("admin-panel/export/alunos/xml/", export_views.exportar_alunos_xml, name="export_alunos_xml"),
     path("admin-panel/export/turnos/csv/", export_views.exportar_turnos_csv, name="export_turnos_csv"),
     path("admin-panel/export/turnos/json/", export_views.exportar_turnos_json, name="export_turnos_json"),
+    path("admin-panel/export/turnos/xml/", export_views.exportar_turnos_xml, name="export_turnos_xml"),
     path("admin-panel/export/inscricoes/csv/", export_views.exportar_inscricoes_csv, name="export_inscricoes_csv"),
     path("admin-panel/export/inscricoes/json/", export_views.exportar_inscricoes_json, name="export_inscricoes_json"),
+    path("admin-panel/export/inscricoes/xml/", export_views.exportar_inscricoes_xml, name="export_inscricoes_xml"),
     path("admin-panel/export/ucs/csv/", export_views.exportar_ucs_csv, name="export_ucs_csv"),
     path("admin-panel/export/ucs/json/", export_views.exportar_ucs_json, name="export_ucs_json"),
+    path("admin-panel/export/ucs/xml/", export_views.exportar_ucs_xml, name="export_ucs_xml"),
     
     # Exportação de vistas materializadas
     path("admin-panel/export/mv/estatisticas-turno/csv/", export_views.exportar_mv_estatisticas_turno_csv, name="export_mv_estatisticas_csv"),
     path("admin-panel/export/mv/estatisticas-turno/json/", export_views.exportar_mv_estatisticas_turno_json, name="export_mv_estatisticas_json"),
+    path("admin-panel/export/mv/estatisticas-turno/xml/", export_views.exportar_mv_estatisticas_xml, name="export_mv_estatisticas_xml"),
     path("admin-panel/export/mv/ucs-procuradas/csv/", export_views.exportar_mv_ucs_procuradas_csv, name="export_mv_ucs_procuradas_csv"),
     path("admin-panel/export/mv/ucs-procuradas/json/", export_views.exportar_mv_ucs_procuradas_json, name="export_mv_ucs_procuradas_json"),
+    path("admin-panel/export/mv/ucs-procuradas/xml/", export_views.exportar_mv_ucs_procuradas_xml, name="export_mv_ucs_procuradas_xml"),
     path("admin-panel/export/mv/resumo-alunos/csv/", export_views.exportar_mv_resumo_alunos_csv, name="export_mv_resumo_alunos_csv"),
     path("admin-panel/export/mv/resumo-alunos/json/", export_views.exportar_mv_resumo_alunos_json, name="export_mv_resumo_alunos_json"),
+    path("admin-panel/export/mv/resumo-alunos/xml/", export_views.exportar_mv_resumo_alunos_xml, name="export_mv_resumo_alunos_xml"),
     
     # Atualizar vistas materializadas
     path("admin-panel/export/mv/refresh/", export_views.atualizar_vistas_materializadas, name="refresh_materialized_views"),

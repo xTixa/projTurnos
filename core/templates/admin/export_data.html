@@ -9,7 +9,7 @@
 
 {% block content %}
 <h1>Exportação de Dados</h1>
-<p class="section-description">Exporte dados do sistema em formato CSV ou JSON para análise e integração.</p>
+<p class="section-description">Exporte os dados do sistema no formato CSV, JSON ou XML para análise e integração.</p>
 
     <!-- Exportação de Dados Gerais -->
     <section class="export-section">
@@ -34,6 +34,10 @@
                         <i class="fas fa-file-code"></i>
                         <span>JSON</span>
                     </a>
+                    <a href="{% url 'home:export_alunos_xml' %}" class="export-btn xml">
+                        <i class="fas fa-file-alt"></i>
+                        <span>XML</span>
+                    </a>
                 </div>
             </div>
 
@@ -51,6 +55,10 @@
                     <a href="{% url 'home:export_turnos_json' %}" class="export-btn json">
                         <i class="fas fa-file-code"></i>
                         <span>JSON</span>
+                    </a>
+                    <a href="{% url 'home:export_turnos_xml' %}" class="export-btn xml">
+                        <i class="fas fa-file-alt"></i>
+                        <span>XML</span>
                     </a>
                 </div>
             </div>
@@ -70,6 +78,10 @@
                         <i class="fas fa-file-code"></i>
                         <span>JSON</span>
                     </a>
+                    <a href="{% url 'home:export_inscricoes_xml' %}" class="export-btn xml">
+                        <i class="fas fa-file-alt"></i>
+                        <span>XML</span>
+                    </a>
                 </div>
             </div>
 
@@ -87,6 +99,10 @@
                     <a href="{% url 'home:export_ucs_json' %}" class="export-btn json">
                         <i class="fas fa-file-code"></i>
                         <span>JSON</span>
+                    </a>
+                    <a href="{% url 'home:export_ucs_xml' %}" class="export-btn xml">
+                        <i class="fas fa-file-alt"></i>
+                        <span>XML</span>
                     </a>
                 </div>
             </div>
@@ -128,6 +144,10 @@
                         <i class="fas fa-file-code"></i>
                         <span>JSON</span>
                     </a>
+                    <a href="{% url 'home:export_mv_estatisticas_xml' %}" class="export-btn xml">
+                        <i class="fas fa-file-alt"></i>
+                        <span>XML</span>
+                    </a>
                 </div>
             </div>
 
@@ -147,6 +167,10 @@
                         <i class="fas fa-file-code"></i>
                         <span>JSON</span>
                     </a>
+                    <a href="{% url 'home:export_mv_ucs_procuradas_xml' %}" class="export-btn xml">
+                        <i class="fas fa-file-alt"></i>
+                        <span>XML</span>
+                    </a>
                 </div>
             </div>
 
@@ -165,6 +189,10 @@
                     <a href="{% url 'home:export_mv_resumo_alunos_json' %}" class="export-btn json">
                         <i class="fas fa-file-code"></i>
                         <span>JSON</span>
+                    </a>
+                    <a href="{% url 'home:export_mv_resumo_alunos_xml' %}" class="export-btn xml">
+                        <i class="fas fa-file-alt"></i>
+                        <span>XML</span>
                     </a>
                 </div>
             </div>
@@ -210,11 +238,27 @@
                     </ul>
                 </div>
             </div>
+
+            <div class="export-card">
+                <div class="export-header">
+                    <i class="fas fa-file-alt"></i>
+                    <h3>Formato XML</h3>
+                </div>
+                <div class="format-info">
+                    <p><strong>O que é:</strong> eXtensible Markup Language - formato hierárquico</p>
+                    <ul>
+                        <li>Padrão para troca de dados estruturados</li>
+                        <li>Suporte nativo em sistemas empresariais</li>
+                        <li>Validação através de schemas (XSD)</li>
+                        <li>Ideal para interoperabilidade e arquivos</li>
+                    </ul>
+                </div>
+            </div>
         </div>
 
         <div class="info-box">
             <i class="fas fa-lightbulb"></i>
-            <p><strong>Dica:</strong> Use CSV para análises em Excel. Use JSON para integração com sistemas externos.</p>
+            <p><strong>Dica:</strong> Use CSV para análises em Excel. Use JSON para APIs modernas. Use XML para sistemas empresariais e arquivos estruturados.</p>
         </div>
     </section>
 </div>
@@ -269,6 +313,18 @@ function atualizarVistas() {
 .btn-outline-success:hover,
 .btn-outline-info:hover {
     transform: scale(1.05);
+}
+
+.export-btn.xml {
+    background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+    color: white;
+    border: none;
+}
+
+.export-btn.xml:hover {
+    background: linear-gradient(135deg, #e67e22 0%, #d35400 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(230, 126, 34, 0.3);
 }
 </style>
 {% endblock %}
