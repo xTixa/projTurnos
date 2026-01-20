@@ -228,10 +228,6 @@ class LogEvento(models.Model):
         ordering = ['-data_hora']
 
 class AuditoriaInscricao(models.Model):
-    """
-    Rastreia cada tentativa de inscrição em turno
-    Para análise temporal, padrões de comportamento, etc.
-    """
     RESULTADO_CHOICES = [
         ('sucesso', 'Sucesso'),
         ('turno_cheio', 'Turno Cheio'),
@@ -264,12 +260,8 @@ class AuditoriaInscricao(models.Model):
         return f"{self.n_mecanografico} — {self.id_unidadecurricular.nome} ({self.resultado})" if self.n_mecanografico else "Auditoria desconhecida"
 
 
-# ==========================================
 # VISTAS MATERIALIZADAS
-# ==========================================
-
 class MvEstatisticasTurno(models.Model):
-    """Vista materializada: Estatísticas de ocupação por turno"""
     id_turno = models.IntegerField(primary_key=True)
     n_turno = models.IntegerField()
     tipo = models.CharField(max_length=255)
@@ -290,9 +282,7 @@ class MvEstatisticasTurno(models.Model):
         managed = False
         db_table = 'mv_estatisticas_turno'
 
-
 class MvResumoInscricoesAluno(models.Model):
-    """Vista materializada: Resumo de inscrições por aluno"""
     n_mecanografico = models.IntegerField(primary_key=True)
     aluno_nome = models.CharField(max_length=255)
     aluno_email = models.CharField(max_length=255)
@@ -309,9 +299,7 @@ class MvResumoInscricoesAluno(models.Model):
         managed = False
         db_table = 'mv_resumo_inscricoes_aluno'
 
-
 class MvUcsMaisProcuradas(models.Model):
-    """Vista materializada: UCs mais procuradas"""
     id_unidadecurricular = models.IntegerField(primary_key=True)
     uc_nome = models.CharField(max_length=255)
     ects = models.FloatField()
@@ -328,9 +316,7 @@ class MvUcsMaisProcuradas(models.Model):
         managed = False
         db_table = 'mv_ucs_mais_procuradas'
 
-
 class MvCargaDocentes(models.Model):
-    """Vista materializada: Carga horária dos docentes"""
     id_docente = models.IntegerField(primary_key=True)
     docente_nome = models.CharField(max_length=255)
     docente_email = models.CharField(max_length=255)
@@ -344,9 +330,7 @@ class MvCargaDocentes(models.Model):
         managed = False
         db_table = 'mv_carga_docentes'
 
-
 class MvInscricoesPorDia(models.Model):
-    """Vista materializada: Histórico de inscrições por dia"""
     data = models.DateField(primary_key=True)
     total_inscricoes = models.IntegerField()
     alunos_distintos = models.IntegerField()
@@ -360,9 +344,7 @@ class MvInscricoesPorDia(models.Model):
         managed = False
         db_table = 'mv_inscricoes_por_dia'
 
-
 class MvConflitosHorario(models.Model):
-    """Vista materializada: Conflitos de horário entre turnos"""
     n_mecanografico = models.IntegerField()
     aluno_nome = models.CharField(max_length=255)
     turno1_id = models.IntegerField()

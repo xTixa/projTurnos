@@ -1,5 +1,5 @@
 """
-Views para análise de dados usando MongoDB aggregations
+Views para análise de dados com MongoDB aggregations
 Dashboards com insights sobre inscrições, consultas, comportamento de alunos
 """
 
@@ -15,7 +15,6 @@ from bd2_projeto.services.mongo_service import (
     analisar_turnos_sobrecarregados
 )
 from core.utils import admin_required
-
 
 @admin_required
 @login_required
@@ -47,14 +46,12 @@ def analytics_inscricoes(request):
     
     return render(request, "admin/analytics_inscricoes.html", contexto)
 
-
 @admin_required
 @login_required
 def analytics_api_inscricoes_dia(request):
     """API para gráfico de inscrições por dia"""
     dados = analisar_inscricoes_por_dia()
     return JsonResponse(dados, safe=False)
-
 
 @admin_required
 @login_required
@@ -63,14 +60,12 @@ def analytics_api_taxa_sucesso(request):
     dados = analisar_taxa_sucesso_inscricoes()
     return JsonResponse(dados, safe=False)
 
-
 @admin_required
 @login_required
 def analytics_api_alunos_ativos(request):
     """API para gráfico de alunos mais ativos"""
     dados = analisar_alunos_mais_ativos()
     return JsonResponse(dados, safe=False)
-
 
 @admin_required
 @login_required

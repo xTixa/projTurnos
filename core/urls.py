@@ -36,9 +36,6 @@ urlpatterns = [
     path("api/analytics/alunos-ativos/", analytics_views.analytics_api_alunos_ativos, name="api_alunos_ativos"),
     path("api/analytics/ucs-procuradas/", analytics_views.analytics_api_ucs_procuradas, name="api_ucs_procuradas"),
 
-    # ==========================================
-    # EXPORTAÇÃO DE DADOS - CSV e JSON
-    # ==========================================
     # Exportação geral
     path("admin-panel/export/alunos/csv/", export_views.exportar_alunos_csv, name="export_alunos_csv"),
     path("admin-panel/export/alunos/json/", export_views.exportar_alunos_json, name="export_alunos_json"),
@@ -105,16 +102,9 @@ urlpatterns = [
     path("turnos_list/", views.turnos_list, name="turnos_list"),
     path("cursos_list/", views.cursos_list, name="cursos_list"),
 
-    # MONGO TESTE
+    # MONGO
     path("testar-mongo/", testar_mongo, name="testar_mongo"),
-
-    # ==========================================
-    # SERVIR PDFs DO MongoDB (GridFS)
-    # ==========================================
-    # Esta rota captura pedidos de PDFs armazenados no MongoDB
-    # Formato: /pdf-mongodb/horario/FILE_ID/ ou /pdf-mongodb/avaliacao/FILE_ID/
     path("pdf-mongodb/<str:tipo_pdf>/<str:file_id>/", views.servir_pdf_mongodb, name="servir_pdf_mongodb"),
-
 
     #DI
     path("di/", views.index_di, name="index_di"),
@@ -168,10 +158,8 @@ urlpatterns = [
     path("eisi/avaliacoes/", views.avaliacoes_mestrado, name="avaliacoes_mestrado"),
     path("eisi/contactos/", views.contactos_mestrado, name="contactos_mestrado"),
 
-
     # Fórum
     path("forum/", views.forum, name="index_forum"),
-
 
     # DAPE
     path("dape/", views.dape, name="index_dape"),

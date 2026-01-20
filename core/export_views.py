@@ -12,16 +12,10 @@ from core.models import (
 )
 from core.utils import admin_required
 
-
-# ==========================================
-# FUNÇÕES AUXILIARES
-# ==========================================
-
 def refresh_materialized_view(view_name):
     """Atualiza uma vista materializada"""
     with connection.cursor() as cursor:
         cursor.execute(f"REFRESH MATERIALIZED VIEW CONCURRENTLY {view_name}")
-
 
 def refresh_all_materialized_views():
     """Atualiza todas as vistas materializadas"""
@@ -35,11 +29,6 @@ def refresh_all_materialized_views():
     ]
     for view in views:
         refresh_materialized_view(view)
-
-
-# ==========================================
-# EXPORTAÇÃO GERAL - ALUNOS
-# ==========================================
 
 @admin_required
 def exportar_alunos_csv(request):
@@ -85,11 +74,6 @@ def exportar_alunos_json(request):
     response['Content-Disposition'] = f'attachment; filename="alunos_{datetime.now().strftime("%Y%m%d_%H%M%S")}.json"'
     return response
 
-
-# ==========================================
-# EXPORTAÇÃO GERAL - TURNOS
-# ==========================================
-
 @admin_required
 def exportar_turnos_csv(request):
     """Exporta lista de turnos para CSV"""
@@ -122,7 +106,6 @@ def exportar_turnos_csv(request):
         ])
     
     return response
-
 
 @admin_required
 def exportar_turnos_json(request):
@@ -158,11 +141,6 @@ def exportar_turnos_json(request):
     response['Content-Disposition'] = f'attachment; filename="turnos_{datetime.now().strftime("%Y%m%d_%H%M%S")}.json"'
     return response
 
-
-# ==========================================
-# EXPORTAÇÃO GERAL - INSCRIÇÕES
-# ==========================================
-
 @admin_required
 def exportar_inscricoes_csv(request):
     """Exporta lista de inscrições para CSV"""
@@ -188,7 +166,6 @@ def exportar_inscricoes_csv(request):
         ])
     
     return response
-
 
 @admin_required
 def exportar_inscricoes_json(request):
@@ -216,11 +193,6 @@ def exportar_inscricoes_json(request):
     response['Content-Disposition'] = f'attachment; filename="inscricoes_{datetime.now().strftime("%Y%m%d_%H%M%S")}.json"'
     return response
 
-
-# ==========================================
-# EXPORTAÇÃO GERAL - UNIDADES CURRICULARES
-# ==========================================
-
 @admin_required
 def exportar_ucs_csv(request):
     """Exporta lista de UCs para CSV"""
@@ -246,7 +218,6 @@ def exportar_ucs_csv(request):
     
     return response
 
-
 @admin_required
 def exportar_ucs_json(request):
     """Exporta lista de UCs para JSON"""
@@ -271,11 +242,6 @@ def exportar_ucs_json(request):
     )
     response['Content-Disposition'] = f'attachment; filename="ucs_{datetime.now().strftime("%Y%m%d_%H%M%S")}.json"'
     return response
-
-
-# ==========================================
-# EXPORTAÇÃO - VISTAS MATERIALIZADAS
-# ==========================================
 
 @admin_required
 def exportar_mv_estatisticas_turno_csv(request):
@@ -312,7 +278,6 @@ def exportar_mv_estatisticas_turno_csv(request):
     
     return response
 
-
 @admin_required
 def exportar_mv_estatisticas_turno_json(request):
     """Exporta estatísticas de turnos (vista materializada) para JSON"""
@@ -344,7 +309,6 @@ def exportar_mv_estatisticas_turno_json(request):
     )
     response['Content-Disposition'] = f'attachment; filename="estatisticas_turnos_{datetime.now().strftime("%Y%m%d_%H%M%S")}.json"'
     return response
-
 
 @admin_required
 def exportar_mv_ucs_procuradas_csv(request):
@@ -379,7 +343,6 @@ def exportar_mv_ucs_procuradas_csv(request):
     
     return response
 
-
 @admin_required
 def exportar_mv_ucs_procuradas_json(request):
     """Exporta UCs mais procuradas (vista materializada) para JSON"""
@@ -409,7 +372,6 @@ def exportar_mv_ucs_procuradas_json(request):
     )
     response['Content-Disposition'] = f'attachment; filename="ucs_procuradas_{datetime.now().strftime("%Y%m%d_%H%M%S")}.json"'
     return response
-
 
 @admin_required
 def exportar_mv_resumo_alunos_csv(request):
@@ -444,7 +406,6 @@ def exportar_mv_resumo_alunos_csv(request):
     
     return response
 
-
 @admin_required
 def exportar_mv_resumo_alunos_json(request):
     """Exporta resumo de inscrições por aluno (vista materializada) para JSON"""
@@ -474,11 +435,6 @@ def exportar_mv_resumo_alunos_json(request):
     )
     response['Content-Disposition'] = f'attachment; filename="resumo_alunos_{datetime.now().strftime("%Y%m%d_%H%M%S")}.json"'
     return response
-
-
-# ==========================================
-# VIEW PARA ATUALIZAR VISTAS MATERIALIZADAS
-# ==========================================
 
 @admin_required
 @require_http_methods(["POST"])

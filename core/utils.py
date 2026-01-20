@@ -25,14 +25,7 @@ def registar_log(request, operacao, entidade, chave, detalhes):
         "detalhes": detalhes
     })
 
-# ==========================================
-# DECORADOR PARA ROTAS DE ADMIN
-# ==========================================
 def admin_required(view_func):
-    """
-    Decorador para proteger rotas de administração
-    Verifica se o utilizador está autenticado e é staff
-    """
     def wrapper(request, *args, **kwargs):
         if not request.user.is_authenticated:
             messages.error(request, "É necessário iniciar sessão como administrador.")
@@ -45,15 +38,7 @@ def admin_required(view_func):
         return view_func(request, *args, **kwargs)
     return wrapper
 
-
-# ==========================================
-# DECORADOR PARA ROTAS DE ALUNOS
-# ==========================================
 def aluno_required(view_func):
-    """
-    Decorador para proteger rotas que requerem sessão de aluno
-    Verifica se existe uma sessão ativa com user_tipo = "aluno"
-    """
     def wrapper(request, *args, **kwargs):
         # Verifica se existe sessão ativa
         if "user_tipo" not in request.session:
@@ -68,15 +53,7 @@ def aluno_required(view_func):
         return view_func(request, *args, **kwargs)
     return wrapper
 
-
-# ==========================================
-# DECORADOR PARA ROTAS DE DOCENTES
-# ==========================================
 def docente_required(view_func):
-    """
-    Decorador para proteger rotas que requerem sessão de docente
-    Verifica se existe uma sessão ativa com user_tipo = "docente"
-    """
     def wrapper(request, *args, **kwargs):
         # Verifica se existe sessão ativa
         if "user_tipo" not in request.session:
@@ -91,15 +68,7 @@ def docente_required(view_func):
         return view_func(request, *args, **kwargs)
     return wrapper
 
-
-# ==========================================
-# DECORADOR PARA ROTAS DE UTILIZADORES AUTENTICADOS (ALUNO OU DOCENTE)
-# ==========================================
 def user_required(view_func):
-    """
-    Decorador para proteger rotas que requerem qualquer tipo de autenticação
-    (aluno, docente ou admin)
-    """
     def wrapper(request, *args, **kwargs):
         # Verifica se existe sessão ativa (aluno/docente) ou user Django autenticado
         tem_sessao = "user_tipo" in request.session
