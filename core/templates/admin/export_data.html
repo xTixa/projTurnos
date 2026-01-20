@@ -124,7 +124,7 @@
 
         <div class="info-box">
             <i class="fas fa-info-circle"></i>
-            <p><strong>Nota:</strong> As vistas materializadas contêm dados pré-calculados. Clique em "Atualizar Vistas" para obter os dados mais recentes antes de exportar.</p>
+            <p><strong>Nota:</strong> As vistas materializadas contêm dados pré-calculados. Clicar em "Atualizar Vistas" para obter os dados mais recentes antes de exportar.</p>
         </div>
 
         <div class="export-grid">
@@ -151,23 +151,23 @@
                 </div>
             </div>
 
-            <!-- UCs Mais Procuradas -->
+            <!-- UCs Mais Preenchidas -->
             <div class="export-card">
                 <div class="export-header">
                     <i class="fas fa-fire"></i>
-                    <h3>UCs Mais Procuradas</h3>
-                    <p class="export-description">Ranking de popularidade por UC</p>
+                    <h3>UCs Mais Preenchidas</h3>
+                    <p class="export-description">Ranking de preenchimento por UC</p>
                 </div>
                 <div class="export-buttons">
-                    <a href="{% url 'home:export_mv_ucs_procuradas_csv' %}" class="export-btn csv">
+                    <a href="{% url 'home:export_mv_ucs_preenchidas_csv' %}" class="export-btn csv">
                         <i class="fas fa-file-csv"></i>
                         <span>CSV</span>
                     </a>
-                    <a href="{% url 'home:export_mv_ucs_procuradas_json' %}" class="export-btn json">
+                    <a href="{% url 'home:export_mv_ucs_preenchidas_json' %}" class="export-btn json">
                         <i class="fas fa-file-code"></i>
                         <span>JSON</span>
                     </a>
-                    <a href="{% url 'home:export_mv_ucs_procuradas_xml' %}" class="export-btn xml">
+                    <a href="{% url 'home:export_mv_ucs_preenchidas_xml' %}" class="export-btn xml">
                         <i class="fas fa-file-alt"></i>
                         <span>XML</span>
                     </a>
@@ -258,7 +258,7 @@
 
         <div class="info-box">
             <i class="fas fa-lightbulb"></i>
-            <p><strong>Dica:</strong> Use CSV para análises em Excel. Use JSON para APIs modernas. Use XML para sistemas empresariais e arquivos estruturados.</p>
+            <p><strong>Dica:</strong> CSV para análises em Excel. JSON para APIs. XML para sistemas empresariais.</p>
         </div>
     </section>
 </div>
@@ -284,13 +284,13 @@ function atualizarVistas() {
     .then(response => response.json())
     .then(data => {
         if (data.status === 'success') {
-            alert('✓ Vistas materializadas atualizadas com sucesso!');
+            alert('Vistas materializadas atualizadas com sucesso!');
         } else {
-            alert('✗ Erro ao atualizar vistas: ' + data.message);
+            alert('Erro ao atualizar vistas: ' + data.message);
         }
     })
     .catch(error => {
-        alert('✗ Erro de conexão: ' + error);
+        alert('Erro de conexão: ' + error);
     })
     .finally(() => {
         btn.disabled = false;

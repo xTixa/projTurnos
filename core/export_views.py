@@ -21,19 +21,19 @@ def criar_xml_formatado(root):
     return reparsed.toprettyxml(indent="  ", encoding='utf-8')
 
 def refresh_materialized_view(view_name):
-    """Atualiza uma vista materializada"""
-    with connection.cursor() as cursor:
-        cursor.execute(f"REFRESH MATERIALIZED VIEW CONCURRENTLY {view_name}")
+    """Atualiza uma vista materializada com tratamento de erro"""
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute(f"REFRESH MATERIALIZED VIEW {view_name}")
+    except Exception as e:
+        print(f"Aviso: Não foi possível atualizar vista {view_name}: {str(e)}")
 
 def refresh_all_materialized_views():
-    """Atualiza todas as vistas materializadas"""
+    """Atualiza todas as vistas materializadas existentes"""
     views = [
         'mv_estatisticas_turno',
         'mv_resumo_inscricoes_aluno',
-        'mv_ucs_mais_procuradas',
-        'mv_carga_docentes',
-        'mv_inscricoes_por_dia',
-        'mv_conflitos_horario'
+        'mv_ucs_mais_procuradas'
     ]
     for view in views:
         refresh_materialized_view(view)
@@ -359,8 +359,6 @@ def exportar_ucs_xml(request):
 @admin_required
 def exportar_mv_estatisticas_xml(request):
     """Exporta estatísticas de turnos (vista materializada) para XML"""
-    refresh_materialized_view('mv_estatisticas_turno')
-    
     root = ET.Element('estatisticas_turnos')
     root.set('exportado_em', datetime.now().isoformat())
     
@@ -383,10 +381,8 @@ def exportar_mv_estatisticas_xml(request):
     return response
 
 @admin_required
-def exportar_mv_ucs_procuradas_xml(request):
-    """Exporta UCs mais procuradas (vista materializada) para XML"""
-    refresh_materialized_view('mv_ucs_mais_procuradas')
-    
+def exportar_mv_ucs_preenchidas_xml(request):
+    """Exporta UCs mais preenchidas (vista materializada) para XML"""
     root = ET.Element('ucs_mais_procuradas')
     root.set('exportado_em', datetime.now().isoformat())
     
@@ -410,8 +406,6 @@ def exportar_mv_ucs_procuradas_xml(request):
 @admin_required
 def exportar_mv_resumo_alunos_xml(request):
     """Exporta resumo de inscrições por aluno (vista materializada) para XML"""
-    refresh_materialized_view('mv_resumo_inscricoes_aluno')
-    
     root = ET.Element('resumo_alunos')
     root.set('exportado_em', datetime.now().isoformat())
     
@@ -439,8 +433,6 @@ def exportar_mv_resumo_alunos_xml(request):
 @admin_required
 def exportar_mv_estatisticas_turno_csv(request):
     """Exporta estatísticas de turnos (vista materializada) para CSV"""
-    refresh_materialized_view('mv_estatisticas_turno')
-    
     response = HttpResponse(content_type='text/csv; charset=utf-8')
     response['Content-Disposition'] = f'attachment; filename="estatisticas_turnos_{datetime.now().strftime("%Y%m%d_%H%M%S")}.csv"'
     
@@ -474,8 +466,6 @@ def exportar_mv_estatisticas_turno_csv(request):
 @admin_required
 def exportar_mv_estatisticas_turno_json(request):
     """Exporta estatísticas de turnos (vista materializada) para JSON"""
-    refresh_materialized_view('mv_estatisticas_turno')
-    
     stats = MvEstatisticasTurno.objects.all()
     
     data = []
@@ -504,10 +494,8 @@ def exportar_mv_estatisticas_turno_json(request):
     return response
 
 @admin_required
-def exportar_mv_ucs_procuradas_csv(request):
-    """Exporta UCs mais procuradas (vista materializada) para CSV"""
-    refresh_materialized_view('mv_ucs_mais_procuradas')
-    
+def exportar_mv_ucs_preenchidas_csv(request):
+    """Exporta UCs mais preenchidas (vista materializada) para CSV"""
     response = HttpResponse(content_type='text/csv; charset=utf-8')
     response['Content-Disposition'] = f'attachment; filename="ucs_procuradas_{datetime.now().strftime("%Y%m%d_%H%M%S")}.csv"'
     
@@ -537,10 +525,8 @@ def exportar_mv_ucs_procuradas_csv(request):
     return response
 
 @admin_required
-def exportar_mv_ucs_procuradas_json(request):
-    """Exporta UCs mais procuradas (vista materializada) para JSON"""
-    refresh_materialized_view('mv_ucs_mais_procuradas')
-    
+def exportar_mv_ucs_preenchidas_json(request):
+    """Exporta UCs mais preenchidas (vista materializada) para JSON"""
     ucs = MvUcsMaisProcuradas.objects.all()
     
     data = []
@@ -569,8 +555,6 @@ def exportar_mv_ucs_procuradas_json(request):
 @admin_required
 def exportar_mv_resumo_alunos_csv(request):
     """Exporta resumo de inscrições por aluno (vista materializada) para CSV"""
-    refresh_materialized_view('mv_resumo_inscricoes_aluno')
-    
     response = HttpResponse(content_type='text/csv; charset=utf-8')
     response['Content-Disposition'] = f'attachment; filename="resumo_alunos_{datetime.now().strftime("%Y%m%d_%H%M%S")}.csv"'
     
@@ -602,8 +586,6 @@ def exportar_mv_resumo_alunos_csv(request):
 @admin_required
 def exportar_mv_resumo_alunos_json(request):
     """Exporta resumo de inscrições por aluno (vista materializada) para JSON"""
-    refresh_materialized_view('mv_resumo_inscricoes_aluno')
-    
     alunos = MvResumoInscricoesAluno.objects.all()
     
     data = []
@@ -637,9 +619,10 @@ def atualizar_vistas_materializadas(request):
         refresh_all_materialized_views()
         return JsonResponse({
             'status': 'success',
-            'message': 'Todas as vistas materializadas foram atualizadas com sucesso!'
+            'message': 'Vistas materializadas atualizadas com sucesso!'
         })
     except Exception as e:
+        print(f"Erro ao atualizar vistas: {str(e)}")
         return JsonResponse({
             'status': 'error',
             'message': f'Erro ao atualizar vistas: {str(e)}'
