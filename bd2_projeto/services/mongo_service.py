@@ -257,6 +257,160 @@ def deletar_proposta_estagio(aluno_id, titulo):
     result = db.proposta_estagio.delete_one({"aluno_id": aluno_id, "titulo": titulo})
     return result.deleted_count > 0
 
+def atribuir_aluno_proposta(proposta_id, aluno_n_mecanografico, aluno_nome=None):
+    """
+    Atribui um aluno a uma proposta de estágio
+    
+    Args:
+        proposta_id: ID da proposta (id_proposta)
+        aluno_n_mecanografico: Número mecanográfico do aluno
+        aluno_nome: Nome do aluno (opcional, será buscado se não fornecido)
+    """
+    updates = {
+        "aluno_atribuido": {
+            "n_mecanografico": aluno_n_mecanografico,
+            "nome": aluno_nome,
+            "data_atribuicao": datetime.now(),
+            "data_formatada": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        },
+        "status": "atribuida"
+    }
+    
+    result = db.proposta_estagio.update_one(
+        {"id_proposta": int(proposta_id)},
+        {"$set": updates}
+    )
+    return result.modified_count > 0
+
+def remover_atribuicao_proposta(proposta_id):
+    """
+    Remove a atribuição de aluno de uma proposta
+    
+    Args:
+        proposta_id: ID da proposta
+    """
+    result = db.proposta_estagio.update_one(
+        {"id_proposta": int(proposta_id)},
+        {
+            "$unset": {"aluno_atribuido": ""},
+            "$set": {"status": "disponivel"}
+        }
+    )
+    return result.modified_count > 0
+
+def obter_aluno_atribuido(proposta_id):
+    """
+    Obtém o aluno atribuído a uma proposta
+    
+    Args:
+        proposta_id: ID da proposta
+    """
+    proposta = db.proposta_estagio.find_one(
+        {"id_proposta": int(proposta_id)},
+        {"aluno_atribuido": 1}
+    )
+    if proposta and "aluno_atribuido" in proposta:
+        return proposta["aluno_atribuido"]
+    return None
+
+
+def verificar_aluno_tem_proposta(aluno_n_mecanografico):
+    """
+    Verifica se um aluno já tem uma proposta atribuída
+    
+    Args:
+        aluno_n_mecanografico: Número mecanográfico do aluno
+    
+    Returns:
+        Proposta atribuída ao aluno ou None
+    """
+    proposta = db.proposta_estagio.find_one(
+        {"aluno_atribuido.n_mecanografico": str(aluno_n_mecanografico)},
+        {"_id": 0, "id_proposta": 1, "titulo": 1, "entidade": 1}
+    )
+    return proposta
+
+
+# ==========================================
+# GESTÃO ADMIN DE PROPOSTAS DAPE
+# ==========================================
+
+def criar_proposta_admin(titulo, entidade, descricao=None, requisitos=None, modelo=None, 
+                         orientador_empresa=None, telefone=None, email=None, logo=None):
+    """
+    Cria uma nova proposta de estágio pelo admin
+    
+    Args:
+        titulo: Título da proposta
+        entidade: Nome da empresa/entidade
+        descricao: Descrição detalhada
+        requisitos: Requisitos da proposta
+        modelo: Modelo (Estágio/Projeto)
+        orientador_empresa: Nome do orientador na empresa
+        telefone: Telefone de contacto
+        email: Email de contacto
+        logo: Nome do ficheiro do logo (sem extensão)
+    """
+    # Gera um novo ID único
+    ultimo = db.proposta_estagio.find_one(sort=[("id_proposta", -1)])
+    novo_id = (ultimo.get("id_proposta", 0) if ultimo else 0) + 1
+    
+    proposta = {
+        "id_proposta": novo_id,
+        "titulo": titulo,
+        "entidade": entidade,
+        "descricao": descricao or "",
+        "requisitos": requisitos or "",
+        "modelo": modelo or "",
+        "orientador_empresa": orientador_empresa or "",
+        "telefone": telefone or "",
+        "email": email or "",
+        "logo": logo or "",
+        "status": "disponivel",
+        "timestamp": datetime.now(),
+        "data_formatada": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    }
+    result = db.proposta_estagio.insert_one(proposta)
+    proposta["_id"] = result.inserted_id
+    return proposta
+
+def obter_proposta_por_id(proposta_id):
+    """
+    Obtém uma proposta pelo ID
+    
+    Args:
+        proposta_id: ID da proposta
+    """
+    return db.proposta_estagio.find_one({"id_proposta": int(proposta_id)})
+
+def atualizar_proposta_admin(proposta_id, updates):
+    """
+    Atualiza uma proposta de estágio pelo admin
+    
+    Args:
+        proposta_id: ID da proposta
+        updates: Dict com campos a atualizar
+    """
+    updates["timestamp"] = datetime.now()
+    updates["data_formatada"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    
+    result = db.proposta_estagio.update_one(
+        {"id_proposta": int(proposta_id)},
+        {"$set": updates}
+    )
+    return result.modified_count > 0
+
+def deletar_proposta_por_id(proposta_id):
+    """
+    Deleta uma proposta de estágio pelo ID
+    
+    Args:
+        proposta_id: ID da proposta
+    """
+    result = db.proposta_estagio.delete_one({"id_proposta": int(proposta_id)})
+    return result.deleted_count > 0
+
+
 # ==========================================
 # FAVORITOS
 # ==========================================

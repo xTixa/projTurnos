@@ -72,6 +72,56 @@
         <h2>Descrição do Projeto</h2>
         <div class="detail-text">{{ proposta.descricao|linebreaks }}</div>
       </section>
+
+      <!-- Aluno Atribuído Section -->
+      <section class="detail-assignment">
+        <h2>Aluno Atribuído</h2>
+        {% if aluno_atribuido %}
+        <div class="assignment-card assigned">
+          <div class="assignment-icon">
+            <i class="fa-solid fa-user-graduate"></i>
+          </div>
+          <div class="assignment-info">
+            <span class="assignment-name">{{ aluno_atribuido.nome }}</span>
+            <span class="assignment-id">Nº {{ aluno_atribuido.n_mecanografico }}</span>
+            {% if aluno_atribuido.data_formatada %}
+            <span class="assignment-date">Atribuído em {{ aluno_atribuido.data_formatada }}</span>
+            {% endif %}
+          </div>
+          {% if request.session.user_tipo == "admin" %}
+          <form method="post" action="{% url 'home:atribuir_aluno' proposta.proposta_id %}" class="assignment-remove">
+            {% csrf_token %}
+            <input type="hidden" name="acao" value="remover">
+            <button type="submit" class="btn-remove" title="Remover atribuição">
+              <i class="fa-solid fa-times"></i>
+            </button>
+          </form>
+          {% endif %}
+        </div>
+        {% else %}
+        <div class="assignment-card empty">
+          <div class="assignment-icon">
+            <i class="fa-regular fa-user"></i>
+          </div>
+          <span class="assignment-empty-text">Nenhum aluno atribuído</span>
+        </div>
+        {% endif %}
+
+        {% if request.session.user_tipo == "admin" and not aluno_atribuido %}
+        <form method="post" action="{% url 'home:atribuir_aluno' proposta.proposta_id %}" class="assignment-form">
+          {% csrf_token %}
+          <div class="form-group">
+            <label for="n_mecanografico">Atribuir aluno (nº mecanográfico)</label>
+            <div class="form-row">
+              <input type="text" name="n_mecanografico" id="n_mecanografico" placeholder="Ex: 12345" required>
+              <button type="submit" class="btn btn-primary btn-sm">
+                <i class="fa-solid fa-user-plus"></i> Atribuir
+              </button>
+            </div>
+          </div>
+        </form>
+        {% endif %}
+      </section>
     </div>
 
     <!-- Actions -->

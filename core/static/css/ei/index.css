@@ -185,6 +185,60 @@ body .main-content {
     box-shadow: var(--shadow-hover);
     border-color: var(--primary);
 }
+
+/* Minha Proposta - Destaque */
+.ei-card.minha-proposta {
+    background: #10b981 !important;
+    border: 2px solid #059669 !important;
+    position: relative;
+}
+
+.ei-card.minha-proposta:hover {
+    border-color: #047857;
+    transform: translateY(-5px);
+    box-shadow: 0 20px 30px -5px rgba(16, 185, 129, 0.35);
+}
+
+.ei-card.minha-proposta h3,
+.ei-card.minha-proposta .entidade,
+.ei-card.minha-proposta .requisitos,
+.ei-card.minha-proposta .modelo,
+.ei-card.minha-proposta .requisitos strong,
+.ei-card.minha-proposta .modelo strong {
+    color: white;
+}
+
+.ei-card.minha-proposta .entidade {
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.ei-card.minha-proposta .requisitos,
+.ei-card.minha-proposta .modelo {
+    color: rgba(255, 255, 255, 0.85);
+}
+
+.ei-card.minha-proposta .logo-placeholder {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+}
+
+.minha-proposta-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: white;
+    color: #059669;
+    padding: 6px 12px;
+    border-radius: 50px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+}
+
+.minha-proposta-badge i {
+    font-size: 0.85rem;
+}
+
 .ei-card__icon {
     width: 64px;
     height: 64px;
@@ -710,6 +764,139 @@ body .main-content {
     gap: 8px;
 }
 
+/* Assignment Section */
+.detail-assignment {
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border);
+}
+
+.detail-assignment h2 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-main);
+    margin: 0 0 1rem 0;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.assignment-card {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 16px;
+    background: #f8fafc;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+}
+
+.assignment-card.assigned {
+    background: linear-gradient(135deg, #ecfdf5, #d1fae5);
+    border-color: #10b981;
+}
+
+.assignment-card.empty {
+    background: #f8fafc;
+    border-style: dashed;
+}
+
+.assignment-icon {
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: white;
+    border-radius: 50%;
+    font-size: 1.25rem;
+    color: var(--text-muted);
+    border: 1px solid var(--border);
+}
+
+.assignment-card.assigned .assignment-icon {
+    background: #10b981;
+    color: white;
+    border-color: #10b981;
+}
+
+.assignment-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.assignment-name {
+    font-weight: 600;
+    color: var(--text-main);
+    font-size: 1rem;
+}
+
+.assignment-id {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+}
+
+.assignment-date {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+.assignment-empty-text {
+    color: var(--text-muted);
+    font-size: 0.95rem;
+}
+
+.assignment-remove .btn-remove {
+    width: 36px;
+    height: 36px;
+    border: none;
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+
+.assignment-remove .btn-remove:hover {
+    background: #ef4444;
+    color: white;
+}
+
+.assignment-form {
+    margin-top: 1rem;
+}
+
+.assignment-form .form-group label {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+}
+
+.assignment-form .form-row {
+    display: flex;
+    gap: 10px;
+}
+
+.assignment-form input[type="text"] {
+    flex: 1;
+    padding: 10px 14px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    font-size: 0.95rem;
+    transition: border-color 0.2s;
+}
+
+.assignment-form input[type="text"]:focus {
+    outline: none;
+    border-color: var(--primary);
+}
+
 /* Responsive */
 @media (max-width: 600px) {
     .detail-header {
@@ -724,6 +911,10 @@ body .main-content {
     .detail-header__info {
         width: 100%;
         order: 1;
+    }
+    
+    .assignment-form .form-row {
+        flex-direction: column;
     }
 }
 

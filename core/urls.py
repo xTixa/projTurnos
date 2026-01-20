@@ -93,6 +93,12 @@ urlpatterns = [
     path("admin-panel/avaliacoes/<int:id>/editar/", views.admin_avaliacoes_edit, name="admin_avaliacoes_edit"),
     path("admin-panel/avaliacoes/<int:id>/apagar/", views.admin_avaliacoes_delete, name="admin_avaliacoes_delete"),
 
+    # ADMIN - PROPOSTAS DAPE
+    path("admin-panel/dape/", views.admin_dape_list, name="admin_dape_list"),
+    path("admin-panel/dape/create/", views.admin_dape_create, name="admin_dape_create"),
+    path("admin-panel/dape/<int:id>/edit/", views.admin_dape_edit, name="admin_dape_edit"),
+    path("admin-panel/dape/<int:id>/delete/", views.admin_dape_delete, name="admin_dape_delete"),
+
     #ficha 12
     path("cadeiras_semestre/", views.cadeiras_semestre, name="cadeiras_semestre"),
     path("vw_alunos_por_ordem_alfabetica/", views.alunos_por_ordem_alfabetica, name="vw_alunos_por_ordem_alfabetica"),
@@ -179,7 +185,7 @@ urlpatterns = [
     path("proposta-estagio/deletar/<str:titulo>/", views.deletar_proposta_estagio_view, name="deletar_proposta_estagio"),
     path("favoritos/", views.favoritos_view, name="favoritos"),
     path("api/favoritos/toggle/", views.toggle_favorito_view, name="toggle_favorito"),
-    path("proposta/<int:id_proposta>/", views.proposta_detalhes, name="proposta_detalhes"
-),
+    path("proposta/<int:id_proposta>/", views.proposta_detalhes, name="proposta_detalhes"),
+    path("proposta/<int:id_proposta>/atribuir/", views.atribuir_aluno_view, name="atribuir_aluno"),
 ]
 

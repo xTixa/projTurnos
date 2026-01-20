@@ -12,13 +12,13 @@
 <div class="ei-layout">
 
   <h1 style="font-size: 2.75rem; font-weight: 800; color: #0f172a; margin-bottom: 1.25rem; line-height: 1.2; letter-spacing: -0.02em; text-align: left;">Propostas para Projeto/Estágio</h1>
-  <p style="font-size: 1.125rem; line-height: 1.7; color: #64748b; margin-bottom: 2rem; text-align: left;">{{ propostas|length }} propostas disponíveis</p>
+  <p style="font-size: 1.125rem; line-height: 1.7; color: #64748b; margin-bottom: 2rem; text-align: left;">{{ propostas_disponiveis }} propostas disponíveis</p>
 
   <!-- PROPOSTAS EM CARDS -->
   <section class="ei-section">
     <div class="ei-cards">
       {% for proposta in propostas %}
-      <article class="ei-card">
+      <article class="ei-card {% if proposta.is_minha_proposta %}minha-proposta{% endif %}">
         <div class="ei-card__logo">
           <!-- Logo da empresa baseado no campo logo -->
           {% if proposta.logo %}
@@ -32,6 +32,12 @@
         </div>
         <h3>{{ proposta.titulo }}</h3>
         <p class="entidade">{{ proposta.entidade }}</p>
+
+        {% if proposta.is_minha_proposta %}
+        <div class="minha-proposta-badge">
+          <i class="fa-solid fa-check-circle"></i> A tua proposta
+        </div>
+        {% endif %}
 
         {% if proposta.requisitos %}
         <p class="requisitos"><strong>Requisitos:</strong> {{ proposta.requisitos }}</p>
