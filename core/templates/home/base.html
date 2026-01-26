@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="{% static 'css/base.css' %}?v=13">
 
 
-  {% if request.user.is_authenticated and request.user.is_staff %}
+  {% if request.session.user_tipo == 'admin' %}
     <link rel="stylesheet" href="{% static 'css/admin/admin.css' %}">
   {% endif %}
 
@@ -67,7 +67,7 @@
       </nav>
 
     </div>
-    {% if  request.session.user_id or request.user.is_authenticated and request.user.is_staff %}
+    {% if  request.session.user_id or request.session.user_tipo == 'admin' %}
     <div class="topbar__right">
       <a href="{% url 'extra_app:sugestao' %}" class="toplinks__link">
         <i class="fa fa-lightbulb-o" aria-hidden="true"></i>
@@ -76,7 +76,7 @@
     {% endif %}
 
       {# ---------- ADMIN (Django User) ---------- #}
-      {% if request.user.is_authenticated and request.user.is_staff %}
+      {% if request.session.user_tipo == 'admin' %}
 
         <a href="{% url 'home:admin_dashboard' %}" class="btn btn-admin">
           <i class="fa-solid fa-screwdriver-wrench"></i>
@@ -86,7 +86,7 @@
         <div class="user-dropdown">
           <button class="user-btn">
             <i class="fa-regular fa-user"></i>
-            <span class="user-name">{{ request.user.username }}</span>
+            <span class="user-name">{{ request.session.user_nome }}</span>
             <i class="fa-solid fa-chevron-down dropdown-icon"></i>
           </button>
 
@@ -132,12 +132,12 @@
   </header>
 
   <!-- LAYOUT GERAL -->
-  <div class="container-flex {% if request.user.is_authenticated and request.user.is_staff %}admin{% endif %}">
+  <div class="container-flex {% if request.session.user_tipo == 'admin' %}admin{% endif %}">
 
     {% block sidebar %}
     <aside class="sidebar">
 
-      {% if request.user.is_authenticated and request.user.is_staff %}
+      {% if request.session.user_tipo == 'admin' %}
 
         {% include "components/sidebar_admin.html" %}
 

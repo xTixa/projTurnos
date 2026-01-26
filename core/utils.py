@@ -4,6 +4,7 @@ from django.contrib import messages
 from bd2_projeto.services.mongo_service import adicionar_log
 
 def registar_log(request, operacao, entidade, chave, detalhes):
+    username = request.session.get("user_nome") or request.session.get("user_email") or "anon"
     with connection.cursor() as cursor:
         cursor.execute("""
             INSERT INTO log_eventos
@@ -12,14 +13,14 @@ def registar_log(request, operacao, entidade, chave, detalhes):
         """, [
             operacao,
             detalhes,
-            request.user.username,
+            username,
             chave,
             entidade
         ])
     
     # Também guarda no MongoDB
     adicionar_log(operacao, {
-        "utilizador": request.user.username,
+        "utilizador": username,
         "entidade": entidade,
         "chave_primaria": chave,
         "detalhes": detalhes
@@ -27,13 +28,9 @@ def registar_log(request, operacao, entidade, chave, detalhes):
 
 def admin_required(view_func):
     def wrapper(request, *args, **kwargs):
-        if not request.user.is_authenticated:
+        if request.session.get("user_tipo") != "admin":
             messages.error(request, "É necessário iniciar sessão como administrador.")
             return redirect("home:login")
-
-        if not request.user.is_staff:
-            messages.error(request, "Acesso restrito ao administrador.")
-            return redirect("home:index")
 
         return view_func(request, *args, **kwargs)
     return wrapper
@@ -70,11 +67,9 @@ def docente_required(view_func):
 
 def user_required(view_func):
     def wrapper(request, *args, **kwargs):
-        # Verifica se existe sessão ativa (aluno/docente) ou user Django autenticado
         tem_sessao = "user_tipo" in request.session
-        tem_user_django = request.user.is_authenticated
         
-        if not tem_sessao and not tem_user_django:
+        if not tem_sessao:
             messages.error(request, "É necessário iniciar sessão para aceder a esta página.")
             return redirect("home:login")
 

@@ -1,15 +1,13 @@
 from datetime import datetime
 from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth import authenticate, login, logout as auth_logout
-from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from django.shortcuts import redirect
-from django.db import models
+from django.db import models, connection
 from .models import AnoCurricular, UnidadeCurricular, Semestre, Docente, Curso, HorarioPDF, AvaliacaoPDF, Aluno, TurnoUc, Turno, InscricaoTurno, InscritoUc, LogEvento, AuditoriaInscricao, Matricula, LecionaUc
 from .db_views import CadeirasSemestre, AlunosPorOrdemAlfabetica, Turnos, Cursos
 from django.http import JsonResponse, FileResponse
 import json
 from django.contrib.auth.models import User
+from core.integracoes_postgresql import PostgreSQLAuth, PostgreSQLTurnos, PostgreSQLConsultas, PostgreSQLProcedures
 from bd2_projeto.services.mongo_service import (
     adicionar_log, listar_eventos_mongo, listar_logs, registar_auditoria_inscricao,
     validar_inscricao_disponivel, registar_consulta_aluno,
@@ -17,34 +15,30 @@ from bd2_projeto.services.mongo_service import (
     criar_proposta_estagio, listar_propostas_estagio, atualizar_proposta_estagio, eliminar_proposta_estagio,
     adicionar_favorito, remover_favorito, verificar_favorito, listar_favoritos
 )
-# ==========================================
-# IMPORT DO SERVIÇO GridFS PARA PDFs
-# ==========================================
-# Importa as funções de armazenamento de PDFs no MongoDB
 from bd2_projeto.services.gridfs_service import (
     upload_pdf_horario, upload_pdf_avaliacao,
     download_pdf, eliminar_pdf, listar_pdfs_horarios, listar_pdfs_avaliacoes
 )
 from core.utils import registar_log, admin_required, aluno_required, user_required, docente_required
 import time
-from django.db.models import Count
 
 
-def _listar_pdfs_por_ano(model_cls, course_id):
-    """Obtém o PDF mais recente por ano curricular, priorizando o curso indicado."""
-    anos = AnoCurricular.objects.all().order_by("id_anocurricular")
-    documentos = []
-
-    for ano in anos:
-        base_qs = model_cls.objects.filter(id_anocurricular=ano)
-
-        pdf = base_qs.filter(id_curso_id=course_id).order_by("-atualizado_em").first()
-        if not pdf:
-            pdf = base_qs.filter(id_curso__isnull=True).order_by("-atualizado_em").first()
-
-        documentos.append({"ano": ano, "pdf": pdf})
-
-    return documentos
+def _listar_pdfs_por_ano(model_table, course_id):
+    """Obtém PDFs mais recentes por ano curricular via SQL."""
+    pdfs_raw = PostgreSQLConsultas.pdfs_por_ano_curso(model_table, course_id)
+    anos_dict = {}
+    
+    for pdf in pdfs_raw:
+        ano_id = pdf.get('id_anocurricular')
+        if ano_id not in anos_dict:
+            anos_dict[ano_id] = {
+                'id_anocurricular': ano_id,
+                'ano_curricular': pdf.get('ano_curricular'),
+                'pdf': pdf
+            }
+        # Mantém o primeiro (mais recente) para cada ano
+    
+    return sorted(anos_dict.values(), key=lambda x: x['id_anocurricular'])
 
 #view pagina inicial DI
 def index(request):
@@ -56,47 +50,36 @@ def login_view(request):
         username_or_email = request.POST.get("username") # le o valor introduzido no username, pode ser username ou email
         password = request.POST.get("password") # le o valor introduzido na password
 
-        #tenta fazer login de um user do django
-        user = authenticate(request, username=username_or_email, password=password)
+        # limpa qualquer sessão anterior
+        request.session.flush()
 
-        #se o user for encontrado no django, faz login, senao redireciona para a pagina inicial
-        if user is not None:
-            login(request, user)
-
-            if user.is_staff:
+        # 1) Admin (auth_user) via SQL
+        admin_row = PostgreSQLAuth.fetch_admin(username_or_email)
+        if admin_row and admin_row.get("is_staff") and admin_row.get("is_active"):
+            if PostgreSQLAuth.validar_password(admin_row.get("password"), password):
                 request.session["user_tipo"] = "admin"
-                request.session["user_id"] = user.id
-                request.session["user_nome"] = user.username
-                request.session["user_email"] = user.email
+                request.session["user_id"] = admin_row.get("id")
+                request.session["user_nome"] = admin_row.get("username")
+                request.session["user_email"] = admin_row.get("email")
                 return redirect("home:admin_dashboard")
 
+        # 2) Aluno (tabela aluno)
+        aluno_row = PostgreSQLAuth.fetch_aluno_por_email(username_or_email)
+        if aluno_row and aluno_row.get("password") == password:
+            request.session["user_tipo"] = "aluno"
+            request.session["user_id"] = aluno_row.get("n_mecanografico")
+            request.session["user_nome"] = aluno_row.get("nome")
+            request.session["user_email"] = aluno_row.get("email")
             return redirect("home:index")
 
-        #procura na tabela de alunos algum registo com estes dados
-        try:
-            aluno = Aluno.objects.get(email=username_or_email)
-            if aluno.password == password:
-                request.session.flush()  # limpa tudo
-                request.session["user_tipo"] = "aluno"
-                request.session["user_id"] = aluno.n_mecanografico
-                request.session["user_nome"] = aluno.nome
-                request.session["user_email"] = aluno.email
-                return redirect("home:index")
-        except Aluno.DoesNotExist:
-            pass
-
-        #procura na tabela de docentes algum registo com estes dados
-        try:
-            docente = Docente.objects.get(email=username_or_email)
-            if docente.password == password:
-                request.session.flush()
-                request.session["user_tipo"] = "docente"
-                request.session["user_id"] = docente.id_docente
-                request.session["user_nome"] = docente.nome
-                request.session["user_email"] = docente.email
-                return redirect("home:index")
-        except Docente.DoesNotExist:
-            pass
+        # 3) Docente (tabela docente)
+        docente_row = PostgreSQLAuth.fetch_docente_por_email(username_or_email)
+        if docente_row and docente_row.get("password") == password:
+            request.session["user_tipo"] = "docente"
+            request.session["user_id"] = docente_row.get("id_docente")
+            request.session["user_nome"] = docente_row.get("nome")
+            request.session["user_email"] = docente_row.get("email")
+            return redirect("home:index")
         
         #caso nao exista ninguem com os dados fornecidos, da msg de erro
         messages.error(request, "Utilizador ou palavra-passe incorretos.")
@@ -106,7 +89,6 @@ def login_view(request):
 
 #view para logout
 def do_logout(request):
-    auth_logout(request)  #faz o logout do Django
     request.session.flush()  # limpa toda a sessão
     return redirect("home:login")  # redireciona para a página de login novamente
 
@@ -116,28 +98,21 @@ def ingresso(request):
 
 #view para plano curricular de EI
 def plano_curricular(request):
-    #se o utilizador for aluno, regista a consulta na coleçao do MongoDB
     if "user_tipo" in request.session and request.session["user_tipo"] == "aluno":
         registar_consulta_aluno(request.session.get("user_id"), request.session.get("user_nome", "desconhecido"), "plano_curricular", {"curso": "EI"})
     
-    #obtem as UCs do curso com id_curso = 1 (Engenharia Informática)
-    #o select_related evita que haja queries desnecessarias
-    unidades = UnidadeCurricular.objects.filter(id_curso_id=1).select_related('id_anocurricular', 'id_semestre').order_by(
-        'id_anocurricular__id_anocurricular', 'id_semestre__id_semestre')
-
-    #cria uma struct para guardar o plano curricular organizado por ano e semestre
+    unidades = PostgreSQLConsultas.ucs_por_curso(1)
+    
     plano = {}
     for uc in unidades:
-        ano = uc.id_anocurricular.ano_curricular
-        semestre = uc.id_semestre.semestre
+        ano = uc.get('id_anocurricular')
+        semestre = uc.get('semestre')
         if ano not in plano:
             plano[ano] = {}
         if semestre not in plano[ano]:
             plano[ano][semestre] = []
         plano[ano][semestre].append(uc)
 
-    #plano é um dicionario com as UCs organizadas por ano e semestre
-    #area é o identificador do curso para o template
     return render(request, "ei/plano_curricular.html", {"plano": plano, "area": "ei"})
 
 #view para horarios de EI
@@ -151,11 +126,9 @@ def horarios(request):
     # Verificar se o aluno pertence ao curso de EI (id_curso = 1)
     pode_inscrever = False
     if "user_tipo" in request.session and request.session["user_tipo"] == "aluno":
-        try:
-            aluno = Aluno.objects.get(n_mecanografico=request.session["user_id"])
-            pode_inscrever = (aluno.id_curso_id == 1)  # Apenas alunos de EI
-        except Aluno.DoesNotExist:
-            pass
+        aluno_row = PostgreSQLTurnos.get_aluno(request.session["user_id"])
+        if aluno_row and aluno_row.get("id_curso") == 1:
+            pode_inscrever = True
 
     return render(request, "ei/horarios.html", {
         "horarios_por_ano": horarios_por_ano,
@@ -175,12 +148,8 @@ def avaliacoes(request):
 
 #view para contactos de EI
 def contactos(request):
-    #procura todos os docentes e ordena pelo nome
-    docentes = Docente.objects.all().order_by('nome')
-
-    #procura dados do curso principal neste caso EI
-    curso = Curso.objects.filter(nome__icontains="Engenharia Informática").first()
-
+    docentes = PostgreSQLConsultas.docentes()
+    curso = {'id_curso': 1, 'nome': 'Engenharia Informática'}
     return render(request, "ei/contactos.html", {"curso": curso, "docentes": docentes, "area": "ei"})
 
 #view para inscricao em turnos de EI (pagina apenas)
@@ -190,75 +159,67 @@ def inscricao_turno(request):
         messages.error(request, "É necessário iniciar sessão como aluno.")
         return redirect("home:login")
 
-    #recolhe o nMecanografico do aluno e vai buscar o aluno em questao
     n_meca = request.session["user_id"]
-    aluno = Aluno.objects.get(n_mecanografico=n_meca)
+    aluno_row = PostgreSQLTurnos.get_aluno(n_meca)
+    if not aluno_row:
+        messages.error(request, "Aluno não encontrado.")
+        return redirect("home:login")
 
-    #verifica se o aluno é de EI ou de TDM, caso nao seja, redireciona para a pagina inicial
-    if aluno.id_curso_id != 1:
+    if aluno_row.get("id_curso") != 1:
         messages.error(request, "Esta página é apenas para alunos de Engenharia Informática.")
-        if aluno.id_curso_id == 2:
+        if aluno_row.get("id_curso") == 2:
             return redirect("home:inscricao_turno_tdm")
         return redirect("home:index")
 
-    #obtem os ids dos turnos em que o aluno ja está inscrito
-    inscricoes_turno = InscricaoTurno.objects.filter(n_mecanografico=aluno).values_list('id_turno_id', flat=True)
-    turnos_inscritos = set(inscricoes_turno)
+    turnos_inscritos_rows = PostgreSQLTurnos.inscricoes_turno_por_aluno(n_meca)
+    turnos_inscritos = {row.get("id_turno") for row in turnos_inscritos_rows}
 
-    #obtem as UCs em que o aluno está inscrito
-    inscricoes = InscritoUc.objects.filter(n_mecanografico=aluno, estado=True).values('id_unidadecurricular')
+    inscricoes_uc = PostgreSQLTurnos.ucs_inscritas_por_aluno(n_meca)
 
-    #lista com as UCs e os turnos disponiveis
     lista_uc = []
-
-    #lista de turnos em que o aluno esta inscrito
     turnos_no_horario = []
 
-    #para cada inscricao do aluno
-    for inscricao in inscricoes:
-        uc_id = inscricao['id_unidadecurricular']
-        uc = UnidadeCurricular.objects.get(id_unidadecurricular=uc_id)
+    def _mapear_dia_semana(hora_inicio):
+        try:
+            h_int = hora_inicio.hour
+            if 8 <= h_int < 10:
+                return "Segunda"
+            if 10 <= h_int < 12:
+                return "Terça"
+            if 12 <= h_int < 14:
+                return "Quarta"
+            if 14 <= h_int < 16:
+                return "Quinta"
+            return "Sexta"
+        except Exception:
+            return "?"
 
-        #obtem quais os turnos que existem nesta uc
-        relacoes = TurnoUc.objects.filter(id_unidadecurricular=uc)
+    for uc_row in inscricoes_uc:
+        uc_id = uc_row.get("id_unidadecurricular")
+        turnos_uc = PostgreSQLTurnos.turno_uc_por_uc(uc_id)
 
-        #lista de turnos para esta UC
         turnos = []
-        for r in relacoes:
-            turno = r.id_turno
-
-            #ve quantos estao inscritos no turno e calcula as vagss
-            ocupados = InscricaoTurno.objects.filter(id_turno=turno).count()
-            vagas = turno.capacidade - ocupados
+        for tu in turnos_uc:
+            turno_id = tu.get("id_turno")
+            ocupados = PostgreSQLTurnos.count_inscritos(turno_id, uc_id)
+            capacidade = tu.get("capacidade") or 0
+            vagas = capacidade - ocupados
             if vagas < 0:
                 vagas = 0
 
-            #ve se o aluno ja esta inscrito no turbo
-            ja_inscrito = turno.id_turno in turnos_inscritos
+            hora_inicio = tu.get("hora_inicio")
+            hora_fim = tu.get("hora_fim")
+            hora_inicio_str = hora_inicio.strftime("%H:%M") if hora_inicio else "?"
+            hora_fim_str = hora_fim.strftime("%H:%M") if hora_fim else "?"
+            dia_semana = _mapear_dia_semana(hora_inicio) if hora_inicio else "?"
 
-            #converte as horas do datetime para uma string
-            hora_inicio_str = r.hora_inicio.strftime("%H:%M")
-            hora_fim_str = r.hora_fim.strftime("%H:%M")
+            ja_inscrito = turno_id in turnos_inscritos
 
-            #mapear o dia da semana
-            h_int = int(hora_inicio_str.split(":")[0])
-            if 8 <= h_int < 10:
-                dia_semana = "Segunda"
-            elif 10 <= h_int < 12:
-                dia_semana = "Terça"
-            elif 12 <= h_int < 14:
-                dia_semana = "Quarta"
-            elif 14 <= h_int < 16:
-                dia_semana = "Quinta"
-            else:
-                dia_semana = "Sexta"
-
-            #dicionario com a info do turno da uc
             turno_info = {
-                "id": turno.id_turno,
-                "nome": f"T{turno.n_turno}",
-                "tipo": turno.tipo,
-                "capacidade": turno.capacidade,
+                "id": turno_id,
+                "nome": f"T{tu.get('n_turno')}",
+                "tipo": tu.get("tipo"),
+                "capacidade": capacidade,
                 "vagas": vagas,
                 "horario": f"{dia_semana} {hora_inicio_str}-{hora_fim_str}",
                 "ja_inscrito": ja_inscrito,
@@ -266,24 +227,22 @@ def inscricao_turno(request):
                 "hora_inicio": hora_inicio_str,
                 "hora_fim": hora_fim_str,
             }
-            
+
             turnos.append(turno_info)
-            
-            #se o aluno está inscrito, adiciona o mesmo na lista do horário
+
             if ja_inscrito:
                 turnos_no_horario.append({
-                    "uc_nome": uc.nome,
-                    "turno_nome": f"T{turno.n_turno}",
-                    "tipo": turno.tipo,
+                    "uc_nome": uc_row.get("nome"),
+                    "turno_nome": f"T{tu.get('n_turno')}",
+                    "tipo": tu.get("tipo"),
                     "dia": dia_semana,
                     "hora_inicio": hora_inicio_str,
                     "hora_fim": hora_fim_str,
                 })
 
-        #adiciona a UC na lista com os seus turnos
         lista_uc.append({
-            "id": uc.id_unidadecurricular,
-            "nome": uc.nome,
+            "id": uc_id,
+            "nome": uc_row.get("nome"),
             "turnos": turnos,
         })
 
@@ -314,57 +273,47 @@ def perfil(request):
     context = {}
 
     if user_tipo == "aluno":
-        aluno = get_object_or_404(Aluno, n_mecanografico=user_id)
-        context["user_obj"] = aluno
+        aluno_row = PostgreSQLTurnos.get_aluno(user_id)
+        if not aluno_row:
+            messages.error(request, "Aluno não encontrado.")
+            return redirect("home:login")
+
+        context["user_obj"] = aluno_row
         context["tipo"] = "Aluno"
-        
-        # Turnos inscritos
-        inscricoes = InscricaoTurno.objects.filter(n_mecanografico=aluno).select_related('id_turno', 'id_unidadecurricular')
-        
-        #lista com a info dos turnos do aluno
+
+        inscricoes = PostgreSQLTurnos.inscricoes_turno_por_aluno(user_id)
+
         turnos_info = []
-        for inscricao in inscricoes:
-            turno = inscricao.id_turno
-            uc = inscricao.id_unidadecurricular
-            
-            # Tenta ter info extra de horário (TurnoUc)
-            # Usamos filter().first() porque a tabela pode ter múltiplas entradas para o mesmo id_turno (modelo incorreto?)
-            # e porque queremos o horário deste turno NESTA disciplina específica.
-            turno_uc = TurnoUc.objects.filter(id_turno=turno, id_unidadecurricular=uc).first()
-            
-            if turno_uc:
-                hora_inicio = turno_uc.hora_inicio.strftime("%H:%M")
-                hora_fim = turno_uc.hora_fim.strftime("%H:%M")
-                
-                #determina o de dia da semana
-                try:
-                    h_int = int(hora_inicio.split(":")[0])
-                    if 8 <= h_int < 10:
-                        dia_semana = "Segunda"
-                    elif 10 <= h_int < 12:
-                        dia_semana = "Terça"
-                    elif 12 <= h_int < 14:
-                        dia_semana = "Quarta"
-                    elif 14 <= h_int < 16:
-                        dia_semana = "Quinta"
-                    else:
-                        dia_semana = "Sexta"
-                except:
+        for insc in inscricoes:
+            hora_inicio = insc.get("hora_inicio")
+            hora_fim = insc.get("hora_fim")
+            hora_inicio_str = hora_inicio.strftime("%H:%M") if hora_inicio else "?"
+            hora_fim_str = hora_fim.strftime("%H:%M") if hora_fim else "?"
+
+            try:
+                h_int = hora_inicio.hour if hora_inicio else None
+                if h_int is None:
                     dia_semana = "?"
-            else:
-                hora_inicio = "?"
-                hora_fim = "?"
+                elif 8 <= h_int < 10:
+                    dia_semana = "Segunda"
+                elif 10 <= h_int < 12:
+                    dia_semana = "Terça"
+                elif 12 <= h_int < 14:
+                    dia_semana = "Quarta"
+                elif 14 <= h_int < 16:
+                    dia_semana = "Quinta"
+                else:
+                    dia_semana = "Sexta"
+            except Exception:
                 dia_semana = "?"
-            
-            #adiciona a lista um dicionario com a info de cada turno do alino
+
             turnos_info.append({
-                "uc": uc.nome,
-                "turno": f"T{turno.n_turno}",
-                "tipo": turno.tipo,
-                "horario": f"{dia_semana}, {hora_inicio} - {hora_fim}"
+                "uc": insc.get("uc_nome"),
+                "turno": f"T{insc.get('turno_numero')}",
+                "tipo": insc.get("turno_tipo"),
+                "horario": f"{dia_semana}, {hora_inicio_str} - {hora_fim_str}"
             })
-        
-        #coloca a lista no contexto para ser apresentado no template
+
         context["turnos"] = turnos_info
 
     elif user_tipo == "docente":
@@ -380,79 +329,85 @@ def inscrever_turno(request, turno_id, uc_id):
     inicio_tempo = time.time()
     resultado = None
     motivo = None
-    
-    #verifica se o user é aluno, senao for, nao dá para inscrevr
-    if "user_tipo" not in request.session or request.session["user_tipo"] != "aluno":
-        mensagem_erro = "Apenas alunos se podem inscrever em turnos."
-        messages.error(request, mensagem_erro)
-        registar_erro("inscrever_turno", mensagem_erro)
-        return redirect("home:login")
 
     try:
-        aluno = get_object_or_404(Aluno, n_mecanografico=request.session["user_id"])
-        
-        #verifica se o aluno pertence a EI
-        if aluno.id_curso_id != 1:
+        aluno_row = PostgreSQLTurnos.get_aluno(request.session["user_id"])
+        if not aluno_row:
+            messages.error(request, "Aluno não encontrado.")
+            return redirect("home:login")
+
+        if aluno_row.get("id_curso") != 1:
             messages.error(request, "Esta funcionalidade é apenas para alunos de Engenharia Informática.")
             return redirect("home:index")
-        
-        #vai buscar o turno e a uc com base no id recebido
-        turno_uc = get_object_or_404(Turno, id_turno=turno_id)
-        uc = get_object_or_404(UnidadeCurricular, id_unidadecurricular=uc_id)
 
-        #verifica se turno pertence à UC
-        turno_uc_existe = TurnoUc.objects.filter(id_turno=turno_uc, id_unidadecurricular=uc).exists()
-        if not turno_uc_existe:
+        turno_row = PostgreSQLTurnos.get_turno(turno_id)
+        uc_row = PostgreSQLTurnos.get_uc(uc_id)
+        if not turno_row or not uc_row:
+            messages.error(request, "Turno ou UC inválidos.")
+            return redirect("home:inscricao_turno")
+
+        if not PostgreSQLTurnos.turno_pertence_uc(turno_id, uc_id):
             resultado = "nao_autorizado"
             motivo = "Este turno não pertence a esta UC"
             messages.error(request, motivo)
             tempo_ms = int((time.time() - inicio_tempo) * 1000)
-            registar_auditoria_inscricao(aluno.n_mecanografico, turno_id, uc_id, uc.nome, resultado, motivo, tempo_ms)
+            registar_auditoria_inscricao(aluno_row["n_mecanografico"], turno_id, uc_id, uc_row.get("nome", ""), resultado, motivo, tempo_ms)
             return redirect("home:inscricao_turno")
 
-        #verifica se o aluno está inscrito na UC
-        inscrito = InscritoUc.objects.filter(n_mecanografico=aluno, id_unidadecurricular=uc, estado=True).exists()
-        if not inscrito:
+        if not PostgreSQLTurnos.inscrito_na_uc(aluno_row["n_mecanografico"], uc_id):
             resultado = "nao_autorizado"
             motivo = "Não estás inscrito nesta UC"
             messages.error(request, motivo)
             tempo_ms = int((time.time() - inicio_tempo) * 1000)
-            registar_auditoria_inscricao(aluno.n_mecanografico, turno_id, uc_id, uc.nome, resultado, motivo, tempo_ms)
+            registar_auditoria_inscricao(aluno_row["n_mecanografico"], turno_id, uc_id, uc_row.get("nome", ""), resultado, motivo, tempo_ms)
             return redirect("home:inscricao_turno")
-        
-        #verifica se já está inscrito no turno
-        pode_inscrever, msg_validacao = validar_inscricao_disponivel(aluno.n_mecanografico, turno_id)
+
+        pode_inscrever, msg_validacao = validar_inscricao_disponivel(aluno_row["n_mecanografico"], turno_id)
         if not pode_inscrever:
             resultado = "uc_duplicada"
             motivo = msg_validacao
             messages.warning(request, "Já estás inscrito neste turno.")
             tempo_ms = int((time.time() - inicio_tempo) * 1000)
-            registar_auditoria_inscricao(aluno.n_mecanografico, turno_id, uc_id, uc.nome, resultado, motivo, tempo_ms)
+            registar_auditoria_inscricao(aluno_row["n_mecanografico"], turno_id, uc_id, uc_row.get("nome", ""), resultado, motivo, tempo_ms)
             return redirect("home:inscricao_turno")
 
-        #verifica a capacidade restante do turno
-        ocupados = InscricaoTurno.objects.filter(id_turno=turno_uc, id_unidadecurricular=uc).count()
-        if ocupados >= turno_uc.capacidade:
+        ocupados = PostgreSQLTurnos.count_inscritos(turno_id, uc_id)
+        if ocupados >= (turno_row.get("capacidade") or 0):
             resultado = "turno_cheio"
-            motivo = f"Turno cheio (capacidade: {turno_uc.capacidade}, ocupado: {ocupados})"
+            motivo = f"Turno cheio (capacidade: {turno_row.get('capacidade')}, ocupado: {ocupados})"
             messages.error(request, "Este turno já está cheio.")
             tempo_ms = int((time.time() - inicio_tempo) * 1000)
-            registar_auditoria_inscricao(aluno.n_mecanografico, turno_id, uc_id, uc.nome, resultado, motivo, tempo_ms)
+            registar_auditoria_inscricao(aluno_row["n_mecanografico"], turno_id, uc_id, uc_row.get("nome", ""), resultado, motivo, tempo_ms)
             return redirect("home:inscricao_turno")
 
-        #cria a inscricao
-        inscricao = InscricaoTurno.objects.create(n_mecanografico=aluno, id_turno=turno_uc, id_unidadecurricular=uc, data_inscricao=datetime.today().date())
-
-        #calcula o tempo de processamento e regista nos logs
+        criado = PostgreSQLTurnos.create_inscricao_turno(aluno_row["n_mecanografico"], turno_id, uc_id)
         tempo_ms = int((time.time() - inicio_tempo) * 1000)
-        auditoria_pg = AuditoriaInscricao.objects.create(n_mecanografico=aluno, id_turno=turno_uc, id_unidadecurricular=uc, resultado='sucesso',tempo_processamento_ms=tempo_ms)
 
-        registar_auditoria_inscricao(aluno.n_mecanografico, turno_id, uc_id, uc.nome, 'sucesso', None, tempo_ms)
-        adicionar_log("inscricao_turno_sucesso", {"aluno": aluno.nome, "uc": uc.nome, "turno": turno_id, "tempo_ms": tempo_ms}, request)
+        if not criado:
+            resultado = "erro_sistema"
+            motivo = "Falha ao gravar inscrição"
+            registar_auditoria_inscricao(aluno_row["n_mecanografico"], turno_id, uc_id, uc_row.get("nome", ""), resultado, motivo, tempo_ms)
+            messages.error(request, "Erro ao processar inscrição. Tente novamente.")
+            return redirect("home:inscricao_turno")
+
+        # auditoria em PostgreSQL (sem ORM)
+        try:
+            with connection.cursor() as cursor:
+                cursor.execute(
+                    """
+                    INSERT INTO auditoria_inscricao (n_mecanografico, id_turno, id_unidadecurricular, resultado, motivo_rejeicao, tempo_processamento_ms)
+                    VALUES (%s, %s, %s, %s, %s, %s)
+                    """,
+                    [aluno_row["n_mecanografico"], turno_id, uc_id, 'sucesso', None, tempo_ms]
+                )
+        except Exception as e:
+            logger.error(f"Erro ao registar auditoria_inscricao: {e}")
+
+        registar_auditoria_inscricao(aluno_row["n_mecanografico"], turno_id, uc_id, uc_row.get("nome", ""), 'sucesso', None, tempo_ms)
+        adicionar_log("inscricao_turno_sucesso", {"aluno": aluno_row.get("nome"), "uc": uc_row.get("nome"), "turno": turno_id, "tempo_ms": tempo_ms}, request)
         messages.success(request, "Inscrição no turno efetuada com sucesso!")
         return redirect("home:inscricao_turno")
-    
-    #caso exista erro, este tambem fica registado nos logs
+
     except Exception as e:
         resultado = "erro_sistema"
         motivo = str(e)
@@ -466,29 +421,25 @@ def inscrever_turno(request, turno_id, uc_id):
 #view para remover a inscriçao do turno
 @aluno_required
 def desinscrever_turno(request, turno_id, uc_id):
-    if "user_tipo" not in request.session or request.session["user_tipo"] != "aluno":
-        return JsonResponse({"erro": "Acesso não autorizado"}, status=403)
-
     try:
-        aluno = get_object_or_404(Aluno, n_mecanografico=request.session["user_id"])
-        turno_uc = get_object_or_404(Turno, id_turno=turno_id)
-        uc = get_object_or_404(UnidadeCurricular, id_unidadecurricular=uc_id)
+        aluno_row = PostgreSQLTurnos.get_aluno(request.session["user_id"])
+        if not aluno_row:
+            return JsonResponse({"erro": "Aluno não encontrado"}, status=404)
 
-        #query para encontrar a inscriçao do aluno no turno
-        qs = InscricaoTurno.objects.filter(n_mecanografico=aluno, id_turno=turno_uc, id_unidadecurricular=uc)
+        uc_row = PostgreSQLTurnos.get_uc(uc_id)
+        turno_row = PostgreSQLTurnos.get_turno(turno_id)
 
-        #apaga os registos encontrados e devolve as linhas eliminadas
-        removidas = qs.delete()[0]
-
-        #senão removeu nada, tenta apagar as inscrições do aluno no turno
+        removidas = PostgreSQLTurnos.delete_inscricao_turno(aluno_row["n_mecanografico"], turno_id, uc_id)
         if removidas == 0:
-            removidas = InscricaoTurno.objects.filter(n_mecanografico=aluno, id_turno=turno_uc).delete()[0]
+            removidas = PostgreSQLTurnos.delete_inscricao_turno(aluno_row["n_mecanografico"], turno_id, None)
 
-        #caso tenha removido, regista nos logs
         if removidas > 0:
-            registar_auditoria_inscricao(aluno.n_mecanografico, turno_id, uc_id, uc.nome, 'desinscrever', None, 0)
-            adicionar_log("desinscrever_turno", {"aluno": aluno.n_mecanografico, "turno": turno_id, "uc": uc_id, "registos_removidos": removidas, }, request)
-            messages.success(request, f"Desinscrição em {uc.nome} — {turno_uc.tipo} efetuada!")
+            registar_auditoria_inscricao(aluno_row["n_mecanografico"], turno_id, uc_id, (uc_row or {}).get("nome", ""), 'desinscrever', None, 0)
+            adicionar_log("desinscrever_turno", {"aluno": aluno_row["n_mecanografico"], "turno": turno_id, "uc": uc_id, "registos_removidos": removidas, }, request)
+            if turno_row and uc_row:
+                messages.success(request, f"Desinscrição em {uc_row.get('nome')} — {turno_row.get('tipo')} efetuada!")
+            else:
+                messages.success(request, "Desinscrição efetuada!")
         else:
             messages.warning(request, "Inscrição não encontrada.")
 
@@ -505,48 +456,32 @@ def api_verificar_conflitos(request, turno_id):
         return JsonResponse({"erro": "Não autorizado"}, status=403)
 
     try:
-        aluno = get_object_or_404(Aluno, n_mecanografico=request.session["user_id"])
-        turno_novo = get_object_or_404(Turno, id_turno=turno_id)
+        aluno_row = PostgreSQLTurnos.get_aluno(request.session["user_id"])
+        if not aluno_row:
+            return JsonResponse({"erro": "Aluno não encontrado"}, status=404)
 
-        #procura os registos associados ao turno
-        turnos_uc_novo = TurnoUc.objects.filter(id_turno=turno_novo)
-        if not turnos_uc_novo.exists():
+        turnos_uc_novo = PostgreSQLTurnos.turno_uc_por_turno(turno_id)
+        if not turnos_uc_novo:
             return JsonResponse({"conflitos": []})
 
-        #obtem as inscriçoes atuais do aluno
-        inscricoes = InscricaoTurno.objects.filter(n_mecanografico=aluno).select_related('id_turno', 'id_unidadecurricular')
+        inscricoes = PostgreSQLTurnos.inscricoes_turno_por_aluno(aluno_row["n_mecanografico"])
 
-        #lista onde vao ser guardados os conflitos que forem encontrados
         conflitos = []
-        
-        #para cada espaço no horario do turno novo
-        for turno_uc_novo in turnos_uc_novo:
-            hora_inicio_novo = turno_uc_novo.hora_inicio
-            hora_fim_novo = turno_uc_novo.hora_fim
-            dia_novo = getattr(turno_uc_novo, "dia", None)
-
-            #compara com os turnos em que o aluno ja está inscrito
+        for tu_novo in turnos_uc_novo:
+            hora_inicio_novo = tu_novo.get("hora_inicio")
+            hora_fim_novo = tu_novo.get("hora_fim")
             for insc in inscricoes:
-                turno_uc_existente = TurnoUc.objects.filter(id_turno=insc.id_turno).first()
+                hora_inicio_existente = insc.get("hora_inicio")
+                hora_fim_existente = insc.get("hora_fim")
+                if not hora_inicio_novo or not hora_fim_novo or not hora_inicio_existente or not hora_fim_existente:
+                    continue
+                if (hora_inicio_novo < hora_fim_existente and hora_fim_novo > hora_inicio_existente):
+                    conflitos.append({
+                        "uc": insc.get("uc_nome") or "UC",
+                        "turno": insc.get("turno_tipo") or "",
+                        "horario": f"{hora_inicio_existente.strftime('%H:%M')} - {hora_fim_existente.strftime('%H:%M')}"
+                    })
 
-                if turno_uc_existente:
-                    hora_inicio_existente = turno_uc_existente.hora_inicio
-                    hora_fim_existente = turno_uc_existente.hora_fim
-                    dia_existente = getattr(turno_uc_existente, "dia", None)
-
-                    #se os dias forem diferentes, nao ha conflito
-                    if dia_novo and dia_existente and dia_novo != dia_existente:
-                        continue
-                    
-                    #verifica se ha sobreposiçao de horarios
-                    if (hora_inicio_novo < hora_fim_existente and hora_fim_novo > hora_inicio_existente):
-                        conflitos.append({
-                            "uc": insc.id_unidadecurricular.nome,
-                            "turno": insc.id_turno.tipo,
-                            "horario": f"{hora_inicio_existente.strftime('%H:%M')} - {hora_fim_existente.strftime('%H:%M')}"
-                        })
-
-        #remove conflitos duplicados
         conflitos_unicos = []
         chaves_vistas = set()
         for c in conflitos:
@@ -555,7 +490,6 @@ def api_verificar_conflitos(request, turno_id):
                 chaves_vistas.add(chave)
                 conflitos_unicos.append(c)
 
-        #devolve a lista de conflitos
         return JsonResponse({"conflitos": conflitos_unicos})
 
     except Exception as e:
@@ -565,57 +499,45 @@ def api_verificar_conflitos(request, turno_id):
 
 #view para obter as ucs por semestre
 def cadeiras_semestre(request):
-    data = list(CadeirasSemestre.objects.order_by('semestre_id', 'nome').values('id_unidadecurricular', 'nome', 'ects', 'semestre_id', 'semestre_nome'))
+    data = PostgreSQLConsultas.cadeiras_semestre()
     return JsonResponse(data, safe=False)
 
 #view para obter os launos alfabeticamente
 def alunos_por_ordem_alfabetica(request):
-    data = list(AlunosPorOrdemAlfabetica.objects.order_by('nome').values('n_mecanografico', 'nome', 'email', 'id_anocurricular'))
+    data = PostgreSQLConsultas.alunos_por_ordem_alfabetica()
     return JsonResponse(data, safe=False)
 
 #view para obter os turnos
 def turnos_list(request):
-    data = list(Turnos.objects.order_by('id_turno').values('id_turno', 'n_turno', 'capacidade', 'tipo'))
+    data = PostgreSQLConsultas.turnos_list()
     return JsonResponse(data, safe=False)
 
 #view para obter os cursos
 def cursos_list(request):
-    data = list(Cursos.objects.order_by('id_curso').values('id_curso', 'nome', 'grau'))
+    data = PostgreSQLConsultas.cursos_list()
     return JsonResponse(data, safe=False)
 
 #view para o dashboard do admin
 @admin_required
 def admin_dashboard(request):
-    #recolhe os dados principais para apresentar no dashboard
-    total_users = User.objects.count()
-    total_turnos = Turnos.objects.count()
-    total_ucs = UnidadeCurricular.objects.count()
-    total_cursos = Curso.objects.count()
-    total_horarios = HorarioPDF.objects.count()
-    total_avaliacoes = AvaliacaoPDF.objects.count()
+    stats = PostgreSQLConsultas.dashboard_totais()
+    alunos_por_uc = PostgreSQLConsultas.alunos_por_uc_top10()
 
-    #calcula os dados para o grafico de alunos por UC
-    alunos_por_uc = InscritoUc.objects.values('id_unidadecurricular__nome').annotate(total=Count('n_mecanografico')).order_by('-total')[:10]  # Top 10 UCs
-    
-    #prepara os dados em formato JSON para o template
-    chart_alunos_labels = json.dumps([item['id_unidadecurricular__nome'] for item in alunos_por_uc])
-    chart_alunos_values = json.dumps([item['total'] for item in alunos_por_uc])
+    chart_alunos_labels = json.dumps([item.get('uc_nome') for item in alunos_por_uc])
+    chart_alunos_values = json.dumps([item.get('total') for item in alunos_por_uc])
 
-    #calcula as vagas disponiveis e ocupadas
-    total_vagas = Turnos.objects.aggregate(total=models.Sum('capacidade'))['total'] or 0
-    vagas_ocupadas = InscricaoTurno.objects.count()
-    vagas_disponiveis = total_vagas - vagas_ocupadas
+    vagas_disponiveis = (stats.get("vagas_total", 0) or 0) - (stats.get("vagas_ocupadas", 0) or 0)
 
     return render(request, "admin/dashboard.html", {
-        "total_users": total_users,
-        "total_turnos": total_turnos,
-        "total_ucs": total_ucs,
-        "total_cursos": total_cursos,
-        "total_horarios": total_horarios,
-        "total_avaliacoes": total_avaliacoes,
+        "total_users": stats.get("total_users", 0),
+        "total_turnos": stats.get("total_turnos", 0),
+        "total_ucs": stats.get("total_ucs", 0),
+        "total_cursos": stats.get("total_cursos", 0),
+        "total_horarios": stats.get("total_horarios", 0),
+        "total_avaliacoes": stats.get("total_avaliacoes", 0),
         "chart_alunos_labels": chart_alunos_labels,
         "chart_alunos_values": chart_alunos_values,
-        "vagas_ocupadas": vagas_ocupadas,
+        "vagas_ocupadas": stats.get("vagas_ocupadas", 0),
         "vagas_disponiveis": vagas_disponiveis,
     })
 
@@ -628,29 +550,11 @@ def admin_export_data(request):
 
 #view para listar os utilizadores admin, alunos e docentes
 def admin_users_list(request):
-    django_users = User.objects.all().values('id', 'username', 'email', 'date_joined', 'is_active', 'is_staff').annotate(tipo=models.Value('Admin', output_field=models.CharField()))
-    alunos = Aluno.objects.all().values('n_mecanografico', 'nome', 'email').annotate(
-        id=models.F('n_mecanografico'),
-        username=models.F('nome'),
-        date_joined=models.Value(None, output_field=models.DateTimeField()),
-        is_active=models.Value(True, output_field=models.BooleanField()),
-        is_staff=models.Value(False, output_field=models.BooleanField()),
-        tipo=models.Value('Aluno', output_field=models.CharField())
-    )
-    docentes = Docente.objects.all().values('id_docente', 'nome', 'email').annotate(
-        id=models.F('id_docente'),
-        username=models.F('nome'),
-        date_joined=models.Value(None, output_field=models.DateTimeField()),
-        is_active=models.Value(True, output_field=models.BooleanField()),
-        is_staff=models.Value(False, output_field=models.BooleanField()),
-        tipo=models.Value('Docente', output_field=models.CharField())
-    )
+    users_sorted = PostgreSQLConsultas.usuarios_combinado()
+    cursos = PostgreSQLConsultas.cursos_list()
+    anos = PostgreSQLConsultas.anos_curriculares()
     
-    #agrupa as 3 listas de users e ordena pelo id
-    users = list(django_users) + list(alunos) + list(docentes)
-    users_sorted = sorted(users, key=lambda x: x.get('id', 0))
-    
-    return render(request, "admin/users_list.html", {"users": users_sorted})
+    return render(request, "admin/users_list.html", {"users": users_sorted, "cursos": cursos, "anos": anos})
 
 #view para criar um user e listar os restantes
 def admin_users_create(request):
@@ -658,232 +562,137 @@ def admin_users_create(request):
         username = request.POST.get("username")
         email = request.POST.get("email")
         password = request.POST.get("password")
+        user_tipo = request.POST.get("tipo", "admin")
 
-        #obriga a inserir um nome e uma pass e depois reconstroi a lista
         if not username or not password:
             messages.error(request, "Username e password são obrigatórios.")
-            django_users = User.objects.all().values('id', 'username', 'email', 'date_joined', 'is_active', 'is_staff').annotate(tipo=models.Value('Admin', output_field=models.CharField()))
-            alunos = Aluno.objects.all().values('n_mecanografico', 'nome', 'email').annotate(
-                id=models.F('n_mecanografico'),
-                username=models.F('nome'),
-                date_joined=models.Value(None, output_field=models.DateTimeField()),
-                is_active=models.Value(True, output_field=models.BooleanField()),
-                is_staff=models.Value(False, output_field=models.BooleanField()),
-                tipo=models.Value('Aluno', output_field=models.CharField())
-            )
-            docentes = Docente.objects.all().values('id_docente', 'nome', 'email').annotate(
-                id=models.F('id_docente'),
-                username=models.F('nome'),
-                date_joined=models.Value(None, output_field=models.DateTimeField()),
-                is_active=models.Value(True, output_field=models.BooleanField()),
-                is_staff=models.Value(False, output_field=models.BooleanField()),
-                tipo=models.Value('Docente', output_field=models.CharField())
-            )
-            users = list(django_users) + list(alunos) + list(docentes)
-            users_sorted = sorted(users, key=lambda x: x.get('id', 0))
+            users_sorted = PostgreSQLConsultas.usuarios_combinado()
+            cursos = PostgreSQLConsultas.cursos_list()
+            anos = PostgreSQLConsultas.anos_curriculares()
+            return render(request, "admin/users_form.html", {"users": users_sorted, "cursos": cursos, "anos": anos})
 
-            #volta a mostrar o formulario
-            return render(request, "admin/users_form.html", {"users": users_sorted})
+        try:
+            if user_tipo == "aluno":
+                n_mecanografico = request.POST.get("n_mecanografico")
+                id_curso = request.POST.get("id_curso")
+                id_anocurricular = request.POST.get("id_anocurricular")
+                
+                if not n_mecanografico or not id_curso or not id_anocurricular:
+                    messages.error(request, "Nº Mecanografico, Curso e Ano Curricular são obrigatórios para alunos.")
+                    return redirect("home:admin_users_create")
+                
+                PostgreSQLProcedures.criar_aluno(int(n_mecanografico), int(id_curso), int(id_anocurricular), username, email, password)
+                registar_log(request, operacao="CREATE", entidade="aluno", chave=str(n_mecanografico), detalhes=f"Novo aluno criado: {username} ({email})")
+                messages.success(request, f"Aluno {username} criado com sucesso!")
+                
+            elif user_tipo == "docente":
+                PostgreSQLProcedures.criar_docente(username, email, "professor")
+                registar_log(request, operacao="CREATE", entidade="docente", chave=username, detalhes=f"Novo docente criado: {username} ({email})")
+                messages.success(request, f"Docente {username} criado com sucesso!")
+                
+            else:  # admin - usar SQL direto
+                try:
+                    with connection.cursor() as cursor:
+                        cursor.execute(
+                            "INSERT INTO auth_user (username, email, password, is_active, is_staff) VALUES (%s, %s, %s, true, true)",
+                            [username, PostgreSQLAuth.validar_password("", password) or password, email]
+                        )
+                    registar_log(request, operacao="CREATE", entidade="user_admin", chave=username, detalhes=f"Novo admin criado: {username} ({email})")
+                    messages.success(request, "Admin criado com sucesso!")
+                except Exception as e:
+                    messages.error(request, f"Erro ao criar admin: {str(e)}")
+                    return redirect("home:admin_users_create")
+            
+            return redirect("home:admin_users_list")
+            
+        except Exception as e:
+            messages.error(request, f"Erro ao criar utilizador: {str(e)}")
+            return redirect("home:admin_users_create")
 
-        #cria um user djang com pass encriptada
-        User.objects.create_user(username=username, email=email, password=password)
-        
-        #vai buscar o user acabado de criar
-        novo_user = User.objects.get(username=username)
-        
-        #faz o registo nos logs
-        registar_log(request, operacao="CREATE", entidade="user_admin", chave=str(novo_user.id), detalhes=f"Novo utilizador criado: {username} ({email})")
-        registar_auditoria_user("CREATE", novo_user.id, "Admin", {"username": username, "email": email}, request)
-        messages.success(request, "Utilizador criado com sucesso!")
-        return redirect("home:admin_users_list")
-
-    #se nao houve pedido por POST, entao os dados apenas saoa preparados para o forms
-    django_users = User.objects.all().values('id', 'username', 'email', 'date_joined', 'is_active', 'is_staff').annotate(tipo=models.Value('Admin', output_field=models.CharField()))
-    alunos = Aluno.objects.all().values('n_mecanografico', 'nome', 'email').annotate(
-        id=models.F('n_mecanografico'),
-        username=models.F('nome'),
-        date_joined=models.Value(None, output_field=models.DateTimeField()),
-        is_active=models.Value(True, output_field=models.BooleanField()),
-        is_staff=models.Value(False, output_field=models.BooleanField()),
-        tipo=models.Value('Aluno', output_field=models.CharField())
-    )
-    docentes = Docente.objects.all().values('id_docente', 'nome', 'email').annotate(
-        id=models.F('id_docente'),
-        username=models.F('nome'),
-        date_joined=models.Value(None, output_field=models.DateTimeField()),
-        is_active=models.Value(True, output_field=models.BooleanField()),
-        is_staff=models.Value(False, output_field=models.BooleanField()),
-        tipo=models.Value('Docente', output_field=models.CharField())
-    )
-    users = list(django_users) + list(alunos) + list(docentes)
-    users_sorted = sorted(users, key=lambda x: x.get('id', 0))
-    return render(request, "admin/users_form.html", {"users": users_sorted})
+    users_sorted = PostgreSQLConsultas.usuarios_combinado()
+    cursos = PostgreSQLConsultas.cursos_list()
+    anos = PostgreSQLConsultas.anos_curriculares()
+    
+    return render(request, "admin/users_form.html", {"users": users_sorted, "cursos": cursos, "anos": anos})
 
 #view para editar os dados de um user
 def admin_users_edit(request, id):
-    user = None
-    user_type = None
+    # SQL: Encontra o user em admin, aluno ou docente
+    user, user_type = PostgreSQLConsultas.get_user_by_id(id)
     
-    #tenta encontrar o user como Admin
-    try:
-        user = User.objects.get(id=id)
-        user_type = "Admin"
-    except User.DoesNotExist:
-        pass
-    
-    #senao encontrar, vai tentar como ALuno
-    if not user:
-        try:
-            user = Aluno.objects.get(n_mecanografico=id)
-            user_type = "Aluno"
-        except Aluno.DoesNotExist:
-            pass
-    
-    #senao encontrar nem aluno nem admin, tenta como docente
-    if not user:
-        try:
-            user = Docente.objects.get(id_docente=id)
-            user_type = "Docente"
-        except Docente.DoesNotExist:
-            pass
-    
-    #senao encontrar nenhum, volta apenas apra a ista de users
-    if not user:
+    if not user or not user_type:
         return redirect("home:admin_users_list")
 
-    #pedido post para editar os dados
+    # POST: Atualiza o user
     if request.method == "POST":
         username = request.POST.get("username")
         email = request.POST.get("email")
         
-        #guarda os dados antigos para colocar nos logs
-        old_data = {'username': user.username if user_type == "Admin" else user.nome, 'email': user.email}
+        # Guarda dados antigos para logs
+        old_username = user.get('username') if user_type == "Admin" else user.get('nome')
+        old_data = {'username': old_username, 'email': user.get('email')}
         
-        #atualiza os campos conforme o user
-        if user_type == "Admin":
-            user.username = username
-            user.email = email
-            user.save()
-        elif user_type == "Aluno":
-            user.nome = username
-            user.email = email
-            user.save()
-        elif user_type == "Docente":
-            user.nome = username
-            user.email = email
-            user.save()
+        # SQL: Atualiza o user
+        success = PostgreSQLConsultas.update_user(id, user_type, username, email)
         
-        #regista nos logs a alteraçao feita
-        registar_log(request, operacao="UPDATE", entidade=f"user_{user_type.lower()}", chave=str(id), detalhes=f"Campos alterados: username={username}, email={email}")
-        registar_auditoria_user("UPDATE", id, user_type,{"username": username, "email": email, "alterado_de": old_data}, request)
-        messages.success(request, "Utilizador atualizado com sucesso!")
+        if success:
+            # Registra log e auditoria
+            registar_log(request, operacao="UPDATE", entidade=f"user_{user_type.lower()}", chave=str(id), detalhes=f"Campos alterados: username={username}, email={email}")
+            registar_auditoria_user("UPDATE", id, user_type, {"username": username, "email": email, "alterado_de": old_data}, request)
+            messages.success(request, "Utilizador atualizado com sucesso!")
+        else:
+            messages.error(request, "Erro ao atualizar utilizador.")
+        
         return redirect("home:admin_users_list")
 
-    #para o get, prepara os dados do user para preencher o forms
+    # GET: Prepara dados do user para o form
     user_data = {
-        'id': user.id if user_type == "Admin" else (user.n_mecanografico if user_type == "Aluno" else user.id_docente),
-        'username': user.username if user_type == "Admin" else user.nome,
-        'email': user.email,
+        'id': user.get('id') if user_type == "Admin" else (user.get('n_mecanografico') if user_type == "Aluno" else user.get('id_docente')),
+        'username': user.get('username') if user_type == "Admin" else user.get('nome'),
+        'email': user.get('email'),
         'tipo': user_type
     }
     
-    #recria a lista de users totais
-    django_users = User.objects.all().values('id', 'username', 'email', 'date_joined', 'is_active', 'is_staff').annotate(tipo=models.Value('Admin', output_field=models.CharField()))
-    alunos = Aluno.objects.all().values('n_mecanografico', 'nome', 'email').annotate(
-        id=models.F('n_mecanografico'),
-        username=models.F('nome'),
-        date_joined=models.Value(None, output_field=models.DateTimeField()),
-        is_active=models.Value(True, output_field=models.BooleanField()),
-        is_staff=models.Value(False, output_field=models.BooleanField()),
-        tipo=models.Value('Aluno', output_field=models.CharField())
-    )
-    docentes = Docente.objects.all().values('id_docente', 'nome', 'email').annotate(
-        id=models.F('id_docente'),
-        username=models.F('nome'),
-        date_joined=models.Value(None, output_field=models.DateTimeField()),
-        is_active=models.Value(True, output_field=models.BooleanField()),
-        is_staff=models.Value(False, output_field=models.BooleanField()),
-        tipo=models.Value('Docente', output_field=models.CharField())
-    )
-    users = list(django_users) + list(alunos) + list(docentes)
-    users_sorted = sorted(users, key=lambda x: x.get('id', 0))
+    # SQL: Lista combinada de users (admin + aluno + docente)
+    users = PostgreSQLConsultas.usuarios_combinado()
+    users_sorted = sorted(users, key=lambda x: x.get('id', 0) if isinstance(x.get('id'), int) else int(x.get('id', 0)) if x.get('id') else 0)
     
     return render(request, "admin/users_form.html", {"user": user_data, "users": users_sorted})
 
 #view para apagar um user
 def admin_users_delete(request, id):
-    user = None
-    user_type = None
-    username = None
+    # SQL: Encontra o user em admin, aluno ou docente
+    user, user_type = PostgreSQLConsultas.get_user_by_id(id)
     
-    #tenta encontrar o user como Admin
-    try:
-        user = User.objects.get(id=id)
-        user_type = "Admin"
-        username = user.username
-    except User.DoesNotExist:
-        pass
-    
-    #senao encontrar, tenta commo Aluno
-    if not user:
-        try:
-            user = Aluno.objects.get(n_mecanografico=id)
-            user_type = "Aluno"
-            username = user.nome
-            
-            #remove as matriculas do aluno
-            matriculas = Matricula.objects.filter(n_mecanografico=user)
-            total_matriculas = matriculas.count()
-            matriculas.delete()
-            
-            #remove as inscriçoes do aluno no turno
-            inscricoes_turno = InscricaoTurno.objects.filter(n_mecanografico=user)
-            total_inscricoes = inscricoes_turno.count()
-            inscricoes_turno.delete()
-            
-            #remove as inscriçoes nas ucs em que o aluno esta inscrito
-            inscricoes_uc = InscritoUc.objects.filter(n_mecanografico=user)
-            total_ucs = inscricoes_uc.count()
-            inscricoes_uc.delete()
-            
-            messages.info(request, f"Removidas {total_matriculas} matrículas, {total_inscricoes} inscrições em turnos e {total_ucs} inscrições em UCs.")
-            
-        except Aluno.DoesNotExist:
-            pass
-    
-    #senao for Admin nem Aluno, tenta como Docente
-    if not user:
-        try:
-            user = Docente.objects.get(id_docente=id)
-            user_type = "Docente"
-            username = user.nome
-            
-            #remove a UC do docente
-            leciona = LecionaUc.objects.filter(id_docente=user)
-            total_ucs = leciona.count()
-            leciona.delete()
-            
-            messages.info(request, f"Removidas {total_ucs} associações com UCs.")
-            
-        except Docente.DoesNotExist:
-            pass
-    
-    #caso nao seja nenhum dos anteriores, apresenta erro
-    if not user:
+    if not user or not user_type:
         messages.error(request, "Utilizador não encontrado.")
         return redirect("home:admin_users_list")
+
+    # Pega o username para o log
+    username = user.get('username') if user_type == "Admin" else user.get('nome')
+    email = user.get('email')
     
+    # SQL: Deleta o user e suas referências
+    if user_type == "Aluno":
+        cascade_result = PostgreSQLConsultas.delete_aluno_cascade(id)
+        messages.info(request, f"Removidas {cascade_result['matriculas']} matrículas, {cascade_result['inscricoes_turno']} inscrições em turnos e {cascade_result['inscrito_uc']} inscrições em UCs.")
+    elif user_type == "Docente":
+        cascade_result = PostgreSQLConsultas.delete_docente_cascade(id)
+        messages.info(request, f"Removidas {cascade_result['leciona_uc']} associações com UCs.")
+    elif user_type == "Admin":
+        PostgreSQLConsultas.delete_admin_user(id)
+
+    # Registra log e auditoria
     registar_log(request, operacao="DELETE", entidade=f"user_{user_type.lower()}", chave=str(id), detalhes=f"Utilizador apagado: {username} (Tipo: {user_type})")
-    registar_auditoria_user("DELETE", id, user_type, {"username": username, "email": user.email, "tipo": user_type}, request)
-    user.delete()
+    registar_auditoria_user("DELETE", id, user_type, {"username": username, "email": email, "tipo": user_type}, request)
+
     messages.success(request, f"{user_type} '{username}' apagado com sucesso!")
     return redirect("home:admin_users_list")
 
 #view para listar todos os turnos no admin
 def admin_turnos_list(request):
-    # Filtra apenas os turnos que não estão associados a nenhuma UC
-    # (Ou seja, exclui os turnos criados automaticamente pelo Criar/Editar UC)
-    turnos = Turno.objects.filter(turnouc__isnull=True).order_by("id_turno")
+    # SQL: Lista turnos sem UC
+    turnos = PostgreSQLConsultas.turnos_sem_uc()
     return render(request, "admin/turnos_list.html", {"turnos": turnos})
 
 #view para criar um novo turno
@@ -893,46 +702,73 @@ def admin_turnos_create(request):
         capacidade = request.POST.get("capacidade")
         tipo = request.POST.get("tipo")
 
-        #cria o turno na base de dados
-        turno = Turnos.objects.create(n_turno=n_turno, capacidade=capacidade, tipo=tipo,)
-
-        registar_log(request, operacao="CREATE", entidade="turno", chave=str(turno.id_turno), detalhes=f"Turno criado: {turno.tipo} (nº {turno.n_turno})")
-        messages.success(request, "Turno criado com sucesso!")
+        # SQL: Cria o turno
+        turno_id = PostgreSQLConsultas.create_turno(n_turno, int(capacidade), tipo)
+        
+        if turno_id:
+            registar_log(request, operacao="CREATE", entidade="turno", chave=str(turno_id), detalhes=f"Turno criado: {tipo} (nº {n_turno})")
+            messages.success(request, "Turno criado com sucesso!")
+        else:
+            messages.error(request, "Erro ao criar turno.")
+        
         return redirect("home:admin_turnos_list")
 
     return render(request, "admin/turnos_form.html")
 
-#view paraa editar turno
+#view para editar turno
 def admin_turnos_edit(request, id):
-    turno = get_object_or_404(Turnos, id_turno=id)
-
-    #se for post atualiza os campos dos turnos
-    if request.method == "POST":
-        turno.n_turno = request.POST.get("n_turno")
-        turno.capacidade = request.POST.get("capacidade")
-        turno.tipo = request.POST.get("tipo")
-        turno.save()
-
-        registar_log(request, operacao="UPDATE", entidade="turno", chave=str(turno.id_turno), detalhes=f"Turno atualizado: {turno.tipo} (nº {turno.n_turno})")
-
-        messages.success(request, "Turno atualizado!")
+    # SQL: Obtém o turno
+    turno = PostgreSQLConsultas.get_turno_by_id(id)
+    
+    if not turno:
+        messages.error(request, "Turno não encontrado.")
         return redirect("home:admin_turnos_list")
 
-    #se for get, apenas mostra o form preenchido
+    # POST: Atualiza o turno
+    if request.method == "POST":
+        n_turno = request.POST.get("n_turno")
+        capacidade = request.POST.get("capacidade")
+        tipo = request.POST.get("tipo")
+        
+        # SQL: Atualiza o turno
+        success = PostgreSQLConsultas.update_turno(id, n_turno, int(capacidade), tipo)
+        
+        if success:
+            registar_log(request, operacao="UPDATE", entidade="turno", chave=str(id), detalhes=f"Turno atualizado: {tipo} (nº {n_turno})")
+            messages.success(request, "Turno atualizado!")
+        else:
+            messages.error(request, "Erro ao atualizar turno.")
+        
+        return redirect("home:admin_turnos_list")
+
+    # GET: Mostra o form preenchido
     return render(request, "admin/turnos_form.html", {"turno": turno})
 
 #view para eliminar turno
 def admin_turnos_delete(request, id):
-    turno = get_object_or_404(Turnos, id_turno=id)
-    turno.delete()
-    registar_log(request, operacao="DELETE", entidade="turno", chave=str(turno.id_turno), detalhes=f"Turno apagado: {turno.tipo} (nº {turno.n_turno})")
-    messages.success(request, "Turno apagado!")
+    # SQL: Obtém o turno antes de deletar
+    turno = PostgreSQLConsultas.get_turno_by_id(id)
+    
+    if not turno:
+        messages.error(request, "Turno não encontrado.")
+        return redirect("home:admin_turnos_list")
+    
+    # SQL: Deleta o turno
+    success = PostgreSQLConsultas.delete_turno(id)
+    
+    if success:
+        registar_log(request, operacao="DELETE", entidade="turno", chave=str(id), detalhes=f"Turno apagado: {turno['tipo']} (nº {turno['n_turno']})")
+        messages.success(request, "Turno apagado!")
+    else:
+        messages.error(request, "Erro ao apagar turno.")
+    
     return redirect("home:admin_turnos_list")
 
 #view para upload pdf com o horario
 def admin_horarios_create(request):
-    cursos = Curso.objects.all().order_by('nome')
-    anos_curriculares = AnoCurricular.objects.all().order_by('id_anocurricular')
+    # SQL: Lista cursos e anos curriculares
+    cursos = PostgreSQLConsultas.cursos_list()
+    anos_curriculares = PostgreSQLConsultas.anos_curriculares()
     
     if request.method == "POST":
         nome = request.POST.get("nome")
@@ -967,21 +803,24 @@ def admin_horarios_create(request):
             file_id_mongodb = resultado_upload["file_id"]
             
             # ==========================================
-            # GUARDAR REFERÊNCIA NA BD (Django/PostgreSQL)
+            # GUARDAR REFERÊNCIA NA BD (SQL)
             # ==========================================
             # Em vez de guardar o ficheiro no filesystem,
             # guardamos apenas o ID do GridFS como referência
-            HorarioPDF.objects.create(
+            pdf_id = PostgreSQLConsultas.create_horario_pdf(
                 nome=nome,
-                ficheiro=f"mongodb_gridfs:{file_id_mongodb}",  # Formato especial para indicar que está no MongoDB
-                id_anocurricular_id=ano_id,
-                id_curso_id=curso_id,
+                ficheiro=f"mongodb_gridfs:{file_id_mongodb}",
+                id_anocurricular=int(ano_id),
+                id_curso=int(curso_id)
             )
             
-            # Regista a operação no log
-            registar_log(request, operacao="CREATE", entidade="horario_pdf", chave=file_id_mongodb, detalhes=f"Horário PDF criado no MongoDB: {nome}")
+            if pdf_id:
+                # Regista a operação no log
+                registar_log(request, operacao="CREATE", entidade="horario_pdf", chave=file_id_mongodb, detalhes=f"Horário PDF criado no MongoDB: {nome}")
+                messages.success(request, "Horário carregado com sucesso no MongoDB!")
+            else:
+                messages.error(request, "Erro ao guardar referência do horário.")
             
-            messages.success(request, "Horário carregado com sucesso no MongoDB!")
             return redirect("home:admin_horarios_list")
         
         except Exception as e:
@@ -993,59 +832,90 @@ def admin_horarios_create(request):
 
 #view para editar o pdf com o horario
 def admin_horarios_edit(request, id):
-    horario = get_object_or_404(HorarioPDF, id=id)
-    cursos = Curso.objects.all().order_by('nome')
-    anos_curriculares = AnoCurricular.objects.all().order_by('id_anocurricular')
+    # SQL: Obtém o horário PDF
+    horario = PostgreSQLConsultas.get_horario_pdf_by_id(id)
+    
+    if not horario:
+        messages.error(request, "Horário não encontrado.")
+        return redirect("home:admin_horarios_list")
+    
+    # SQL: Lista cursos e anos curriculares
+    cursos = PostgreSQLConsultas.cursos_list()
+    anos_curriculares = PostgreSQLConsultas.anos_curriculares()
 
     if request.method == "POST":
-        horario.nome = request.POST.get("nome")
+        nome = request.POST.get("nome")
         curso_id = request.POST.get("id_curso")
         ano_id = request.POST.get("id_anocurricular")
         
-        if ano_id:
-            horario.id_anocurricular_id = ano_id
-
-        if curso_id:
-            horario.id_curso_id = curso_id
-
-        #se foi efetuado o upload de um pdf, este substitui o pdf atual
+        # Se foi efetuado o upload de um PDF, este substitui o PDF atual
+        ficheiro_ref = horario['ficheiro']  # Keep existing if no new upload
         if "ficheiro" in request.FILES:
-            horario.ficheiro = request.FILES["ficheiro"]
-
-        horario.save()
-        messages.success(request, "Horário atualizado!")
+            ficheiro = request.FILES["ficheiro"]
+            try:
+                resultado_upload = upload_pdf_horario(
+                    ficheiro_file=ficheiro,
+                    nome=nome,
+                    id_curso=int(curso_id),
+                    id_anocurricular=int(ano_id)
+                )
+                file_id_mongodb = resultado_upload["file_id"]
+                ficheiro_ref = f"mongodb_gridfs:{file_id_mongodb}"
+            except Exception as e:
+                messages.error(request, f"Erro ao carregar novo horário: {str(e)}")
+                return redirect("home:admin_horarios_edit", id=id)
+        
+        # SQL: Atualiza o horário PDF
+        success = PostgreSQLConsultas.update_horario_pdf(
+            id, nome, ficheiro_ref, int(ano_id), int(curso_id)
+        )
+        
+        if success:
+            messages.success(request, "Horário atualizado!")
+        else:
+            messages.error(request, "Erro ao atualizar horário.")
+        
         return redirect("home:admin_horarios_list")
 
     return render(request, "admin/horarios_form.html", {"horario": horario, 'cursos': cursos, 'anos_curriculares': anos_curriculares})
 
 #view para eliminar o pdf do horario
 def admin_horarios_delete(request, id):
-    horario = get_object_or_404(HorarioPDF, id=id)
-    horario.delete()
-    messages.success(request, "Horário apagado!")
+    # SQL: Deleta o horário PDF
+    success = PostgreSQLConsultas.delete_horario_pdf(id)
+    
+    if success:
+        messages.success(request, "Horário apagado!")
+    else:
+        messages.error(request, "Erro ao apagar horário.")
+    
     return redirect("home:admin_horarios_list")
 
 #view para listar os horarios
 def admin_horarios_list(request):
-    horarios = HorarioPDF.objects.all().order_by("-atualizado_em")
+    # SQL: Lista todos os horários
+    horarios = PostgreSQLConsultas.list_horario_pdfs()
     return render(request, "admin/horarios_list.html", {"horarios": horarios})
 
 #view para mostrar na web o mais recente
 def horarios_admin(request):
-    pdf = HorarioPDF.objects.order_by("-atualizado_em").first()
+    # SQL: Obtém o horário mais recente
+    pdf = PostgreSQLConsultas.get_latest_horario_pdf()
     return render(request, "home/horarios.html", {"pdf": pdf})
 
 #view para listar os pdf das avaliacoes
 @admin_required
 def admin_avaliacoes_list(request):
-    avaliacoes = AvaliacaoPDF.objects.all().order_by("-atualizado_em")
+    # SQL: Lista todos os PDFs de avaliação
+    avaliacoes = PostgreSQLConsultas.list_avaliacao_pdfs()
     return render(request, "admin/avaliacoes_list.html", {"avaliacoes": avaliacoes})
 
 #view para upload pdf para avaliacoes
 @admin_required
 def admin_avaliacoes_create(request):
-    cursos = Curso.objects.all().order_by('nome')
-    anos_curriculares = AnoCurricular.objects.all().order_by('id_anocurricular')
+    # SQL: Lista cursos e anos curriculares
+    cursos = PostgreSQLConsultas.cursos_list()
+    anos_curriculares = PostgreSQLConsultas.anos_curriculares()
 
     if request.method == "POST":
         nome = request.POST.get("nome")
@@ -1080,18 +950,22 @@ def admin_avaliacoes_create(request):
             file_id_mongodb = resultado_upload["file_id"]
             
             # ==========================================
-            # GUARDAR REFERÊNCIA NA BD (Django/PostgreSQL)
+            # GUARDAR REFERÊNCIA NA BD (SQL)
             # ==========================================
             # Guardamos apenas o ID do GridFS como referência
-            AvaliacaoPDF.objects.create(
+            pdf_id = PostgreSQLConsultas.create_avaliacao_pdf(
                 nome=nome,
-                ficheiro=f"mongodb_gridfs:{file_id_mongodb}",  # Indica que está no MongoDB
-                id_anocurricular_id=ano_id,
-                id_curso_id=curso_id,
+                ficheiro=f"mongodb_gridfs:{file_id_mongodb}",
+                id_anocurricular=int(ano_id),
+                id_curso=int(curso_id)
             )
 
-            registar_log(request, operacao="CREATE", entidade="avaliacao_pdf", chave=file_id_mongodb, detalhes=f"Avaliação PDF criada no MongoDB: {nome}")
-            messages.success(request, "Calendário de avaliações carregado com sucesso no MongoDB!")
+            if pdf_id:
+                registar_log(request, operacao="CREATE", entidade="avaliacao_pdf", chave=file_id_mongodb, detalhes=f"Avaliação PDF criada no MongoDB: {nome}")
+                messages.success(request, "Calendário de avaliações carregado com sucesso no MongoDB!")
+            else:
+                messages.error(request, "Erro ao guardar referência da avaliação.")
+            
             return redirect("home:admin_avaliacoes_list")
         
         except Exception as e:
@@ -1103,29 +977,50 @@ def admin_avaliacoes_create(request):
 #view editar um pdf de avaliacoes
 @admin_required
 def admin_avaliacoes_edit(request, id):
-    avaliacao = get_object_or_404(AvaliacaoPDF, id=id)
-    cursos = Curso.objects.all().order_by('nome')
-    anos_curriculares = AnoCurricular.objects.all().order_by('id_anocurricular')
+    # SQL: Obtém o PDF de avaliação
+    avaliacao = PostgreSQLConsultas.get_avaliacao_pdf_by_id(id)
+    
+    if not avaliacao:
+        messages.error(request, "Avaliação não encontrada.")
+        return redirect("home:admin_avaliacoes_list")
+    
+    # SQL: Lista cursos e anos curriculares
+    cursos = PostgreSQLConsultas.cursos_list()
+    anos_curriculares = PostgreSQLConsultas.anos_curriculares()
 
     if request.method == "POST":
-        avaliacao.nome = request.POST.get("nome")
+        nome = request.POST.get("nome")
         ano_id = request.POST.get("id_anocurricular")
         curso_id = request.POST.get("id_curso")
         
-        #atualiza o ano curricular se tiver selecionado
-        if ano_id:
-            avaliacao.id_anocurricular_id = ano_id
-
-        if curso_id:
-            avaliacao.id_curso_id = curso_id
-
-        #substitui o pdf atual pelo novo
+        # Se foi efetuado o upload de um PDF, este substitui o PDF atual
+        ficheiro_ref = avaliacao['ficheiro']  # Keep existing if no new upload
         if "ficheiro" in request.FILES:
-            avaliacao.ficheiro = request.FILES["ficheiro"]
-
-        avaliacao.save()
-        registar_log(request, operacao="UPDATE", entidade="avaliacao_pdf", chave=str(id), detalhes=f"Avaliação PDF atualizada: {avaliacao.nome}")
-        messages.success(request, "Calendário de avaliações atualizado!")
+            ficheiro = request.FILES["ficheiro"]
+            try:
+                resultado_upload = upload_pdf_avaliacao(
+                    ficheiro_file=ficheiro,
+                    nome=nome,
+                    id_curso=int(curso_id),
+                    id_anocurricular=int(ano_id)
+                )
+                file_id_mongodb = resultado_upload["file_id"]
+                ficheiro_ref = f"mongodb_gridfs:{file_id_mongodb}"
+            except Exception as e:
+                messages.error(request, f"Erro ao carregar nova avaliação: {str(e)}")
+                return redirect("home:admin_avaliacoes_edit", id=id)
+        
+        # SQL: Atualiza o PDF de avaliação
+        success = PostgreSQLConsultas.update_avaliacao_pdf(
+            id, nome, ficheiro_ref, int(ano_id), int(curso_id)
+        )
+        
+        if success:
+            registar_log(request, operacao="UPDATE", entidade="avaliacao_pdf", chave=str(id), detalhes=f"Avaliação PDF atualizada: {nome}")
+            messages.success(request, "Calendário de avaliações atualizado!")
+        else:
+            messages.error(request, "Erro ao atualizar avaliação.")
+        
         return redirect("home:admin_avaliacoes_list")
 
     return render(request, "admin/avaliacoes_form.html", {"avaliacao": avaliacao, 'cursos': cursos, 'anos_curriculares': anos_curriculares})
@@ -1133,29 +1028,32 @@ def admin_avaliacoes_edit(request, id):
 #view para apagar o pdf das avaliacoes
 @admin_required
 def admin_avaliacoes_delete(request, id):
-    avaliacao = get_object_or_404(AvaliacaoPDF, id=id)
-    nome = avaliacao.nome
+    # SQL: Obtém a avaliação antes de deletar
+    avaliacao = PostgreSQLConsultas.get_avaliacao_pdf_by_id(id)
+    
+    if not avaliacao:
+        messages.error(request, "Avaliação não encontrada.")
+        return redirect("home:admin_avaliacoes_list")
+    
+    nome = avaliacao['nome']
+    ficheiro_ref = avaliacao['ficheiro']
     
     try:
-        # ==========================================
-        # EXTRAIR ID DO MongoDB (GridFS)
-        # ==========================================
         # Verifica se o ficheiro está no MongoDB
-        # O formato é "mongodb_gridfs:ID_DO_FICHEIRO"
-        if avaliacao.ficheiro and avaliacao.ficheiro.name.startswith("mongodb_gridfs:"):
+        if ficheiro_ref and ficheiro_ref.startswith("mongodb_gridfs:"):
             # Extrai o ID do ficheiro
-            file_id_mongodb = avaliacao.ficheiro.name.replace("mongodb_gridfs:", "")
-            
-            # ==========================================
-            # DELETAR DO MongoDB (GridFS)
-            # ==========================================
-            # Remove o ficheiro do MongoDB
+            file_id_mongodb = ficheiro_ref.replace("mongodb_gridfs:", "")
+            # Remove do MongoDB
             eliminar_pdf(file_id_mongodb, tipo_pdf="avaliacao")
         
-        # Remove o registo da BD
-        avaliacao.delete()
-        registar_log(request, operacao="DELETE", entidade="avaliacao_pdf", chave=str(id), detalhes=f"Avaliação PDF apagada do MongoDB: {nome}")
-        messages.success(request, "Calendário de avaliações apagado!")
+        # SQL: Remove o registo da BD
+        success = PostgreSQLConsultas.delete_avaliacao_pdf(id)
+        
+        if success:
+            registar_log(request, operacao="DELETE", entidade="avaliacao_pdf", chave=str(id), detalhes=f"Avaliação PDF apagada: {nome}")
+            messages.success(request, "Calendário de avaliações apagado!")
+        else:
+            messages.error(request, "Erro ao apagar avaliação.")
         
     except Exception as e:
         messages.error(request, f"Erro ao apagar avaliação: {str(e)}")
@@ -1164,12 +1062,14 @@ def admin_avaliacoes_delete(request, id):
 
 #view para listar os docentes no admin
 def admin_users_docentes(request):
-    docentes = Docente.objects.all().order_by("id_docente")
+    # SQL: Lista todos os docentes
+    docentes = PostgreSQLConsultas.docentes()
     return render(request, "admin/users_filter.html", {"titulo": "Docentes", "users": docentes})
 
 #view para listar os alunos no admin
 def admin_users_alunos(request):
-    alunos = Aluno.objects.all().order_by("n_mecanografico")
+    # SQL: Lista todos os alunos em ordem alfabética
+    alunos = PostgreSQLConsultas.alunos_por_ordem_alfabetica()
     return render(request, "admin/users_filter.html", {"titulo": "Alunos", "users": alunos})
 
 def testar_mongo(request):
@@ -1208,7 +1108,7 @@ def sobre_di(request):
 
 #view contactos DI
 def contacto_di(request):
-    docentes = Docente.objects.all().order_by('nome')
+    docentes = PostgreSQLConsultas.docentes()
     return render(request, "di/contactos.html", { "area": "di", "docentes": docentes })
 
 #view pagina inicial EI
@@ -1225,13 +1125,12 @@ def ingresso_tdm(request):
 
 #view plano curricular TDM
 def plano_tdm(request):
-    unidades = UnidadeCurricular.objects.filter(id_curso_id=2).select_related('id_anocurricular', 'id_semestre').order_by('id_anocurricular__id_anocurricular', 'id_semestre__id_semestre')
+    unidades = PostgreSQLConsultas.ucs_por_curso(2)
 
-    #constroi um dicionario para o plano
     plano = {}
     for uc in unidades:
-        ano = uc.id_anocurricular.ano_curricular
-        semestre = uc.id_semestre.semestre
+        ano = uc.get('id_anocurricular')
+        semestre = uc.get('semestre')
         if ano not in plano:
             plano[ano] = {}
         if semestre not in plano[ano]:
@@ -1242,20 +1141,16 @@ def plano_tdm(request):
 
 #view para mostrar os horarios TDM
 def horarios_tdm(request):
-    #se o utilizador for aluno, regista a consulta na coleçao do MongoDB
     if "user_tipo" in request.session and request.session["user_tipo"] == "aluno":
         registar_consulta_aluno(request.session.get("user_id"), request.session.get("user_nome", "desconhecido"), "horarios", {"curso": "TDM"})
     
-    horarios_por_ano = _listar_pdfs_por_ano(HorarioPDF, course_id=2)
+    horarios_por_ano = _listar_pdfs_por_ano('horario_pdf', course_id=2)
     
-    # Verificar se o aluno pertence ao curso de TDM (id_curso = 2)
     pode_inscrever = False
     if "user_tipo" in request.session and request.session["user_tipo"] == "aluno":
-        try:
-            aluno = Aluno.objects.get(n_mecanografico=request.session["user_id"])
-            pode_inscrever = (aluno.id_curso_id == 2)  # Apenas alunos de TDM
-        except Aluno.DoesNotExist:
-            pass
+        aluno_row = PostgreSQLTurnos.get_aluno(request.session["user_id"])
+        if aluno_row and aluno_row.get("id_curso") == 2:
+            pode_inscrever = True
 
     return render(request, "tdm/horarios_tdm.html", {
         "horarios_por_ano": horarios_por_ano, 
@@ -1265,7 +1160,7 @@ def horarios_tdm(request):
 
 #view contactos TDM
 def contactos_tdm(request):
-    docentes = Docente.objects.all().order_by('nome')
+    docentes = PostgreSQLConsultas.docentes()
     return render(request, "tdm/contactos_tdm.html", { "area": "tdm", "docentes": docentes })
 
 #view saidas profissionais TDM
@@ -1274,7 +1169,7 @@ def saidas_tdm(request):
 
 #view avaliacoes TDM
 def avaliacoes_tdm(request):
-    avaliacoes_por_ano = _listar_pdfs_por_ano(AvaliacaoPDF, course_id=2)
+    avaliacoes_por_ano = _listar_pdfs_por_ano('avaliacao_pdf', course_id=2)
     return render(request, "tdm/avaliacoes_tdm.html", {"avaliacoes_por_ano": avaliacoes_por_ano, "area": "tdm"})
 
 #view moodle TDM
@@ -1288,74 +1183,77 @@ def inscricao_turno_tdm(request):
         messages.error(request, "É necessário iniciar sessão como aluno.")
         return redirect("home:login")
 
-    #obtem nMecanografico do aluno
     n_meca = request.session["user_id"]
-    aluno = Aluno.objects.get(n_mecanografico=n_meca)
-    
-    #verifica se o aluno pertence a TDM
-    if aluno.id_curso_id != 2:
+    aluno_row = PostgreSQLTurnos.get_aluno(n_meca)
+    if not aluno_row:
+        messages.error(request, "Aluno não encontrado.")
+        return redirect("home:login")
+
+    if aluno_row.get("id_curso") != 2:
         messages.error(request, "Esta página é apenas para alunos de Tecnologia e Design Multimédia.")
-        if aluno.id_curso_id == 1:
+        if aluno_row.get("id_curso") == 1:
             return redirect("home:inscricao_turno")
         return redirect("home:index")
-    
-    #verifica se já tem inscrições em algum turno
-    inscricoes_existentes = InscricaoTurno.objects.filter(n_mecanografico=aluno)
+
+    inscricoes_existentes = PostgreSQLTurnos.inscricoes_turno_por_aluno(n_meca)
     turno_escolhido = None
-    
-    #se houver uma inscriçao, obtem numero do turno
-    if inscricoes_existentes.exists():
-        primeira_inscricao = inscricoes_existentes.first()
-        turno_escolhido = primeira_inscricao.id_turno.n_turno if primeira_inscricao.id_turno else None
-    
-    #UCs em que está inscrito
-    inscricoes = InscritoUc.objects.filter(n_mecanografico=aluno, estado=True).select_related('id_unidadecurricular')
-    ucs_inscritas = [i.id_unidadecurricular for i in inscricoes]
-    
-    #struct para os turnos e lista de UCs
+    if inscricoes_existentes:
+        primeiro = inscricoes_existentes[0]
+        turno_escolhido = primeiro.get("turno_numero")
+
+    inscricoes_uc = PostgreSQLTurnos.ucs_inscritas_por_aluno(n_meca)
+
     turnos_info = {
         1: {"nome": "Turno 1", "ucs": []},
         2: {"nome": "Turno 2", "ucs": []}
     }
-    
-    #para cada UC que esta inscrito, procura registos TurnoUC
-    for uc in ucs_inscritas:
-        turnos_uc = TurnoUc.objects.filter(id_unidadecurricular=uc).select_related('id_turno')
-        
-        for turno_rel in turnos_uc:
-            turno = turno_rel.id_turno
-            n_turno = turno.n_turno
-            
-            #calcula quantoas estao inscritos e as vags disponiveis
-            if n_turno in [1, 2]:
-                ocupados = InscricaoTurno.objects.filter(id_turno=turno,id_unidadecurricular=uc).count()
-                vagas = turno.capacidade - ocupados
-                if vagas < 0:
-                    vagas = 0
-                
-                #converte a hora para string e extrai para mapear o dia da semana
-                hora_inicio_str = turno_rel.hora_inicio.strftime("%H:%M")
-                h_int = int(hora_inicio_str.split(":")[0])
-                
-                if 8 <= h_int < 10:
-                    dia_semana = "Segunda"
-                elif 10 <= h_int < 12:
-                    dia_semana = "Terça"
-                elif 12 <= h_int < 14:
-                    dia_semana = "Quarta"
-                elif 14 <= h_int < 16:
-                    dia_semana = "Quinta"
-                else:
-                    dia_semana = "Sexta"
-                
-                #adiciona esta UC à lisra de UCs do turno escolhido
-                turnos_info[n_turno]["ucs"].append({
-                    "nome": uc.nome,
-                    "horario": f"{dia_semana} {turno_rel.hora_inicio.strftime('%H:%M')}-{turno_rel.hora_fim.strftime('%H:%M')}",
-                    "vagas": vagas,
-                    "capacidade": turno.capacidade
-                })
-    
+
+    def _dia_semana(hora_inicio):
+        try:
+            h_int = hora_inicio.hour
+            if 8 <= h_int < 10:
+                return "Segunda"
+            if 10 <= h_int < 12:
+                return "Terça"
+            if 12 <= h_int < 14:
+                return "Quarta"
+            if 14 <= h_int < 16:
+                return "Quinta"
+            return "Sexta"
+        except Exception:
+            return "?"
+
+    for uc_row in inscricoes_uc:
+        if uc_row.get("id_curso") != 2:
+            continue
+        uc_id = uc_row.get("id_unidadecurricular")
+        turnos_uc = PostgreSQLTurnos.turno_uc_por_uc(uc_id)
+
+        for tu in turnos_uc:
+            n_turno = tu.get("n_turno")
+            if n_turno not in [1, 2]:
+                continue
+
+            turno_id = tu.get("id_turno")
+            ocupados = PostgreSQLTurnos.count_inscritos(turno_id, uc_id)
+            capacidade = tu.get("capacidade") or 0
+            vagas = capacidade - ocupados
+            if vagas < 0:
+                vagas = 0
+
+            hora_inicio = tu.get("hora_inicio")
+            hora_fim = tu.get("hora_fim")
+            hora_inicio_str = hora_inicio.strftime("%H:%M") if hora_inicio else "?"
+            hora_fim_str = hora_fim.strftime("%H:%M") if hora_fim else "?"
+            dia_semana = _dia_semana(hora_inicio) if hora_inicio else "?"
+
+            turnos_info[n_turno]["ucs"].append({
+                "nome": uc_row.get("nome"),
+                "horario": f"{dia_semana} {hora_inicio_str}-{hora_fim_str}",
+                "vagas": vagas,
+                "capacidade": capacidade
+            })
+
     return render(request, "tdm/inscricao_turno_tdm.html", {"turnos_info": turnos_info, "turno_escolhido": turno_escolhido, "area": "tdm"})
 
 #view para inscrevr no turno TDM
@@ -1367,64 +1265,75 @@ def inscrever_turno_tdm(request, n_turno):
     
     inicio_tempo = time.time()
     n_meca = request.session["user_id"]
-    aluno = Aluno.objects.get(n_mecanografico=n_meca)
-    
-    if aluno.id_curso_id != 2:
+    aluno_row = PostgreSQLTurnos.get_aluno(n_meca)
+
+    if not aluno_row:
+        messages.error(request, "Aluno não encontrado.")
+        return redirect("home:login")
+
+    if aluno_row.get("id_curso") != 2:
         messages.error(request, "Esta funcionalidade é apenas para alunos de TDM.")
         return redirect("home:index")
-    
-    #se ja existe inscriçao, nao deixa inscrever
+
     try:
-        inscricoes_existentes = InscricaoTurno.objects.filter(n_mecanografico=aluno)
-        if inscricoes_existentes.exists():
+        inscricoes_existentes = PostgreSQLTurnos.inscricoes_turno_por_aluno(n_meca)
+        if inscricoes_existentes:
             messages.warning(request, "Já tens um turno escolhido. Para mudar, contacta a coordenação.")
             return redirect("home:inscricao_turno_tdm")
-        
-        #UCs onde está inscrito
-        inscricoes = InscritoUc.objects.filter(n_mecanografico=aluno, estado=True)
-        
+
+        inscricoes_uc = PostgreSQLTurnos.ucs_inscritas_por_aluno(n_meca)
+
         inscricoes_realizadas = 0
         erros = []
-        
-        for inscricao in inscricoes:
-            uc = inscricao.id_unidadecurricular
-            
+
+        for uc_row in inscricoes_uc:
+            if uc_row.get("id_curso") != 2:
+                continue
+            uc_id = uc_row.get("id_unidadecurricular")
+
             try:
-                turno_uc_rel = TurnoUc.objects.filter(id_unidadecurricular=uc, id_turno__n_turno=n_turno).select_related('id_turno').first()
-                
-                if not turno_uc_rel:
-                    erros.append(f"{uc.nome}: Turno {n_turno} não disponível")
+                turnos_uc = PostgreSQLTurnos.turno_uc_por_uc(uc_id)
+                turno_alvo = None
+                for tu in turnos_uc:
+                    if tu.get("n_turno") == n_turno:
+                        turno_alvo = tu
+                        break
+
+                if not turno_alvo:
+                    erros.append(f"{uc_row.get('nome')}: Turno {n_turno} não disponível")
                     continue
-                
-                turno = turno_uc_rel.id_turno
-                
-                #verifica capacidade do turno
-                ocupados = InscricaoTurno.objects.filter(id_turno=turno, id_unidadecurricular=uc).count()
-                
-                if ocupados >= turno.capacidade:
-                    erros.append(f"{uc.nome}: Turno {n_turno} cheio")
+
+                turno_id = turno_alvo.get("id_turno")
+                capacidade = turno_alvo.get("capacidade") or 0
+                ocupados = PostgreSQLTurnos.count_inscritos(turno_id, uc_id)
+
+                if ocupados >= capacidade:
+                    erros.append(f"{uc_row.get('nome')}: Turno {n_turno} cheio")
                     continue
-                
-                #criacao da inscricao no turno
-                InscricaoTurno.objects.create(n_mecanografico=aluno, id_turno=turno, id_unidadecurricular=uc, data_inscricao=datetime.today().date())
-                
+
+                criado = PostgreSQLTurnos.create_inscricao_turno(n_meca, turno_id, uc_id)
                 tempo_ms = int((time.time() - inicio_tempo) * 1000)
-                registar_auditoria_inscricao(aluno.n_mecanografico, turno.id_turno, uc.id_unidadecurricular, uc.nome, 'sucesso', f'Inscrição TDM - Turno {n_turno}', tempo_ms)
+
+                if not criado:
+                    erros.append(f"{uc_row.get('nome')}: erro ao criar inscrição")
+                    continue
+
+                registar_auditoria_inscricao(n_meca, turno_id, uc_id, uc_row.get("nome", ""), 'sucesso', f'Inscrição TDM - Turno {n_turno}', tempo_ms)
                 inscricoes_realizadas += 1
-                
+
             except Exception as e:
-                erros.append(f"{uc.nome}: {str(e)}")
-        
+                erros.append(f"{uc_row.get('nome')}: {str(e)}")
+
         if inscricoes_realizadas > 0:
             messages.success(request, f"✓ Inscrito no Turno {n_turno} em {inscricoes_realizadas} UC(s)!")
-            adicionar_log("inscricao_turno_tdm_sucesso", {"aluno": aluno.nome, "turno": n_turno, "ucs_inscritas": inscricoes_realizadas}, request)
-        
+            adicionar_log("inscricao_turno_tdm_sucesso", {"aluno": aluno_row.get("nome"), "turno": n_turno, "ucs_inscritas": inscricoes_realizadas}, request)
+
         if erros:
             for erro in erros:
                 messages.warning(request, f"⚠ {erro}")
-        
+
         return redirect("home:inscricao_turno_tdm")
-        
+
     except Exception as e:
         messages.error(request, f"Erro ao processar inscrição: {str(e)}")
         registar_erro("inscrever_turno_tdm", str(e), {"aluno": n_meca, "turno": n_turno})
@@ -1440,12 +1349,12 @@ def ingresso_rsi(request):
 
 #view o plano curricular RSI
 def plano_curric_rsi(request):
-    unidades = UnidadeCurricular.objects.filter(id_curso_id=3).select_related('id_anocurricular', 'id_semestre').order_by('id_anocurricular__id_anocurricular', 'id_semestre__id_semestre')
+    unidades = PostgreSQLConsultas.ucs_por_curso(3)
 
     plano = {}
     for uc in unidades:
-        ano = uc.id_anocurricular.ano_curricular
-        semestre = uc.id_semestre.semestre
+        ano = uc.get('id_anocurricular')
+        semestre = uc.get('semestre')
         if ano not in plano:
             plano[ano] = {}
         if semestre not in plano[ano]:
@@ -1460,12 +1369,12 @@ def estagio_rsi(request):
 
 #view contactos RSI
 def contactos_rsi(request):
-    docentes = Docente.objects.all().order_by('nome')
+    docentes = PostgreSQLConsultas.docentes()
     return render(request, "rsi/contactos_rsi.html", { "area": "rsi", "docentes": docentes })
 
 #view avaliaçoes RSI
 def avaliacoes_rsi(request):
-    avaliacoes_por_ano = _listar_pdfs_por_ano(AvaliacaoPDF, course_id=3)
+    avaliacoes_por_ano = _listar_pdfs_por_ano('avaliacao_pdf', course_id=3)
     return render(request, "rsi/avaliacoes_rsi.html", {"avaliacoes_por_ano": avaliacoes_por_ano, "area": "rsi"})
 
 #view para saidas profissionais RSI
@@ -1474,7 +1383,7 @@ def saidas_rsi(request):
 
 #view horarios RSI
 def horarios_rsi(request):
-    horarios_por_ano = _listar_pdfs_por_ano(HorarioPDF, course_id=3)
+    horarios_por_ano = _listar_pdfs_por_ano('horario_pdf', course_id=3)
     return render(request, "rsi/horarios_rsi.html", {"horarios_por_ano": horarios_por_ano, "area": "rsi"})
 
 #view para pagina inicial DWDM
@@ -1487,12 +1396,12 @@ def ingresso_dwdm(request):
 
 #view para plano curricular DWDM
 def plano_dwdm(request):
-    unidades = UnidadeCurricular.objects.filter(id_curso_id=4).select_related('id_anocurricular', 'id_semestre').order_by('id_anocurricular__id_anocurricular', 'id_semestre__id_semestre')
+    unidades = PostgreSQLConsultas.ucs_por_curso(4)
 
     plano = {}
     for uc in unidades:
-        ano = uc.id_anocurricular.ano_curricular
-        semestre = uc.id_semestre.semestre
+        ano = uc.get('id_anocurricular')
+        semestre = uc.get('semestre')
         if ano not in plano:
             plano[ano] = {}
         if semestre not in plano[ano]:
@@ -1503,7 +1412,7 @@ def plano_dwdm(request):
 
 #view para horarios DWDM
 def horarios_dwdm(request):
-    horarios_por_ano = _listar_pdfs_por_ano(HorarioPDF, course_id=4)
+    horarios_por_ano = _listar_pdfs_por_ano('horario_pdf', course_id=4)
     return render(request, "dwdm/horarios_dwdm.html", {"horarios_por_ano": horarios_por_ano, "area": "dwdm"})
 
 #view para avaliacoes DWDM
@@ -1513,7 +1422,8 @@ def avaliacoes_dwdm(request):
 
 #view para contactos DWDM
 def contactos_dwdm(request):
-    docentes = Docente.objects.all().order_by('nome')
+    # SQL: Lista todos os docentes
+    docentes = PostgreSQLConsultas.docentes()
     return render(request, "dwdm/contactos_dwdm.html", { "area": "dwdm", "docentes": docentes })
 
 #view para etagio DWDM
@@ -1546,12 +1456,13 @@ def destinatarios_mestrado(request):
 
 #view plano curricular mestrado
 def plano_curric_mestrado(request):
-    unidades = UnidadeCurricular.objects.filter(id_curso_id=5).select_related('id_anocurricular', 'id_semestre').order_by('id_anocurricular__id_anocurricular', 'id_semestre__id_semestre')
+    # SQL: Lista UCs do curso 5 (Mestrado)
+    unidades = PostgreSQLConsultas.ucs_por_curso(5)
 
     plano = {}
     for uc in unidades:
-        ano = uc.id_anocurricular.ano_curricular
-        semestre = uc.id_semestre.semestre
+        ano = uc.get('id_anocurricular')
+        semestre = uc.get('semestre')
         if ano not in plano:
             plano[ano] = {}
         if semestre not in plano[ano]:
@@ -1562,42 +1473,43 @@ def plano_curric_mestrado(request):
 
 #view horarios do mestrado
 def horarios_mestrado(request):
-    horarios_por_ano = _listar_pdfs_por_ano(HorarioPDF, course_id=5)
+    horarios_por_ano = _listar_pdfs_por_ano("horario_pdf", course_id=5)
     return render(request, "eisi/horarios_mestrado.html", {"horarios_por_ano": horarios_por_ano, "area": "eisi"})
 
 #view avaliacoes do mestrado
 def avaliacoes_mestrado(request):
-    avaliacoes_por_ano = _listar_pdfs_por_ano(AvaliacaoPDF, course_id=5)
+    avaliacoes_por_ano = _listar_pdfs_por_ano("avaliacao_pdf", course_id=5)
     return render(request, "eisi/avaliacoes_mestrado.html", {"avaliacoes_por_ano": avaliacoes_por_ano, "area": "eisi"})
 
 #view contactos do mestrado
 def contactos_mestrado(request):
-    docentes = Docente.objects.all().order_by('nome')
+    # SQL: Lista todos os docentes
+    docentes = PostgreSQLConsultas.docentes()
     return render(request, "eisi/contactos_mestrado.html", { "area": "eisi", "docentes": docentes })
 
 #view para listar UCs no admin
 def admin_uc_list(request):
-    ucs = UnidadeCurricular.objects.all().order_by("id_unidadecurricular")
-
-    # filtro
+    # SQL: Lista todas as UCs
+    ucs = PostgreSQLConsultas.list_all_ucs()
+    
+    # Filtros
     ano = request.GET.get('ano')
     semestre = request.GET.get('semestre')
     curso = request.GET.get('curso')
-
+    
+    # Aplicar filtros
     if ano:
-        ucs = ucs.filter(id_anocurricular_id=ano)
-
+        ucs = [u for u in ucs if str(u.get('id_anocurricular')) == str(ano)]
     if semestre:
-        ucs = ucs.filter(id_semestre_id=semestre)
-
+        ucs = [u for u in ucs if str(u.get('id_semestre')) == str(semestre)]
     if curso:
-        ucs = ucs.filter(id_curso_id=curso)
-
-    # carrega as listas para agrupar por filtros
-    anos = AnoCurricular.objects.all()
-    semestres = Semestre.objects.all()
-    cursos = Curso.objects.all()
-    #...
+        ucs = [u for u in ucs if str(u.get('id_curso')) == str(curso)]
+    
+    # SQL: Carrega listas para filtros
+    anos = PostgreSQLConsultas.anos_curriculares()
+    semestres = PostgreSQLConsultas.get_semestres()
+    cursos = PostgreSQLConsultas.cursos_list()
+    
     return render(request, "admin/uc_list.html", {
         "ucs": ucs,
         "anos": anos,
@@ -1617,31 +1529,31 @@ def admin_uc_create(request):
         id_ano = request.POST.get("ano")
         id_semestre = request.POST.get("semestre")
 
-        curso = get_object_or_404(Curso, pk=id_curso)
-        ano = get_object_or_404(AnoCurricular, pk=id_ano)
-        semestre = get_object_or_404(Semestre, pk=id_semestre)
-
-        #cria UC com nome e ects e chaves estrangeiras
-        uc = UnidadeCurricular.objects.create(
-            nome=nome, 
-            ects=ects,
-            id_curso=curso,
-            id_anocurricular=ano,
-            id_semestre=semestre
+        # SQL: Cria UC
+        uc_id = PostgreSQLConsultas.create_uc(
+            nome=nome,
+            id_curso=int(id_curso),
+            id_anocurricular=int(id_ano),
+            id_semestre=int(id_semestre),
+            ects=float(ects) if ects else 0.0
         )
 
-        registar_log( request, operacao="CREATE", entidade="unidade_curricular", chave=str(uc.id_unidadecurricular), detalhes=f"UC criada: {uc.nome}")
-        messages.success(request, "Unidade Curricular criada com sucesso!")
+        if uc_id:
+            registar_log(request, operacao="CREATE", entidade="unidade_curricular", chave=str(uc_id), detalhes=f"UC criada: {nome}")
+            messages.success(request, "Unidade Curricular criada com sucesso!")
+        else:
+            messages.error(request, "Erro ao criar Unidade Curricular.")
+
         return redirect("home:admin_uc_list")
 
-    # Passar listas para o form
-    cursos = Curso.objects.all()
-    anos = AnoCurricular.objects.all()
-    semestres = Semestre.objects.all()
+    # SQL: Passa listas para o form
+    cursos = PostgreSQLConsultas.cursos_list()
+    anos = PostgreSQLConsultas.anos_curriculares()
+    semestres = PostgreSQLConsultas.get_semestres()
 
     return render(request, "admin/uc_form.html", {
-        "uc": None, 
-        "turnos_uc": [], 
+        "uc": None,
+        "turnos_uc": [],
         "turnos_count": 0,
         "cursos": cursos,
         "anos": anos,
@@ -1650,35 +1562,42 @@ def admin_uc_create(request):
 
 #view para editar UC
 def admin_uc_edit(request, id):
-    uc = get_object_or_404(UnidadeCurricular, id_unidadecurricular=id)
+    # SQL: Obtém a UC
+    uc = PostgreSQLConsultas.get_uc_by_id(id)
+    
+    if not uc:
+        messages.error(request, "UC não encontrada.")
+        return redirect("home:admin_uc_list")
 
-    #obtem turnos associados a UC
-    turnos_uc = (TurnoUc.objects.filter(id_unidadecurricular=uc).select_related("id_turno").order_by("id_turno__n_turno"))
-    turnos_count = turnos_uc.count()
+    # SQL: Obtém turnos associados à UC
+    turnos_uc = PostgreSQLConsultas.get_turnos_uc_by_uc_id(id)
+    turnos_count = len(turnos_uc)
 
     if request.method == "POST":
         action = request.POST.get("action") or "update_uc"
 
-        #atualizar apenas nome e ects
+        # Atualizar apenas nome e ects
         if action == "update_uc":
-            uc.nome = request.POST.get("nome")
-            uc.ects = request.POST.get("ects")
+            nome = request.POST.get("nome")
+            ects = request.POST.get("ects")
+            curso = request.POST.get("curso")
+            ano = request.POST.get("ano")
+            semestre = request.POST.get("semestre")
             
-            # Atualizar FKs se forem enviadas
-            if request.POST.get("curso"):
-                uc.id_curso = get_object_or_404(Curso, pk=request.POST.get("curso"))
-            if request.POST.get("ano"):
-                uc.id_anocurricular = get_object_or_404(AnoCurricular, pk=request.POST.get("ano"))
-            if request.POST.get("semestre"):
-                uc.id_semestre = get_object_or_404(Semestre, pk=request.POST.get("semestre"))
-                
-            uc.save()
-
-            registar_log(request, operacao="UPDATE", entidade="unidade_curricular", chave=str(uc.id_unidadecurricular), detalhes=f"UC atualizada: {uc.nome}",)
-            messages.success(request, "Unidade Curricular atualizada!")
+            # SQL: Atualiza UC
+            success = PostgreSQLConsultas.update_uc(
+                id, nome, int(curso), int(ano), int(semestre), float(ects) if ects else 0.0
+            )
+            
+            if success:
+                registar_log(request, operacao="UPDATE", entidade="unidade_curricular", chave=str(id), detalhes=f"UC atualizada: {nome}")
+                messages.success(request, "Unidade Curricular atualizada!")
+            else:
+                messages.error(request, "Erro ao atualizar UC.")
+            
             return redirect("home:admin_uc_list")
 
-        #adciionar um turno à UC
+        # Adicionar um turno à UC
         if action == "add_turno":
             n_turno = request.POST.get("n_turno")
             tipo = request.POST.get("tipo")
@@ -1686,55 +1605,66 @@ def admin_uc_edit(request, id):
             hora_inicio = request.POST.get("hora_inicio")
             hora_fim = request.POST.get("hora_fim")
             
-            #cria um turno ainda sem a conexao a UC
-            novo_turno = Turno.objects.create(n_turno=n_turno or 0, tipo=tipo or "", capacidade=capacidade or 0,)
+            # SQL: Cria turno
+            novo_turno_id = PostgreSQLConsultas.create_turno(n_turno or "0", int(capacidade) if capacidade else 0, tipo or "")
+            
+            if novo_turno_id:
+                # SQL: Associa turno à UC
+                success = PostgreSQLConsultas.create_turno_uc(novo_turno_id, id, hora_inicio or "", hora_fim or "")
+                
+                if success:
+                    registar_log(request, operacao="CREATE", entidade="turno", chave=str(novo_turno_id), detalhes=f"Turno criado para UC {uc['nome']}")
+                    messages.success(request, "Turno adicionado à UC!")
+                else:
+                    messages.error(request, "Erro ao associar turno à UC.")
+            else:
+                messages.error(request, "Erro ao criar turno.")
+            
+            return redirect("home:admin_uc_edit", id=id)
 
-            #cria a relacao com os horarios
-            TurnoUc.objects.create(id_turno=novo_turno, id_unidadecurricular=uc, hora_inicio=hora_inicio, hora_fim=hora_fim,)
-
-            registar_log(request, operacao="CREATE", entidade="turno", chave=str(novo_turno.id_turno), detalhes=f"Turno criado para UC {uc.nome}",)
-            messages.success(request, "Turno adicionado à UC!")
-            return redirect("home:admin_uc_edit", id=uc.id_unidadecurricular)
-
-        #atualizar um turno da UC
+        # Atualizar um turno da UC
         if action == "update_turno":
             turno_id = request.POST.get("turno_id")
-            turno = get_object_or_404(Turno, id_turno=turno_id)
-            turno_uc = get_object_or_404(TurnoUc, id_turno=turno)
+            n_turno = request.POST.get("n_turno")
+            tipo = request.POST.get("tipo")
+            capacidade = request.POST.get("capacidade")
+            hora_inicio = request.POST.get("hora_inicio")
+            hora_fim = request.POST.get("hora_fim")
+            
+            # SQL: Atualiza turno
+            success = PostgreSQLConsultas.update_turno(int(turno_id), n_turno or "0", int(capacidade) if capacidade else 0, tipo or "")
+            
+            if success:
+                registar_log(request, operacao="UPDATE", entidade="turno", chave=str(turno_id), detalhes=f"Turno atualizado para UC {uc['nome']}")
+                messages.success(request, "Turno atualizado!")
+            else:
+                messages.error(request, "Erro ao atualizar turno.")
+            
+            return redirect("home:admin_uc_edit", id=id)
 
-            turno.n_turno = request.POST.get("n_turno")
-            turno.tipo = request.POST.get("tipo")
-            turno.capacidade = request.POST.get("capacidade")
-            turno.save()
-
-            turno_uc.hora_inicio = request.POST.get("hora_inicio")
-            turno_uc.hora_fim = request.POST.get("hora_fim")
-            turno_uc.save()
-
-            registar_log(request, operacao="UPDATE", entidade="turno", chave=str(turno.id_turno), detalhes=f"Turno atualizado para UC {uc.nome}",)
-            messages.success(request, "Turno atualizado!")
-            return redirect("home:admin_uc_edit", id=uc.id_unidadecurricular)
-
-        #apagar turno associado a UC
+        # Apagar turno associado a UC
         if action == "delete_turno":
             turno_id = request.POST.get("turno_id")
-            turno = get_object_or_404(Turno, id_turno=turno_id)
+            
+            # SQL: Deleta turno_uc e turno
+            success = PostgreSQLConsultas.delete_turno(int(turno_id))
+            
+            if success:
+                registar_log(request, operacao="DELETE", entidade="turno", chave=str(turno_id), detalhes=f"Turno removido da UC {uc['nome']}")
+                messages.success(request, "Turno removido!")
+            else:
+                messages.error(request, "Erro ao remover turno.")
+            
+            return redirect("home:admin_uc_edit", id=id)
 
-            TurnoUc.objects.filter(id_turno=turno).delete()
-            turno.delete()
-
-            registar_log(request, operacao="DELETE", entidade="turno", chave=str(turno_id), detalhes=f"Turno removido da UC {uc.nome}",)
-            messages.success(request, "Turno removido!")
-            return redirect("home:admin_uc_edit", id=uc.id_unidadecurricular)
-
-    # Passar listas para os selects
-    cursos = Curso.objects.all()
-    anos = AnoCurricular.objects.all()
-    semestres = Semestre.objects.all()
+    # SQL: Passa listas para os selects
+    cursos = PostgreSQLConsultas.cursos_list()
+    anos = PostgreSQLConsultas.anos_curriculares()
+    semestres = PostgreSQLConsultas.get_semestres()
 
     return render(request, "admin/uc_form.html", {
-        "uc": uc, 
-        "turnos_uc": turnos_uc, 
+        "uc": uc,
+        "turnos_uc": turnos_uc,
         "turnos_count": turnos_count,
         "cursos": cursos,
         "anos": anos,
@@ -1743,29 +1673,25 @@ def admin_uc_edit(request, id):
 
 #view para apagar UC
 def admin_uc_delete(request, id):
-    uc = get_object_or_404(UnidadeCurricular, id_unidadecurricular=id)
-
-    # =========================================================================
-    # CASCATA MANUAL: APAGAR TURNOS ASSOCIADOS
-    # =========================================================================
-    # Como as tabelas são `managed = False` e usam DO_NOTHING, precisamos
-    # apagar manualmente os turnos associados para não deixar lixo na BD.
-    turnos_associados = TurnoUc.objects.filter(id_unidadecurricular=uc)
+    # SQL: Obtém UC
+    uc = PostgreSQLConsultas.get_uc_by_id(id)
     
-    count_t = 0
-    for tu in turnos_associados:
-        turno_pai = tu.id_turno
-        # Apagar a relação (embora .delete() no turno pai pudesse tratar disso se houvesse cascade na BD)
-        tu.delete()
-        # Apagar a entidade Turno propriamente dita
-        if turno_pai:
-            turno_pai.delete()
-            count_t += 1
-            
-    uc.delete()
+    if not uc:
+        messages.error(request, "UC não encontrada.")
+        return redirect("home:admin_uc_list")
 
-    registar_log( request, operacao="DELETE", entidade="unidade_curricular", chave=str(uc.id_unidadecurricular), detalhes=f"UC apagada: {uc.nome} (e {count_t} turnos associados)")
-    messages.success(request, f"Unidade Curricular apagada! ({count_t} turnos removidos)")
+    # SQL: Deleta turnos_uc e turnos associados
+    count_t = PostgreSQLConsultas.delete_turnos_uc_by_uc_id(id)
+    
+    # SQL: Deleta UC
+    success = PostgreSQLConsultas.delete_uc(id)
+    
+    if success:
+        registar_log(request, operacao="DELETE", entidade="unidade_curricular", chave=str(id), detalhes=f"UC apagada: {uc['nome']} (e {count_t} turnos associados)")
+        messages.success(request, f"Unidade Curricular apagada! ({count_t} turnos removidos)")
+    else:
+        messages.error(request, "Erro ao apagar UC.")
+    
     return redirect("home:admin_uc_list")
 
 #view para listar logs unificados entre SQL e MOJGO
@@ -1963,7 +1889,7 @@ def servir_pdf_mongodb(request, file_id, tipo_pdf):
 # VIEWS PARA PROPOSTAS DE ESTÁGIO
 # ==========================================
 
-@login_required
+@user_required
 def criar_proposta_estagio_view(request):
     """View para criar uma nova proposta de estágio"""
     if request.method == "POST":
@@ -2006,7 +1932,7 @@ def criar_proposta_estagio_view(request):
     
     return render(request, "proposta_estagio/criar.html")
 
-@login_required
+@user_required
 def listar_propostas_estagio_view(request):
     """View para listar propostas de estágio do aluno"""
     if request.session.get("user_tipo") != "aluno":
@@ -2027,7 +1953,7 @@ def listar_propostas_estagio_view(request):
     
     return render(request, "dape/dape.html", {"propostas": propostas})
 
-@login_required
+@user_required
 def atualizar_proposta_estagio_view(request, titulo):
     """View para atualizar uma proposta de estágio"""
     if request.session.get("user_tipo") != "aluno":
@@ -2072,7 +1998,7 @@ def atualizar_proposta_estagio_view(request, titulo):
     proposta = propostas[0]
     return render(request, "dape/dape.html", {"proposta": proposta})
 
-@login_required
+@user_required
 def deletar_proposta_estagio_view(request, titulo):
     """View para deletar uma proposta de estágio"""
     if request.session.get("user_tipo") != "aluno":
@@ -2211,15 +2137,16 @@ def atribuir_aluno_view(request, id_proposta):
     messages.error(request, "Funcionalidade de atribuir aluno ainda não implementada.")
     return redirect("home:proposta_detalhes", id_proposta=id_proposta)
     
-    # # Verificar se é admin
+    # TODO: Descomentar quando implementar as funções de atribuição
+    # Verificar se é admin
     # if request.session.get("user_tipo") != "admin":
     #     messages.error(request, "Apenas administradores podem atribuir alunos a propostas.")
     #     return redirect("home:proposta_detalhes", id_proposta=id_proposta)
-    
+    # 
     # if request.method == "POST":
     #     n_mecanografico = request.POST.get("n_mecanografico", "").strip()
     #     acao = request.POST.get("acao", "atribuir")
-        
+    #     
     #     if acao == "remover":
     #         # Remover atribuição
     #         sucesso = remover_atribuicao_proposta(id_proposta)
@@ -2240,7 +2167,7 @@ def atribuir_aluno_view(request, id_proposta):
     #         except Aluno.DoesNotExist:
     #             messages.error(request, f"Aluno com número mecanográfico {n_mecanografico} não encontrado.")
     #             return redirect("home:proposta_detalhes", id_proposta=id_proposta)
-            
+    #         
     #         # Verificar se o aluno já tem uma proposta atribuída
     #         proposta_existente = verificar_aluno_tem_proposta(n_mecanografico)
     #         if proposta_existente:
@@ -2250,7 +2177,7 @@ def atribuir_aluno_view(request, id_proposta):
     #                 f"Remova essa atribuição primeiro antes de atribuir uma nova proposta."
     #             )
     #             return redirect("home:proposta_detalhes", id_proposta=id_proposta)
-            
+    #         
     #         # Atribuir aluno à proposta
     #         sucesso = atribuir_aluno_proposta(id_proposta, n_mecanografico, aluno_nome)
     #         if sucesso:
@@ -2268,7 +2195,7 @@ def atribuir_aluno_view(request, id_proposta):
     #             messages.error(request, "Erro ao atribuir aluno à proposta.")
     #     else:
     #         messages.error(request, "Número mecanográfico é obrigatório.")
-    
+    # 
     # return redirect("home:proposta_detalhes", id_proposta=id_proposta)
 
 
@@ -2297,6 +2224,7 @@ def admin_dape_create(request):
     if request.method == "POST":
         messages.error(request, "Funcionalidade de criar proposta ainda não implementada.")
         return redirect("home:admin_dape_list")
+        # TODO: Descomentar quando implementar criar_proposta_admin
         # titulo = request.POST.get("titulo")
         # entidade = request.POST.get("entidade")
         # descricao = request.POST.get("descricao")
@@ -2306,7 +2234,7 @@ def admin_dape_create(request):
         # telefone = request.POST.get("telefone")
         # email = request.POST.get("email")
         # logo = request.POST.get("logo")
-        
+        # 
         # proposta = criar_proposta_admin(
         #     titulo=titulo,
         #     entidade=entidade,
@@ -2318,7 +2246,7 @@ def admin_dape_create(request):
         #     email=email,
         #     logo=logo
         # )
-        
+        # 
         # if proposta:
         #     adicionar_log(
         #         "admin_criar_proposta",
@@ -2338,12 +2266,13 @@ def admin_dape_edit(request, id):
     """Edita uma proposta DAPE existente"""
     messages.error(request, "Funcionalidade de editar proposta ainda não implementada.")
     return redirect("home:admin_dape_list")
+    # TODO: Descomentar quando implementar obter_proposta_por_id e atualizar_proposta_admin
     # proposta = obter_proposta_por_id(id)
-    
+    # 
     # if not proposta:
     #     messages.error(request, "Proposta não encontrada.")
     #     return redirect("home:admin_dape_list")
-    
+    # 
     # if request.method == "POST":
     #     updates = {
     #         "titulo": request.POST.get("titulo"),
@@ -2356,9 +2285,9 @@ def admin_dape_edit(request, id):
     #         "email": request.POST.get("email"),
     #         "logo": request.POST.get("logo")
     #     }
-        
+    #     
     #     sucesso = atualizar_proposta_admin(id, updates)
-        
+    #     
     #     if sucesso:
     #         adicionar_log(
     #             "admin_editar_proposta",
@@ -2369,7 +2298,7 @@ def admin_dape_edit(request, id):
     #         return redirect("home:admin_dape_list")
     #     else:
     #         messages.error(request, "Erro ao atualizar proposta.")
-    
+    # 
     # return render(request, "admin/dape_form.html", {"proposta": proposta})
 
 
@@ -2378,12 +2307,13 @@ def admin_dape_delete(request, id):
     """Deleta uma proposta DAPE"""
     messages.error(request, "Funcionalidade de eliminar proposta ainda não implementada.")
     return redirect("home:admin_dape_list")
+    # TODO: Descomentar quando implementar obter_proposta_por_id e deletar_proposta_por_id
     # proposta = obter_proposta_por_id(id)
-    
+    # 
     # if proposta:
     #     titulo = proposta.get("titulo", "Desconhecido")
     #     sucesso = deletar_proposta_por_id(id)
-        
+    # 
     #     if sucesso:
     #         adicionar_log(
     #             "admin_deletar_proposta",
@@ -2395,6 +2325,5 @@ def admin_dape_delete(request, id):
     #         messages.error(request, "Erro ao eliminar proposta.")
     # else:
     #     messages.error(request, "Proposta não encontrada.")
-    
+    # 
     # return redirect("home:admin_dape_list")
-

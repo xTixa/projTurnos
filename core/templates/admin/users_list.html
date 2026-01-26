@@ -15,14 +15,52 @@
 
     <!-- FORMULÁRIO PARA CRIAR NOVO UTILIZADOR -->
     <div class="form-section" id="novo-form" style="display:none;">
-        <h2>Novo Utilizador (Admin)</h2>
+        <h2>Novo Utilizador</h2>
         
         <form method="post" action="{% url 'home:admin_users_create' %}" class="user-form">
             {% csrf_token %}
 
+            <!-- Campo TIPO -->
             <div class="form-group">
-                <label for="username">Username:</label>
-                <input type="text" id="username" name="username" placeholder="Digite o username" required>
+                <label for="tipo">Tipo de Utilizador:</label>
+                <select id="tipo" name="tipo" required onchange="mostrarCamposEspecificos()">
+                    <option value="admin">Admin</option>
+                    <option value="aluno">Aluno</option>
+                    <option value="docente">Docente</option>
+                </select>
+            </div>
+
+            <!-- Campos para ALUNO -->
+            <div id="campos-aluno" style="display: none;">
+                <div class="form-group">
+                    <label for="n_mecanografico">Nº Mecanografico:</label>
+                    <input type="number" id="n_mecanografico" name="n_mecanografico">
+                </div>
+                
+                <div class="form-group">
+                    <label for="id_curso">Curso:</label>
+                    <select id="id_curso" name="id_curso">
+                        <option value="">-- Selecione um curso --</option>
+                        {% for curso in cursos %}
+                            <option value="{{ curso.id_curso }}">{{ curso.nome }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="id_anocurricular">Ano Curricular:</label>
+                    <select id="id_anocurricular" name="id_anocurricular">
+                        <option value="">-- Selecione um ano --</option>
+                        {% for ano in anos %}
+                            <option value="{{ ano.id_anocurricular }}">{{ ano.ano_curricular }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="username">Username/Nome:</label>
+                <input type="text" id="username" name="username" placeholder="Digite o username ou nome" required>
             </div>
 
             <div class="form-group">
@@ -101,6 +139,24 @@
     function toggleFormulario() {
         var formSection = document.getElementById('novo-form');
         formSection.style.display = formSection.style.display === 'none' ? 'block' : 'none';
+    }
+
+    // Mostrar/esconder campos específicos por tipo
+    function mostrarCamposEspecificos() {
+        const tipo = document.getElementById('tipo').value;
+        const camposAluno = document.getElementById('campos-aluno');
+        
+        if (tipo === 'aluno') {
+            camposAluno.style.display = 'block';
+            document.getElementById('n_mecanografico').required = true;
+            document.getElementById('id_curso').required = true;
+            document.getElementById('id_anocurricular').required = true;
+        } else {
+            camposAluno.style.display = 'none';
+            document.getElementById('n_mecanografico').required = false;
+            document.getElementById('id_curso').required = false;
+            document.getElementById('id_anocurricular').required = false;
+        }
     }
 
     // Clique no botão
