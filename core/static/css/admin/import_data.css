@@ -1,3 +1,33 @@
+body {
+  overflow: hidden;
+}
+/* --- MENSAGENS DE SUCESSO/ERRO DIFERENCIADAS --- */
+.admin-import-page .messages li.success {
+  background: #e6fffa;
+  color: #065f46;
+  border-color: #34d399;
+}
+.admin-import-page .messages li.error {
+  background: #fef2f2;
+  color: #991b1b;
+  border-color: #fca5a5;
+}
+
+/* --- SEPARAÇÃO DOS FORMULÁRIOS --- */
+.admin-import-page .import-form {
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 1.2rem;
+  margin-bottom: 1.2rem;
+}
+.admin-import-page .import-form:last-of-type {
+  border-bottom: none;
+  margin-bottom: 0;
+}
+
+/* --- ESPAÇAMENTO EXTRA NO TÍTULO --- */
+.admin-import-page .page-title {
+  margin-top: 0.5rem;
+}
 /* ================================
    IMPORT DATA – ESTILO ALINHADO COM EXPORT
    ================================ */

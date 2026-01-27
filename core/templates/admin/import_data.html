@@ -6,15 +6,31 @@
 {% endblock %}
 {% block content %}
 <div class="admin-import-page">
-    <h1 class="page-title">Importação de Dados (CSV)</h1>
-    <p class="page-subtitle">Importe um ficheiro CSV com os dados dos alunos.</p>
-    <form method="post" enctype="multipart/form-data" class="import-form">
+    <h1 class="page-title">Importação de Dados</h1>
+    <p class="page-subtitle">Importe um ficheiro CSV, JSON ou XML com os dados dos alunos.</p>
+    <form method="post" enctype="multipart/form-data" class="import-form" action="{% url 'home:import_alunos_csv' %}">
         {% csrf_token %}
         <div class="form-group">
             <label for="file">Ficheiro CSV:</label>
-            <input type="file" name="file" id="file" accept=".csv" required>
+            <input type="file" name="file" id="file" accept=".csv">
         </div>
-        <button type="submit" class="btn btn-primary">Importar</button>
+        <button type="submit" class="btn btn-primary">Importar CSV</button>
+    </form>
+    <form method="post" enctype="multipart/form-data" class="import-form" action="{% url 'home:import_alunos_json' %}">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="file">Ficheiro JSON:</label>
+            <input type="file" name="file" id="file_json" accept=".json">
+        </div>
+        <button type="submit" class="btn btn-primary">Importar JSON</button>
+    </form>
+    <form method="post" enctype="multipart/form-data" class="import-form" action="{% url 'home:import_alunos_xml' %}">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="file">Ficheiro XML:</label>
+            <input type="file" name="file" id="file_xml" accept=".xml">
+        </div>
+        <button type="submit" class="btn btn-primary">Importar XML</button>
     </form>
     {% if messages %}
         <ul class="messages">

@@ -1,3 +1,85 @@
+-- Função para importar alunos em lote a partir de XML
+CREATE OR REPLACE FUNCTION importar_alunos_xml(conteudo_xml TEXT)
+RETURNS VOID AS $$
+DECLARE
+    aluno_xml XML;
+    aluno RECORD;
+    n_mec INT;
+    nome TEXT;
+    email TEXT;
+    curso_nome TEXT;
+    ano_nome TEXT;
+    passw TEXT;
+    id_curso_int INT;
+    id_ano_int INT;
+BEGIN
+    aluno_xml := xmlparse(document conteudo_xml);
+    FOR aluno IN
+        SELECT
+            unnest(xpath('//aluno/n_mecanografico/text()', aluno_xml))::text::int AS n_mecanografico,
+            unnest(xpath('//aluno/nome/text()', aluno_xml))::text AS nome,
+            unnest(xpath('//aluno/email/text()', aluno_xml))::text AS email,
+            unnest(xpath('//aluno/curso/text()', aluno_xml))::text AS curso,
+            unnest(xpath('//aluno/ano_curricular/text()', aluno_xml))::text AS ano_curricular,
+            unnest(xpath('//aluno/password/text()', aluno_xml))::text AS password
+    LOOP
+        n_mec := aluno.n_mecanografico;
+        nome := aluno.nome;
+        email := aluno.email;
+        curso_nome := aluno.curso;
+        ano_nome := aluno.ano_curricular;
+        passw := aluno.password;
+        -- Normalizar curso e ano
+        curso_nome := replace(replace(replace(replace(replace(replace(replace(replace(lower(trim(curso_nome)), 'á','a'),'é','e'),'í','i'),'ó','o'),'ú','u'),'ã','a'),'ç','c'),'Âº','º');
+        ano_nome := replace(replace(replace(replace(replace(replace(replace(replace(lower(trim(ano_nome)), 'á','a'),'é','e'),'í','i'),'ó','o'),'ú','u'),'ã','a'),'ç','c'),'Âº','º');
+        SELECT id_curso INTO id_curso_int FROM curso WHERE lower(trim(curso.nome)) = curso_nome LIMIT 1;
+        SELECT id_anocurricular INTO id_ano_int FROM ano_curricular WHERE lower(trim(ano_curricular.ano_curricular)) = ano_nome LIMIT 1;
+        IF id_curso_int IS NOT NULL AND id_ano_int IS NOT NULL AND passw IS NOT NULL THEN
+            IF NOT EXISTS (SELECT 1 FROM aluno WHERE n_mecanografico = n_mec) THEN
+                INSERT INTO aluno (n_mecanografico, nome, email, id_curso, id_anocurricular, password)
+                VALUES (n_mec, nome, email, id_curso_int, id_ano_int, passw);
+            END IF;
+        END IF;
+    END LOOP;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Função para importar alunos em lote a partir de JSON
+CREATE OR REPLACE FUNCTION importar_alunos_json(json_alunos JSON)
+RETURNS VOID AS $$
+DECLARE
+    aluno JSON;
+    n_mec INT;
+    nome TEXT;
+    email TEXT;
+    curso_nome TEXT;
+    ano_nome TEXT;
+    passw TEXT;
+    id_curso_int INT;
+    id_ano_int INT;
+BEGIN
+    FOR aluno IN SELECT * FROM json_array_elements(json_alunos) LOOP
+        n_mec := (aluno->>'n_mecanografico')::integer;
+        nome := aluno->>'nome';
+        email := aluno->>'email';
+        curso_nome := aluno->>'curso';
+        ano_nome := aluno->>'ano_curricular';
+        passw := aluno->>'password';
+        -- Normalizar curso e ano
+        curso_nome := replace(replace(replace(replace(replace(replace(replace(replace(lower(trim(curso_nome)), 'á','a'),'é','e'),'í','i'),'ó','o'),'ú','u'),'ã','a'),'ç','c'),'Âº','º');
+        ano_nome := replace(replace(replace(replace(replace(replace(replace(replace(lower(trim(ano_nome)), 'á','a'),'é','e'),'í','i'),'ó','o'),'ú','u'),'ã','a'),'ç','c'),'Âº','º');
+        SELECT id_curso INTO id_curso_int FROM curso WHERE lower(trim(curso.nome)) = curso_nome LIMIT 1;
+        SELECT id_anocurricular INTO id_ano_int FROM ano_curricular WHERE lower(trim(ano_curricular.ano_curricular)) = ano_nome LIMIT 1;
+        IF id_curso_int IS NOT NULL AND id_ano_int IS NOT NULL AND passw IS NOT NULL THEN
+            IF NOT EXISTS (SELECT 1 FROM aluno WHERE n_mecanografico = n_mec) THEN
+                INSERT INTO aluno (n_mecanografico, nome, email, id_curso, id_anocurricular, password)
+                VALUES (n_mec, nome, email, id_curso_int, id_ano_int, passw);
+            END IF;
+        END IF;
+    END LOOP;
+END;
+$$ LANGUAGE plpgsql;
+
 -- Função para importar alunos em lote a partir de CSV, só insere se não existir
 CREATE OR REPLACE FUNCTION importar_alunos_csv(conteudo_csv TEXT)
 RETURNS VOID AS $$
