@@ -5,25 +5,8 @@ from xml.dom import minidom
 from datetime import datetime
 from django.http import HttpResponse, JsonResponse
 from django.views.decorators.http import require_http_methods
-from django.db import connection
+from django.db import connection, connections
 from core.utils import admin_required
-
-# ---------------------------------------------------------------------------
-# Helpers para acesso direto à BD (sem ORM)
-# ---------------------------------------------------------------------------
-
-def _fetch(sql, params=None):
-    with connection.cursor() as cursor:
-        cursor.execute(sql, params or [])
-        cols = [col[0] for col in cursor.description]
-        rows = cursor.fetchall()
-    return cols, rows
-
-
-def _fetch_dicts(sql, params=None):
-    cols, rows = _fetch(sql, params)
-    return [dict(zip(cols, row)) for row in rows]
-
 
 def criar_xml_formatado(root):
     """Formata XML de forma legível"""
@@ -33,7 +16,7 @@ def criar_xml_formatado(root):
 
 def refresh_materialized_view(view_name):
     try:
-        with connection.cursor() as cursor:
+        with connections["admin"].cursor() as cursor:
             cursor.execute(f"REFRESH MATERIALIZED VIEW {view_name}")
     except Exception as exc:
         print(f"Aviso: não foi possível atualizar vista {view_name}: {exc}")
@@ -51,7 +34,10 @@ def refresh_all_materialized_views():
 
 @admin_required
 def exportar_alunos_csv(request):
-    _, rows = _fetch("SELECT * FROM fn_export_alunos()")
+    with connections["admin"].cursor() as cursor:
+        cursor.execute("SELECT * FROM fn_export_alunos()")
+        cols = [col[0] for col in cursor.description]
+        rows = cursor.fetchall()
 
     response = HttpResponse(content_type="text/csv; charset=utf-8")
     response["Content-Disposition"] = (
@@ -67,7 +53,12 @@ def exportar_alunos_csv(request):
 
 @admin_required
 def exportar_alunos_json(request):
-    data = _fetch_dicts("SELECT * FROM fn_export_alunos()")
+    with connections["admin"].cursor() as cursor:
+        cursor.execute("SELECT * FROM fn_export_alunos()")
+        cols = [col[0] for col in cursor.description]
+        rows = cursor.fetchall()
+    
+    data = [dict(zip(cols, row)) for row in rows]
     response = HttpResponse(
         json.dumps(data, ensure_ascii=False, indent=2),
         content_type="application/json; charset=utf-8",
@@ -80,7 +71,10 @@ def exportar_alunos_json(request):
 
 @admin_required
 def exportar_turnos_csv(request):
-    _, rows = _fetch("SELECT * FROM fn_export_turnos()")
+    with connections["admin"].cursor() as cursor:
+        cursor.execute("SELECT * FROM fn_export_turnos()")
+        cols = [col[0] for col in cursor.description]
+        rows = cursor.fetchall()
 
     response = HttpResponse(content_type="text/csv; charset=utf-8")
     response["Content-Disposition"] = (
@@ -104,7 +98,12 @@ def exportar_turnos_csv(request):
 
 @admin_required
 def exportar_turnos_json(request):
-    data = _fetch_dicts("SELECT * FROM fn_export_turnos()")
+    with connections["admin"].cursor() as cursor:
+        cursor.execute("SELECT * FROM fn_export_turnos()")
+        cols = [col[0] for col in cursor.description]
+        rows = cursor.fetchall()
+    
+    data = [dict(zip(cols, row)) for row in rows]
     response = HttpResponse(
         json.dumps(data, ensure_ascii=False, indent=2),
         content_type="application/json; charset=utf-8",
@@ -117,7 +116,10 @@ def exportar_turnos_json(request):
 
 @admin_required
 def exportar_inscricoes_csv(request):
-    _, rows = _fetch("SELECT * FROM fn_export_inscricoes()")
+    with connections["admin"].cursor() as cursor:
+        cursor.execute("SELECT * FROM fn_export_inscricoes()")
+        cols = [col[0] for col in cursor.description]
+        rows = cursor.fetchall()
 
     response = HttpResponse(content_type="text/csv; charset=utf-8")
     response["Content-Disposition"] = (
@@ -149,7 +151,12 @@ def exportar_inscricoes_csv(request):
 
 @admin_required
 def exportar_inscricoes_json(request):
-    data = _fetch_dicts("SELECT * FROM fn_export_inscricoes()")
+    with connections["admin"].cursor() as cursor:
+        cursor.execute("SELECT * FROM fn_export_inscricoes()")
+        cols = [col[0] for col in cursor.description]
+        rows = cursor.fetchall()
+    
+    data = [dict(zip(cols, row)) for row in rows]
     response = HttpResponse(
         json.dumps(data, ensure_ascii=False, indent=2),
         content_type="application/json; charset=utf-8",
@@ -162,7 +169,10 @@ def exportar_inscricoes_json(request):
 
 @admin_required
 def exportar_ucs_csv(request):
-    _, rows = _fetch("SELECT * FROM fn_export_ucs()")
+    with connections["admin"].cursor() as cursor:
+        cursor.execute("SELECT * FROM fn_export_ucs()")
+        cols = [col[0] for col in cursor.description]
+        rows = cursor.fetchall()
 
     response = HttpResponse(content_type="text/csv; charset=utf-8")
     response["Content-Disposition"] = (
@@ -185,7 +195,12 @@ def exportar_ucs_csv(request):
 
 @admin_required
 def exportar_ucs_json(request):
-    data = _fetch_dicts("SELECT * FROM fn_export_ucs()")
+    with connections["admin"].cursor() as cursor:
+        cursor.execute("SELECT * FROM fn_export_ucs()")
+        cols = [col[0] for col in cursor.description]
+        rows = cursor.fetchall()
+    
+    data = [dict(zip(cols, row)) for row in rows]
     response = HttpResponse(
         json.dumps(data, ensure_ascii=False, indent=2),
         content_type="application/json; charset=utf-8",
@@ -202,7 +217,10 @@ def exportar_ucs_json(request):
 
 @admin_required
 def exportar_alunos_xml(request):
-    _, rows = _fetch("SELECT * FROM fn_export_alunos()")
+    with connections["admin"].cursor() as cursor:
+        cursor.execute("SELECT * FROM fn_export_alunos()")
+        cols = [col[0] for col in cursor.description]
+        rows = cursor.fetchall()
 
     root = ET.Element("alunos")
     root.set("exportado_em", datetime.now().isoformat())
@@ -224,7 +242,10 @@ def exportar_alunos_xml(request):
 
 @admin_required
 def exportar_turnos_xml(request):
-    _, rows = _fetch("SELECT * FROM fn_export_turnos()")
+    with connections["admin"].cursor() as cursor:
+        cursor.execute("SELECT * FROM fn_export_turnos()")
+        cols = [col[0] for col in cursor.description]
+        rows = cursor.fetchall()
 
     root = ET.Element("turnos")
     root.set("exportado_em", datetime.now().isoformat())
@@ -248,7 +269,10 @@ def exportar_turnos_xml(request):
 
 @admin_required
 def exportar_inscricoes_xml(request):
-    _, rows = _fetch("SELECT * FROM fn_export_inscricoes()")
+    with connections["admin"].cursor() as cursor:
+        cursor.execute("SELECT * FROM fn_export_inscricoes()")
+        cols = [col[0] for col in cursor.description]
+        rows = cursor.fetchall()
 
     root = ET.Element("inscricoes")
     root.set("exportado_em", datetime.now().isoformat())
@@ -272,7 +296,10 @@ def exportar_inscricoes_xml(request):
 
 @admin_required
 def exportar_ucs_xml(request):
-    _, rows = _fetch("SELECT * FROM fn_export_ucs()")
+    with connections["admin"].cursor() as cursor:
+        cursor.execute("SELECT * FROM fn_export_ucs()")
+        cols = [col[0] for col in cursor.description]
+        rows = cursor.fetchall()
 
     root = ET.Element("unidades_curriculares")
     root.set("exportado_em", datetime.now().isoformat())
@@ -299,7 +326,10 @@ def exportar_ucs_xml(request):
 
 @admin_required
 def exportar_mv_estatisticas_xml(request):
-    _, rows = _fetch("SELECT id_turno, n_turno, tipo, capacidade, uc_nome, total_inscritos, vagas_disponiveis, taxa_ocupacao_percent FROM fn_export_mv_estatisticas_turno()")
+    with connections["admin"].cursor() as cursor:
+        cursor.execute("SELECT id_turno, n_turno, tipo, capacidade, uc_nome, total_inscritos, vagas_disponiveis, taxa_ocupacao_percent FROM fn_export_mv_estatisticas_turno()")
+        cols = [col[0] for col in cursor.description]
+        rows = cursor.fetchall()
 
     root = ET.Element("estatisticas_turnos")
     root.set("exportado_em", datetime.now().isoformat())
@@ -324,7 +354,10 @@ def exportar_mv_estatisticas_xml(request):
 
 @admin_required
 def exportar_mv_ucs_preenchidas_xml(request):
-    _, rows = _fetch("SELECT id_unidadecurricular, uc_nome, curso_nome, ano_curricular, total_inscricoes, total_alunos_inscritos, taxa_preenchimento_global_percent FROM fn_export_mv_ucs_procuradas()")
+    with connections["admin"].cursor() as cursor:
+        cursor.execute("SELECT id_unidadecurricular, uc_nome, curso_nome, ano_curricular, total_inscricoes, total_alunos_inscritos, taxa_preenchimento_global_percent FROM fn_export_mv_ucs_procuradas()")
+        cols = [col[0] for col in cursor.description]
+        rows = cursor.fetchall()
 
     root = ET.Element("ucs_mais_procuradas")
     root.set("exportado_em", datetime.now().isoformat())
@@ -348,7 +381,10 @@ def exportar_mv_ucs_preenchidas_xml(request):
 
 @admin_required
 def exportar_mv_resumo_alunos_xml(request):
-    _, rows = _fetch("SELECT * FROM fn_export_mv_resumo_alunos()")
+    with connections["admin"].cursor() as cursor:
+        cursor.execute("SELECT * FROM fn_export_mv_resumo_alunos()")
+        cols = [col[0] for col in cursor.description]
+        rows = cursor.fetchall()
 
     root = ET.Element("resumo_alunos")
     root.set("exportado_em", datetime.now().isoformat())
@@ -376,7 +412,10 @@ def exportar_mv_resumo_alunos_xml(request):
 
 @admin_required
 def exportar_mv_estatisticas_turno_csv(request):
-    _, rows = _fetch("SELECT * FROM fn_export_mv_estatisticas_turno()")
+    with connections["admin"].cursor() as cursor:
+        cursor.execute("SELECT * FROM fn_export_mv_estatisticas_turno()")
+        cols = [col[0] for col in cursor.description]
+        rows = cursor.fetchall()
 
     response = HttpResponse(content_type="text/csv; charset=utf-8")
     response["Content-Disposition"] = (
@@ -420,7 +459,12 @@ def exportar_mv_estatisticas_turno_csv(request):
 
 @admin_required
 def exportar_mv_estatisticas_turno_json(request):
-    data = _fetch_dicts("SELECT * FROM fn_export_mv_estatisticas_turno()")
+    with connections["admin"].cursor() as cursor:
+        cursor.execute("SELECT * FROM fn_export_mv_estatisticas_turno()")
+        cols = [col[0] for col in cursor.description]
+        rows = cursor.fetchall()
+    
+    data = [dict(zip(cols, row)) for row in rows]
     response = HttpResponse(
         json.dumps(data, ensure_ascii=False, indent=2),
         content_type="application/json; charset=utf-8",
@@ -433,7 +477,10 @@ def exportar_mv_estatisticas_turno_json(request):
 
 @admin_required
 def exportar_mv_ucs_preenchidas_csv(request):
-    _, rows = _fetch("SELECT * FROM fn_export_mv_ucs_procuradas()")
+    with connections["admin"].cursor() as cursor:
+        cursor.execute("SELECT * FROM fn_export_mv_ucs_procuradas()")
+        cols = [col[0] for col in cursor.description]
+        rows = cursor.fetchall()
 
     response = HttpResponse(content_type="text/csv; charset=utf-8")
     response["Content-Disposition"] = (
@@ -473,7 +520,12 @@ def exportar_mv_ucs_preenchidas_csv(request):
 
 @admin_required
 def exportar_mv_ucs_preenchidas_json(request):
-    data = _fetch_dicts("SELECT * FROM fn_export_mv_ucs_procuradas()")
+    with connections["admin"].cursor() as cursor:
+        cursor.execute("SELECT * FROM fn_export_mv_ucs_procuradas()")
+        cols = [col[0] for col in cursor.description]
+        rows = cursor.fetchall()
+    
+    data = [dict(zip(cols, row)) for row in rows]
     response = HttpResponse(
         json.dumps(data, ensure_ascii=False, indent=2),
         content_type="application/json; charset=utf-8",
@@ -486,7 +538,10 @@ def exportar_mv_ucs_preenchidas_json(request):
 
 @admin_required
 def exportar_mv_resumo_alunos_csv(request):
-    _, rows = _fetch("SELECT * FROM fn_export_mv_resumo_alunos()")
+    with connections["admin"].cursor() as cursor:
+        cursor.execute("SELECT * FROM fn_export_mv_resumo_alunos()")
+        cols = [col[0] for col in cursor.description]
+        rows = cursor.fetchall()
 
     response = HttpResponse(content_type="text/csv; charset=utf-8")
     response["Content-Disposition"] = (
