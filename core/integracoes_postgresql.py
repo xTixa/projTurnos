@@ -18,7 +18,7 @@ class PostgreSQLProcedures:
         Retorna True se sucesso, False se erro
         """
         try:
-            with connection.cursor() as cursor:
+            with connections["admin"].cursor() as cursor:
                 cursor.execute(
                     "CALL criar_aluno(%s, %s, %s, %s, %s, %s)",
                     [n_mecanografico, id_curso, id_anocurricular, nome, email, password]
@@ -33,7 +33,7 @@ class PostgreSQLProcedures:
     def atualizar_aluno(n_mecanografico: int, id_curso: int = None, id_anocurricular: int = None, nome: str = None, email: str = None, password: str = None) -> bool:
         """Chama procedure atualizar_aluno"""
         try:
-            with connection.cursor() as cursor:
+            with connections["admin"].cursor() as cursor:
                 cursor.execute(
                     "CALL atualizar_aluno(%s, %s, %s, %s, %s, %s)",
                     [n_mecanografico, id_curso, id_anocurricular, nome, email, password]
@@ -48,7 +48,7 @@ class PostgreSQLProcedures:
     def apagar_aluno(n_mecanografico: int) -> bool:
         """Chama procedure apagar_aluno"""
         try:
-            with connection.cursor() as cursor:
+            with connections["admin"].cursor() as cursor:
                 cursor.execute("CALL apagar_aluno(%s)", [n_mecanografico])
             logger.info(f"Aluno {n_mecanografico} apagado via procedure")
             return True
@@ -60,7 +60,7 @@ class PostgreSQLProcedures:
     def criar_docente(nome: str, email: str, cargo: str) -> bool:
         """Chama procedure criar_docente"""
         try:
-            with connection.cursor() as cursor:
+            with connections["admin"].cursor() as cursor:
                 cursor.execute(
                     "CALL criar_docente(%s, %s, %s)",
                     [nome, email, cargo]
@@ -75,7 +75,7 @@ class PostgreSQLProcedures:
     def atualizar_docente(id_docente: int, nome: str = None, email: str = None, cargo: str = None) -> bool:
         """Chama procedure atualizar_docente"""
         try:
-            with connection.cursor() as cursor:
+            with connections["admin"].cursor() as cursor:
                 cursor.execute(
                     "CALL atualizar_docente(%s, %s, %s, %s)",
                     [id_docente, nome, email, cargo]
@@ -90,7 +90,7 @@ class PostgreSQLProcedures:
     def apagar_docente(id_docente: int) -> bool:
         """Chama procedure apagar_docente"""
         try:
-            with connection.cursor() as cursor:
+            with connections["admin"].cursor() as cursor:
                 cursor.execute("CALL apagar_docente(%s)", [id_docente])
             logger.info(f"Docente {id_docente} apagado via procedure")
             return True
@@ -107,7 +107,7 @@ class PostgreSQLFunctions:
         Retorna lista de alunos inscritos em UC com tipo de turno específico
         """
         try:
-            with connection.cursor() as cursor:
+            with connections["admin"].cursor() as cursor:
                 cursor.execute(
                     "SELECT * FROM alunos_por_uc(%s, %s)",
                     [id_uc, tipo_de_turno]
@@ -122,7 +122,7 @@ class PostgreSQLFunctions:
     def alunos_inscritos_por_dia(data_inscricao) -> List[Dict[str, Any]]:
         """Chama function alunos_inscritos_por_dia"""
         try:
-            with connection.cursor() as cursor:
+            with connections["admin"].cursor() as cursor:
                 cursor.execute(
                     "SELECT * FROM alunos_inscritos_por_dia(%s)",
                     [data_inscricao]
@@ -140,7 +140,7 @@ class PostgreSQLFunctions:
         Retorna (mensagem, sucesso)
         """
         try:
-            with connection.cursor() as cursor:
+            with connections["admin"].cursor() as cursor:
                 cursor.execute(
                     "SELECT * FROM inserir_matricula(%s, %s, %s, %s)",
                     [id_anoletivo, n_mecanografico, data_matricula, estado]
@@ -155,7 +155,7 @@ class PostgreSQLFunctions:
     def registar_log(entidade: str, operacao: str, chave_primaria: str, detalhes: str = None) -> bool:
         """Chama function registar_log"""
         try:
-            with connection.cursor() as cursor:
+            with connections["admin"].cursor() as cursor:
                 cursor.execute(
                     "SELECT registar_log(%s, %s, %s, %s)",
                     [entidade, operacao, chave_primaria, detalhes]
@@ -181,7 +181,7 @@ class PostgreSQLViews:
         ]
         
         try:
-            with connection.cursor() as cursor:
+            with connections["admin"].cursor() as cursor:
                 for view in views:
                     cursor.execute(f"REFRESH MATERIALIZED VIEW {view}")
                     logger.info(f"View {view} atualizada")
@@ -189,7 +189,7 @@ class PostgreSQLViews:
         except Exception as e:
             logger.error(f"Erro ao atualizar views: {e}")
             return False
-    
+    #verificar mais tarde
     @staticmethod
     def conflitos_horario() -> List[Dict[str, Any]]:
         """Lê dados da view mv_conflitos_horario"""
@@ -206,7 +206,7 @@ class PostgreSQLViews:
     def estatisticas_turno() -> List[Dict[str, Any]]:
         """Lê dados da view mv_estatisticas_turno"""
         try:
-            with connection.cursor() as cursor:
+            with connections["admin"].cursor() as cursor:
                 cursor.execute("SELECT * FROM mv_estatisticas_turno")
                 columns = [col[0] for col in cursor.description]
                 return [dict(zip(columns, row)) for row in cursor.fetchall()]
@@ -232,7 +232,7 @@ class PostgreSQLConsultas:
     @staticmethod
     def alunos_por_ordem_alfabetica() -> List[Dict[str, Any]]:
         try:
-            with connection.cursor() as cursor:
+            with connections["admin"].cursor() as cursor:
                 cursor.execute("SELECT * FROM fn_alunos_por_ordem_alfabetica()")
                 cols = [col[0] for col in cursor.description]
                 return [dict(zip(cols, row)) for row in cursor.fetchall()]
@@ -275,7 +275,7 @@ class PostgreSQLConsultas:
             "vagas_ocupadas": 0,
         }
         try:
-            with connection.cursor() as cursor:
+            with connections["admin"].cursor() as cursor:
                 cursor.execute("SELECT * FROM fn_dashboard_totais()")
                 row = cursor.fetchone()
                 if not row:
@@ -289,7 +289,7 @@ class PostgreSQLConsultas:
     @staticmethod
     def alunos_por_uc_top10() -> List[Dict[str, Any]]:
         try:
-            with connection.cursor() as cursor:
+            with connections["admin"].cursor() as cursor:
                 cursor.execute("SELECT * FROM fn_alunos_por_uc_top10()")
                 cols = [col[0] for col in cursor.description]
                 return [dict(zip(cols, row)) for row in cursor.fetchall()]
@@ -344,7 +344,7 @@ class PostgreSQLConsultas:
     @staticmethod
     def users_combinado() -> List[Dict[str, Any]]:
         try:
-            with connection.cursor() as cursor:
+            with connections["admin"].cursor() as cursor:
                 cursor.execute("SELECT * FROM fn_users_combinado()")
                 cols = [col[0] for col in cursor.description]
                 return [dict(zip(cols, row)) for row in cursor.fetchall()]
@@ -355,7 +355,7 @@ class PostgreSQLConsultas:
     @staticmethod
     def get_user_by_id(user_id: int) -> Tuple[Optional[Dict[str, Any]], Optional[str]]:
         try:
-            with connection.cursor() as cursor:
+            with connections["admin"].cursor() as cursor:
                 cursor.execute("SELECT * FROM fn_get_user_by_id(%s)", [user_id])
                 row = cursor.fetchone()
                 if not row:
@@ -371,7 +371,7 @@ class PostgreSQLConsultas:
     @staticmethod
     def update_user(user_id: int, user_type: str, username: str, email: str) -> bool:
         try:
-            with connection.cursor() as cursor:
+            with connections["admin"].cursor() as cursor:
                 cursor.execute(
                     "SELECT fn_update_user(%s, %s, %s, %s)",
                     [user_id, user_type, username, email],
@@ -386,7 +386,7 @@ class PostgreSQLConsultas:
     def delete_aluno_cascade(n_mecanografico: int) -> Dict[str, int]:
         fallback = {"matriculas": 0, "inscricoes_turno": 0, "inscrito_uc": 0}
         try:
-            with connection.cursor() as cursor:
+            with connections["admin"].cursor() as cursor:
                 cursor.execute("SELECT * FROM fn_delete_aluno_cascade(%s)", [n_mecanografico])
                 row = cursor.fetchone()
                 if not row:
@@ -401,7 +401,7 @@ class PostgreSQLConsultas:
     def delete_docente_cascade(id_docente: int) -> Dict[str, int]:
         fallback = {"leciona_uc": 0}
         try:
-            with connection.cursor() as cursor:
+            with connections["admin"].cursor() as cursor:
                 cursor.execute("SELECT * FROM fn_delete_docente_cascade(%s)", [id_docente])
                 row = cursor.fetchone()
                 if not row:
@@ -415,7 +415,7 @@ class PostgreSQLConsultas:
     @staticmethod
     def delete_admin_user(user_id: int) -> bool:
         try:
-            with connection.cursor() as cursor:
+            with connections["admin"].cursor() as cursor:
                 cursor.execute("SELECT fn_delete_admin_user(%s)", [user_id])
                 row = cursor.fetchone()
                 return bool(row[0]) if row else False
@@ -426,7 +426,7 @@ class PostgreSQLConsultas:
     @staticmethod
     def turnos_sem_uc() -> List[Dict[str, Any]]:
         try:
-            with connection.cursor() as cursor:
+            with connections["admin"].cursor() as cursor:
                 cursor.execute("SELECT * FROM fn_turnos_sem_uc()")
                 cols = [col[0] for col in cursor.description]
                 return [dict(zip(cols, row)) for row in cursor.fetchall()]
@@ -473,7 +473,7 @@ class PostgreSQLConsultas:
     @staticmethod
     def delete_turno(turno_id: int) -> bool:
         try:
-            with connection.cursor() as cursor:
+            with connections["admin"].cursor() as cursor:
                 cursor.execute("SELECT fn_delete_turno(%s)", [turno_id])
                 row = cursor.fetchone()
                 return bool(row[0]) if row else False
@@ -498,7 +498,7 @@ class PostgreSQLConsultas:
     @staticmethod
     def create_horario_pdf(nome: str, ficheiro: str, id_anocurricular: int, id_curso: int) -> Optional[int]:
         try:
-            with connection.cursor() as cursor:
+            with connections["admin"].cursor() as cursor:
                 cursor.execute(
                     "SELECT fn_create_horario_pdf(%s, %s, %s, %s)",
                     [nome, ficheiro, id_anocurricular, id_curso],
@@ -512,7 +512,7 @@ class PostgreSQLConsultas:
     @staticmethod
     def update_horario_pdf(pdf_id: int, nome: str, ficheiro: str, id_anocurricular: int, id_curso: int) -> bool:
         try:
-            with connection.cursor() as cursor:
+            with connections["admin"].cursor() as cursor:
                 cursor.execute(
                     "SELECT fn_update_horario_pdf(%s, %s, %s, %s, %s)",
                     [pdf_id, nome, ficheiro, id_anocurricular, id_curso],
@@ -526,7 +526,7 @@ class PostgreSQLConsultas:
     @staticmethod
     def delete_horario_pdf(pdf_id: int) -> bool:
         try:
-            with connection.cursor() as cursor:
+            with connections["admin"].cursor() as cursor:
                 cursor.execute("SELECT fn_delete_horario_pdf(%s)", [pdf_id])
                 row = cursor.fetchone()
                 return bool(row[0]) if row else False
@@ -576,7 +576,7 @@ class PostgreSQLConsultas:
     @staticmethod
     def create_avaliacao_pdf(nome: str, ficheiro: str, id_anocurricular: int, id_curso: int) -> Optional[int]:
         try:
-            with connection.cursor() as cursor:
+            with connections["admin"].cursor() as cursor:
                 cursor.execute(
                     "SELECT fn_create_avaliacao_pdf(%s, %s, %s, %s)",
                     [nome, ficheiro, id_anocurricular, id_curso],
@@ -590,7 +590,7 @@ class PostgreSQLConsultas:
     @staticmethod
     def update_avaliacao_pdf(pdf_id: int, nome: str, ficheiro: str, id_anocurricular: int, id_curso: int) -> bool:
         try:
-            with connection.cursor() as cursor:
+            with connections["admin"].cursor() as cursor:
                 cursor.execute(
                     "SELECT fn_update_avaliacao_pdf(%s, %s, %s, %s, %s)",
                     [pdf_id, nome, ficheiro, id_anocurricular, id_curso],
@@ -604,7 +604,7 @@ class PostgreSQLConsultas:
     @staticmethod
     def delete_avaliacao_pdf(pdf_id: int) -> bool:
         try:
-            with connection.cursor() as cursor:
+            with connections["admin"].cursor() as cursor:
                 cursor.execute("SELECT fn_delete_avaliacao_pdf(%s)", [pdf_id])
                 row = cursor.fetchone()
                 return bool(row[0]) if row else False
@@ -651,7 +651,7 @@ class PostgreSQLConsultas:
     @staticmethod
     def create_uc(nome: str, id_curso: int, id_anocurricular: int, id_semestre: int, ects: float) -> Optional[int]:
         try:
-            with connection.cursor() as cursor:
+            with connections["admin"].cursor() as cursor:
                 cursor.execute(
                     "SELECT fn_create_uc(%s, %s, %s, %s, %s)",
                     [nome, id_curso, id_anocurricular, id_semestre, ects],
@@ -665,7 +665,7 @@ class PostgreSQLConsultas:
     @staticmethod
     def update_uc(uc_id: int, nome: str, id_curso: int, id_anocurricular: int, id_semestre: int, ects: float) -> bool:
         try:
-            with connection.cursor() as cursor:
+            with connections["admin"].cursor() as cursor:
                 cursor.execute(
                     "SELECT fn_update_uc(%s, %s, %s, %s, %s, %s)",
                     [uc_id, nome, id_curso, id_anocurricular, id_semestre, ects],
@@ -679,7 +679,7 @@ class PostgreSQLConsultas:
     @staticmethod
     def delete_uc(uc_id: int) -> bool:
         try:
-            with connection.cursor() as cursor:
+            with connections["admin"].cursor() as cursor:
                 cursor.execute("SELECT fn_delete_uc(%s)", [uc_id])
                 row = cursor.fetchone()
                 return bool(row[0]) if row else False
@@ -690,7 +690,7 @@ class PostgreSQLConsultas:
     @staticmethod
     def get_turnos_uc_by_uc_id(uc_id: int) -> List[Dict[str, Any]]:
         try:
-            with connection.cursor() as cursor:
+            with connections["admin"].cursor() as cursor:
                 cursor.execute("SELECT * FROM fn_get_turnos_uc_by_uc_id(%s)", [uc_id])
                 cols = [col[0] for col in cursor.description]
                 return [dict(zip(cols, row)) for row in cursor.fetchall()]
@@ -701,7 +701,7 @@ class PostgreSQLConsultas:
     @staticmethod
     def delete_turnos_uc_by_uc_id(uc_id: int) -> int:
         try:
-            with connection.cursor() as cursor:
+            with connections["admin"].cursor() as cursor:
                 cursor.execute("SELECT fn_delete_turnos_uc_by_uc_id(%s)", [uc_id])
                 row = cursor.fetchone()
                 return int(row[0]) if row and row[0] is not None else 0
@@ -712,7 +712,7 @@ class PostgreSQLConsultas:
     @staticmethod
     def create_turno_uc(id_turno: int, id_uc: int, hora_inicio: str, hora_fim: str) -> bool:
         try:
-            with connection.cursor() as cursor:
+            with connections["admin"].cursor() as cursor:
                 cursor.execute(
                     "SELECT fn_create_turno_uc(%s, %s, %s, %s)",
                     [id_turno, id_uc, hora_inicio, hora_fim],
