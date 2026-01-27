@@ -92,3 +92,11 @@ def is_mongodb_pdf(pdf_obj):
         return ficheiro_path.startswith("mongodb_gridfs:")
     except:
         return False
+
+@register.filter
+def multiply(value, arg):
+    """Multiplica um valor por outro número."""
+    try:
+        return float(value) * float(arg)
+    except (ValueError, TypeError):
+        return 0

@@ -1,5 +1,6 @@
 {% extends "home/base.html" %}
 {% load static %}
+{% load pdf_tags %}
 
 {% block title %}Analytics — Inscrições{% endblock %}
 
@@ -54,13 +55,13 @@
             {% for aluno in alunos_ativos %}
             <tr>
               <td><span class="badge">{{ forloop.counter }}</span></td>
-              <td>{{ aluno.aluno_id }}</td>
+              <td>{{ aluno.id }}</td>
               <td><strong>{{ aluno.total_tentativas }}</strong></td>
               <td><strong>{{ aluno.sucessos }}</strong></td>
               <td>
                 <div class="progress-bar">
-                  <div class="progress-fill" style="width: {{ aluno.taxa_sucesso }}%"></div>
-                  <span class="progress-text">{{ aluno.taxa_sucesso|floatformat:1 }}%</span>
+                  <div class="progress-fill" style="width: {{ aluno.taxa_sucesso|multiply:100 }}%"></div>
+                  <span class="progress-text">{{ aluno.taxa_sucesso|multiply:100|floatformat:1 }}%</span>
                 </div>
               </td>
             </tr>
@@ -123,7 +124,7 @@
           <tbody>
             {% for turno in turnos_cheios %}
             <tr>
-              <td><strong>{{ turno.turno_id }}</strong></td>
+              <td><strong>{{ turno.id }}</strong></td>
               <td>
                 <span class="status-badge high">{{ turno.rejeicoes_por_limite }}</span>
               </td>

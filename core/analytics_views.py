@@ -4,7 +4,6 @@ Dashboards com insights sobre inscrições, consultas, comportamento de alunos
 """
 
 from django.shortcuts import render, redirect
-from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.contrib import messages
 from bd2_projeto.services.mongo_service import (
@@ -17,7 +16,6 @@ from bd2_projeto.services.mongo_service import (
 from core.utils import admin_required
 
 @admin_required
-@login_required
 def analytics_inscricoes(request):
     """Dashboard com análise de inscrições em turnos"""
     
@@ -29,12 +27,31 @@ def analytics_inscricoes(request):
     
     # Alunos mais ativos
     alunos_ativos = analisar_alunos_mais_ativos()
+    # Renomear _id para id (Django templates não permitem underscore)
+    alunos_ativos = [
+        {**aluno, 'id': aluno.get('_id')} 
+        for aluno in alunos_ativos
+    ]
     
     # UCs mais procuradas
     ucs_procuradas = analisar_ucs_mais_procuradas()
+    # Renomear _id para id
+    ucs_procuradas = [
+        {
+            **uc, 
+            'id': uc.get('_id', {}).get('uc_id'),
+            'uc_nome': uc.get('_id', {}).get('uc_nome')
+        } 
+        for uc in ucs_procuradas
+    ]
     
     # Turnos sobrecarregados
     turnos_cheios = analisar_turnos_sobrecarregados()
+    # Renomear _id para id
+    turnos_cheios = [
+        {**turno, 'id': turno.get('_id')} 
+        for turno in turnos_cheios
+    ]
     
     contexto = {
         "taxa_sucesso": taxa_sucesso,
@@ -47,28 +64,24 @@ def analytics_inscricoes(request):
     return render(request, "admin/analytics_inscricoes.html", contexto)
 
 @admin_required
-@login_required
 def analytics_api_inscricoes_dia(request):
     """API para gráfico de inscrições por dia"""
     dados = analisar_inscricoes_por_dia()
     return JsonResponse(dados, safe=False)
 
 @admin_required
-@login_required
 def analytics_api_taxa_sucesso(request):
     """API para gráfico de taxa de sucesso"""
     dados = analisar_taxa_sucesso_inscricoes()
     return JsonResponse(dados, safe=False)
 
 @admin_required
-@login_required
 def analytics_api_alunos_ativos(request):
     """API para gráfico de alunos mais ativos"""
     dados = analisar_alunos_mais_ativos()
     return JsonResponse(dados, safe=False)
 
 @admin_required
-@login_required
 def analytics_api_ucs_procuradas(request):
     """API para gráfico de UCs mais procuradas"""
     dados = analisar_ucs_mais_procuradas()
