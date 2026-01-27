@@ -14,19 +14,26 @@ def _executar_funcao_lote(nome_func, conteudo_csv):
 @admin_required
 @require_http_methods(["POST"])
 def importar_alunos_csv(request):
-    if 'file' not in request.FILES:
-        return JsonResponse({'erro': 'Ficheiro não enviado.'}, status=400)
-    file = request.FILES['file']
-    try:
-        conteudo_csv = file.read().decode('utf-8')
-    except UnicodeDecodeError:
-        file.seek(0)
-        conteudo_csv = file.read().decode('latin1')
-    try:
-        _executar_funcao_lote('importar_alunos_csv', conteudo_csv)
-        return JsonResponse({'status': 'ok'})
-    except Exception as exc:
-        return JsonResponse({'status': 'erro', 'detalhe': str(exc)}, status=500)
+    if request.method == "POST":
+        if 'file' not in request.FILES:
+            messages.error(request, "Ficheiro não enviado.")
+            return render(request, "admin/import_data.html")
+        file = request.FILES['file']
+        try:
+            conteudo_csv = file.read().decode('utf-8')
+        except UnicodeDecodeError:
+            file.seek(0)
+            conteudo_csv = file.read().decode('latin1')
+        print('--- CSV LIDO ---')
+        print(conteudo_csv)
+        try:
+            _executar_funcao_lote('importar_alunos_csv', conteudo_csv)
+            messages.success(request, "Importação de alunos (CSV) concluída com sucesso!")
+        except Exception as exc:
+            messages.error(request, f"Erro na importação CSV: {exc}")
+        return render(request, "admin/import_data.html")
+    else:
+        return render(request, "admin/import_data.html")
 
 @admin_required
 def admin_import_data(request):
