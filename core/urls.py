@@ -131,8 +131,6 @@ urlpatterns = [
     path("tdm/avaliacoes/", views.avaliacoes_tdm, name="avaliacoes_tdm"),
     path("tdm/saidas/", views.saidas_tdm, name="saidas"),
     path("tdm/moodle/", views.moodle, name="moodle"),
-    path("tdm/inscricao_turno/", views.inscricao_turno_tdm, name="inscricao_turno_tdm"),
-    path("tdm/inscrever_turno/<int:n_turno>/", views.inscrever_turno_tdm, name="inscrever_turno_tdm"),
 
     #RSI
     path("rsi/", views.index_rsi, name="index_rsi"),

@@ -2,7 +2,7 @@
 Integração de Procedures, Functions e Triggers do PostgreSQL
 """
 
-from django.db import connection
+from django.db import connection, connections
 from django.contrib.auth.hashers import check_password
 from typing import List, Dict, Any, Tuple, Optional
 import logging
@@ -585,7 +585,8 @@ class PostgreSQLConsultas:
         """Obtém um turno pelo ID."""
         sql = "SELECT id_turno, n_turno, capacidade, tipo FROM turno WHERE id_turno = %s"
         try:
-            with connection.cursor() as cursor:
+            ##alteracao_user_para
+            with connections["admin"].cursor() as cursor:
                 cursor.execute(sql, [turno_id])
                 row = cursor.fetchone()
                 if row:
@@ -601,7 +602,8 @@ class PostgreSQLConsultas:
         """Cria um novo turno. Retorna o id_turno ou None se erro."""
         sql = "INSERT INTO turno (n_turno, capacidade, tipo) VALUES (%s, %s, %s) RETURNING id_turno"
         try:
-            with connection.cursor() as cursor:
+            #with connection.cursor() as cursor:
+            with connections["admin"].cursor() as cursor:
                 cursor.execute(sql, [n_turno, capacidade, tipo])
                 row = cursor.fetchone()
                 return row[0] if row else None
@@ -614,7 +616,8 @@ class PostgreSQLConsultas:
         """Atualiza um turno."""
         sql = "UPDATE turno SET n_turno = %s, capacidade = %s, tipo = %s WHERE id_turno = %s"
         try:
-            with connection.cursor() as cursor:
+            #with connection.cursor() as cursor:
+            with connections["admin"].cursor() as cursor:
                 cursor.execute(sql, [n_turno, capacidade, tipo, turno_id])
                 return True
         except Exception as e:
