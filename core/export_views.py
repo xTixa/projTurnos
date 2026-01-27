@@ -26,11 +26,6 @@ def _fetch_dicts(sql, params=None):
 
 
 def criar_xml_formatado(root):
-    rough_string = ET.tostring(root, encoding="unicode")
-    reparsed = minidom.parseString(rough_string)
-    return reparsed.toprettyxml(indent="  ", encoding="utf-8")
-
-def criar_xml_formatado(root):
     """Formata XML de forma legível"""
     rough_string = ET.tostring(root, encoding='unicode')
     reparsed = minidom.parseString(rough_string)
@@ -56,16 +51,7 @@ def refresh_all_materialized_views():
 
 @admin_required
 def exportar_alunos_csv(request):
-    sql = """
-        SELECT a.n_mecanografico, a.nome, a.email,
-               c.nome AS curso,
-               ac.ano_curricular
-        FROM aluno a
-        LEFT JOIN curso c ON a.id_curso = c.id_curso
-        LEFT JOIN ano_curricular ac ON a.id_anocurricular = ac.id_anocurricular
-        ORDER BY a.nome;
-    """
-    _, rows = _fetch(sql)
+    _, rows = _fetch("SELECT * FROM fn_export_alunos()")
 
     response = HttpResponse(content_type="text/csv; charset=utf-8")
     response["Content-Disposition"] = (
@@ -81,16 +67,7 @@ def exportar_alunos_csv(request):
 
 @admin_required
 def exportar_alunos_json(request):
-    sql = """
-        SELECT a.n_mecanografico, a.nome, a.email,
-               c.nome AS curso,
-               ac.ano_curricular
-        FROM aluno a
-        LEFT JOIN curso c ON a.id_curso = c.id_curso
-        LEFT JOIN ano_curricular ac ON a.id_anocurricular = ac.id_anocurricular
-        ORDER BY a.nome;
-    """
-    data = _fetch_dicts(sql)
+    data = _fetch_dicts("SELECT * FROM fn_export_alunos()")
     response = HttpResponse(
         json.dumps(data, ensure_ascii=False, indent=2),
         content_type="application/json; charset=utf-8",
@@ -103,16 +80,7 @@ def exportar_alunos_json(request):
 
 @admin_required
 def exportar_turnos_csv(request):
-    sql = """
-        SELECT t.id_turno, t.n_turno, t.tipo, t.capacidade,
-               uc.nome AS uc_nome,
-               tuc.hora_inicio, tuc.hora_fim
-        FROM turno t
-        LEFT JOIN turno_uc tuc ON t.id_turno = tuc.id_turno
-        LEFT JOIN unidade_curricular uc ON tuc.id_unidadecurricular = uc.id_unidadecurricular
-        ORDER BY t.id_turno;
-    """
-    _, rows = _fetch(sql)
+    _, rows = _fetch("SELECT * FROM fn_export_turnos()")
 
     response = HttpResponse(content_type="text/csv; charset=utf-8")
     response["Content-Disposition"] = (
@@ -136,16 +104,7 @@ def exportar_turnos_csv(request):
 
 @admin_required
 def exportar_turnos_json(request):
-    sql = """
-        SELECT t.id_turno, t.n_turno, t.tipo, t.capacidade,
-               uc.nome AS uc_nome,
-               tuc.hora_inicio, tuc.hora_fim
-        FROM turno t
-        LEFT JOIN turno_uc tuc ON t.id_turno = tuc.id_turno
-        LEFT JOIN unidade_curricular uc ON tuc.id_unidadecurricular = uc.id_unidadecurricular
-        ORDER BY t.id_turno;
-    """
-    data = _fetch_dicts(sql)
+    data = _fetch_dicts("SELECT * FROM fn_export_turnos()")
     response = HttpResponse(
         json.dumps(data, ensure_ascii=False, indent=2),
         content_type="application/json; charset=utf-8",
@@ -158,18 +117,7 @@ def exportar_turnos_json(request):
 
 @admin_required
 def exportar_inscricoes_csv(request):
-    sql = """
-        SELECT it.id_inscricao, it.data_inscricao,
-               a.n_mecanografico, a.nome AS aluno_nome,
-               uc.nome AS uc_nome,
-               t.n_turno, t.tipo
-        FROM inscricao_turno it
-        LEFT JOIN aluno a ON it.n_mecanografico = a.n_mecanografico
-        LEFT JOIN turno t ON it.id_turno = t.id_turno
-        LEFT JOIN unidade_curricular uc ON it.id_unidadecurricular = uc.id_unidadecurricular
-        ORDER BY it.id_inscricao;
-    """
-    _, rows = _fetch(sql)
+    _, rows = _fetch("SELECT * FROM fn_export_inscricoes()")
 
     response = HttpResponse(content_type="text/csv; charset=utf-8")
     response["Content-Disposition"] = (
@@ -201,18 +149,7 @@ def exportar_inscricoes_csv(request):
 
 @admin_required
 def exportar_inscricoes_json(request):
-    sql = """
-        SELECT it.id_inscricao, it.data_inscricao,
-               a.n_mecanografico, a.nome AS aluno_nome,
-               uc.nome AS uc_nome,
-               t.n_turno, t.tipo
-        FROM inscricao_turno it
-        LEFT JOIN aluno a ON it.n_mecanografico = a.n_mecanografico
-        LEFT JOIN turno t ON it.id_turno = t.id_turno
-        LEFT JOIN unidade_curricular uc ON it.id_unidadecurricular = uc.id_unidadecurricular
-        ORDER BY it.id_inscricao;
-    """
-    data = _fetch_dicts(sql)
+    data = _fetch_dicts("SELECT * FROM fn_export_inscricoes()")
     response = HttpResponse(
         json.dumps(data, ensure_ascii=False, indent=2),
         content_type="application/json; charset=utf-8",
@@ -225,18 +162,7 @@ def exportar_inscricoes_json(request):
 
 @admin_required
 def exportar_ucs_csv(request):
-    sql = """
-        SELECT uc.id_unidadecurricular, uc.nome, uc.ects,
-               c.nome AS curso,
-               ac.ano_curricular,
-               s.semestre
-        FROM unidade_curricular uc
-        LEFT JOIN curso c ON uc.id_curso = c.id_curso
-        LEFT JOIN ano_curricular ac ON uc.id_anocurricular = ac.id_anocurricular
-        LEFT JOIN semestre s ON uc.id_semestre = s.id_semestre
-        ORDER BY uc.id_unidadecurricular;
-    """
-    _, rows = _fetch(sql)
+    _, rows = _fetch("SELECT * FROM fn_export_ucs()")
 
     response = HttpResponse(content_type="text/csv; charset=utf-8")
     response["Content-Disposition"] = (
@@ -259,18 +185,7 @@ def exportar_ucs_csv(request):
 
 @admin_required
 def exportar_ucs_json(request):
-    sql = """
-        SELECT uc.id_unidadecurricular, uc.nome, uc.ects,
-               c.nome AS curso,
-               ac.ano_curricular,
-               s.semestre
-        FROM unidade_curricular uc
-        LEFT JOIN curso c ON uc.id_curso = c.id_curso
-        LEFT JOIN ano_curricular ac ON uc.id_anocurricular = ac.id_anocurricular
-        LEFT JOIN semestre s ON uc.id_semestre = s.id_semestre
-        ORDER BY uc.id_unidadecurricular;
-    """
-    data = _fetch_dicts(sql)
+    data = _fetch_dicts("SELECT * FROM fn_export_ucs()")
     response = HttpResponse(
         json.dumps(data, ensure_ascii=False, indent=2),
         content_type="application/json; charset=utf-8",
@@ -287,16 +202,7 @@ def exportar_ucs_json(request):
 
 @admin_required
 def exportar_alunos_xml(request):
-    sql = """
-        SELECT a.n_mecanografico, a.nome, a.email,
-               c.nome AS curso,
-               ac.ano_curricular
-        FROM aluno a
-        LEFT JOIN curso c ON a.id_curso = c.id_curso
-        LEFT JOIN ano_curricular ac ON a.id_anocurricular = ac.id_anocurricular
-        ORDER BY a.nome;
-    """
-    _, rows = _fetch(sql)
+    _, rows = _fetch("SELECT * FROM fn_export_alunos()")
 
     root = ET.Element("alunos")
     root.set("exportado_em", datetime.now().isoformat())
@@ -318,16 +224,7 @@ def exportar_alunos_xml(request):
 
 @admin_required
 def exportar_turnos_xml(request):
-    sql = """
-        SELECT t.id_turno, t.n_turno, t.tipo, t.capacidade,
-               uc.nome AS uc_nome,
-               tuc.hora_inicio, tuc.hora_fim
-        FROM turno t
-        LEFT JOIN turno_uc tuc ON t.id_turno = tuc.id_turno
-        LEFT JOIN unidade_curricular uc ON tuc.id_unidadecurricular = uc.id_unidadecurricular
-        ORDER BY t.id_turno;
-    """
-    _, rows = _fetch(sql)
+    _, rows = _fetch("SELECT * FROM fn_export_turnos()")
 
     root = ET.Element("turnos")
     root.set("exportado_em", datetime.now().isoformat())
@@ -351,18 +248,7 @@ def exportar_turnos_xml(request):
 
 @admin_required
 def exportar_inscricoes_xml(request):
-    sql = """
-        SELECT it.id_inscricao, it.data_inscricao,
-               a.n_mecanografico, a.nome AS aluno_nome,
-               uc.nome AS uc_nome,
-               t.n_turno, t.tipo
-        FROM inscricao_turno it
-        LEFT JOIN aluno a ON it.n_mecanografico = a.n_mecanografico
-        LEFT JOIN turno t ON it.id_turno = t.id_turno
-        LEFT JOIN unidade_curricular uc ON it.id_unidadecurricular = uc.id_unidadecurricular
-        ORDER BY it.id_inscricao;
-    """
-    _, rows = _fetch(sql)
+    _, rows = _fetch("SELECT * FROM fn_export_inscricoes()")
 
     root = ET.Element("inscricoes")
     root.set("exportado_em", datetime.now().isoformat())
@@ -386,18 +272,7 @@ def exportar_inscricoes_xml(request):
 
 @admin_required
 def exportar_ucs_xml(request):
-    sql = """
-        SELECT uc.id_unidadecurricular, uc.nome, uc.ects,
-               c.nome AS curso,
-               ac.ano_curricular,
-               s.semestre
-        FROM unidade_curricular uc
-        LEFT JOIN curso c ON uc.id_curso = c.id_curso
-        LEFT JOIN ano_curricular ac ON uc.id_anocurricular = ac.id_anocurricular
-        LEFT JOIN semestre s ON uc.id_semestre = s.id_semestre
-        ORDER BY uc.id_unidadecurricular;
-    """
-    _, rows = _fetch(sql)
+    _, rows = _fetch("SELECT * FROM fn_export_ucs()")
 
     root = ET.Element("unidades_curriculares")
     root.set("exportado_em", datetime.now().isoformat())
@@ -424,13 +299,7 @@ def exportar_ucs_xml(request):
 
 @admin_required
 def exportar_mv_estatisticas_xml(request):
-    sql = """
-        SELECT id_turno, n_turno, tipo, capacidade, uc_nome,
-               total_inscritos, vagas_disponiveis, taxa_ocupacao_percent
-        FROM mv_estatisticas_turno
-        ORDER BY id_turno;
-    """
-    _, rows = _fetch(sql)
+    _, rows = _fetch("SELECT id_turno, n_turno, tipo, capacidade, uc_nome, total_inscritos, vagas_disponiveis, taxa_ocupacao_percent FROM fn_export_mv_estatisticas_turno()")
 
     root = ET.Element("estatisticas_turnos")
     root.set("exportado_em", datetime.now().isoformat())
@@ -455,13 +324,7 @@ def exportar_mv_estatisticas_xml(request):
 
 @admin_required
 def exportar_mv_ucs_preenchidas_xml(request):
-    sql = """
-        SELECT id_unidadecurricular, uc_nome, curso_nome, ano_curricular,
-               total_inscricoes, total_alunos_inscritos, taxa_preenchimento_global_percent
-        FROM mv_ucs_mais_procuradas
-        ORDER BY total_inscricoes DESC;
-    """
-    _, rows = _fetch(sql)
+    _, rows = _fetch("SELECT id_unidadecurricular, uc_nome, curso_nome, ano_curricular, total_inscricoes, total_alunos_inscritos, taxa_preenchimento_global_percent FROM fn_export_mv_ucs_procuradas()")
 
     root = ET.Element("ucs_mais_procuradas")
     root.set("exportado_em", datetime.now().isoformat())
@@ -485,14 +348,7 @@ def exportar_mv_ucs_preenchidas_xml(request):
 
 @admin_required
 def exportar_mv_resumo_alunos_xml(request):
-    sql = """
-        SELECT n_mecanografico, aluno_nome, aluno_email, curso_nome,
-               ano_curricular, total_ucs_inscritas, total_turnos_inscritos,
-               total_ects, primeira_inscricao, ultima_inscricao, dias_com_atividade
-        FROM mv_resumo_inscricoes_aluno
-        ORDER BY aluno_nome;
-    """
-    _, rows = _fetch(sql)
+    _, rows = _fetch("SELECT * FROM fn_export_mv_resumo_alunos()")
 
     root = ET.Element("resumo_alunos")
     root.set("exportado_em", datetime.now().isoformat())
@@ -520,14 +376,7 @@ def exportar_mv_resumo_alunos_xml(request):
 
 @admin_required
 def exportar_mv_estatisticas_turno_csv(request):
-    sql = """
-        SELECT id_turno, n_turno, tipo, capacidade, uc_nome, curso_nome,
-               ano_curricular, total_inscritos, vagas_disponiveis,
-               taxa_ocupacao_percent, turno_cheio, hora_inicio, hora_fim
-        FROM mv_estatisticas_turno
-        ORDER BY id_turno;
-    """
-    _, rows = _fetch(sql)
+    _, rows = _fetch("SELECT * FROM fn_export_mv_estatisticas_turno()")
 
     response = HttpResponse(content_type="text/csv; charset=utf-8")
     response["Content-Disposition"] = (
@@ -571,14 +420,7 @@ def exportar_mv_estatisticas_turno_csv(request):
 
 @admin_required
 def exportar_mv_estatisticas_turno_json(request):
-    sql = """
-        SELECT id_turno, n_turno, tipo, capacidade, uc_nome, curso_nome,
-               ano_curricular, total_inscritos, vagas_disponiveis,
-               taxa_ocupacao_percent, turno_cheio, hora_inicio, hora_fim
-        FROM mv_estatisticas_turno
-        ORDER BY id_turno;
-    """
-    data = _fetch_dicts(sql)
+    data = _fetch_dicts("SELECT * FROM fn_export_mv_estatisticas_turno()")
     response = HttpResponse(
         json.dumps(data, ensure_ascii=False, indent=2),
         content_type="application/json; charset=utf-8",
@@ -591,14 +433,7 @@ def exportar_mv_estatisticas_turno_json(request):
 
 @admin_required
 def exportar_mv_ucs_preenchidas_csv(request):
-    sql = """
-        SELECT id_unidadecurricular, uc_nome, ects, curso_nome, ano_curricular,
-               semestre, total_alunos_inscritos, total_turnos_com_inscricoes,
-               total_inscricoes, capacidade_total_turnos, taxa_preenchimento_global_percent
-        FROM mv_ucs_mais_procuradas
-        ORDER BY total_inscricoes DESC;
-    """
-    _, rows = _fetch(sql)
+    _, rows = _fetch("SELECT * FROM fn_export_mv_ucs_procuradas()")
 
     response = HttpResponse(content_type="text/csv; charset=utf-8")
     response["Content-Disposition"] = (
@@ -638,14 +473,7 @@ def exportar_mv_ucs_preenchidas_csv(request):
 
 @admin_required
 def exportar_mv_ucs_preenchidas_json(request):
-    sql = """
-        SELECT id_unidadecurricular, uc_nome, ects, curso_nome, ano_curricular,
-               semestre, total_alunos_inscritos, total_turnos_com_inscricoes,
-               total_inscricoes, capacidade_total_turnos, taxa_preenchimento_global_percent
-        FROM mv_ucs_mais_procuradas
-        ORDER BY total_inscricoes DESC;
-    """
-    data = _fetch_dicts(sql)
+    data = _fetch_dicts("SELECT * FROM fn_export_mv_ucs_procuradas()")
     response = HttpResponse(
         json.dumps(data, ensure_ascii=False, indent=2),
         content_type="application/json; charset=utf-8",
@@ -658,14 +486,7 @@ def exportar_mv_ucs_preenchidas_json(request):
 
 @admin_required
 def exportar_mv_resumo_alunos_csv(request):
-    sql = """
-        SELECT n_mecanografico, aluno_nome, aluno_email, curso_nome,
-               ano_curricular, total_ucs_inscritas, total_turnos_inscritos,
-               total_ects, primeira_inscricao, ultima_inscricao, dias_com_atividade
-        FROM mv_resumo_inscricoes_aluno
-        ORDER BY aluno_nome;
-    """
-    _, rows = _fetch(sql)
+    _, rows = _fetch("SELECT * FROM fn_export_mv_resumo_alunos()")
 
     response = HttpResponse(content_type="text/csv; charset=utf-8")
     response["Content-Disposition"] = (
@@ -705,14 +526,7 @@ def exportar_mv_resumo_alunos_csv(request):
 
 @admin_required
 def exportar_mv_resumo_alunos_json(request):
-    sql = """
-        SELECT n_mecanografico, aluno_nome, aluno_email, curso_nome,
-               ano_curricular, total_ucs_inscritas, total_turnos_inscritos,
-               total_ects, primeira_inscricao, ultima_inscricao, dias_com_atividade
-        FROM mv_resumo_inscricoes_aluno
-        ORDER BY aluno_nome;
-    """
-    data = _fetch_dicts(sql)
+    data = _fetch_dicts("SELECT * FROM fn_export_mv_resumo_alunos()")
     response = HttpResponse(
         json.dumps(data, ensure_ascii=False, indent=2),
         content_type="application/json; charset=utf-8",
