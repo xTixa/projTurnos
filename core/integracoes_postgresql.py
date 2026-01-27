@@ -416,10 +416,10 @@ class PostgreSQLConsultas:
             return []
 
     @staticmethod
-    def usuarios_combinado() -> List[Dict[str, Any]]:
+    def users_combinado() -> List[Dict[str, Any]]:
         """Lista combinada de admins (auth_user), alunos e docentes."""
         sql = """
-            SELECT u.id, u.username, u.email, u.date_joined, u.is_active, u.is_staff, 'Admin' AS tipo
+            SELECT u.id::text AS id, u.username, u.email, u.date_joined, u.is_active, u.is_staff, 'Admin' AS tipo
             FROM auth_user u
             UNION ALL
             SELECT a.n_mecanografico::text, a.nome, a.email, NULL, true, false, 'Aluno'
@@ -427,7 +427,7 @@ class PostgreSQLConsultas:
             UNION ALL
             SELECT d.id_docente::text, d.nome, d.email, NULL, true, false, 'Docente'
             FROM docente d
-            ORDER BY id
+            ORDER BY tipo, id
         """
         try:
             with connection.cursor() as cursor:
@@ -435,7 +435,7 @@ class PostgreSQLConsultas:
                 cols = [col[0] for col in cursor.description]
                 return [dict(zip(cols, row)) for row in cursor.fetchall()]
         except Exception as e:
-            logger.error(f"Erro ao listar usuarios combinado: {e}")
+            logger.error(f"Erro ao listar users combinado: {e}")
             return []
 
     @staticmethod

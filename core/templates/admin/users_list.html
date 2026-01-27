@@ -84,8 +84,33 @@
     <div class="list-section">
         <h2>Lista de Utilizadores</h2>
 
+        <!-- FILTROS -->
+        <div class="filter-options">
+            <div class="filter-group">
+                <label for="search-input">Pesquisar:</label>
+                <input type="text" id="search-input" placeholder="Username ou email..." onkeyup="filtrarUtilizadores()">
+            </div>
+            
+            <div class="filter-group">
+                <label for="tipo-filter">Tipo:</label>
+                <select id="tipo-filter" onchange="filtrarUtilizadores()">
+                    <option value="">Todos</option>
+                    <option value="Admin">Admin</option>
+                    <option value="Aluno">Aluno</option>
+                    <option value="Docente">Docente</option>
+                </select>
+            </div>
+
+            <button type="button" class="btn-filter-reset" onclick="limparFiltros()">
+                <i class="fa-solid fa-rotate-left"></i> Limpar Filtros
+            </button>
+        </div>
+
         {% if users %}
-            <div class="table-info">Total: <strong>{{ users|length }}</strong> utilizador(es)</div>
+            <div class="table-info">
+                <span>Total: <strong id="total-users">{{ users|length }}</strong> utilizador(es)</span>
+                <span id="filtered-info" style="display:none; margin-left: 10px; color: #2563eb;"></span>
+            </div>
             <table class="admin-table">
                 <thead>
                     <tr>
@@ -163,6 +188,57 @@
     document.getElementById('btn-novo-user').addEventListener('click', function(e) {
         e.preventDefault();
         toggleFormulario();
+    });
+
+    // Filtrar utilizadores
+    function filtrarUtilizadores() {
+        const searchTerm = document.getElementById('search-input').value.toLowerCase();
+        const tipoFilter = document.getElementById('tipo-filter').value;
+        const table = document.querySelector('.admin-table tbody');
+        const rows = table.getElementsByTagName('tr');
+        let visibleCount = 0;
+
+        for (let i = 0; i < rows.length; i++) {
+            const row = rows[i];
+            const username = row.cells[1].textContent.toLowerCase();
+            const email = row.cells[2].textContent.toLowerCase();
+            const tipo = row.cells[3].textContent.trim();
+            
+            const matchSearch = username.includes(searchTerm) || email.includes(searchTerm);
+            const matchTipo = tipoFilter === '' || tipo === tipoFilter;
+            
+            if (matchSearch && matchTipo) {
+                row.style.display = '';
+                visibleCount++;
+            } else {
+                row.style.display = 'none';
+            }
+        }
+
+        // Atualizar contador
+        const filteredInfo = document.getElementById('filtered-info');
+        if (searchTerm || tipoFilter) {
+            filteredInfo.style.display = 'inline';
+            filteredInfo.textContent = `(Filtrado: ${visibleCount})`;
+        } else {
+            filteredInfo.style.display = 'none';
+        }
+    }
+
+    // Limpar filtros
+    function limparFiltros() {
+        document.getElementById('search-input').value = '';
+        document.getElementById('tipo-filter').value = '';
+        filtrarUtilizadores();
+    }
+
+    // Aplicar filtro inicial se vindo de uma página específica
+    window.addEventListener('load', function() {
+        const filterTipo = '{{ filter_tipo }}';
+        if (filterTipo) {
+            document.getElementById('tipo-filter').value = filterTipo;
+            filtrarUtilizadores();
+        }
     });
 </script>
 

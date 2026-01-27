@@ -551,7 +551,7 @@ def admin_export_data(request):
 
 #view para listar os utilizadores admin, alunos e docentes
 def admin_users_list(request):
-    users_sorted = PostgreSQLConsultas.usuarios_combinado()
+    users_sorted = PostgreSQLConsultas.users_combinado()
     cursos = PostgreSQLConsultas.cursos_list()
     anos = PostgreSQLConsultas.anos_curriculares()
     
@@ -567,7 +567,7 @@ def admin_users_create(request):
 
         if not username or not password:
             messages.error(request, "Username e password são obrigatórios.")
-            users_sorted = PostgreSQLConsultas.usuarios_combinado()
+            users_sorted = PostgreSQLConsultas.users_combinado()
             cursos = PostgreSQLConsultas.cursos_list()
             anos = PostgreSQLConsultas.anos_curriculares()
             return render(request, "admin/users_form.html", {"users": users_sorted, "cursos": cursos, "anos": anos})
@@ -610,7 +610,7 @@ def admin_users_create(request):
             messages.error(request, f"Erro ao criar utilizador: {str(e)}")
             return redirect("home:admin_users_create")
 
-    users_sorted = PostgreSQLConsultas.usuarios_combinado()
+    users_sorted = PostgreSQLConsultas.users_combinado()
     cursos = PostgreSQLConsultas.cursos_list()
     anos = PostgreSQLConsultas.anos_curriculares()
     
@@ -655,7 +655,7 @@ def admin_users_edit(request, id):
     }
     
     # SQL: Lista combinada de users (admin + aluno + docente)
-    users = PostgreSQLConsultas.usuarios_combinado()
+    users = PostgreSQLConsultas.users_combinado()
     users_sorted = sorted(users, key=lambda x: x.get('id', 0) if isinstance(x.get('id'), int) else int(x.get('id', 0)) if x.get('id') else 0)
     
     return render(request, "admin/users_form.html", {"user": user_data, "users": users_sorted})
@@ -1063,15 +1063,37 @@ def admin_avaliacoes_delete(request, id):
 
 #view para listar os docentes no admin
 def admin_users_docentes(request):
-    # SQL: Lista todos os docentes
-    docentes = PostgreSQLConsultas.docentes()
-    return render(request, "admin/users_filter.html", {"titulo": "Docentes", "users": docentes})
+    # Redireciona para a lista geral de utilizadores
+    # A filtragem é feita no cliente via JavaScript
+    users_sorted = PostgreSQLConsultas.usuarios_combinado()
+    cursos = PostgreSQLConsultas.cursos_list()
+    anos = PostgreSQLConsultas.anos_curriculares()
+    
+    # Passar um flag para o template indicar que deve filtrar por "Docente"
+    context = {
+        "users": users_sorted,
+        "cursos": cursos,
+        "anos": anos,
+        "filter_tipo": "Docente"
+    }
+    return render(request, "admin/users_list.html", context)
 
 #view para listar os alunos no admin
 def admin_users_alunos(request):
-    # SQL: Lista todos os alunos em ordem alfabética
-    alunos = PostgreSQLConsultas.alunos_por_ordem_alfabetica()
-    return render(request, "admin/users_filter.html", {"titulo": "Alunos", "users": alunos})
+    # Redireciona para a lista geral de utilizadores
+    # A filtragem é feita no cliente via JavaScript
+    users_sorted = PostgreSQLConsultas.usuarios_combinado()
+    cursos = PostgreSQLConsultas.cursos_list()
+    anos = PostgreSQLConsultas.anos_curriculares()
+    
+    # Passar um flag para o template indicar que deve filtrar por "Aluno"
+    context = {
+        "users": users_sorted,
+        "cursos": cursos,
+        "anos": anos,
+        "filter_tipo": "Aluno"
+    }
+    return render(request, "admin/users_list.html", context)
 
 def testar_mongo(request):
     # Adicionar um log no MongoDB

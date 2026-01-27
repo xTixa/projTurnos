@@ -7,43 +7,11 @@
     </a>
   </li>
 
-  <!-- UTILIZADORES (COM SUBMENU) -->
-  <li class="menu__item menu-item
-      {% if request.resolver_match.url_name in 'admin_users_list admin_users_docentes admin_users_alunos' %}
-        open
-      {% endif %}
-  ">
-
-    <button class="submenu-btn">
-      <i class="fa-solid fa-users"></i>
-      <span>Utilizadores</span>
-      <i class="fa-solid fa-chevron-down arrow"></i>
-    </button>
-
-    <ul class="submenu">
-
-      <li>
-        <a href="{% url 'home:admin_users_list' %}"
-           class="{% if request.resolver_match.url_name == 'admin_users_list' %}active-sub{% endif %}">
-          Todos
-        </a>
-      </li>
-
-      <li>
-        <a href="{% url 'home:admin_users_docentes' %}"
-           class="{% if request.resolver_match.url_name == 'admin_users_docentes' %}active-sub{% endif %}">
-          Docentes
-        </a>
-      </li>
-
-      <li>
-        <a href="{% url 'home:admin_users_alunos' %}"
-           class="{% if request.resolver_match.url_name == 'admin_users_alunos' %}active-sub{% endif %}">
-          Alunos
-        </a>
-      </li>
-
-    </ul>
+  <!-- UTILIZADORES -->
+  <li class="menu__item {% if 'admin_users' in request.resolver_match.url_name %}is-active{% endif %}">
+    <a href="{% url 'home:admin_users_list' %}">
+      <i class="fa-solid fa-users"></i> Utilizadores
+    </a>
   </li>
 
   <!-- TURNOS -->
