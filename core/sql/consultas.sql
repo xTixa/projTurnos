@@ -119,7 +119,7 @@ BEGIN
     END IF;
 
     RETURN QUERY EXECUTE format(
-        'SELECT ac.id_anocurricular, ac.ano_curricular, p.id, p.nome, p.ficheiro, p.atualizado_em, p.id_curso
+        'SELECT ac.id_anocurricular, ac.ano_curricular::text, p.id::integer, p.nome::text, p.ficheiro::text, p.atualizado_em::timestamp, p.id_curso
          FROM %I p
          JOIN ano_curricular ac ON ac.id_anocurricular = p.id_anocurricular
          WHERE p.id_curso = $1 OR p.id_curso IS NULL
