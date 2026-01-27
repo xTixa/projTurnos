@@ -70,4 +70,11 @@
     </a>
   </li>
 
+  <!-- IMPORTAÇÃO DE DADOS -->
+  <li class="menu__item {% if request.resolver_match.url_name == 'admin_import_data' %}is-active{% endif %}">
+    <a href="{% url 'home:admin_import_data' %}">
+      <i class="fa-solid fa-upload"></i> Importar Dados
+    </a>
+  </li>
+
 </ul>

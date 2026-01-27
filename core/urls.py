@@ -3,11 +3,15 @@ from django.contrib.auth import views as auth_views
 from . import views
 from . import analytics_views
 from . import export_views
+from . import import_views
 from core.views import testar_mongo
 
 app_name = "home"
 
 urlpatterns = [
+    # Importação de alunos
+    path("admin-panel/import/alunos/csv/", import_views.importar_alunos_csv, name="import_alunos_csv"),
+    path("admin-panel/import/", import_views.admin_import_data, name="admin_import_data"),
     path("", views.index, name="index"),
     path("ingresso/", views.ingresso, name="ingresso"),
     path("plano/", views.plano_curricular, name="plano"),

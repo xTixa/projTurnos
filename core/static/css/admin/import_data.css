@@ -1,0 +1,156 @@
+/* ================================
+   IMPORT DATA – ESTILO ALINHADO COM EXPORT
+   ================================ */
+
+/* Variáveis locais (iguais ao export.css para consistência) */
+.admin-import-page {
+  --primary: #2371a7;
+  --primary-dark: #1b5a85;
+  --bg-color: #f1f5f9;
+  --surface: #ffffff;
+  --text-dark: #0f172a;
+  --text-gray: #64748b;
+  --border: #e2e8f0;
+
+  --radius: 12px;
+  --shadow-sm: 0 4px 6px -1px rgba(0,0,0,0.05);
+  --shadow-md: 0 10px 15px -3px rgba(0,0,0,0.05);
+
+  max-width: 520px;
+  margin: 3rem auto;
+  background: var(--surface);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+  padding: 2.5rem 2.75rem;
+  animation: fadeIn 0.4s ease;
+}
+
+/* --- TÍTULOS --- */
+.admin-import-page .page-title {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--primary);
+  margin-bottom: 0.5rem;
+}
+
+.admin-import-page .page-subtitle {
+  font-size: 0.95rem;
+  color: var(--text-gray);
+  margin-bottom: 2rem;
+}
+
+/* --- FORMULÁRIO --- */
+.admin-import-page .import-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.admin-import-page .form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.admin-import-page label {
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: var(--text-dark);
+}
+
+/* --- INPUT FILE --- */
+.admin-import-page input[type="file"] {
+  padding: 0.55rem 0.6rem;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: #f8fafc;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: border 0.2s ease, box-shadow 0.2s ease;
+}
+
+.admin-import-page input[type="file"]:hover {
+  border-color: var(--primary);
+}
+
+.admin-import-page input[type="file"]:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px rgba(35, 113, 167, 0.15);
+}
+
+/* --- BOTÃO IMPORTAR --- */
+.admin-import-page .btn.btn-primary {
+  margin-top: 0.75rem;
+  background: var(--primary);
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  padding: 0.7rem 1rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  box-shadow: var(--shadow-sm);
+}
+
+.admin-import-page .btn.btn-primary:hover {
+  background: var(--primary-dark);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+.admin-import-page .btn.btn-primary:active {
+  transform: translateY(0);
+}
+
+/* --- MENSAGENS (SUCESSO / ERRO) --- */
+.admin-import-page .messages {
+  list-style: none;
+  margin: 1.75rem 0 0 0;
+  padding: 0;
+}
+
+.admin-import-page .messages li {
+  padding: 0.7rem 0.9rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  margin-bottom: 0.5rem;
+  border: 1px solid transparent;
+}
+
+/* Mensagem genérica (fallback) */
+.admin-import-page .messages li {
+  background: #f0f9ff;
+  color: #0c4a6e;
+  border-color: #bae6fd;
+}
+
+/* --- ANIMAÇÃO --- */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* --- RESPONSIVO --- */
+@media (max-width: 480px) {
+  .admin-import-page {
+    padding: 2rem 1.75rem;
+    margin: 2rem 1rem;
+  }
+
+  .admin-import-page .page-title {
+    font-size: 1.5rem;
+  }
+
+  .admin-import-page .page-subtitle {
+    font-size: 0.85rem;
+  }
+}
