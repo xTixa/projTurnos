@@ -1,28 +1,20 @@
 from datetime import datetime
-from django.shortcuts import render, redirect, get_object_or_404
+from django.shortcuts import render, redirect
 from django.contrib import messages
-from django.db import models, connection
-from .models import AnoCurricular, UnidadeCurricular, Semestre, Docente, Curso, HorarioPDF, AvaliacaoPDF, Aluno, TurnoUc, Turno, InscricaoTurno, InscritoUc, LogEvento, AuditoriaInscricao, Matricula, LecionaUc
-from .db_views import CadeirasSemestre, AlunosPorOrdemAlfabetica, Turnos, Cursos
+from django.db import connection
 from django.http import JsonResponse, FileResponse
 import json
-from django.contrib.auth.models import User
-from core.integracoes_postgresql import PostgreSQLAuth, PostgreSQLTurnos, PostgreSQLConsultas, PostgreSQLProcedures, PostgreSQLDAPE
+from core.integracoes_postgresql import PostgreSQLAuth, PostgreSQLTurnos, PostgreSQLConsultas, PostgreSQLProcedures, PostgreSQLDAPE, PostgreSQLPDF, PostgreSQLLogs
 from bd2_projeto.services.mongo_service import (
     adicionar_log, listar_eventos_mongo, listar_logs, registar_auditoria_inscricao,
-    validar_inscricao_disponivel, registar_consulta_aluno,
-    registar_atividade_docente, registar_erro, registar_auditoria_user
+    validar_inscricao_disponivel, registar_consulta_aluno, registar_erro, registar_auditoria_user
 )
-from bd2_projeto.services.gridfs_service import (
-    upload_pdf_horario, upload_pdf_avaliacao,
-    download_pdf, eliminar_pdf, listar_pdfs_horarios, listar_pdfs_avaliacoes
-)
-from core.utils import registar_log, admin_required, aluno_required, user_required, docente_required
+from bd2_projeto.services.gridfs_service import (upload_pdf_horario, upload_pdf_avaliacao, download_pdf, eliminar_pdf)
+from core.utils import registar_log, admin_required, aluno_required, user_required
 import logging
 import time
 
 logger = logging.getLogger(__name__)
-
 
 def _listar_pdfs_por_ano(model_table, course_id):
     """Obtém PDFs mais recentes por ano curricular via SQL."""
@@ -1106,9 +1098,10 @@ def testar_mongo(request):
 
 #view para apagar o pdf dos horarios
 def admin_horarios_delete(request, id):
-    horario = get_object_or_404(HorarioPDF, id=id)
-    horario.delete()
-    messages.success(request, "Horário apagado!")
+    if PostgreSQLPDF.delete_pdf(id, 'horario'):
+        messages.success(request, "Horário apagado!")
+    else:
+        messages.error(request, "Erro ao apagar horário")
     return redirect("home:admin_horarios_list")
 
 # NOVA VIEW PARA TESTAR MONGO
@@ -1735,43 +1728,38 @@ def admin_logs_list(request):
         except Exception:
             return str(val)
 
-    #query nos logs sql
-    sql_qs = LogEvento.objects.all()
-    if operacao_filter:
-        sql_qs = sql_qs.filter(operacao__icontains=operacao_filter)
-    if entidade_filter:
-        sql_qs = sql_qs.filter(entidade__icontains=entidade_filter)
-    sql_qs = sql_qs.order_by('-data_hora')[:limite]
+    #query nos logs sql usando SQL puro
+    sql_logs_raw = PostgreSQLLogs.list_logs(operacao_filter=operacao_filter, entidade_filter=entidade_filter, limite=limite)
 
     #converte logs SQL para uma lista de dicionários
     sql_logs = [
         {
-            "id": log.id_log,
+            "id": log.get('id_log'),
             "fonte": "SQL",
-            "data": log.data_hora,
-            "data_display": log.data_hora.strftime("%Y-%m-%d %H:%M:%S") if log.data_hora else "",
-            "operacao": log.operacao,
-            "entidade": log.entidade,
-            "chave": log.chave_primaria,
-            "utilizador": log.utilizador_db,
+            "data": log.get('data_hora'),
+            "data_display": log.get('data_hora').strftime("%Y-%m-%d %H:%M:%S") if log.get('data_hora') else "",
+            "operacao": log.get('operacao'),
+            "entidade": log.get('entidade'),
+            "chave": log.get('chave_primaria'),
+            "utilizador": log.get('utilizador_db'),
             "ip": "",
             "user_agent": "",
-            "detalhes": _to_str(log.detalhes),
+            "detalhes": _to_str(log.get('detalhes')),
         }
-        for log in sql_qs
+        for log in sql_logs_raw
     ]
 
-    #obtem os logs em Mongo utiliazndo os mesmos filtros e limite
+    #obtem os logs em Mongo utilizando os mesmos filtros e limite
     mongo_logs = listar_eventos_mongo(filtro_acao=operacao_filter or None, filtro_entidade=entidade_filter or None, limite=limite,)
 
-    #junta os logs do sql com os do mongo e oredena por data
+    #junta os logs do sql com os do mongo e ordena por data
     logs_unificados = sql_logs + mongo_logs
     logs_unificados = sorted(logs_unificados, key=lambda l: l.get("data") or datetime.min, reverse=True)[:limite]
 
     #carrega mais logs para construir listas de filtros
     mongo_all_for_filters = listar_eventos_mongo(limite=1000)
-    operacoes = set(list(LogEvento.objects.values_list('operacao', flat=True).distinct()) + [l.get("operacao", "") for l in mongo_all_for_filters])
-    entidades = set(list(LogEvento.objects.values_list('entidade', flat=True).distinct()) + [l.get("entidade", "") for l in mongo_all_for_filters])
+    operacoes = set(PostgreSQLLogs.get_distinct_operacoes() + [l.get("operacao", "") for l in mongo_all_for_filters])
+    entidades = set(PostgreSQLLogs.get_distinct_entidades() + [l.get("entidade", "") for l in mongo_all_for_filters])
 
     return render(request, "admin/logs_list.html", {
         "logs": logs_unificados,
