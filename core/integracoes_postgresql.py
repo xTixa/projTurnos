@@ -892,16 +892,10 @@ class PostgreSQLAuth:
 
     @staticmethod
     def fetch_admin(username_or_email: str) -> Optional[Dict[str, Any]]:
-        """Obtém admin por username ou email."""
-        sql = """
-            SELECT id, username, email, password, is_staff, is_active
-            FROM auth_user
-            WHERE (username = %s OR email = %s)
-            LIMIT 1
-        """
+        """Obtém admin por username ou email via fn_fetch_admin."""
         try:
             with connection.cursor() as cursor:
-                cursor.execute(sql, [username_or_email, username_or_email])
+                cursor.execute("SELECT * FROM fn_fetch_admin(%s)", [username_or_email])
                 row = cursor.fetchone()
                 if not row:
                     return None
@@ -921,16 +915,10 @@ class PostgreSQLAuth:
 
     @staticmethod
     def fetch_aluno_por_email(email: str) -> Optional[Dict[str, Any]]:
-        """Busca aluno por email."""
-        sql = """
-            SELECT n_mecanografico, nome, email, password, id_curso, id_anocurricular
-            FROM aluno
-            WHERE email = %s
-            LIMIT 1
-        """
+        """Busca aluno por email via fn_fetch_aluno_por_email."""
         try:
             with connection.cursor() as cursor:
-                cursor.execute(sql, [email])
+                cursor.execute("SELECT * FROM fn_fetch_aluno_por_email(%s)", [email])
                 row = cursor.fetchone()
                 if not row:
                     return None
@@ -942,16 +930,10 @@ class PostgreSQLAuth:
 
     @staticmethod
     def fetch_docente_por_email(email: str) -> Optional[Dict[str, Any]]:
-        """Busca docente por email."""
-        sql = """
-            SELECT id_docente, nome, email, password, cargo
-            FROM docente
-            WHERE email = %s
-            LIMIT 1
-        """
+        """Busca docente por email via fn_fetch_docente_por_email."""
         try:
             with connection.cursor() as cursor:
-                cursor.execute(sql, [email])
+                cursor.execute("SELECT * FROM fn_fetch_docente_por_email(%s)", [email])
                 row = cursor.fetchone()
                 if not row:
                     return None
@@ -963,17 +945,17 @@ class PostgreSQLAuth:
 
 
 class PostgreSQLPDF:
-    """Operações com PDFs via funções SQL existentes."""
+    """Operações com PDFs via funções SQL."""
 
     @staticmethod
     def delete_pdf(pdf_id: int, pdf_type: str) -> bool:
-        """Apaga um PDF (horario ou avaliacao) por ID via funções fn_delete_horario_pdf/fn_delete_avaliacao_pdf."""
+        """Apaga um PDF (horario ou avaliacao) por ID via fn_delete_pdf_horario/fn_delete_pdf_avaliacao."""
         try:
-            with connection.cursor() as cursor:
+            with connections["admin"].cursor() as cursor:
                 if pdf_type == 'horario':
-                    cursor.execute("SELECT fn_delete_horario_pdf(%s)", [pdf_id])
+                    cursor.execute("SELECT fn_delete_pdf_horario(%s)", [pdf_id])
                 else:
-                    cursor.execute("SELECT fn_delete_avaliacao_pdf(%s)", [pdf_id])
+                    cursor.execute("SELECT fn_delete_pdf_avaliacao(%s)", [pdf_id])
                 row = cursor.fetchone()
                 return bool(row[0]) if row else False
         except Exception as e:
@@ -982,13 +964,13 @@ class PostgreSQLPDF:
 
     @staticmethod
     def get_pdf(pdf_id: int, pdf_type: str) -> Optional[Dict[str, Any]]:
-        """Obtém um PDF específico via funções fn_get_horario_pdf_by_id/fn_get_avaliacao_pdf_by_id."""
+        """Obtém um PDF específico via fn_get_pdf_horario/fn_get_pdf_avaliacao."""
         try:
             with connection.cursor() as cursor:
                 if pdf_type == 'horario':
-                    cursor.execute("SELECT * FROM fn_get_horario_pdf_by_id(%s)", [pdf_id])
+                    cursor.execute("SELECT * FROM fn_get_pdf_horario(%s)", [pdf_id])
                 else:
-                    cursor.execute("SELECT * FROM fn_get_avaliacao_pdf_by_id(%s)", [pdf_id])
+                    cursor.execute("SELECT * FROM fn_get_pdf_avaliacao(%s)", [pdf_id])
                 row = cursor.fetchone()
                 if not row:
                     return None
@@ -1000,28 +982,14 @@ class PostgreSQLPDF:
 
 
 class PostgreSQLLogs:
-    """Operações com logs de eventos via SQL."""
+    """Operações com logs de eventos via funções SQL."""
 
     @staticmethod
     def list_logs(operacao_filter: Optional[str] = None, entidade_filter: Optional[str] = None, limite: int = 100) -> List[Dict[str, Any]]:
-        """Lista logs com filtros opcionais."""
-        sql = "SELECT * FROM log_eventos WHERE 1=1"
-        params = []
-
-        if operacao_filter:
-            sql += " AND operacao ILIKE %s"
-            params.append(f"%{operacao_filter}%")
-
-        if entidade_filter:
-            sql += " AND entidade ILIKE %s"
-            params.append(f"%{entidade_filter}%")
-
-        sql += " ORDER BY data_hora DESC LIMIT %s"
-        params.append(limite)
-
+        """Lista logs com filtros opcionais via fn_list_logs."""
         try:
-            with connection.cursor() as cursor:
-                cursor.execute(sql, params)
+            with connections["admin"].cursor() as cursor:
+                cursor.execute("SELECT * FROM fn_list_logs(%s, %s, %s)", [operacao_filter, entidade_filter, limite])
                 cols = [col[0] for col in cursor.description]
                 return [dict(zip(cols, row)) for row in cursor.fetchall()]
         except Exception as e:
@@ -1030,11 +998,10 @@ class PostgreSQLLogs:
 
     @staticmethod
     def get_distinct_operacoes() -> List[str]:
-        """Obtém lista de operações distintas."""
-        sql = "SELECT DISTINCT operacao FROM log_eventos WHERE operacao IS NOT NULL AND operacao != '' ORDER BY operacao"
+        """Obtém lista de operações distintas via fn_get_distinct_operacoes."""
         try:
-            with connection.cursor() as cursor:
-                cursor.execute(sql)
+            with connections["admin"].cursor() as cursor:
+                cursor.execute("SELECT operacao FROM fn_get_distinct_operacoes()")
                 return [row[0] for row in cursor.fetchall()]
         except Exception as e:
             logger.error(f"Erro ao obter operações: {e}")
@@ -1042,11 +1009,10 @@ class PostgreSQLLogs:
 
     @staticmethod
     def get_distinct_entidades() -> List[str]:
-        """Obtém lista de entidades distintas."""
-        sql = "SELECT DISTINCT entidade FROM log_eventos WHERE entidade IS NOT NULL AND entidade != '' ORDER BY entidade"
+        """Obtém lista de entidades distintas via fn_get_distinct_entidades."""
         try:
-            with connection.cursor() as cursor:
-                cursor.execute(sql)
+            with connections["admin"].cursor() as cursor:
+                cursor.execute("SELECT entidade FROM fn_get_distinct_entidades()")
                 return [row[0] for row in cursor.fetchall()]
         except Exception as e:
             logger.error(f"Erro ao obter entidades: {e}")
@@ -1058,15 +1024,10 @@ class PostgreSQLTurnos:
 
     @staticmethod
     def get_aluno(n_mecanografico: int) -> Optional[Dict[str, Any]]:
-        """Obtém aluno por número mecanográfico."""
-        sql = """
-            SELECT n_mecanografico, nome, email, id_curso, id_anocurricular
-            FROM aluno
-            WHERE n_mecanografico = %s
-        """
+        """Obtém aluno por número mecanográfico via fn_get_aluno."""
         try:
             with connection.cursor() as cursor:
-                cursor.execute(sql, [n_mecanografico])
+                cursor.execute("SELECT * FROM fn_get_aluno(%s)", [n_mecanografico])
                 row = cursor.fetchone()
                 if not row:
                     return None
@@ -1078,10 +1039,10 @@ class PostgreSQLTurnos:
 
     @staticmethod
     def get_turno(turno_id: int) -> Optional[Dict[str, Any]]:
-        """Obtém turno por ID via função fn_get_turno_by_id."""
+        """Obtém turno por ID via fn_get_turno."""
         try:
             with connection.cursor() as cursor:
-                cursor.execute("SELECT * FROM fn_get_turno_by_id(%s)", [turno_id])
+                cursor.execute("SELECT * FROM fn_get_turno(%s)", [turno_id])
                 row = cursor.fetchone()
                 if not row:
                     return None
@@ -1093,10 +1054,10 @@ class PostgreSQLTurnos:
 
     @staticmethod
     def get_uc(uc_id: int) -> Optional[Dict[str, Any]]:
-        """Obtém UC por ID via função fn_get_uc_by_id."""
+        """Obtém UC por ID via fn_get_uc."""
         try:
             with connection.cursor() as cursor:
-                cursor.execute("SELECT * FROM fn_get_uc_by_id(%s)", [uc_id])
+                cursor.execute("SELECT * FROM fn_get_uc(%s)", [uc_id])
                 row = cursor.fetchone()
                 if not row:
                     return None
@@ -1108,93 +1069,70 @@ class PostgreSQLTurnos:
 
     @staticmethod
     def turno_pertence_uc(turno_id: int, uc_id: int) -> bool:
-        """Verifica se turno pertence a UC."""
-        sql = """
-            SELECT 1 FROM turno_uc
-            WHERE id_turno = %s AND id_unidadecurricular = %s
-            LIMIT 1
-        """
+        """Verifica se turno pertence a UC via fn_turno_pertence_uc."""
         try:
             with connection.cursor() as cursor:
-                cursor.execute(sql, [turno_id, uc_id])
-                return cursor.fetchone() is not None
+                cursor.execute("SELECT fn_turno_pertence_uc(%s, %s)", [turno_id, uc_id])
+                row = cursor.fetchone()
+                return bool(row[0]) if row else False
         except Exception as e:
             logger.error(f"Erro ao validar turno/UC: {e}")
             return False
 
     @staticmethod
     def inscrito_na_uc(n_mecanografico: int, uc_id: int) -> bool:
-        """Verifica se aluno está inscrito na UC."""
-        sql = """
-            SELECT 1 FROM inscrito_uc
-            WHERE n_mecanografico = %s AND id_unidadecurricular = %s AND estado = TRUE
-            LIMIT 1
-        """
+        """Verifica se aluno está inscrito em UC via fn_inscrito_na_uc."""
         try:
             with connection.cursor() as cursor:
-                cursor.execute(sql, [n_mecanografico, uc_id])
-                return cursor.fetchone() is not None
+                cursor.execute("SELECT fn_inscrito_na_uc(%s, %s)", [n_mecanografico, uc_id])
+                row = cursor.fetchone()
+                return bool(row[0]) if row else False
         except Exception as e:
             logger.error(f"Erro ao verificar inscrito_uc: {e}")
             return False
 
     @staticmethod
     def count_inscritos(turno_id: int, uc_id: int) -> int:
-        """Conta inscritos num turno."""
-        sql = """
-            SELECT COUNT(*) FROM inscricao_turno
-            WHERE id_turno = %s AND id_unidadecurricular = %s
-        """
+        """Conta inscritos em turno/UC via fn_count_inscritos."""
         try:
             with connection.cursor() as cursor:
-                cursor.execute(sql, [turno_id, uc_id])
+                cursor.execute("SELECT fn_count_inscritos(%s, %s)", [turno_id, uc_id])
                 row = cursor.fetchone()
-                return row[0] if row else 0
+                return int(row[0]) if row else 0
         except Exception as e:
             logger.error(f"Erro ao contar inscritos: {e}")
             return 0
 
     @staticmethod
     def create_inscricao_turno(n_mecanografico: int, turno_id: int, uc_id: int) -> bool:
-        """Cria inscrição no turno via procedure criar_inscricao_turno."""
+        """Cria inscrição em turno via fn_create_inscricao_turno."""
         try:
             with connection.cursor() as cursor:
-                cursor.execute(
-                    "CALL criar_inscricao_turno(%s, %s, %s)",
-                    [n_mecanografico, turno_id, uc_id]
-                )
-            return True
+                cursor.execute("SELECT fn_create_inscricao_turno(%s, %s, %s)", [n_mecanografico, turno_id, uc_id])
+                row = cursor.fetchone()
+                return bool(row[0]) if row else False
         except Exception as e:
             logger.error(f"Erro ao criar inscricao_turno: {e}")
             return False
 
     @staticmethod
     def delete_inscricao_turno(n_mecanografico: int, turno_id: int, uc_id: Optional[int] = None) -> int:
-        """Apaga inscrição no turno via procedure remover_inscricao_turno ou SQL direto."""
+        """Apaga inscrição no turno via fn_delete_inscricao_turno."""
         try:
             with connection.cursor() as cursor:
-                if uc_id is not None:
-                    cursor.execute(
-                        "CALL remover_inscricao_turno(%s, %s, %s)",
-                        [n_mecanografico, turno_id, uc_id]
-                    )
-                    return 1
-                else:
-                    cursor.execute(
-                        "DELETE FROM inscricao_turno WHERE n_mecanografico = %s AND id_turno = %s",
-                        [n_mecanografico, turno_id]
-                    )
-                    return cursor.rowcount
+                cursor.execute("SELECT fn_delete_inscricao_turno(%s, %s, %s)", [n_mecanografico, turno_id, uc_id])
+                row = cursor.fetchone()
+                return int(row[0]) if row else 0
         except Exception as e:
             logger.error(f"Erro ao apagar inscricao_turno: {e}")
             return 0
 
     @staticmethod
     def turno_uc_por_uc(uc_id: int) -> List[Dict[str, Any]]:
-        """Lista turnos de uma UC via função fn_get_turnos_uc_by_uc_id."""
+        """Lista turnos de uma UC via fn_turno_uc_por_uc."""
         try:
             with connection.cursor() as cursor:
-                cursor.execute("SELECT * FROM fn_get_turnos_uc_by_uc_id(%s)", [uc_id])
+                cursor.execute("SELECT * FROM fn_turno_uc_por_uc(%s)", [uc_id])
                 cols = [col[0] for col in cursor.description]
                 return [dict(zip(cols, row)) for row in cursor.fetchall()]
         except Exception as e:
@@ -1203,20 +1141,10 @@ class PostgreSQLTurnos:
 
     @staticmethod
     def ucs_inscritas_por_aluno(n_mecanografico: int) -> List[Dict[str, Any]]:
-        """Lista UCs inscritas por aluno."""
-        sql = """
-            SELECT iu.id_unidadecurricular,
-                   uc.nome,
-                   uc.id_curso,
-                   uc.id_anocurricular
-            FROM inscrito_uc iu
-            JOIN unidade_curricular uc ON uc.id_unidadecurricular = iu.id_unidadecurricular
-            WHERE iu.n_mecanografico = %s AND iu.estado = TRUE
-            ORDER BY uc.nome
-        """
+        """Lista UCs inscritas por aluno via fn_ucs_inscritas_por_aluno."""
         try:
             with connection.cursor() as cursor:
-                cursor.execute(sql, [n_mecanografico])
+                cursor.execute("SELECT * FROM fn_ucs_inscritas_por_aluno(%s)", [n_mecanografico])
                 cols = [col[0] for col in cursor.description]
                 return [dict(zip(cols, row)) for row in cursor.fetchall()]
         except Exception as e:
@@ -1225,24 +1153,10 @@ class PostgreSQLTurnos:
 
     @staticmethod
     def inscricoes_turno_por_aluno(n_mecanografico: int) -> List[Dict[str, Any]]:
-        """Lista inscrições em turnos do aluno."""
-        sql = """
-            SELECT it.id_turno,
-                   it.id_unidadecurricular,
-                   tu.hora_inicio,
-                   tu.hora_fim,
-                   uc.nome AS uc_nome,
-                   t.tipo AS turno_tipo,
-                   t.n_turno AS turno_numero
-            FROM inscricao_turno it
-            LEFT JOIN turno_uc tu ON tu.id_turno = it.id_turno AND tu.id_unidadecurricular = it.id_unidadecurricular
-            LEFT JOIN unidade_curricular uc ON uc.id_unidadecurricular = it.id_unidadecurricular
-            LEFT JOIN turno t ON t.id_turno = it.id_turno
-            WHERE it.n_mecanografico = %s
-        """
+        """Lista inscrições em turnos do aluno via fn_inscricoes_turno_por_aluno."""
         try:
             with connection.cursor() as cursor:
-                cursor.execute(sql, [n_mecanografico])
+                cursor.execute("SELECT * FROM fn_inscricoes_turno_por_aluno(%s)", [n_mecanografico])
                 cols = [col[0] for col in cursor.description]
                 return [dict(zip(cols, row)) for row in cursor.fetchall()]
         except Exception as e:
@@ -1251,15 +1165,10 @@ class PostgreSQLTurnos:
 
     @staticmethod
     def turno_uc_por_turno(turno_id: int) -> List[Dict[str, Any]]:
-        """Obtém turno_uc por turno."""
-        sql = """
-            SELECT id_turno, id_unidadecurricular, hora_inicio, hora_fim
-            FROM turno_uc
-            WHERE id_turno = %s
-        """
+        """Obtém turno_uc por turno via fn_turno_uc_por_turno."""
         try:
             with connection.cursor() as cursor:
-                cursor.execute(sql, [turno_id])
+                cursor.execute("SELECT * FROM fn_turno_uc_por_turno(%s)", [turno_id])
                 cols = [col[0] for col in cursor.description]
                 return [dict(zip(cols, row)) for row in cursor.fetchall()]
         except Exception as e:
