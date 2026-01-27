@@ -95,6 +95,7 @@ LANGUAGE plpgsql
 AS $$
 DECLARE
     v_conflito RECORD;
+    v_detalhes TEXT;
 BEGIN
     SELECT * INTO v_conflito
     FROM verificar_conflito_horario(NEW.n_mecanografico, NEW.id_turno)
@@ -102,7 +103,28 @@ BEGIN
     LIMIT 1;
 
     IF FOUND THEN
-        RAISE EXCEPTION 'Conflito de horário detectado: %', v_conflito.mensagem;
+        -- Construir mensagem detalhada
+        SELECT STRING_AGG(
+            'Turno ' || t.id_turno || ' de ' || uc.nome || ' (' || 
+            tu.hora_inicio::TEXT || '-' || tu.hora_fim::TEXT || ')',
+            '; '
+        )
+        INTO v_detalhes
+        FROM inscricao_turno it
+        JOIN turno t ON it.id_turno = t.id_turno
+        JOIN turno_uc tu ON tu.id_turno = t.id_turno
+        JOIN unidade_curricular uc ON it.id_unidadecurricular = uc.id_unidadecurricular
+        WHERE it.n_mecanografico = NEW.n_mecanografico
+          AND (
+              (tu.hora_inicio <= (SELECT hora_inicio FROM turno_uc WHERE id_turno = NEW.id_turno LIMIT 1) 
+               AND tu.hora_fim > (SELECT hora_inicio FROM turno_uc WHERE id_turno = NEW.id_turno LIMIT 1)) OR
+              (tu.hora_inicio < (SELECT hora_fim FROM turno_uc WHERE id_turno = NEW.id_turno LIMIT 1) 
+               AND tu.hora_fim >= (SELECT hora_fim FROM turno_uc WHERE id_turno = NEW.id_turno LIMIT 1)) OR
+              (tu.hora_inicio >= (SELECT hora_inicio FROM turno_uc WHERE id_turno = NEW.id_turno LIMIT 1) 
+               AND tu.hora_fim <= (SELECT hora_fim FROM turno_uc WHERE id_turno = NEW.id_turno LIMIT 1))
+          );
+        
+        RAISE EXCEPTION 'Conflito de horário detectado: % Turnos em conflito: %', v_conflito.mensagem, COALESCE(v_detalhes, 'Desconhecido');
     END IF;
     RETURN NEW;
 END;
