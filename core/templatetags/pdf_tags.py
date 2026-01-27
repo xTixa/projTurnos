@@ -17,7 +17,7 @@ def pdf_url(pdf_obj, tipo_pdf):
     Gera o URL correto para um PDF, seja do MongoDB ou do filesystem
     
     Args:
-        pdf_obj: Objeto HorarioPDF ou AvaliacaoPDF
+        pdf_obj: Objeto HorarioPDF/AvaliacaoPDF (ORM) ou dicionário com 'ficheiro'
         tipo_pdf: Tipo do PDF ("horario" ou "avaliacao")
     
     Returns:
@@ -29,11 +29,17 @@ def pdf_url(pdf_obj, tipo_pdf):
     """
     try:
         # ==========================================
+        # EXTRAI O CAMINHO DO FICHEIRO
+        # ==========================================
+        # Pode ser um objeto ORM ou um dicionário
+        if isinstance(pdf_obj, dict):
+            ficheiro_path = str(pdf_obj.get('ficheiro', ''))
+        else:
+            ficheiro_path = str(pdf_obj.ficheiro)
+        
+        # ==========================================
         # VERIFICA SE ESTÁ NO MongoDB
         # ==========================================
-        # Se o ficheiro começa com "mongodb_gridfs:", está no MongoDB
-        ficheiro_path = str(pdf_obj.ficheiro)
-        
         if ficheiro_path.startswith("mongodb_gridfs:"):
             # Extrai o file_id do MongoDB
             file_id = ficheiro_path.replace("mongodb_gridfs:", "")
@@ -49,11 +55,16 @@ def pdf_url(pdf_obj, tipo_pdf):
         # SE NÃO ESTÁ NO MongoDB, USA URL NORMAL
         # ==========================================
         # Para ficheiros no filesystem (compatibilidade com PDFs antigos)
-        return pdf_obj.ficheiro.url
+        if isinstance(pdf_obj, dict):
+            return f"/media/{pdf_obj.get('ficheiro', '')}"
+        else:
+            return pdf_obj.ficheiro.url
     
     except Exception as e:
         # Se algo correr mal, retorna "#" (link vazio)
-        print(f"Erro ao gerar URL do PDF: {str(e)}")
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.error(f"Erro ao gerar URL do PDF: {str(e)} | pdf_obj: {pdf_obj} | tipo: {type(pdf_obj)}")
         return "#"
 
 
@@ -63,7 +74,7 @@ def is_mongodb_pdf(pdf_obj):
     Verifica se um PDF está no MongoDB
     
     Args:
-        pdf_obj: Objeto HorarioPDF ou AvaliacaoPDF
+        pdf_obj: Objeto HorarioPDF/AvaliacaoPDF (ORM) ou dicionário
     
     Returns:
         True se está no MongoDB, False caso contrário
@@ -74,7 +85,10 @@ def is_mongodb_pdf(pdf_obj):
         {% endif %}
     """
     try:
-        ficheiro_path = str(pdf_obj.ficheiro)
+        if isinstance(pdf_obj, dict):
+            ficheiro_path = str(pdf_obj.get('ficheiro', ''))
+        else:
+            ficheiro_path = str(pdf_obj.ficheiro)
         return ficheiro_path.startswith("mongodb_gridfs:")
     except:
         return False

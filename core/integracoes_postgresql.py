@@ -309,10 +309,10 @@ class PostgreSQLConsultas:
                 cursor.execute("SELECT COUNT(*) FROM curso")
                 result["total_cursos"] = cursor.fetchone()[0]
 
-                cursor.execute("SELECT COUNT(*) FROM horario_pdf")
+                cursor.execute("SELECT COUNT(*) FROM core_horariopdf")
                 result["total_horarios"] = cursor.fetchone()[0]
 
-                cursor.execute("SELECT COUNT(*) FROM avaliacao_pdf")
+                cursor.execute("SELECT COUNT(*) FROM core_avaliacaopdf")
                 result["total_avaliacoes"] = cursor.fetchone()[0]
 
                 cursor.execute("SELECT COALESCE(SUM(capacidade),0) FROM turno")
@@ -398,9 +398,9 @@ class PostgreSQLConsultas:
 
     @staticmethod
     def pdfs_por_ano_curso(model_table: str, id_curso: int) -> List[Dict[str, Any]]:
-        """model_table pode ser 'horario_pdf' ou 'avaliacao_pdf'"""
+        """model_table pode ser 'core_horariopdf' ou 'core_avaliacaopdf'"""
         sql = f"""
-            SELECT ac.id_anocurricular, ac.ano_curricular, p.id_{model_table.replace('_pdf', '')}, p.nome, p.atualizado_em, p.id_curso
+            SELECT ac.id_anocurricular, ac.ano_curricular, p.id, p.nome, p.ficheiro, p.atualizado_em, p.id_curso
             FROM {model_table} p
             JOIN ano_curricular ac ON ac.id_anocurricular = p.id_anocurricular
             WHERE p.id_curso = %s OR p.id_curso IS NULL
@@ -637,9 +637,9 @@ class PostgreSQLConsultas:
     def get_horario_pdf_by_id(pdf_id: int) -> Optional[Dict[str, Any]]:
         """Obtém um horário PDF pelo ID."""
         sql = """
-            SELECT id_horario, nome, ficheiro, id_anocurricular, id_curso, atualizado_em
-            FROM horario_pdf
-            WHERE id_horario = %s
+            SELECT id, nome, ficheiro, id_anocurricular, id_curso, atualizado_em
+            FROM core_horariopdf
+            WHERE id = %s
         """
         try:
             with connection.cursor() as cursor:
@@ -655,10 +655,10 @@ class PostgreSQLConsultas:
 
     @staticmethod
     def create_horario_pdf(nome: str, ficheiro: str, id_anocurricular: int, id_curso: int) -> Optional[int]:
-        """Cria um novo registro de horário PDF. Retorna o id_horario ou None."""
+        """Cria um novo registro de horário PDF. Retorna o id ou None."""
         sql = """
-            INSERT INTO horario_pdf (nome, ficheiro, id_anocurricular, id_curso)
-            VALUES (%s, %s, %s, %s) RETURNING id_horario
+            INSERT INTO core_horariopdf (nome, ficheiro, id_anocurricular, id_curso)
+            VALUES (%s, %s, %s, %s) RETURNING id
         """
         try:
             with connection.cursor() as cursor:
@@ -673,9 +673,9 @@ class PostgreSQLConsultas:
     def update_horario_pdf(pdf_id: int, nome: str, ficheiro: str, id_anocurricular: int, id_curso: int) -> bool:
         """Atualiza um registro de horário PDF."""
         sql = """
-            UPDATE horario_pdf
+            UPDATE core_horariopdf
             SET nome = %s, ficheiro = %s, id_anocurricular = %s, id_curso = %s
-            WHERE id_horario = %s
+            WHERE id = %s
         """
         try:
             with connection.cursor() as cursor:
@@ -690,7 +690,7 @@ class PostgreSQLConsultas:
         """Deleta um registro de horário PDF."""
         try:
             with connection.cursor() as cursor:
-                cursor.execute("DELETE FROM horario_pdf WHERE id_horario = %s", [pdf_id])
+                cursor.execute("DELETE FROM core_horariopdf WHERE id = %s", [pdf_id])
                 return True
         except Exception as e:
             logger.error(f"Erro ao deletar horario_pdf {pdf_id}: {e}")
@@ -700,8 +700,8 @@ class PostgreSQLConsultas:
     def list_horario_pdfs() -> List[Dict[str, Any]]:
         """Lista todos os horários PDF."""
         sql = """
-            SELECT id_horario, nome, ficheiro, id_anocurricular, id_curso, atualizado_em
-            FROM horario_pdf
+            SELECT id, nome, ficheiro, id_anocurricular, id_curso, atualizado_em
+            FROM core_horariopdf
             ORDER BY atualizado_em DESC
         """
         try:
@@ -717,8 +717,8 @@ class PostgreSQLConsultas:
     def get_latest_horario_pdf() -> Optional[Dict[str, Any]]:
         """Obtém o horário PDF mais recente."""
         sql = """
-            SELECT id_horario, nome, ficheiro, id_anocurricular, id_curso, atualizado_em
-            FROM horario_pdf
+            SELECT id, nome, ficheiro, id_anocurricular, id_curso, atualizado_em
+            FROM core_horariopdf
             ORDER BY atualizado_em DESC
             LIMIT 1
         """
@@ -738,9 +738,9 @@ class PostgreSQLConsultas:
     def get_avaliacao_pdf_by_id(pdf_id: int) -> Optional[Dict[str, Any]]:
         """Obtém um PDF de avaliação pelo ID."""
         sql = """
-            SELECT id_avaliacao, nome, ficheiro, id_anocurricular, id_curso, atualizado_em
-            FROM avaliacao_pdf
-            WHERE id_avaliacao = %s
+            SELECT id, nome, ficheiro, id_anocurricular, id_curso, atualizado_em
+            FROM core_avaliacaopdf
+            WHERE id = %s
         """
         try:
             with connection.cursor() as cursor:
@@ -756,10 +756,10 @@ class PostgreSQLConsultas:
 
     @staticmethod
     def create_avaliacao_pdf(nome: str, ficheiro: str, id_anocurricular: int, id_curso: int) -> Optional[int]:
-        """Cria um novo registro de PDF de avaliação. Retorna o id_avaliacao ou None."""
+        """Cria um novo registro de PDF de avaliação. Retorna o id ou None."""
         sql = """
-            INSERT INTO avaliacao_pdf (nome, ficheiro, id_anocurricular, id_curso)
-            VALUES (%s, %s, %s, %s) RETURNING id_avaliacao
+            INSERT INTO core_avaliacaopdf (nome, ficheiro, id_anocurricular, id_curso)
+            VALUES (%s, %s, %s, %s) RETURNING id
         """
         try:
             with connection.cursor() as cursor:
@@ -774,9 +774,9 @@ class PostgreSQLConsultas:
     def update_avaliacao_pdf(pdf_id: int, nome: str, ficheiro: str, id_anocurricular: int, id_curso: int) -> bool:
         """Atualiza um registro de PDF de avaliação."""
         sql = """
-            UPDATE avaliacao_pdf
+            UPDATE core_avaliacaopdf
             SET nome = %s, ficheiro = %s, id_anocurricular = %s, id_curso = %s
-            WHERE id_avaliacao = %s
+            WHERE id = %s
         """
         try:
             with connection.cursor() as cursor:
@@ -791,7 +791,7 @@ class PostgreSQLConsultas:
         """Deleta um registro de PDF de avaliação."""
         try:
             with connection.cursor() as cursor:
-                cursor.execute("DELETE FROM avaliacao_pdf WHERE id_avaliacao = %s", [pdf_id])
+                cursor.execute("DELETE FROM core_avaliacaopdf WHERE id = %s", [pdf_id])
                 return True
         except Exception as e:
             logger.error(f"Erro ao deletar avaliacao_pdf {pdf_id}: {e}")
@@ -801,8 +801,8 @@ class PostgreSQLConsultas:
     def list_avaliacao_pdfs() -> List[Dict[str, Any]]:
         """Lista todos os PDFs de avaliação."""
         sql = """
-            SELECT id_avaliacao, nome, ficheiro, id_anocurricular, id_curso, atualizado_em
-            FROM avaliacao_pdf
+            SELECT id, nome, ficheiro, id_anocurricular, id_curso, atualizado_em
+            FROM core_avaliacaopdf
             ORDER BY atualizado_em DESC
         """
         try:

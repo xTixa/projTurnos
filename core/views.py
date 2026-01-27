@@ -122,7 +122,7 @@ def horarios(request):
     if "user_tipo" in request.session and request.session["user_tipo"] == "aluno":
         registar_consulta_aluno(request.session.get("user_id"), request.session.get("user_nome", "desconhecido"), "horarios", {"curso": "EI"})
 
-    horarios_por_ano = _listar_pdfs_por_ano(HorarioPDF, course_id=1)
+    horarios_por_ano = _listar_pdfs_por_ano('core_horariopdf', course_id=1)
     
     # Verificar se o aluno pertence ao curso de EI (id_curso = 1)
     pode_inscrever = False
@@ -143,7 +143,7 @@ def avaliacoes(request):
     if "user_tipo" in request.session and request.session["user_tipo"] == "aluno":
         registar_consulta_aluno(request.session.get("user_id"), request.session.get("user_nome", "desconhecido"), "avaliacoes", {"curso": "EI"})
 
-    avaliacoes_por_ano = _listar_pdfs_por_ano(AvaliacaoPDF, course_id=1)
+    avaliacoes_por_ano = _listar_pdfs_por_ano('core_avaliacaopdf', course_id=1)
 
     return render(request, "ei/avaliacoes.html", {"avaliacoes_por_ano": avaliacoes_por_ano, "area": "ei"})
 
@@ -1167,7 +1167,7 @@ def horarios_tdm(request):
     if "user_tipo" in request.session and request.session["user_tipo"] == "aluno":
         registar_consulta_aluno(request.session.get("user_id"), request.session.get("user_nome", "desconhecido"), "horarios", {"curso": "TDM"})
     
-    horarios_por_ano = _listar_pdfs_por_ano('horario_pdf', course_id=2)
+    horarios_por_ano = _listar_pdfs_por_ano('core_horariopdf', course_id=2)
     
     pode_inscrever = False
     if "user_tipo" in request.session and request.session["user_tipo"] == "aluno":
@@ -1192,7 +1192,7 @@ def saidas_tdm(request):
 
 #view avaliacoes TDM
 def avaliacoes_tdm(request):
-    avaliacoes_por_ano = _listar_pdfs_por_ano('avaliacao_pdf', course_id=2)
+    avaliacoes_por_ano = _listar_pdfs_por_ano('core_avaliacaopdf', course_id=2)
     return render(request, "tdm/avaliacoes_tdm.html", {"avaliacoes_por_ano": avaliacoes_por_ano, "area": "tdm"})
 
 #view moodle TDM
@@ -1397,7 +1397,7 @@ def contactos_rsi(request):
 
 #view avaliaçoes RSI
 def avaliacoes_rsi(request):
-    avaliacoes_por_ano = _listar_pdfs_por_ano('avaliacao_pdf', course_id=3)
+    avaliacoes_por_ano = _listar_pdfs_por_ano('core_avaliacaopdf', course_id=3)
     return render(request, "rsi/avaliacoes_rsi.html", {"avaliacoes_por_ano": avaliacoes_por_ano, "area": "rsi"})
 
 #view para saidas profissionais RSI
@@ -1406,7 +1406,7 @@ def saidas_rsi(request):
 
 #view horarios RSI
 def horarios_rsi(request):
-    horarios_por_ano = _listar_pdfs_por_ano('horario_pdf', course_id=3)
+    horarios_por_ano = _listar_pdfs_por_ano('core_horariopdf', course_id=3)
     return render(request, "rsi/horarios_rsi.html", {"horarios_por_ano": horarios_por_ano, "area": "rsi"})
 
 #view para pagina inicial DWDM
@@ -1435,12 +1435,12 @@ def plano_dwdm(request):
 
 #view para horarios DWDM
 def horarios_dwdm(request):
-    horarios_por_ano = _listar_pdfs_por_ano('horario_pdf', course_id=4)
+    horarios_por_ano = _listar_pdfs_por_ano('core_horariopdf', course_id=4)
     return render(request, "dwdm/horarios_dwdm.html", {"horarios_por_ano": horarios_por_ano, "area": "dwdm"})
 
 #view para avaliacoes DWDM
 def avaliacoes_dwdm(request):
-    avaliacoes_por_ano = _listar_pdfs_por_ano(AvaliacaoPDF, course_id=4)
+    avaliacoes_por_ano = _listar_pdfs_por_ano('core_avaliacaopdf', course_id=4)
     return render(request, "dwdm/avaliacoes_dwdm.html", {"avaliacoes_por_ano": avaliacoes_por_ano, "area": "dwdm"})
 
 #view para contactos DWDM
