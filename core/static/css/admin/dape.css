@@ -1,0 +1,133 @@
+/* DAPE List page styles (scoped) */
+
+/* Title aligned with admin look */
+.dape-list .page-title {
+  font-size: 28px;
+  font-weight: 700;
+  margin-bottom: 8px;
+  color: #0f172a;
+}
+
+/* Quick actions aligned with admin */
+.dape-list .quick-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 30px;
+  margin-top: 14px;
+}
+.dape-list .quick-actions a {
+  background: white;
+  color: #475569;
+  padding: 12px 20px;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.9rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+  border: 1px solid #cbd5e1;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
+.dape-list .quick-actions a:hover {
+  background: #f8fafc;
+  color: #0f172a;
+  border-color: #94a3b8;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+}
+.dape-list .quick-actions a i {
+  font-size: 0.9rem;
+  color: #64748b;
+}
+.dape-list .quick-actions a:hover i {
+  color: #0f172a;
+}
+
+/* Table column widths */
+.dape-list .admin-table th:nth-child(1),
+.dape-list .admin-table td:nth-child(1) {
+  width: 60px; /* ID */
+}
+
+.dape-list .admin-table th:nth-child(2),
+.dape-list .admin-table td:nth-child(2) {
+  width: 30%;
+  max-width: 250px; /* Título */
+}
+
+.dape-list .admin-table th:nth-child(3),
+.dape-list .admin-table td:nth-child(3) {
+  width: 20%;
+  max-width: 180px; /* Entidade */
+}
+
+.dape-list .admin-table th:nth-child(4),
+.dape-list .admin-table td:nth-child(4) {
+  width: 100px; /* Modelo */
+}
+
+.dape-list .admin-table th:nth-child(5),
+.dape-list .admin-table td:nth-child(5) {
+  width: 100px; /* Status */
+}
+
+.dape-list .admin-table td:nth-child(2),
+.dape-list .admin-table td:nth-child(3) {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Badges para modelos */
+.dape-list .badge-modelo-presencial {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.dape-list .badge-modelo-remoto {
+  background-color: #cce5ff;
+  color: #004085;
+}
+
+.dape-list .badge-modelo-híbrido,
+.dape-list .badge-modelo-hibrido {
+  background-color: #fff3cd;
+  color: #856404;
+}
+
+/* Alerts */
+.dape-list .messages-container {
+  margin-bottom: 20px;
+}
+
+.dape-list .alert {
+  padding: 12px 15px;
+  border-radius: 4px;
+  margin-bottom: 10px;
+  font-size: 14px;
+}
+
+.dape-list .alert-success {
+  background-color: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
+.dape-list .alert-error {
+  background-color: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+}
+
+/* View button */
+.dape-list .btn-view {
+  background-color: #17a2b8;
+  color: #fff;
+}
+
+.dape-list .btn-view:hover {
+  background-color: #138496;
+}

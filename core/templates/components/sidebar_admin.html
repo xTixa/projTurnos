@@ -74,6 +74,13 @@
     </a>
   </li>
 
+  <!-- DAPE -->
+  <li class="menu__item {% if 'admin_dape' in request.resolver_match.url_name %}is-active{% endif %}">
+    <a href="{% url 'home:admin_dape_list' %}">
+      <i class="fa-solid fa-briefcase"></i> Propostas DAPE
+    </a>
+  </li>
+
   <!-- ANALYTICS -->
   <li class="menu__item {% if request.resolver_match.url_name == 'analytics_inscricoes' %}is-active{% endif %}">
     <a href="{% url 'home:analytics_inscricoes' %}">

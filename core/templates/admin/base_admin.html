@@ -16,58 +16,13 @@
 
     <!-- SIDEBAR -->
     <aside class="sidebar">
-
         <h2 class="sidebar-logo">Admin</h2>
-
-        <nav>
-
-            <a href="{% url 'home:admin_dashboard' %}"
-               class="nav-item {% if request.resolver_match.url_name == 'admin_dashboard' %}active{% endif %}">
-               <i class="fa-solid fa-gauge"></i> <span>Dashboard</span>
-            </a>
-
-            <a href="{% url 'home:admin_users_list' %}"
-               class="nav-item {% if 'admin_users' in request.resolver_match.url_name %}active{% endif %}">
-               <i class="fa-solid fa-users"></i> <span>Utilizadores</span>
-            </a>
-
-            <a href="{% url 'home:admin_turnos_list' %}"
-               class="nav-item {% if 'admin_turnos' in request.resolver_match.url_name %}active{% endif %}">
-               <i class="fa-solid fa-clock"></i> <span>Turnos</span>
-            </a>
-
-            <a href="{% url 'home:admin_horarios_list' %}"
-               class="nav-item {% if 'admin_horarios' in request.resolver_match.url_name %}active{% endif %}">
-               <i class="fa-regular fa-calendar"></i> <span>Horários</span>
-            </a>
-
-            <a href="{% url 'home:admin_uc_list' %}"
-               class="nav-item {% if 'admin_uc' in request.resolver_match.url_name %}active{% endif %}">
-               <i class="fa-solid fa-graduation-cap"></i> <span>UC</span>
-            </a>
-
-            <a href="{% url 'home:admin_logs_list' %}"
-               class="nav-item {% if 'admin_logs' in request.resolver_match.url_name %}active{% endif %}">
-               <i class="fa-solid fa-clipboard-list"></i> <span>Logs</span>
-            </a>
-
-            <a href="{% url 'home:admin_dape_list' %}"
-               class="nav-item {% if 'admin_dape' in request.resolver_match.url_name %}active{% endif %}">
-               <i class="fa-solid fa-briefcase"></i> <span>Propostas DAPE</span>
-            </a>
-
-            <a href="{% url 'home:admin_export_data' %}"
-               class="nav-item {% if 'admin_export' in request.resolver_match.url_name %}active{% endif %}">
-               <i class="fa-solid fa-download"></i> <span>Exportar Dados</span>
-            </a>
-        </nav>
-
+        {% include 'components/sidebar_admin.html' %}
         <div class="sidebar-bottom">
             <a href="{% url 'home:logout' %}" class="logout-btn">
                 <i class="fa-solid fa-right-from-bracket"></i> Logout
             </a>
         </div>
-
     </aside>
 
     <!-- MAIN CONTENT -->

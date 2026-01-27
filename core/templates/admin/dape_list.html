@@ -3,17 +3,19 @@
 
 {% block title %}Gestão de Propostas DAPE — Admin Panel{% endblock %}
 
-{% block content %}
+{% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/admin/users_form.css' %}">
+<link rel="stylesheet" href="{% static 'css/admin/dape.css' %}">
+{% endblock %}
 
-<div class="users-container">
-    <h1><i class="fa-solid fa-briefcase"></i> Gestão de Propostas DAPE</h1>
+{% block content %}
 
-    <!-- Botão para criar nova proposta -->
-    <div class="action-buttons">
-        <a href="{% url 'home:admin_dape_create' %}" class="btn-create">+ Nova Proposta</a>
-        <a href="{% url 'home:admin_dashboard' %}" class="btn-filter-reset" style="margin-left: 10px;">
-            <i class="fa-solid fa-arrow-left"></i> Voltar ao Dashboard
+<div class="users-container dape-list">
+    <h1 class="page-title"><i class="fa-solid fa-briefcase"></i> Gestão de Propostas DAPE</h1>
+
+    <div class="quick-actions">
+        <a href="{% url 'home:admin_dape_create' %}">
+            <i class="fa-solid fa-plus"></i> Nova Proposta
         </a>
     </div>
 
@@ -68,11 +70,11 @@
                             {% endif %}
                         </td>
                         <td class="actions-cell">
-                            <a href="{% url 'home:proposta_detalhes' proposta.proposta_id %}" 
-                               class="btn-edit" 
+                                     <a href="{% url 'home:proposta_detalhes' proposta.proposta_id %}" 
+                                         class="btn-view" 
                                title="Ver detalhes"
                                target="_blank"
-                               style="background-color: #17a2b8;">
+                                         >
                                 <i class="fa-solid fa-eye"></i> Ver
                             </a>
                             <a href="{% url 'home:admin_dape_edit' proposta.id_proposta %}" 
@@ -100,61 +102,5 @@
         {% endif %}
     </div>
 </div>
-
-<style>
-    /* Tabela DAPE - larguras das colunas */
-    .admin-table th:nth-child(1),
-    .admin-table td:nth-child(1) { width: 60px; } /* ID */
-    .admin-table th:nth-child(2),
-    .admin-table td:nth-child(2) { width: 30%; max-width: 250px; } /* Título */
-    .admin-table th:nth-child(3),
-    .admin-table td:nth-child(3) { width: 20%; max-width: 180px; } /* Entidade */
-    .admin-table th:nth-child(4),
-    .admin-table td:nth-child(4) { width: 100px; } /* Modelo */
-    .admin-table th:nth-child(5),
-    .admin-table td:nth-child(5) { width: 100px; } /* Status */
-    
-    .admin-table td:nth-child(2),
-    .admin-table td:nth-child(3) {
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-    }
-    
-    /* Badges para modelos */
-    .badge-modelo-presencial {
-        background-color: #d4edda;
-        color: #155724;
-    }
-    .badge-modelo-remoto {
-        background-color: #cce5ff;
-        color: #004085;
-    }
-    .badge-modelo-híbrido, .badge-modelo-hibrido {
-        background-color: #fff3cd;
-        color: #856404;
-    }
-    
-    /* Alerts */
-    .messages-container {
-        margin-bottom: 20px;
-    }
-    .alert {
-        padding: 12px 15px;
-        border-radius: 4px;
-        margin-bottom: 10px;
-        font-size: 14px;
-    }
-    .alert-success {
-        background-color: #d4edda;
-        color: #155724;
-        border: 1px solid #c3e6cb;
-    }
-    .alert-error {
-        background-color: #f8d7da;
-        color: #721c24;
-        border: 1px solid #f5c6cb;
-    }
-</style>
 
 {% endblock %}

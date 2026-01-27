@@ -7,20 +7,21 @@ from .db_views import CadeirasSemestre, AlunosPorOrdemAlfabetica, Turnos, Cursos
 from django.http import JsonResponse, FileResponse
 import json
 from django.contrib.auth.models import User
-from core.integracoes_postgresql import PostgreSQLAuth, PostgreSQLTurnos, PostgreSQLConsultas, PostgreSQLProcedures
+from core.integracoes_postgresql import PostgreSQLAuth, PostgreSQLTurnos, PostgreSQLConsultas, PostgreSQLProcedures, PostgreSQLDAPE
 from bd2_projeto.services.mongo_service import (
     adicionar_log, listar_eventos_mongo, listar_logs, registar_auditoria_inscricao,
     validar_inscricao_disponivel, registar_consulta_aluno,
-    registar_atividade_docente, registar_erro, registar_auditoria_user,
-    criar_proposta_estagio, listar_propostas_estagio, atualizar_proposta_estagio, eliminar_proposta_estagio,
-    adicionar_favorito, remover_favorito, verificar_favorito, listar_favoritos
+    registar_atividade_docente, registar_erro, registar_auditoria_user
 )
 from bd2_projeto.services.gridfs_service import (
     upload_pdf_horario, upload_pdf_avaliacao,
     download_pdf, eliminar_pdf, listar_pdfs_horarios, listar_pdfs_avaliacoes
 )
 from core.utils import registar_log, admin_required, aluno_required, user_required, docente_required
+import logging
 import time
+
+logger = logging.getLogger(__name__)
 
 
 def _listar_pdfs_por_ano(model_table, course_id):
@@ -1765,40 +1766,34 @@ def forum(request):
 
 #view pagina inicial DAPE
 def dape(request):
-    # Busca todas as propostas de estágio do MongoDB
-    propostas = listar_propostas_estagio()
+    # Busca todas as propostas de estágio via PostgreSQL
+    propostas = PostgreSQLDAPE.listar_propostas()
     
-    # Define proposta_id para todas as propostas e conta disponíveis
+    # Define proposta_id e conta disponíveis
     propostas_disponiveis = 0
     for proposta in propostas:
-        proposta["proposta_id"] = str(proposta.get("id_proposta", proposta.get("_id", "")))
-        proposta["is_minha_proposta"] = False  # Inicializa
-        # Conta apenas propostas não atribuídas
+        proposta["proposta_id"] = str(proposta.get("id_proposta", ""))
+        proposta["is_minha_proposta"] = False
         if not proposta.get("aluno_atribuido"):
             propostas_disponiveis += 1
     
-    # Se o usuário for aluno, verifica quais propostas são favoritas e qual está atribuída
+    # Se o usuário for aluno, marca favoritos e a sua proposta (se atribuída)
     if request.session.get("user_tipo") == "aluno":
         aluno_id = request.session.get("user_id")
         proposta_atribuida = None
         outras_propostas = []
         
         for proposta in propostas:
-            proposta["is_favorito"] = verificar_favorito(aluno_id, proposta["proposta_id"])
+            is_fav = PostgreSQLDAPE.verificar_favorito(aluno_id, proposta.get("id_proposta"))
+            proposta["is_favorito"] = is_fav
             
-            # Verifica se esta proposta está atribuída ao aluno logado
-            aluno_atribuido = proposta.get("aluno_atribuido")
-            if aluno_atribuido and str(aluno_atribuido.get("n_mecanografico")) == str(aluno_id):
+            if proposta.get("aluno_atribuido") and str(proposta.get("aluno_atribuido")) == str(aluno_id):
                 proposta["is_minha_proposta"] = True
                 proposta_atribuida = proposta
             else:
                 outras_propostas.append(proposta)
         
-        # Coloca a proposta atribuída primeiro
-        if proposta_atribuida:
-            propostas = [proposta_atribuida] + outras_propostas
-        else:
-            propostas = outras_propostas
+        propostas = [proposta_atribuida] + outras_propostas if proposta_atribuida else outras_propostas
     
     # Regista a consulta para analytics
     adicionar_log(
@@ -1905,15 +1900,18 @@ def criar_proposta_estagio_view(request):
         
         aluno_id = request.session.get("user_id")
         aluno_nome = request.session.get("user_nome")
-        
-        # Cria a proposta no MongoDB
-        proposta = criar_proposta_estagio(
+        # Cria a proposta no PostgreSQL
+        novo_id = PostgreSQLDAPE.criar_proposta(
             aluno_id=aluno_id,
-            aluno_nome=aluno_nome,
             titulo=titulo,
+            entidade=empresa,
             descricao=descricao,
-            empresa=empresa,
-            orientador=orientador
+            requisitos=None,
+            modelo=None,
+            orientador_empresa=orientador,
+            telefone=None,
+            email=None,
+            logo=None,
         )
         
         # Regista log da criação
@@ -1922,12 +1920,15 @@ def criar_proposta_estagio_view(request):
             {
                 "aluno_id": aluno_id,
                 "titulo": titulo,
-                "empresa": empresa
+                "empresa": empresa,
+                "id_proposta": novo_id
             },
             request
         )
-        
-        messages.success(request, "Proposta de estágio criada com sucesso!")
+        if novo_id:
+            messages.success(request, "Proposta de estágio criada com sucesso!")
+        else:
+            messages.error(request, "Erro ao criar proposta de estágio.")
         return redirect("home:listar_propostas_estagio")
     
     return render(request, "proposta_estagio/criar.html")
@@ -1941,8 +1942,8 @@ def listar_propostas_estagio_view(request):
     
     aluno_id = request.session.get("user_id")
     
-    # Lista propostas do aluno
-    propostas = listar_propostas_estagio({"aluno_id": aluno_id})
+    # Lista propostas do aluno via PostgreSQL
+    propostas = PostgreSQLDAPE.listar_propostas({"aluno_id": aluno_id})
     
     # Regista consulta
     adicionar_log(
@@ -1969,12 +1970,12 @@ def atualizar_proposta_estagio_view(request, titulo):
         if request.POST.get("descricao"):
             updates["descricao"] = request.POST.get("descricao")
         if request.POST.get("empresa"):
-            updates["empresa"] = request.POST.get("empresa")
+            updates["entidade"] = request.POST.get("empresa")
         if request.POST.get("orientador"):
-            updates["orientador"] = request.POST.get("orientador")
+            updates["orientador_empresa"] = request.POST.get("orientador")
         
-        # Atualiza a proposta
-        sucesso = atualizar_proposta_estagio(aluno_id, titulo, updates)
+        # Atualiza a proposta via PostgreSQL
+        sucesso = PostgreSQLDAPE.atualizar_proposta(aluno_id, titulo, updates)
         
         if sucesso:
             # Regista log da atualização
@@ -1990,7 +1991,7 @@ def atualizar_proposta_estagio_view(request, titulo):
         return redirect("home:listar_propostas_estagio")
     
     # Busca a proposta atual para preencher o formulário
-    propostas = listar_propostas_estagio({"aluno_id": aluno_id, "titulo": titulo})
+    propostas = PostgreSQLDAPE.listar_propostas({"aluno_id": aluno_id, "titulo": titulo})
     if not propostas:
         messages.error(request, "Proposta não encontrada.")
         return redirect("home:listar_propostas_estagio")
@@ -2007,8 +2008,8 @@ def deletar_proposta_estagio_view(request, titulo):
     
     aluno_id = request.session.get("user_id")
     
-    # Deleta a proposta
-    sucesso = eliminar_proposta_estagio(aluno_id, titulo)
+    # Deleta a proposta via PostgreSQL
+    sucesso = PostgreSQLDAPE.eliminar_proposta(aluno_id, titulo)
     
     if sucesso:
         # Regista log da deleção
@@ -2035,12 +2036,12 @@ def favoritos_view(request):
     
     aluno_id = request.session.get("user_id")
     
-    # Busca propostas favoritas
-    propostas_favoritas = listar_favoritos(aluno_id)
+    # Busca propostas favoritas via PostgreSQL
+    propostas_favoritas = PostgreSQLDAPE.listar_favoritos(aluno_id)
     
     # Adiciona proposta_id para cada proposta
     for proposta in propostas_favoritas:
-        proposta["proposta_id"] = str(proposta.get("id_proposta", proposta.get("_id", "")))
+        proposta["proposta_id"] = str(proposta.get("id_proposta", ""))
     
     # Regista consulta
     adicionar_log(
@@ -2064,20 +2065,10 @@ def toggle_favorito_view(request):
             print(f"proposta_id: {proposta_id}, aluno_id: {aluno_id}")
             
             if proposta_id and aluno_id:
-                # Verifica se já é favorito
-                is_favorito = verificar_favorito(aluno_id, proposta_id)
-                print(f"is_favorito: {is_favorito}")
-                
-                if is_favorito:
-                    # Remove dos favoritos
-                    remover_favorito(aluno_id, proposta_id)
-                    adicionar_log("remover_favorito", {"aluno_id": aluno_id, "proposta_id": proposta_id}, request)
-                    return JsonResponse({"success": True, "action": "removed"})
-                else:
-                    # Adiciona aos favoritos
-                    adicionar_favorito(aluno_id, proposta_id)
-                    adicionar_log("adicionar_favorito", {"aluno_id": aluno_id, "proposta_id": proposta_id}, request)
-                    return JsonResponse({"success": True, "action": "added"})
+                res = PostgreSQLDAPE.toggle_favorito(int(aluno_id), int(proposta_id))
+                action = "added" if res.get("added") else "removed"
+                adicionar_log(f"favorito_{action}", {"aluno_id": aluno_id, "proposta_id": proposta_id}, request)
+                return JsonResponse({"success": True, "action": action})
         
         print("Invalid request")
         return JsonResponse({"success": False, "error": "Invalid request"})
@@ -2090,28 +2081,22 @@ from django.http import Http404
 def proposta_detalhes(request, id_proposta):
     """
     View para mostrar os detalhes de uma proposta de estágio
-    (dados vêm do MongoDB)
+    (dados vêm do PostgreSQL)
     """
 
-    # Buscar todas as propostas do MongoDB
-    propostas = listar_propostas_estagio()
-
-    # Encontrar a proposta correta pelo id_proposta
-    proposta = next(
-        (p for p in propostas if str(p.get("id_proposta")) == str(id_proposta)),
-        None
-    )
+    # Buscar proposta por ID
+    proposta = PostgreSQLDAPE.obter_proposta_por_id(id_proposta)
 
     if not proposta:
         raise Http404("Proposta não encontrada")
 
-    # Normalizar ID (como fazes no dape)
-    proposta["proposta_id"] = str(proposta.get("id_proposta", proposta.get("_id", "")))
+    # Normalizar ID
+    proposta["proposta_id"] = str(proposta.get("id_proposta", ""))
 
     # Verificar favorito (se aluno)
     if request.session.get("user_tipo") == "aluno":
         aluno_id = request.session.get("user_id")
-        proposta["is_favorito"] = verificar_favorito(aluno_id, proposta["proposta_id"])
+        proposta["is_favorito"] = PostgreSQLDAPE.verificar_favorito(aluno_id, proposta["id_proposta"])
 
     # Obter aluno atribuído (se existir) - FUNCIONALIDADE AINDA NÃO IMPLEMENTADA
     aluno_atribuido = None  # obter_aluno_atribuido(proposta["proposta_id"])
@@ -2206,7 +2191,7 @@ def atribuir_aluno_view(request, id_proposta):
 @admin_required
 def admin_dape_list(request):
     """Lista todas as propostas DAPE para gestão"""
-    propostas = listar_propostas_estagio()
+    propostas = PostgreSQLDAPE.listar_propostas()
     
     # Adiciona o ID formatado para cada proposta
     for proposta in propostas:
@@ -2222,108 +2207,101 @@ def admin_dape_list(request):
 def admin_dape_create(request):
     """Cria uma nova proposta DAPE"""
     if request.method == "POST":
-        messages.error(request, "Funcionalidade de criar proposta ainda não implementada.")
-        return redirect("home:admin_dape_list")
-        # TODO: Descomentar quando implementar criar_proposta_admin
-        # titulo = request.POST.get("titulo")
-        # entidade = request.POST.get("entidade")
-        # descricao = request.POST.get("descricao")
-        # requisitos = request.POST.get("requisitos")
-        # modelo = request.POST.get("modelo")
-        # orientador_empresa = request.POST.get("orientador_empresa")
-        # telefone = request.POST.get("telefone")
-        # email = request.POST.get("email")
-        # logo = request.POST.get("logo")
-        # 
-        # proposta = criar_proposta_admin(
-        #     titulo=titulo,
-        #     entidade=entidade,
-        #     descricao=descricao,
-        #     requisitos=requisitos,
-        #     modelo=modelo,
-        #     orientador_empresa=orientador_empresa,
-        #     telefone=telefone,
-        #     email=email,
-        #     logo=logo
-        # )
-        # 
-        # if proposta:
-        #     adicionar_log(
-        #         "admin_criar_proposta",
-        #         {"titulo": titulo, "entidade": entidade},
-        #         request
-        #     )
-        #     messages.success(request, f"Proposta '{titulo}' criada com sucesso!")
-        #     return redirect("home:admin_dape_list")
-        # else:
-        #     messages.error(request, "Erro ao criar proposta.")
+        titulo = request.POST.get("titulo")
+        entidade = request.POST.get("entidade")
+        descricao = request.POST.get("descricao")
+        requisitos = request.POST.get("requisitos")
+        modelo = request.POST.get("modelo")
+        orientador_empresa = request.POST.get("orientador_empresa")
+        telefone = request.POST.get("telefone")
+        email = request.POST.get("email")
+        logo = request.POST.get("logo")
+
+        novo_id = PostgreSQLDAPE.criar_proposta(
+            aluno_id=None,
+            titulo=titulo,
+            entidade=entidade,
+            descricao=descricao,
+            requisitos=requisitos,
+            modelo=modelo,
+            orientador_empresa=orientador_empresa,
+            telefone=telefone,
+            email=email,
+            logo=logo,
+        )
+
+        if novo_id:
+            adicionar_log(
+                "admin_criar_proposta",
+                {"titulo": titulo, "entidade": entidade, "id_proposta": novo_id},
+                request
+            )
+            messages.success(request, f"Proposta '{titulo}' criada com sucesso!")
+            return redirect("home:admin_dape_list")
+        else:
+            messages.error(request, "Erro ao criar proposta.")
     
     return render(request, "admin/dape_form.html", {"proposta": None})
 
 
 @admin_required
 def admin_dape_edit(request, id):
-    """Edita uma proposta DAPE existente"""
-    messages.error(request, "Funcionalidade de editar proposta ainda não implementada.")
-    return redirect("home:admin_dape_list")
-    # TODO: Descomentar quando implementar obter_proposta_por_id e atualizar_proposta_admin
-    # proposta = obter_proposta_por_id(id)
-    # 
-    # if not proposta:
-    #     messages.error(request, "Proposta não encontrada.")
-    #     return redirect("home:admin_dape_list")
-    # 
-    # if request.method == "POST":
-    #     updates = {
-    #         "titulo": request.POST.get("titulo"),
-    #         "entidade": request.POST.get("entidade"),
-    #         "descricao": request.POST.get("descricao"),
-    #         "requisitos": request.POST.get("requisitos"),
-    #         "modelo": request.POST.get("modelo"),
-    #         "orientador_empresa": request.POST.get("orientador_empresa"),
-    #         "telefone": request.POST.get("telefone"),
-    #         "email": request.POST.get("email"),
-    #         "logo": request.POST.get("logo")
-    #     }
-    #     
-    #     sucesso = atualizar_proposta_admin(id, updates)
-    #     
-    #     if sucesso:
-    #         adicionar_log(
-    #             "admin_editar_proposta",
-    #             {"id": id, "titulo": updates["titulo"]},
-    #             request
-    #         )
-    #         messages.success(request, f"Proposta '{updates['titulo']}' atualizada com sucesso!")
-    #         return redirect("home:admin_dape_list")
-    #     else:
-    #         messages.error(request, "Erro ao atualizar proposta.")
-    # 
-    # return render(request, "admin/dape_form.html", {"proposta": proposta})
+    """Edita uma proposta DAPE existente (admin)"""
+    try:
+        pid = int(id)
+    except Exception:
+        messages.error(request, "ID inválido.")
+        return redirect("home:admin_dape_list")
+
+    proposta = PostgreSQLDAPE.obter_proposta_por_id(pid)
+    if not proposta:
+        messages.error(request, "Proposta não encontrada.")
+        return redirect("home:admin_dape_list")
+
+    if request.method == "POST":
+        updates = {
+            "titulo": request.POST.get("titulo"),
+            "entidade": request.POST.get("entidade"),
+            "descricao": request.POST.get("descricao"),
+            "requisitos": request.POST.get("requisitos"),
+            "modelo": request.POST.get("modelo"),
+            "orientador_empresa": request.POST.get("orientador_empresa"),
+            "telefone": request.POST.get("telefone"),
+            "email": request.POST.get("email"),
+            "logo": request.POST.get("logo"),
+        }
+
+        sucesso = PostgreSQLDAPE.admin_atualizar_proposta(pid, updates)
+        if sucesso:
+            adicionar_log("admin_editar_proposta", {"id": pid, "updates": updates}, request)
+            messages.success(request, f"Proposta '{updates.get('titulo') or proposta.get('titulo')}' atualizada com sucesso!")
+            return redirect("home:admin_dape_list")
+        else:
+            messages.error(request, "Erro ao atualizar proposta.")
+
+    return render(request, "admin/dape_form.html", {"proposta": proposta})
 
 
 @admin_required
 def admin_dape_delete(request, id):
-    """Deleta uma proposta DAPE"""
-    messages.error(request, "Funcionalidade de eliminar proposta ainda não implementada.")
+    """Remover uma proposta DAPE (admin)"""
+    try:
+        pid = int(id)
+    except Exception:
+        messages.error(request, "ID inválido.")
+        return redirect("home:admin_dape_list")
+
+    proposta = PostgreSQLDAPE.obter_proposta_por_id(pid)
+    if not proposta:
+        messages.error(request, "Proposta não encontrada.")
+        return redirect("home:admin_dape_list")
+
+    titulo = proposta.get("titulo", "Desconhecido")
+    sucesso = PostgreSQLDAPE.admin_eliminar_proposta(pid)
+    if sucesso:
+        adicionar_log("admin_deletar_proposta", {"id": pid, "titulo": titulo}, request)
+        messages.success(request, f"Proposta '{titulo}' eliminada com sucesso!")
+    else:
+        messages.error(request, "Erro ao eliminar proposta.")
+
     return redirect("home:admin_dape_list")
-    # TODO: Descomentar quando implementar obter_proposta_por_id e deletar_proposta_por_id
-    # proposta = obter_proposta_por_id(id)
-    # 
-    # if proposta:
-    #     titulo = proposta.get("titulo", "Desconhecido")
-    #     sucesso = deletar_proposta_por_id(id)
-    # 
-    #     if sucesso:
-    #         adicionar_log(
-    #             "admin_deletar_proposta",
-    #             {"id": id, "titulo": titulo},
-    #             request
-    #         )
-    #         messages.success(request, f"Proposta '{titulo}' eliminada com sucesso!")
-    #     else:
-    #         messages.error(request, "Erro ao eliminar proposta.")
-    # else:
-    #     messages.error(request, "Proposta não encontrada.")
-    # 
-    # return redirect("home:admin_dape_list")

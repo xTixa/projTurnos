@@ -953,6 +953,304 @@ class PostgreSQLConsultas:
             return []
 
 
+class PostgreSQLDAPE:
+    """Operações DAPE (propostas de estágio e favoritos) via SQL/procedures."""
+
+    # =============================
+    # PROPOSTAS
+    # =============================
+    @staticmethod
+    def listar_propostas(filtro: Optional[Dict[str, Any]] = None) -> List[Dict[str, Any]]:
+        """
+        Lista propostas. Filtros suportados:
+        - aluno_id: int
+        - titulo: str (match exato)
+        """
+        base_sql = """
+            SELECT p.id_proposta, p.aluno_id, p.titulo, p.entidade, p.descricao,
+                   p.requisitos, p.modelo, p.orientador_empresa, p.telefone,
+                   p.email, p.logo, p.aluno_atribuido, p.criado_em, p.atualizado_em
+            FROM proposta_estagio p
+        """
+        where_clauses = []
+        params: List[Any] = []
+
+        filtro = filtro or {}
+        if "aluno_id" in filtro and filtro["aluno_id"]:
+            where_clauses.append("p.aluno_id = %s")
+            params.append(filtro["aluno_id"])
+        if "titulo" in filtro and filtro["titulo"]:
+            where_clauses.append("p.titulo = %s")
+            params.append(filtro["titulo"])
+
+        sql = base_sql
+        if where_clauses:
+            sql += " WHERE " + " AND ".join(where_clauses)
+        sql += " ORDER BY p.atualizado_em DESC, p.id_proposta DESC"
+
+        try:
+            with connection.cursor() as cursor:
+                cursor.execute(sql, params)
+                cols = [c[0] for c in cursor.description]
+                return [dict(zip(cols, r)) for r in cursor.fetchall()]
+        except Exception as e:
+            logger.error(f"Erro a listar propostas DAPE: {e}")
+            return []
+
+    @staticmethod
+    def obter_proposta_por_id(id_proposta: int) -> Optional[Dict[str, Any]]:
+        sql = """
+            SELECT id_proposta, aluno_id, titulo, entidade, descricao,
+                   requisitos, modelo, orientador_empresa, telefone,
+                   email, logo, aluno_atribuido, criado_em, atualizado_em
+            FROM proposta_estagio WHERE id_proposta = %s
+        """
+        try:
+            with connection.cursor() as cursor:
+                cursor.execute(sql, [id_proposta])
+                row = cursor.fetchone()
+                if not row:
+                    return None
+                cols = [c[0] for c in cursor.description]
+                return dict(zip(cols, row))
+        except Exception as e:
+            logger.error(f"Erro a obter proposta {id_proposta}: {e}")
+            return None
+
+    @staticmethod
+    def criar_proposta(aluno_id: Optional[int], titulo: str, entidade: Optional[str],
+                       descricao: Optional[str], requisitos: Optional[str],
+                       modelo: Optional[str], orientador_empresa: Optional[str],
+                       telefone: Optional[str], email: Optional[str], logo: Optional[str]) -> Optional[int]:
+        """
+        Tenta chamar a procedure dape_criar_proposta; caso não exista, faz INSERT direto.
+        Retorna id_proposta ou None.
+        """
+        # Tenta procedure (function que retorna id)
+        try:
+            with connection.cursor() as cursor:
+                cursor.execute(
+                    "SELECT dape_criar_proposta(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)",
+                    [aluno_id, titulo, entidade, descricao, requisitos, modelo,
+                     orientador_empresa, telefone, email, logo]
+                )
+                row = cursor.fetchone()
+                if row and row[0]:
+                    return int(row[0])
+        except Exception as e:
+            logger.debug(f"Procedure dape_criar_proposta indisponível, fallback INSERT. Erro: {e}")
+
+        # Fallback INSERT
+        insert_sql = """
+            INSERT INTO proposta_estagio (
+                aluno_id, titulo, entidade, descricao, requisitos, modelo,
+                orientador_empresa, telefone, email, logo
+            ) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
+            RETURNING id_proposta
+        """
+        try:
+            with connection.cursor() as cursor:
+                cursor.execute(insert_sql, [aluno_id, titulo, entidade, descricao, requisitos,
+                                            modelo, orientador_empresa, telefone, email, logo])
+                r = cursor.fetchone()
+                return int(r[0]) if r else None
+        except Exception as e:
+            logger.error(f"Erro a criar proposta DAPE: {e}")
+            return None
+
+    @staticmethod
+    def atualizar_proposta(aluno_id: int, titulo_atual: str, updates: Dict[str, Any]) -> bool:
+        """Atualiza proposta do aluno. Tenta procedure; fallback UPDATE direto."""
+        # Tenta procedure
+        try:
+            with connection.cursor() as cursor:
+                cursor.execute(
+                    "CALL dape_atualizar_proposta(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)",
+                    [aluno_id,
+                     titulo_atual,
+                     updates.get("titulo"), updates.get("entidade"), updates.get("descricao"),
+                     updates.get("requisitos"), updates.get("modelo"), updates.get("orientador_empresa"),
+                     updates.get("telefone"), updates.get("email")]
+                )
+                return True
+        except Exception:
+            pass
+
+        # Fallback UPDATE dinâmico
+        allowed = [
+            "titulo", "entidade", "descricao", "requisitos", "modelo",
+            "orientador_empresa", "telefone", "email", "logo"
+        ]
+        set_parts = []
+        params: List[Any] = []
+        for k in allowed:
+            if k in updates and updates[k] is not None:
+                set_parts.append(f"{k} = %s")
+                params.append(updates[k])
+        if not set_parts:
+            return True
+        params.extend([aluno_id, titulo_atual])
+        sql = f"UPDATE proposta_estagio SET {', '.join(set_parts)}, atualizado_em = NOW() WHERE aluno_id = %s AND titulo = %s"
+        try:
+            with connection.cursor() as cursor:
+                cursor.execute(sql, params)
+                return cursor.rowcount > 0
+        except Exception as e:
+            logger.error(f"Erro a atualizar proposta DAPE: {e}")
+            return False
+
+    @staticmethod
+    def eliminar_proposta(aluno_id: int, titulo: str) -> bool:
+        """Elimina proposta do aluno. Tenta procedure; fallback DELETE direto."""
+        try:
+            with connection.cursor() as cursor:
+                cursor.execute("CALL dape_eliminar_proposta(%s,%s)", [aluno_id, titulo])
+                return True
+        except Exception:
+            pass
+        try:
+            with connection.cursor() as cursor:
+                cursor.execute("DELETE FROM proposta_estagio WHERE aluno_id = %s AND titulo = %s", [aluno_id, titulo])
+                return cursor.rowcount > 0
+        except Exception as e:
+            logger.error(f"Erro a eliminar proposta DAPE: {e}")
+            return False
+
+    # =============================
+    # ADMIN OPS POR ID
+    # =============================
+    @staticmethod
+    def admin_atualizar_proposta(id_proposta: int, updates: Dict[str, Any]) -> bool:
+        """Atualiza proposta por ID (admin). Tenta procedure; fallback UPDATE direto."""
+        try:
+            with connection.cursor() as cursor:
+                cursor.execute(
+                    "CALL dape_admin_atualizar_proposta(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)",
+                    [id_proposta,
+                     updates.get("titulo"), updates.get("entidade"), updates.get("descricao"),
+                     updates.get("requisitos"), updates.get("modelo"), updates.get("orientador_empresa"),
+                     updates.get("telefone"), updates.get("email"), updates.get("logo")]
+                )
+                return True
+        except Exception:
+            pass
+
+        allowed = [
+            "titulo", "entidade", "descricao", "requisitos", "modelo",
+            "orientador_empresa", "telefone", "email", "logo"
+        ]
+        set_parts = []
+        params: List[Any] = []
+        for k in allowed:
+            if k in updates and updates[k] is not None:
+                set_parts.append(f"{k} = %s")
+                params.append(updates[k])
+        if not set_parts:
+            return True
+        params.append(id_proposta)
+        sql = f"UPDATE proposta_estagio SET {', '.join(set_parts)}, atualizado_em = NOW() WHERE id_proposta = %s"
+        try:
+            with connection.cursor() as cursor:
+                cursor.execute(sql, params)
+                return cursor.rowcount > 0
+        except Exception as e:
+            logger.error(f"Erro admin atualizar proposta DAPE: {e}")
+            return False
+
+    @staticmethod
+    def admin_eliminar_proposta(id_proposta: int) -> bool:
+        """Elimina proposta por ID (admin). Tenta procedure; fallback DELETE direto."""
+        try:
+            with connection.cursor() as cursor:
+                cursor.execute("CALL dape_admin_eliminar_proposta(%s)", [id_proposta])
+                return True
+        except Exception:
+            pass
+        try:
+            with connection.cursor() as cursor:
+                cursor.execute("DELETE FROM favorito_proposta WHERE id_proposta = %s", [id_proposta])
+                cursor.execute("DELETE FROM proposta_estagio WHERE id_proposta = %s", [id_proposta])
+                return True
+        except Exception as e:
+            logger.error(f"Erro admin eliminar proposta DAPE: {e}")
+            return False
+
+    # =============================
+    # FAVORITOS
+    # =============================
+    @staticmethod
+    def listar_favoritos(aluno_id: int) -> List[Dict[str, Any]]:
+        sql = """
+            SELECT p.*
+            FROM favorito_proposta f
+            JOIN proposta_estagio p ON p.id_proposta = f.id_proposta
+            WHERE f.aluno_id = %s
+            ORDER BY p.atualizado_em DESC, p.id_proposta DESC
+        """
+        try:
+            with connection.cursor() as cursor:
+                cursor.execute(sql, [aluno_id])
+                cols = [c[0] for c in cursor.description]
+                return [dict(zip(cols, r)) for r in cursor.fetchall()]
+        except Exception as e:
+            logger.error(f"Erro a listar favoritos DAPE: {e}")
+            return []
+
+    @staticmethod
+    def verificar_favorito(aluno_id: int, id_proposta: int) -> bool:
+        try:
+            with connection.cursor() as cursor:
+                cursor.execute(
+                    "SELECT 1 FROM favorito_proposta WHERE aluno_id = %s AND id_proposta = %s",
+                    [aluno_id, id_proposta]
+                )
+                return cursor.fetchone() is not None
+        except Exception as e:
+            logger.error(f"Erro a verificar favorito DAPE: {e}")
+            return False
+
+    @staticmethod
+    def toggle_favorito(aluno_id: int, id_proposta: int) -> Dict[str, Any]:
+        """Adiciona/remove favorito (upsert/delete). Retorna {added: bool}."""
+        # Tenta procedure
+        try:
+            with connection.cursor() as cursor:
+                cursor.execute("SELECT dape_toggle_favorito(%s,%s)", [aluno_id, id_proposta])
+                row = cursor.fetchone()
+                if row is not None:
+                    return {"added": bool(row[0])}
+        except Exception:
+            pass
+
+        # Fallback lógico
+        if PostgreSQLDAPE.verificar_favorito(aluno_id, id_proposta):
+            try:
+                with connection.cursor() as cursor:
+                    cursor.execute(
+                        "DELETE FROM favorito_proposta WHERE aluno_id = %s AND id_proposta = %s",
+                        [aluno_id, id_proposta]
+                    )
+                return {"added": False}
+            except Exception as e:
+                logger.error(f"Erro a remover favorito DAPE: {e}")
+                return {"added": False}
+        else:
+            try:
+                with connection.cursor() as cursor:
+                    cursor.execute(
+                        """
+                        INSERT INTO favorito_proposta (aluno_id, id_proposta)
+                        VALUES (%s, %s)
+                        ON CONFLICT (aluno_id, id_proposta) DO NOTHING
+                        """,
+                        [aluno_id, id_proposta]
+                    )
+                return {"added": True}
+            except Exception as e:
+                logger.error(f"Erro a adicionar favorito DAPE: {e}")
+                return {"added": False}
+
+
 class PostgreSQLAuth:
     """Autenticação via SQL puro (sem ORM) para admin, aluno e docente."""
 
@@ -975,6 +1273,14 @@ class PostgreSQLAuth:
         except Exception as e:
             logger.error(f"Erro ao obter admin: {e}")
             return None
+
+    @staticmethod
+    def validar_password(hash_pwd: str, password: str) -> bool:
+        """Valida hash Django (auth_user.password) contra password fornecida."""
+        try:
+            return check_password(password, hash_pwd)
+        except Exception:
+            return False
 
 
 class PostgreSQLTurnos:
