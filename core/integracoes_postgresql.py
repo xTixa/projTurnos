@@ -736,17 +736,17 @@ class PostgreSQLConsultas:
 
 # ============================= CORREÇÃO
 class PostgreSQLDAPE:
-    
+
     # =============================
     # PROPOSTAS
     # =============================
     @staticmethod
-    def listar_propostas(filtro: Optional[Dict[str, Any]] = None) -> List[Dict[str, Any]]:
+    def dape_listar_propostas(filtro: Optional[Dict[str, Any]] = None) -> List[Dict[str, Any]]:
         filtro = filtro or {}
         curso_id = filtro.get("curso_id")
         try:
             with connection.cursor() as cursor:
-                cursor.execute("SELECT * FROM dape_listar_propostas(%s)", [curso_id])
+                cursor.execute("SELECT * FROM fn_dape_listar_propostas(%s)", [curso_id])
                 cols = [col[0] for col in cursor.description]
                 return [dict(zip(cols, row)) for row in cursor.fetchall()]
         except Exception as e:
@@ -754,10 +754,10 @@ class PostgreSQLDAPE:
             return []
 
     @staticmethod
-    def obter_proposta_por_id(id_proposta: int) -> Optional[Dict[str, Any]]:
+    def dape_obter_proposta_por_id(id_proposta: int) -> Optional[Dict[str, Any]]:
         try:
             with connection.cursor() as cursor:
-                cursor.execute("SELECT * FROM dape_obter_proposta(%s)", [id_proposta])
+                cursor.execute("SELECT * FROM fn_dape_obter_proposta(%s)", [id_proposta])
                 row = cursor.fetchone()
                 if not row:
                     return None
@@ -768,14 +768,10 @@ class PostgreSQLDAPE:
             return None
 
     @staticmethod
-    def criar_proposta(aluno_id: Optional[int], titulo: str, entidade: Optional[str],
+    def dape_criar_proposta(aluno_id: Optional[int], titulo: str, entidade: Optional[str],
                        descricao: Optional[str], requisitos: Optional[str],
                        modelo: Optional[str], orientador_empresa: Optional[str],
                        telefone: Optional[str], email: Optional[str], logo: Optional[str]) -> Optional[int]:
-        """
-        Chama function dape_criar_proposta.
-        Retorna id_proposta ou None.
-        """
         try:
             with connection.cursor() as cursor:
                 cursor.execute(
@@ -790,8 +786,7 @@ class PostgreSQLDAPE:
             return None
 
     @staticmethod
-    def atualizar_proposta(aluno_id: int, titulo_atual: str, updates: Dict[str, Any]) -> bool:
-        """Atualiza proposta do aluno via procedure dape_atualizar_proposta."""
+    def dape_atualizar_proposta(aluno_id: int, titulo_atual: str, updates: Dict[str, Any]) -> bool:
         try:
             with connection.cursor() as cursor:
                 cursor.execute(
@@ -808,8 +803,7 @@ class PostgreSQLDAPE:
             return False
 
     @staticmethod
-    def eliminar_proposta(aluno_id: int, titulo: str) -> bool:
-        """Elimina proposta do aluno via procedure dape_eliminar_proposta."""
+    def dape_eliminar_proposta(aluno_id: int, titulo: str) -> bool:
         try:
             with connection.cursor() as cursor:
                 cursor.execute("CALL dape_eliminar_proposta(%s,%s)", [aluno_id, titulo])
@@ -822,8 +816,7 @@ class PostgreSQLDAPE:
     # ADMIN OPS POR ID
     # =============================
     @staticmethod
-    def admin_atualizar_proposta(id_proposta: int, updates: Dict[str, Any]) -> bool:
-        """Atualiza proposta por ID (admin) via procedure dape_admin_atualizar_proposta."""
+    def dape_admin_atualizar_proposta(id_proposta: int, updates: Dict[str, Any]) -> bool:
         try:
             with connection.cursor() as cursor:
                 cursor.execute(
@@ -839,8 +832,7 @@ class PostgreSQLDAPE:
             return False
 
     @staticmethod
-    def admin_eliminar_proposta(id_proposta: int) -> bool:
-        """Elimina proposta por ID (admin) via procedure dape_admin_eliminar_proposta."""
+    def dape_admin_eliminar_proposta(id_proposta: int) -> bool:
         try:
             with connection.cursor() as cursor:
                 cursor.execute("CALL dape_admin_eliminar_proposta(%s)", [id_proposta])
@@ -853,10 +845,10 @@ class PostgreSQLDAPE:
     # FAVORITOS
     # =============================
     @staticmethod
-    def listar_favoritos(aluno_id: int) -> List[Dict[str, Any]]:
+    def dape_listar_favoritos(aluno_id: int) -> List[Dict[str, Any]]:
         try:
             with connection.cursor() as cursor:
-                cursor.execute("SELECT * FROM dape_listar_favoritos(%s)", [aluno_id])
+                cursor.execute("SELECT * FROM fn_dape_listar_favoritos(%s)", [aluno_id])
                 cols = [col[0] for col in cursor.description]
                 return [dict(zip(cols, row)) for row in cursor.fetchall()]
         except Exception as e:
@@ -864,10 +856,10 @@ class PostgreSQLDAPE:
             return []
 
     @staticmethod
-    def verificar_favorito(aluno_id: int, id_proposta: int) -> bool:
+    def dape_verificar_favorito(aluno_id: int, id_proposta: int) -> bool:
         try:
             with connection.cursor() as cursor:
-                cursor.execute("SELECT dape_verificar_favorito(%s, %s)", [aluno_id, id_proposta])
+                cursor.execute("SELECT fn_dape_verificar_favorito(%s, %s)", [aluno_id, id_proposta])
                 row = cursor.fetchone()
                 return bool(row[0]) if row else False
         except Exception as e:
@@ -875,8 +867,8 @@ class PostgreSQLDAPE:
             return False
 
     @staticmethod
-    def toggle_favorito(aluno_id: int, id_proposta: int) -> Dict[str, Any]:
-        """Adiciona/remove favorito via função dape_toggle_favorito. Retorna {added: bool}."""
+    def dape_toggle_favorito(aluno_id: int, id_proposta: int) -> Dict[str, Any]:
+
         try:
             with connection.cursor() as cursor:
                 cursor.execute("SELECT dape_toggle_favorito(%s,%s)", [aluno_id, id_proposta])
