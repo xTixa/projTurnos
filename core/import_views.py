@@ -1,13 +1,13 @@
 from core.utils import registar_log, admin_required, aluno_required, user_required, docente_required
 from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
-from django.db import connection
+from django.db import connections
 from django.shortcuts import render
 from django.contrib import messages
 from core.utils import admin_required
 
 def _executar_funcao_lote(nome_func, conteudo_csv):
-    with connection.cursor() as cursor:
+    with connections["admin"].cursor() as cursor:
         cursor.execute(f"SELECT {nome_func}(%s)", [conteudo_csv])
 
 @admin_required
