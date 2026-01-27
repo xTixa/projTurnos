@@ -2,7 +2,7 @@
 Integração de Procedures, Functions e Triggers do PostgreSQL
 """
 
-from django.db import connection
+from django.db import connection, connections
 from django.contrib.auth.hashers import check_password
 from typing import List, Dict, Any, Tuple, Optional
 import logging
@@ -12,8 +12,7 @@ logger = logging.getLogger(__name__)
 
 class PostgreSQLProcedures:
     @staticmethod
-    def criar_aluno(n_mecanografico: int, id_curso: int, id_anocurricular: int, 
-                    nome: str, email: str, password: str) -> bool:
+    def criar_aluno(n_mecanografico: int, id_curso: int, id_anocurricular: int, nome: str, email: str, password: str) -> bool:
         """
         Chama procedure criar_aluno
         Retorna True se sucesso, False se erro
@@ -100,7 +99,7 @@ class PostgreSQLProcedures:
             return False
 
 
-class PostgreSQLFunctions:    
+class PostgreSQLFunctions:
     @staticmethod
     def alunos_por_uc(id_uc: int, tipo_de_turno: str) -> List[Dict[str, Any]]:
         """
@@ -586,7 +585,8 @@ class PostgreSQLConsultas:
         """Obtém um turno pelo ID."""
         sql = "SELECT id_turno, n_turno, capacidade, tipo FROM turno WHERE id_turno = %s"
         try:
-            with connection.cursor() as cursor:
+            ##alteracao_user_para
+            with connections["admin"].cursor() as cursor:
                 cursor.execute(sql, [turno_id])
                 row = cursor.fetchone()
                 if row:
@@ -602,7 +602,8 @@ class PostgreSQLConsultas:
         """Cria um novo turno. Retorna o id_turno ou None se erro."""
         sql = "INSERT INTO turno (n_turno, capacidade, tipo) VALUES (%s, %s, %s) RETURNING id_turno"
         try:
-            with connection.cursor() as cursor:
+            #with connection.cursor() as cursor:
+            with connections["admin"].cursor() as cursor:
                 cursor.execute(sql, [n_turno, capacidade, tipo])
                 row = cursor.fetchone()
                 return row[0] if row else None
@@ -615,7 +616,8 @@ class PostgreSQLConsultas:
         """Atualiza um turno."""
         sql = "UPDATE turno SET n_turno = %s, capacidade = %s, tipo = %s WHERE id_turno = %s"
         try:
-            with connection.cursor() as cursor:
+            #with connection.cursor() as cursor:
+            with connections["admin"].cursor() as cursor:
                 cursor.execute(sql, [n_turno, capacidade, tipo, turno_id])
                 return True
         except Exception as e:
@@ -1282,6 +1284,143 @@ class PostgreSQLAuth:
         except Exception:
             return False
 
+    @staticmethod
+    def fetch_aluno_por_email(email: str) -> Optional[Dict[str, Any]]:
+        """Busca aluno por email na tabela aluno."""
+        sql = """
+            SELECT n_mecanografico, nome, email, password, id_curso, id_anocurricular
+            FROM aluno
+            WHERE email = %s
+            LIMIT 1
+        """
+        try:
+            with connection.cursor() as cursor:
+                cursor.execute(sql, [email])
+                row = cursor.fetchone()
+                if not row:
+                    return None
+                cols = [col[0] for col in cursor.description]
+                return dict(zip(cols, row))
+        except Exception as e:
+            logger.error(f"Erro ao obter aluno: {e}")
+            return None
+
+    @staticmethod
+    def fetch_docente_por_email(email: str) -> Optional[Dict[str, Any]]:
+        """Busca docente por email na tabela docente."""
+        sql = """
+            SELECT id_docente, nome, email, password, cargo
+            FROM docente
+            WHERE email = %s
+            LIMIT 1
+        """
+        try:
+            with connection.cursor() as cursor:
+                cursor.execute(sql, [email])
+                row = cursor.fetchone()
+                if not row:
+                    return None
+                cols = [col[0] for col in cursor.description]
+                return dict(zip(cols, row))
+        except Exception as e:
+            logger.error(f"Erro ao obter docente: {e}")
+            return None
+
+
+class PostgreSQLPDF:
+    """Operações com PDFs via SQL puro."""
+
+    @staticmethod
+    def delete_pdf(pdf_id: int, pdf_type: str) -> bool:
+        """Apaga um PDF (horario ou avaliacao) por ID."""
+        table_name = 'core_horariopdf' if pdf_type == 'horario' else 'core_avaliacaopdf'
+        sql = f"""
+            DELETE FROM {table_name}
+            WHERE id = %s
+        """
+        try:
+            with connection.cursor() as cursor:
+                cursor.execute(sql, [pdf_id])
+            return True
+        except Exception as e:
+            logger.error(f"Erro ao apagar PDF: {e}")
+            return False
+
+    @staticmethod
+    def get_pdf(pdf_id: int, pdf_type: str) -> Optional[Dict[str, Any]]:
+        """Obtém um PDF específico."""
+        table_name = 'core_horariopdf' if pdf_type == 'horario' else 'core_avaliacaopdf'
+        sql = f"""
+            SELECT id, nome, ficheiro, id_curso, id_anocurricular, atualizado_em
+            FROM {table_name}
+            WHERE id = %s
+        """
+        try:
+            with connection.cursor() as cursor:
+                cursor.execute(sql, [pdf_id])
+                row = cursor.fetchone()
+                if not row:
+                    return None
+                cols = [col[0] for col in cursor.description]
+                return dict(zip(cols, row))
+        except Exception as e:
+            logger.error(f"Erro ao obter PDF: {e}")
+            return None
+
+
+class PostgreSQLLogs:
+    """Operações com logs de eventos via SQL puro."""
+
+    @staticmethod
+    def list_logs(operacao_filter: Optional[str] = None, entidade_filter: Optional[str] = None, limite: int = 100) -> List[Dict[str, Any]]:
+        """Lista logs com filtros opcionais."""
+        sql = "SELECT * FROM log_eventos WHERE 1=1"
+        params = []
+
+        if operacao_filter:
+            sql += " AND operacao ILIKE %s"
+            params.append(f"%{operacao_filter}%")
+
+        if entidade_filter:
+            sql += " AND entidade ILIKE %s"
+            params.append(f"%{entidade_filter}%")
+
+        sql += " ORDER BY data_hora DESC LIMIT %s"
+        params.append(limite)
+
+        try:
+            with connection.cursor() as cursor:
+                cursor.execute(sql, params)
+                cols = [col[0] for col in cursor.description]
+                return [dict(zip(cols, row)) for row in cursor.fetchall()]
+        except Exception as e:
+            logger.error(f"Erro ao listar logs: {e}")
+            return []
+
+    @staticmethod
+    def get_distinct_operacoes() -> List[str]:
+        """Obtém lista de operações distintas."""
+        sql = "SELECT DISTINCT operacao FROM log_eventos WHERE operacao IS NOT NULL AND operacao != '' ORDER BY operacao"
+        try:
+            with connection.cursor() as cursor:
+                cursor.execute(sql)
+                return [row[0] for row in cursor.fetchall()]
+        except Exception as e:
+            logger.error(f"Erro ao obter operações: {e}")
+            return []
+
+    @staticmethod
+    def get_distinct_entidades() -> List[str]:
+        """Obtém lista de entidades distintas."""
+        sql = "SELECT DISTINCT entidade FROM log_eventos WHERE entidade IS NOT NULL AND entidade != '' ORDER BY entidade"
+        try:
+            with connection.cursor() as cursor:
+                cursor.execute(sql)
+                return [row[0] for row in cursor.fetchall()]
+        except Exception as e:
+            logger.error(f"Erro ao obter entidades: {e}")
+            return []
+
 
 class PostgreSQLTurnos:
     """Operações de inscrição em turnos via SQL (sem ORM)."""
@@ -1510,43 +1649,3 @@ class PostgreSQLTurnos:
             return check_password(password, hash_pwd)
         except Exception:
             return False
-
-    @staticmethod
-    def fetch_aluno_por_email(email: str) -> Optional[Dict[str, Any]]:
-        sql = """
-            SELECT n_mecanografico, nome, email, password, id_curso, id_anocurricular
-            FROM aluno
-            WHERE email = %s
-            LIMIT 1
-        """
-        try:
-            with connection.cursor() as cursor:
-                cursor.execute(sql, [email])
-                row = cursor.fetchone()
-                if not row:
-                    return None
-                cols = [col[0] for col in cursor.description]
-                return dict(zip(cols, row))
-        except Exception as e:
-            logger.error(f"Erro ao obter aluno: {e}")
-            return None
-
-    @staticmethod
-    def fetch_docente_por_email(email: str) -> Optional[Dict[str, Any]]:
-        sql = """
-            SELECT id_docente, nome, email, password, cargo
-            FROM docente
-            WHERE email = %s
-            LIMIT 1
-        """
-        try:
-            with connection.cursor() as cursor:
-                cursor.execute(sql, [email])
-                row = cursor.fetchone()
-                if not row:
-                    return None
-                cols = [col[0] for col in cursor.description]
-                return dict(zip(cols, row))
-        except Exception as e:
-            logger.error(f"Erro ao obter docente: {e}")
-            return None

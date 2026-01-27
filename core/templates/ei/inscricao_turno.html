@@ -53,8 +53,8 @@
 
                 {% for t in uc.turnos %}
                         <option value="{{ t.id }}"
-                            {% if t.vagas == 0 or t.ja_inscrito %}disabled{% endif %}
-                            class="{% if t.ja_inscrito %}option-inscrito{% elif t.vagas == 0 %}option-esgotado{% else %}option-vagas{% endif %}"
+                            {% if t.vagas == 0 or t.ja_inscrito or t.tem_conflito %}disabled{% endif %}
+                            class="{% if t.ja_inscrito %}option-inscrito{% elif t.tem_conflito %}option-conflito{% elif t.vagas == 0 %}option-esgotado{% else %}option-vagas{% endif %}"
                             data-dia="{{ t.dia }}"
                             data-hora="{{ t.hora_inicio }}"
                             data-hora-fim="{{ t.hora_fim }}"
@@ -64,6 +64,7 @@
                             data-turno-nome="{{ t.nome }}">
                         {{ t.nome }} ({{ t.horario }})
                         {% if t.ja_inscrito %} — INSCRITO
+                        {% elif t.tem_conflito %} — CONFLITO DE HORÁRIO
                         {% elif t.vagas == 0 %} — ESGOTADO
                         {% else %} — {{ t.vagas }} vaga{{ t.vagas|pluralize:"s" }}
                         {% endif %}

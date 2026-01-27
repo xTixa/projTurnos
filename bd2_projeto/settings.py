@@ -79,7 +79,18 @@ WSGI_APPLICATION = 'bd2_projeto.wsgi.application'
 # Database
 
 DATABASES = {
-    "default": {
+    "default": {  # utilizador app_user (para operações normais)
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": "neondb",
+        "USER": "app_user",
+        "PASSWORD": "SenhaForte123",
+        "HOST": "ep-lively-pond-a956w6sx-pooler.gwc.azure.neon.tech",
+        "PORT": "5432",
+        "OPTIONS": {
+            "sslmode": "require",
+        },
+    },
+    "admin": {  # utilizador neondb_owner (só para operações de admin)
         "ENGINE": "django.db.backends.postgresql",
         "NAME": "neondb",
         "USER": "neondb_owner",
@@ -88,8 +99,8 @@ DATABASES = {
         "PORT": "5432",
         "OPTIONS": {
             "sslmode": "require",
-        }
-    }
+        },
+    },
 }
 
 

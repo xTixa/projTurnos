@@ -1,28 +1,20 @@
 from datetime import datetime
-from django.shortcuts import render, redirect, get_object_or_404
+from django.shortcuts import render, redirect
 from django.contrib import messages
-from django.db import models, connection
-from .models import AnoCurricular, UnidadeCurricular, Semestre, Docente, Curso, HorarioPDF, AvaliacaoPDF, Aluno, TurnoUc, Turno, InscricaoTurno, InscritoUc, LogEvento, AuditoriaInscricao, Matricula, LecionaUc
-from .db_views import CadeirasSemestre, AlunosPorOrdemAlfabetica, Turnos, Cursos
+from django.db import connection
 from django.http import JsonResponse, FileResponse
 import json
-from django.contrib.auth.models import User
-from core.integracoes_postgresql import PostgreSQLAuth, PostgreSQLTurnos, PostgreSQLConsultas, PostgreSQLProcedures, PostgreSQLDAPE
+from core.integracoes_postgresql import PostgreSQLAuth, PostgreSQLTurnos, PostgreSQLConsultas, PostgreSQLProcedures, PostgreSQLDAPE, PostgreSQLPDF, PostgreSQLLogs
 from bd2_projeto.services.mongo_service import (
     adicionar_log, listar_eventos_mongo, listar_logs, registar_auditoria_inscricao,
-    validar_inscricao_disponivel, registar_consulta_aluno,
-    registar_atividade_docente, registar_erro, registar_auditoria_user
+    validar_inscricao_disponivel, registar_consulta_aluno, registar_erro, registar_auditoria_user
 )
-from bd2_projeto.services.gridfs_service import (
-    upload_pdf_horario, upload_pdf_avaliacao,
-    download_pdf, eliminar_pdf, listar_pdfs_horarios, listar_pdfs_avaliacoes
-)
-from core.utils import registar_log, admin_required, aluno_required, user_required, docente_required
+from bd2_projeto.services.gridfs_service import (upload_pdf_horario, upload_pdf_avaliacao, download_pdf, eliminar_pdf)
+from core.utils import registar_log, admin_required, aluno_required, user_required
 import logging
 import time
 
 logger = logging.getLogger(__name__)
-
 
 def _listar_pdfs_por_ano(model_table, course_id):
     """Obtém PDFs mais recentes por ano curricular via SQL."""
@@ -172,6 +164,27 @@ def inscricao_turno(request):
             return redirect("home:inscricao_turno_tdm")
         return redirect("home:index")
 
+    # Buscar horários dos turnos já inscritos
+    horarios_ocupados = []
+    try:
+        with connection.cursor() as cursor:
+            sql = """
+                SELECT DISTINCT tu.hora_inicio, tu.hora_fim
+                FROM inscricao_turno it
+                JOIN turno_uc tu ON tu.id_turno = it.id_turno
+                WHERE it.n_mecanografico = %s
+            """
+            cursor.execute(sql, [n_meca])
+            cols = [col[0] for col in cursor.description]
+            for row in cursor.fetchall():
+                row_dict = dict(zip(cols, row))
+                horarios_ocupados.append({
+                    'hora_inicio': row_dict.get('hora_inicio'),
+                    'hora_fim': row_dict.get('hora_fim')
+                })
+    except Exception as e:
+        logger.error(f"Erro ao buscar horários: {e}")
+    
     turnos_inscritos_rows = PostgreSQLTurnos.inscricoes_turno_por_aluno(n_meca)
     turnos_inscritos = {row.get("id_turno") for row in turnos_inscritos_rows}
 
@@ -202,7 +215,19 @@ def inscricao_turno(request):
         turnos = []
         for tu in turnos_uc:
             turno_id = tu.get("id_turno")
-            ocupados = PostgreSQLTurnos.count_inscritos(turno_id, uc_id)
+            # Contar TODOS os inscritos no turno (globalmente)
+            sql = """
+                SELECT COUNT(*) FROM inscricao_turno
+                WHERE id_turno = %s
+            """
+            try:
+                with connection.cursor() as cursor:
+                    cursor.execute(sql, [turno_id])
+                    ocupados = cursor.fetchone()[0]
+            except Exception as e:
+                logger.error(f"Erro ao contar inscritos: {e}")
+                ocupados = 0
+            
             capacidade = tu.get("capacidade") or 0
             vagas = capacidade - ocupados
             if vagas < 0:
@@ -215,6 +240,25 @@ def inscricao_turno(request):
             dia_semana = _mapear_dia_semana(hora_inicio) if hora_inicio else "?"
 
             ja_inscrito = turno_id in turnos_inscritos
+            
+            # Verificar conflito de horário com turnos já inscritos
+            tem_conflito = False
+            if not ja_inscrito and hora_inicio and hora_fim:
+                for horario in horarios_ocupados:
+                    if horario['hora_inicio'] and horario['hora_fim']:
+                        # Conflito se os horários se sobrepõem
+                        inicio_ocupado = horario['hora_inicio']
+                        fim_ocupado = horario['hora_fim']
+                        
+                        # Converter para time objects se necessário
+                        if hasattr(inicio_ocupado, 'time'):
+                            inicio_ocupado = inicio_ocupado.time()
+                        if hasattr(fim_ocupado, 'time'):
+                            fim_ocupado = fim_ocupado.time()
+                        
+                        if not (hora_fim <= inicio_ocupado or hora_inicio >= fim_ocupado):
+                            tem_conflito = True
+                            break
 
             turno_info = {
                 "id": turno_id,
@@ -222,8 +266,10 @@ def inscricao_turno(request):
                 "tipo": tu.get("tipo"),
                 "capacidade": capacidade,
                 "vagas": vagas,
+                "tem_vagas": vagas > 0 and not tem_conflito,  # Só tem vagas se > 0 E sem conflito
                 "horario": f"{dia_semana} {hora_inicio_str}-{hora_fim_str}",
                 "ja_inscrito": ja_inscrito,
+                "tem_conflito": tem_conflito,  # Novo campo
                 "dia": dia_semana,
                 "hora_inicio": hora_inicio_str,
                 "hora_fim": hora_fim_str,
@@ -413,10 +459,18 @@ def inscrever_turno(request, turno_id, uc_id):
         resultado = "erro_sistema"
         motivo = str(e)
         tempo_ms = int((time.time() - inicio_tempo) * 1000)
+        
+        # Extrair mensagem de erro do trigger (PostgreSQL)
+        error_msg = str(e)
+        if "Conflito de horário" in error_msg:
+            messages.error(request, "❌ Não podes inscrever-te! Conflito de horário com outro turno.")
+        elif "está cheio" in error_msg or "Turno" in error_msg and "ocupado" in error_msg:
+            messages.error(request, "❌ Este turno já está cheio. Nenhuma vaga disponível.")
+        else:
+            messages.error(request, f"❌ Erro na inscrição: {error_msg}")
 
         registar_erro("inscrever_turno", str(e), {"turno_id": turno_id, "uc_id": uc_id})
         registar_auditoria_inscricao(request.session.get("user_id"), turno_id, uc_id, "desconhecido",  resultado, motivo, tempo_ms)
-        messages.error(request, "Erro ao processar inscrição. Tente novamente.")
         return redirect("home:inscricao_turno")
 
 #view para remover a inscriçao do turno
@@ -1106,9 +1160,10 @@ def testar_mongo(request):
 
 #view para apagar o pdf dos horarios
 def admin_horarios_delete(request, id):
-    horario = get_object_or_404(HorarioPDF, id=id)
-    horario.delete()
-    messages.success(request, "Horário apagado!")
+    if PostgreSQLPDF.delete_pdf(id, 'horario'):
+        messages.success(request, "Horário apagado!")
+    else:
+        messages.error(request, "Erro ao apagar horário")
     return redirect("home:admin_horarios_list")
 
 # NOVA VIEW PARA TESTAR MONGO
@@ -1199,168 +1254,6 @@ def avaliacoes_tdm(request):
 def moodle(request):
     return render(request, "tdm/moodle.html", { "area": "tdm" })
 
-#view para inscricao nos turnos TDM
-@aluno_required
-def inscricao_turno_tdm(request):
-    if "user_tipo" not in request.session or request.session["user_tipo"] != "aluno":
-        messages.error(request, "É necessário iniciar sessão como aluno.")
-        return redirect("home:login")
-
-    n_meca = request.session["user_id"]
-    aluno_row = PostgreSQLTurnos.get_aluno(n_meca)
-    if not aluno_row:
-        messages.error(request, "Aluno não encontrado.")
-        return redirect("home:login")
-
-    if aluno_row.get("id_curso") != 2:
-        messages.error(request, "Esta página é apenas para alunos de Tecnologia e Design Multimédia.")
-        if aluno_row.get("id_curso") == 1:
-            return redirect("home:inscricao_turno")
-        return redirect("home:index")
-
-    inscricoes_existentes = PostgreSQLTurnos.inscricoes_turno_por_aluno(n_meca)
-    turno_escolhido = None
-    if inscricoes_existentes:
-        primeiro = inscricoes_existentes[0]
-        turno_escolhido = primeiro.get("turno_numero")
-
-    inscricoes_uc = PostgreSQLTurnos.ucs_inscritas_por_aluno(n_meca)
-
-    turnos_info = {
-        1: {"nome": "Turno 1", "ucs": []},
-        2: {"nome": "Turno 2", "ucs": []}
-    }
-
-    def _dia_semana(hora_inicio):
-        try:
-            h_int = hora_inicio.hour
-            if 8 <= h_int < 10:
-                return "Segunda"
-            if 10 <= h_int < 12:
-                return "Terça"
-            if 12 <= h_int < 14:
-                return "Quarta"
-            if 14 <= h_int < 16:
-                return "Quinta"
-            return "Sexta"
-        except Exception:
-            return "?"
-
-    for uc_row in inscricoes_uc:
-        if uc_row.get("id_curso") != 2:
-            continue
-        uc_id = uc_row.get("id_unidadecurricular")
-        turnos_uc = PostgreSQLTurnos.turno_uc_por_uc(uc_id)
-
-        for tu in turnos_uc:
-            n_turno = tu.get("n_turno")
-            if n_turno not in [1, 2]:
-                continue
-
-            turno_id = tu.get("id_turno")
-            ocupados = PostgreSQLTurnos.count_inscritos(turno_id, uc_id)
-            capacidade = tu.get("capacidade") or 0
-            vagas = capacidade - ocupados
-            if vagas < 0:
-                vagas = 0
-
-            hora_inicio = tu.get("hora_inicio")
-            hora_fim = tu.get("hora_fim")
-            hora_inicio_str = hora_inicio.strftime("%H:%M") if hora_inicio else "?"
-            hora_fim_str = hora_fim.strftime("%H:%M") if hora_fim else "?"
-            dia_semana = _dia_semana(hora_inicio) if hora_inicio else "?"
-
-            turnos_info[n_turno]["ucs"].append({
-                "nome": uc_row.get("nome"),
-                "horario": f"{dia_semana} {hora_inicio_str}-{hora_fim_str}",
-                "vagas": vagas,
-                "capacidade": capacidade
-            })
-
-    return render(request, "tdm/inscricao_turno_tdm.html", {"turnos_info": turnos_info, "turno_escolhido": turno_escolhido, "area": "tdm"})
-
-#view para inscrevr no turno TDM
-@aluno_required
-def inscrever_turno_tdm(request, n_turno):
-    if "user_tipo" not in request.session or request.session["user_tipo"] != "aluno":
-        messages.error(request, "Apenas alunos podem inscrever-se em turnos.")
-        return redirect("home:login")
-    
-    inicio_tempo = time.time()
-    n_meca = request.session["user_id"]
-    aluno_row = PostgreSQLTurnos.get_aluno(n_meca)
-
-    if not aluno_row:
-        messages.error(request, "Aluno não encontrado.")
-        return redirect("home:login")
-
-    if aluno_row.get("id_curso") != 2:
-        messages.error(request, "Esta funcionalidade é apenas para alunos de TDM.")
-        return redirect("home:index")
-
-    try:
-        inscricoes_existentes = PostgreSQLTurnos.inscricoes_turno_por_aluno(n_meca)
-        if inscricoes_existentes:
-            messages.warning(request, "Já tens um turno escolhido. Para mudar, contacta a coordenação.")
-            return redirect("home:inscricao_turno_tdm")
-
-        inscricoes_uc = PostgreSQLTurnos.ucs_inscritas_por_aluno(n_meca)
-
-        inscricoes_realizadas = 0
-        erros = []
-
-        for uc_row in inscricoes_uc:
-            if uc_row.get("id_curso") != 2:
-                continue
-            uc_id = uc_row.get("id_unidadecurricular")
-
-            try:
-                turnos_uc = PostgreSQLTurnos.turno_uc_por_uc(uc_id)
-                turno_alvo = None
-                for tu in turnos_uc:
-                    if tu.get("n_turno") == n_turno:
-                        turno_alvo = tu
-                        break
-
-                if not turno_alvo:
-                    erros.append(f"{uc_row.get('nome')}: Turno {n_turno} não disponível")
-                    continue
-
-                turno_id = turno_alvo.get("id_turno")
-                capacidade = turno_alvo.get("capacidade") or 0
-                ocupados = PostgreSQLTurnos.count_inscritos(turno_id, uc_id)
-
-                if ocupados >= capacidade:
-                    erros.append(f"{uc_row.get('nome')}: Turno {n_turno} cheio")
-                    continue
-
-                criado = PostgreSQLTurnos.create_inscricao_turno(n_meca, turno_id, uc_id)
-                tempo_ms = int((time.time() - inicio_tempo) * 1000)
-
-                if not criado:
-                    erros.append(f"{uc_row.get('nome')}: erro ao criar inscrição")
-                    continue
-
-                registar_auditoria_inscricao(n_meca, turno_id, uc_id, uc_row.get("nome", ""), 'sucesso', f'Inscrição TDM - Turno {n_turno}', tempo_ms)
-                inscricoes_realizadas += 1
-
-            except Exception as e:
-                erros.append(f"{uc_row.get('nome')}: {str(e)}")
-
-        if inscricoes_realizadas > 0:
-            messages.success(request, f"✓ Inscrito no Turno {n_turno} em {inscricoes_realizadas} UC(s)!")
-            adicionar_log("inscricao_turno_tdm_sucesso", {"aluno": aluno_row.get("nome"), "turno": n_turno, "ucs_inscritas": inscricoes_realizadas}, request)
-
-        if erros:
-            for erro in erros:
-                messages.warning(request, f"⚠ {erro}")
-
-        return redirect("home:inscricao_turno_tdm")
-
-    except Exception as e:
-        messages.error(request, f"Erro ao processar inscrição: {str(e)}")
-        registar_erro("inscrever_turno_tdm", str(e), {"aluno": n_meca, "turno": n_turno})
-        return redirect("home:inscricao_turno_tdm")
 
 #view para pagina inicial RSI
 def index_rsi(request):
@@ -1735,43 +1628,38 @@ def admin_logs_list(request):
         except Exception:
             return str(val)
 
-    #query nos logs sql
-    sql_qs = LogEvento.objects.all()
-    if operacao_filter:
-        sql_qs = sql_qs.filter(operacao__icontains=operacao_filter)
-    if entidade_filter:
-        sql_qs = sql_qs.filter(entidade__icontains=entidade_filter)
-    sql_qs = sql_qs.order_by('-data_hora')[:limite]
+    #query nos logs sql usando SQL puro
+    sql_logs_raw = PostgreSQLLogs.list_logs(operacao_filter=operacao_filter, entidade_filter=entidade_filter, limite=limite)
 
     #converte logs SQL para uma lista de dicionários
     sql_logs = [
         {
-            "id": log.id_log,
+            "id": log.get('id_log'),
             "fonte": "SQL",
-            "data": log.data_hora,
-            "data_display": log.data_hora.strftime("%Y-%m-%d %H:%M:%S") if log.data_hora else "",
-            "operacao": log.operacao,
-            "entidade": log.entidade,
-            "chave": log.chave_primaria,
-            "utilizador": log.utilizador_db,
+            "data": log.get('data_hora'),
+            "data_display": log.get('data_hora').strftime("%Y-%m-%d %H:%M:%S") if log.get('data_hora') else "",
+            "operacao": log.get('operacao'),
+            "entidade": log.get('entidade'),
+            "chave": log.get('chave_primaria'),
+            "utilizador": log.get('utilizador_db'),
             "ip": "",
             "user_agent": "",
-            "detalhes": _to_str(log.detalhes),
+            "detalhes": _to_str(log.get('detalhes')),
         }
-        for log in sql_qs
+        for log in sql_logs_raw
     ]
 
-    #obtem os logs em Mongo utiliazndo os mesmos filtros e limite
+    #obtem os logs em Mongo utilizando os mesmos filtros e limite
     mongo_logs = listar_eventos_mongo(filtro_acao=operacao_filter or None, filtro_entidade=entidade_filter or None, limite=limite,)
 
-    #junta os logs do sql com os do mongo e oredena por data
+    #junta os logs do sql com os do mongo e ordena por data
     logs_unificados = sql_logs + mongo_logs
     logs_unificados = sorted(logs_unificados, key=lambda l: l.get("data") or datetime.min, reverse=True)[:limite]
 
     #carrega mais logs para construir listas de filtros
     mongo_all_for_filters = listar_eventos_mongo(limite=1000)
-    operacoes = set(list(LogEvento.objects.values_list('operacao', flat=True).distinct()) + [l.get("operacao", "") for l in mongo_all_for_filters])
-    entidades = set(list(LogEvento.objects.values_list('entidade', flat=True).distinct()) + [l.get("entidade", "") for l in mongo_all_for_filters])
+    operacoes = set(PostgreSQLLogs.get_distinct_operacoes() + [l.get("operacao", "") for l in mongo_all_for_filters])
+    entidades = set(PostgreSQLLogs.get_distinct_entidades() + [l.get("entidade", "") for l in mongo_all_for_filters])
 
     return render(request, "admin/logs_list.html", {
         "logs": logs_unificados,
