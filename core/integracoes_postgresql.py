@@ -216,18 +216,13 @@ class PostgreSQLViews:
 
 
 class PostgreSQLConsultas:
-    """Consultas auxiliares (listas e dashboards) em SQL puro."""
+    """Consultas auxiliares (listas e dashboards) via functions SQL."""
 
     @staticmethod
     def cadeiras_semestre() -> List[Dict[str, Any]]:
-        sql = """
-            SELECT id_unidadecurricular, nome, ects, semestre_id, semestre_nome
-            FROM cadeirassemestre
-            ORDER BY semestre_id, nome
-        """
         try:
             with connection.cursor() as cursor:
-                cursor.execute(sql)
+                cursor.execute("SELECT * FROM fn_cadeiras_semestre()")
                 cols = [col[0] for col in cursor.description]
                 return [dict(zip(cols, row)) for row in cursor.fetchall()]
         except Exception as e:
@@ -236,14 +231,9 @@ class PostgreSQLConsultas:
 
     @staticmethod
     def alunos_por_ordem_alfabetica() -> List[Dict[str, Any]]:
-        sql = """
-            SELECT n_mecanografico, nome, email, id_anocurricular
-            FROM vw_alunos_por_ordem_alfabetica
-            ORDER BY nome
-        """
         try:
             with connection.cursor() as cursor:
-                cursor.execute(sql)
+                cursor.execute("SELECT * FROM fn_alunos_por_ordem_alfabetica()")
                 cols = [col[0] for col in cursor.description]
                 return [dict(zip(cols, row)) for row in cursor.fetchall()]
         except Exception as e:
@@ -252,14 +242,9 @@ class PostgreSQLConsultas:
 
     @staticmethod
     def turnos_list() -> List[Dict[str, Any]]:
-        sql = """
-            SELECT id_turno, n_turno, capacidade, tipo
-            FROM vw_turnos
-            ORDER BY id_turno
-        """
         try:
             with connection.cursor() as cursor:
-                cursor.execute(sql)
+                cursor.execute("SELECT * FROM fn_turnos_list()")
                 cols = [col[0] for col in cursor.description]
                 return [dict(zip(cols, row)) for row in cursor.fetchall()]
         except Exception as e:
@@ -268,14 +253,9 @@ class PostgreSQLConsultas:
 
     @staticmethod
     def cursos_list() -> List[Dict[str, Any]]:
-        sql = """
-            SELECT id_curso, nome, grau
-            FROM vw_cursos
-            ORDER BY id_curso
-        """
         try:
             with connection.cursor() as cursor:
-                cursor.execute(sql)
+                cursor.execute("SELECT * FROM fn_cursos_list()")
                 cols = [col[0] for col in cursor.description]
                 return [dict(zip(cols, row)) for row in cursor.fetchall()]
         except Exception as e:
@@ -284,7 +264,7 @@ class PostgreSQLConsultas:
 
     @staticmethod
     def dashboard_totais() -> Dict[str, Any]:
-        result = {
+        fallback = {
             "total_users": 0,
             "total_turnos": 0,
             "total_ucs": 0,
@@ -296,49 +276,21 @@ class PostgreSQLConsultas:
         }
         try:
             with connection.cursor() as cursor:
-                cursor.execute("SELECT COUNT(*) FROM auth_user")
-                result["total_users"] = cursor.fetchone()[0]
-
-                cursor.execute("SELECT COUNT(*) FROM turno")
-                result["total_turnos"] = cursor.fetchone()[0]
-
-                cursor.execute("SELECT COUNT(*) FROM unidade_curricular")
-                result["total_ucs"] = cursor.fetchone()[0]
-
-                cursor.execute("SELECT COUNT(*) FROM curso")
-                result["total_cursos"] = cursor.fetchone()[0]
-
-                cursor.execute("SELECT COUNT(*) FROM core_horariopdf")
-                result["total_horarios"] = cursor.fetchone()[0]
-
-                cursor.execute("SELECT COUNT(*) FROM core_avaliacaopdf")
-                result["total_avaliacoes"] = cursor.fetchone()[0]
-
-                cursor.execute("SELECT COALESCE(SUM(capacidade),0) FROM turno")
-                result["vagas_total"] = cursor.fetchone()[0]
-
-                cursor.execute("SELECT COUNT(*) FROM inscricao_turno")
-                result["vagas_ocupadas"] = cursor.fetchone()[0]
-
-            return result
+                cursor.execute("SELECT * FROM fn_dashboard_totais()")
+                row = cursor.fetchone()
+                if not row:
+                    return fallback
+                cols = [col[0] for col in cursor.description]
+                return dict(zip(cols, row))
         except Exception as e:
             logger.error(f"Erro ao obter totais dashboard: {e}")
-            return result
+            return fallback
 
     @staticmethod
     def alunos_por_uc_top10() -> List[Dict[str, Any]]:
-        sql = """
-            SELECT uc.nome AS uc_nome, COUNT(*) AS total
-            FROM inscrito_uc iu
-            JOIN unidade_curricular uc ON uc.id_unidadecurricular = iu.id_unidadecurricular
-            WHERE iu.estado = TRUE
-            GROUP BY uc.nome
-            ORDER BY total DESC
-            LIMIT 10
-        """
         try:
             with connection.cursor() as cursor:
-                cursor.execute(sql)
+                cursor.execute("SELECT * FROM fn_alunos_por_uc_top10()")
                 cols = [col[0] for col in cursor.description]
                 return [dict(zip(cols, row)) for row in cursor.fetchall()]
         except Exception as e:
@@ -347,14 +299,9 @@ class PostgreSQLConsultas:
 
     @staticmethod
     def anos_curriculares() -> List[Dict[str, Any]]:
-        sql = """
-            SELECT id_anocurricular, ano_curricular
-            FROM ano_curricular
-            ORDER BY id_anocurricular
-        """
         try:
             with connection.cursor() as cursor:
-                cursor.execute(sql)
+                cursor.execute("SELECT * FROM fn_anos_curriculares()")
                 cols = [col[0] for col in cursor.description]
                 return [dict(zip(cols, row)) for row in cursor.fetchall()]
         except Exception as e:
@@ -363,14 +310,9 @@ class PostgreSQLConsultas:
 
     @staticmethod
     def docentes() -> List[Dict[str, Any]]:
-        sql = """
-            SELECT id_docente, nome, email, cargo
-            FROM docente
-            ORDER BY nome
-        """
         try:
             with connection.cursor() as cursor:
-                cursor.execute(sql)
+                cursor.execute("SELECT * FROM fn_docentes()")
                 cols = [col[0] for col in cursor.description]
                 return [dict(zip(cols, row)) for row in cursor.fetchall()]
         except Exception as e:
@@ -379,16 +321,9 @@ class PostgreSQLConsultas:
 
     @staticmethod
     def ucs_por_curso(id_curso: int) -> List[Dict[str, Any]]:
-        sql = """
-            SELECT uc.id_unidadecurricular, uc.nome, uc.id_anocurricular, uc.id_semestre, s.semestre
-            FROM unidade_curricular uc
-            JOIN semestre s ON s.id_semestre = uc.id_semestre
-            WHERE uc.id_curso = %s
-            ORDER BY uc.id_anocurricular, uc.id_semestre
-        """
         try:
             with connection.cursor() as cursor:
-                cursor.execute(sql, [id_curso])
+                cursor.execute("SELECT * FROM fn_ucs_por_curso(%s)", [id_curso])
                 cols = [col[0] for col in cursor.description]
                 return [dict(zip(cols, row)) for row in cursor.fetchall()]
         except Exception as e:
@@ -397,17 +332,9 @@ class PostgreSQLConsultas:
 
     @staticmethod
     def pdfs_por_ano_curso(model_table: str, id_curso: int) -> List[Dict[str, Any]]:
-        """model_table pode ser 'core_horariopdf' ou 'core_avaliacaopdf'"""
-        sql = f"""
-            SELECT ac.id_anocurricular, ac.ano_curricular, p.id, p.nome, p.ficheiro, p.atualizado_em, p.id_curso
-            FROM {model_table} p
-            JOIN ano_curricular ac ON ac.id_anocurricular = p.id_anocurricular
-            WHERE p.id_curso = %s OR p.id_curso IS NULL
-            ORDER BY ac.id_anocurricular DESC, p.atualizado_em DESC
-        """
         try:
             with connection.cursor() as cursor:
-                cursor.execute(sql, [id_curso])
+                cursor.execute("SELECT * FROM fn_pdfs_por_ano_curso(%s, %s)", [model_table, id_curso])
                 cols = [col[0] for col in cursor.description]
                 return [dict(zip(cols, row)) for row in cursor.fetchall()]
         except Exception as e:
@@ -416,21 +343,9 @@ class PostgreSQLConsultas:
 
     @staticmethod
     def users_combinado() -> List[Dict[str, Any]]:
-        """Lista combinada de admins (auth_user), alunos e docentes."""
-        sql = """
-            SELECT u.id::text AS id, u.username, u.email, u.date_joined, u.is_active, u.is_staff, 'Admin' AS tipo
-            FROM auth_user u
-            UNION ALL
-            SELECT a.n_mecanografico::text, a.nome, a.email, NULL, true, false, 'Aluno'
-            FROM aluno a
-            UNION ALL
-            SELECT d.id_docente::text, d.nome, d.email, NULL, true, false, 'Docente'
-            FROM docente d
-            ORDER BY tipo, id
-        """
         try:
             with connection.cursor() as cursor:
-                cursor.execute(sql)
+                cursor.execute("SELECT * FROM fn_users_combinado()")
                 cols = [col[0] for col in cursor.description]
                 return [dict(zip(cols, row)) for row in cursor.fetchall()]
         except Exception as e:
@@ -438,142 +353,81 @@ class PostgreSQLConsultas:
             return []
 
     @staticmethod
-    def get_user_by_id(user_id: int) -> Tuple[Optional[Dict[str, Any]], str]:
-        """
-        Encontra um user por ID em admin (auth_user), aluno ou docente.
-        Retorna (user_dict, tipo) onde tipo é 'Admin', 'Aluno', 'Docente' ou None se não encontrado.
-        """
-        # Tenta admin primeiro
-        sql_admin = "SELECT id, username, email, is_staff, is_active FROM auth_user WHERE id = %s LIMIT 1"
+    def get_user_by_id(user_id: int) -> Tuple[Optional[Dict[str, Any]], Optional[str]]:
         try:
             with connection.cursor() as cursor:
-                cursor.execute(sql_admin, [user_id])
+                cursor.execute("SELECT * FROM fn_get_user_by_id(%s)", [user_id])
                 row = cursor.fetchone()
-                if row:
-                    cols = [col[0] for col in cursor.description]
-                    return dict(zip(cols, row)), "Admin"
+                if not row:
+                    return None, None
+                cols = [col[0] for col in cursor.description]
+                data = dict(zip(cols, row))
+                user_type = data.pop("tipo", None)
+                return data, user_type
         except Exception as e:
-            logger.error(f"Erro ao obter admin {user_id}: {e}")
-
-        # Tenta aluno
-        sql_aluno = "SELECT n_mecanografico, nome, email, id_curso, id_anocurricular FROM aluno WHERE n_mecanografico = %s LIMIT 1"
-        try:
-            with connection.cursor() as cursor:
-                cursor.execute(sql_aluno, [user_id])
-                row = cursor.fetchone()
-                if row:
-                    cols = [col[0] for col in cursor.description]
-                    return dict(zip(cols, row)), "Aluno"
-        except Exception as e:
-            logger.error(f"Erro ao obter aluno {user_id}: {e}")
-
-        # Tenta docente
-        sql_docente = "SELECT id_docente, nome, email, cargo FROM docente WHERE id_docente = %s LIMIT 1"
-        try:
-            with connection.cursor() as cursor:
-                cursor.execute(sql_docente, [user_id])
-                row = cursor.fetchone()
-                if row:
-                    cols = [col[0] for col in cursor.description]
-                    return dict(zip(cols, row)), "Docente"
-        except Exception as e:
-            logger.error(f"Erro ao obter docente {user_id}: {e}")
-
-        return None, None
+            logger.error(f"Erro ao obter utilizador {user_id}: {e}")
+            return None, None
 
     @staticmethod
     def update_user(user_id: int, user_type: str, username: str, email: str) -> bool:
-        """Atualiza um user em auth_user, aluno ou docente."""
-        if user_type == "Admin":
-            sql = "UPDATE auth_user SET username = %s, email = %s WHERE id = %s"
-        elif user_type == "Aluno":
-            sql = "UPDATE aluno SET nome = %s, email = %s WHERE n_mecanografico = %s"
-        elif user_type == "Docente":
-            sql = "UPDATE docente SET nome = %s, email = %s WHERE id_docente = %s"
-        else:
-            return False
-
         try:
             with connection.cursor() as cursor:
-                cursor.execute(sql, [username, email, user_id])
-                return True
+                cursor.execute(
+                    "SELECT fn_update_user(%s, %s, %s, %s)",
+                    [user_id, user_type, username, email],
+                )
+                row = cursor.fetchone()
+                return bool(row[0]) if row else False
         except Exception as e:
             logger.error(f"Erro ao atualizar {user_type} {user_id}: {e}")
             return False
 
     @staticmethod
     def delete_aluno_cascade(n_mecanografico: int) -> Dict[str, int]:
-        """
-        Deleta um aluno e todas as suas referências (matriculas, inscricoes_turno, inscrito_uc).
-        Retorna dict com contagens deletadas.
-        """
-        result = {"matriculas": 0, "inscricoes_turno": 0, "inscrito_uc": 0}
+        fallback = {"matriculas": 0, "inscricoes_turno": 0, "inscrito_uc": 0}
         try:
             with connection.cursor() as cursor:
-                # Delete matricula
-                cursor.execute("DELETE FROM matricula WHERE n_mecanografico = %s", [n_mecanografico])
-                result["matriculas"] = cursor.rowcount
-
-                # Delete inscricao_turno
-                cursor.execute("DELETE FROM inscricao_turno WHERE n_mecanografico = %s", [n_mecanografico])
-                result["inscricoes_turno"] = cursor.rowcount
-
-                # Delete inscrito_uc
-                cursor.execute("DELETE FROM inscrito_uc WHERE n_mecanografico = %s", [n_mecanografico])
-                result["inscrito_uc"] = cursor.rowcount
-
-                # Delete aluno
-                cursor.execute("DELETE FROM aluno WHERE n_mecanografico = %s", [n_mecanografico])
-
-            return result
+                cursor.execute("SELECT * FROM fn_delete_aluno_cascade(%s)", [n_mecanografico])
+                row = cursor.fetchone()
+                if not row:
+                    return fallback
+                cols = [col[0] for col in cursor.description]
+                return dict(zip(cols, row))
         except Exception as e:
             logger.error(f"Erro ao deletar aluno {n_mecanografico} em cascata: {e}")
-            return result
+            return fallback
 
     @staticmethod
     def delete_docente_cascade(id_docente: int) -> Dict[str, int]:
-        """
-        Deleta um docente e todas as suas referências (leciona_uc).
-        Retorna dict com contagens deletadas.
-        """
-        result = {"leciona_uc": 0}
+        fallback = {"leciona_uc": 0}
         try:
             with connection.cursor() as cursor:
-                # Delete leciona_uc
-                cursor.execute("DELETE FROM leciona_uc WHERE id_docente = %s", [id_docente])
-                result["leciona_uc"] = cursor.rowcount
-
-                # Delete docente
-                cursor.execute("DELETE FROM docente WHERE id_docente = %s", [id_docente])
-
-            return result
+                cursor.execute("SELECT * FROM fn_delete_docente_cascade(%s)", [id_docente])
+                row = cursor.fetchone()
+                if not row:
+                    return fallback
+                cols = [col[0] for col in cursor.description]
+                return dict(zip(cols, row))
         except Exception as e:
             logger.error(f"Erro ao deletar docente {id_docente} em cascata: {e}")
-            return result
+            return fallback
 
     @staticmethod
     def delete_admin_user(user_id: int) -> bool:
-        """Deleta um admin user."""
         try:
             with connection.cursor() as cursor:
-                cursor.execute("DELETE FROM auth_user WHERE id = %s", [user_id])
-                return True
+                cursor.execute("SELECT fn_delete_admin_user(%s)", [user_id])
+                row = cursor.fetchone()
+                return bool(row[0]) if row else False
         except Exception as e:
             logger.error(f"Erro ao deletar admin {user_id}: {e}")
             return False
 
     @staticmethod
     def turnos_sem_uc() -> List[Dict[str, Any]]:
-        """Lista turnos que não estão associados a nenhuma UC."""
-        sql = """
-            SELECT id_turno, n_turno, capacidade, tipo
-            FROM turno
-            WHERE id_turno NOT IN (SELECT DISTINCT id_turno FROM turno_uc)
-            ORDER BY id_turno
-        """
         try:
             with connection.cursor() as cursor:
-                cursor.execute(sql)
+                cursor.execute("SELECT * FROM fn_turnos_sem_uc()")
                 cols = [col[0] for col in cursor.description]
                 return [dict(zip(cols, row)) for row in cursor.fetchall()]
         except Exception as e:
@@ -582,133 +436,109 @@ class PostgreSQLConsultas:
 
     @staticmethod
     def get_turno_by_id(turno_id: int) -> Optional[Dict[str, Any]]:
-        """Obtém um turno pelo ID."""
-        sql = "SELECT id_turno, n_turno, capacidade, tipo FROM turno WHERE id_turno = %s"
         try:
-            ##alteracao_user_para
             with connections["admin"].cursor() as cursor:
-                cursor.execute(sql, [turno_id])
+                cursor.execute("SELECT * FROM fn_get_turno_by_id(%s)", [turno_id])
                 row = cursor.fetchone()
-                if row:
-                    cols = [col[0] for col in cursor.description]
-                    return dict(zip(cols, row))
-                return None
+                if not row:
+                    return None
+                cols = [col[0] for col in cursor.description]
+                return dict(zip(cols, row))
         except Exception as e:
             logger.error(f"Erro ao obter turno {turno_id}: {e}")
             return None
 
     @staticmethod
     def create_turno(n_turno: str, capacidade: int, tipo: str) -> Optional[int]:
-        """Cria um novo turno. Retorna o id_turno ou None se erro."""
-        sql = "INSERT INTO turno (n_turno, capacidade, tipo) VALUES (%s, %s, %s) RETURNING id_turno"
         try:
-            #with connection.cursor() as cursor:
             with connections["admin"].cursor() as cursor:
-                cursor.execute(sql, [n_turno, capacidade, tipo])
+                cursor.execute("SELECT fn_create_turno(%s, %s, %s)", [n_turno, capacidade, tipo])
                 row = cursor.fetchone()
-                return row[0] if row else None
+                return int(row[0]) if row and row[0] is not None else None
         except Exception as e:
             logger.error(f"Erro ao criar turno: {e}")
             return None
 
     @staticmethod
     def update_turno(turno_id: int, n_turno: str, capacidade: int, tipo: str) -> bool:
-        """Atualiza um turno."""
-        sql = "UPDATE turno SET n_turno = %s, capacidade = %s, tipo = %s WHERE id_turno = %s"
         try:
-            #with connection.cursor() as cursor:
             with connections["admin"].cursor() as cursor:
-                cursor.execute(sql, [n_turno, capacidade, tipo, turno_id])
-                return True
+                cursor.execute("SELECT fn_update_turno(%s, %s, %s, %s)", [turno_id, n_turno, capacidade, tipo])
+                row = cursor.fetchone()
+                return bool(row[0]) if row else False
         except Exception as e:
             logger.error(f"Erro ao atualizar turno {turno_id}: {e}")
             return False
 
     @staticmethod
     def delete_turno(turno_id: int) -> bool:
-        """Deleta um turno."""
         try:
             with connection.cursor() as cursor:
-                cursor.execute("DELETE FROM turno WHERE id_turno = %s", [turno_id])
-                return True
+                cursor.execute("SELECT fn_delete_turno(%s)", [turno_id])
+                row = cursor.fetchone()
+                return bool(row[0]) if row else False
         except Exception as e:
             logger.error(f"Erro ao deletar turno {turno_id}: {e}")
             return False
 
     @staticmethod
     def get_horario_pdf_by_id(pdf_id: int) -> Optional[Dict[str, Any]]:
-        """Obtém um horário PDF pelo ID."""
-        sql = """
-            SELECT id, nome, ficheiro, id_anocurricular, id_curso, atualizado_em
-            FROM core_horariopdf
-            WHERE id = %s
-        """
         try:
             with connection.cursor() as cursor:
-                cursor.execute(sql, [pdf_id])
+                cursor.execute("SELECT * FROM fn_get_horario_pdf_by_id(%s)", [pdf_id])
                 row = cursor.fetchone()
-                if row:
-                    cols = [col[0] for col in cursor.description]
-                    return dict(zip(cols, row))
-                return None
+                if not row:
+                    return None
+                cols = [col[0] for col in cursor.description]
+                return dict(zip(cols, row))
         except Exception as e:
             logger.error(f"Erro ao obter horario_pdf {pdf_id}: {e}")
             return None
 
     @staticmethod
     def create_horario_pdf(nome: str, ficheiro: str, id_anocurricular: int, id_curso: int) -> Optional[int]:
-        """Cria um novo registro de horário PDF. Retorna o id ou None."""
-        sql = """
-            INSERT INTO core_horariopdf (nome, ficheiro, id_anocurricular, id_curso)
-            VALUES (%s, %s, %s, %s) RETURNING id
-        """
         try:
             with connection.cursor() as cursor:
-                cursor.execute(sql, [nome, ficheiro, id_anocurricular, id_curso])
+                cursor.execute(
+                    "SELECT fn_create_horario_pdf(%s, %s, %s, %s)",
+                    [nome, ficheiro, id_anocurricular, id_curso],
+                )
                 row = cursor.fetchone()
-                return row[0] if row else None
+                return int(row[0]) if row and row[0] is not None else None
         except Exception as e:
             logger.error(f"Erro ao criar horario_pdf: {e}")
             return None
 
     @staticmethod
     def update_horario_pdf(pdf_id: int, nome: str, ficheiro: str, id_anocurricular: int, id_curso: int) -> bool:
-        """Atualiza um registro de horário PDF."""
-        sql = """
-            UPDATE core_horariopdf
-            SET nome = %s, ficheiro = %s, id_anocurricular = %s, id_curso = %s
-            WHERE id = %s
-        """
         try:
             with connection.cursor() as cursor:
-                cursor.execute(sql, [nome, ficheiro, id_anocurricular, id_curso, pdf_id])
-                return True
+                cursor.execute(
+                    "SELECT fn_update_horario_pdf(%s, %s, %s, %s, %s)",
+                    [pdf_id, nome, ficheiro, id_anocurricular, id_curso],
+                )
+                row = cursor.fetchone()
+                return bool(row[0]) if row else False
         except Exception as e:
             logger.error(f"Erro ao atualizar horario_pdf {pdf_id}: {e}")
             return False
 
     @staticmethod
     def delete_horario_pdf(pdf_id: int) -> bool:
-        """Deleta um registro de horário PDF."""
         try:
             with connection.cursor() as cursor:
-                cursor.execute("DELETE FROM core_horariopdf WHERE id = %s", [pdf_id])
-                return True
+                cursor.execute("SELECT fn_delete_horario_pdf(%s)", [pdf_id])
+                row = cursor.fetchone()
+                return bool(row[0]) if row else False
         except Exception as e:
             logger.error(f"Erro ao deletar horario_pdf {pdf_id}: {e}")
             return False
 
     @staticmethod
     def list_horario_pdfs() -> List[Dict[str, Any]]:
-        """Lista todos os horários PDF."""
-        sql = """
-            SELECT id, nome, ficheiro, id_anocurricular, id_curso, atualizado_em
-            FROM core_horariopdf
-            ORDER BY atualizado_em DESC
-        """
         try:
             with connection.cursor() as cursor:
-                cursor.execute(sql)
+                cursor.execute("SELECT * FROM fn_list_horario_pdfs()")
                 cols = [col[0] for col in cursor.description]
                 return [dict(zip(cols, row)) for row in cursor.fetchall()]
         except Exception as e:
@@ -717,99 +547,76 @@ class PostgreSQLConsultas:
 
     @staticmethod
     def get_latest_horario_pdf() -> Optional[Dict[str, Any]]:
-        """Obtém o horário PDF mais recente."""
-        sql = """
-            SELECT id, nome, ficheiro, id_anocurricular, id_curso, atualizado_em
-            FROM core_horariopdf
-            ORDER BY atualizado_em DESC
-            LIMIT 1
-        """
         try:
             with connection.cursor() as cursor:
-                cursor.execute(sql)
+                cursor.execute("SELECT * FROM fn_get_latest_horario_pdf()")
                 row = cursor.fetchone()
-                if row:
-                    cols = [col[0] for col in cursor.description]
-                    return dict(zip(cols, row))
-                return None
+                if not row:
+                    return None
+                cols = [col[0] for col in cursor.description]
+                return dict(zip(cols, row))
         except Exception as e:
             logger.error(f"Erro ao obter latest horario_pdf: {e}")
             return None
 
     @staticmethod
     def get_avaliacao_pdf_by_id(pdf_id: int) -> Optional[Dict[str, Any]]:
-        """Obtém um PDF de avaliação pelo ID."""
-        sql = """
-            SELECT id, nome, ficheiro, id_anocurricular, id_curso, atualizado_em
-            FROM core_avaliacaopdf
-            WHERE id = %s
-        """
         try:
             with connection.cursor() as cursor:
-                cursor.execute(sql, [pdf_id])
+                cursor.execute("SELECT * FROM fn_get_avaliacao_pdf_by_id(%s)", [pdf_id])
                 row = cursor.fetchone()
-                if row:
-                    cols = [col[0] for col in cursor.description]
-                    return dict(zip(cols, row))
-                return None
+                if not row:
+                    return None
+                cols = [col[0] for col in cursor.description]
+                return dict(zip(cols, row))
         except Exception as e:
             logger.error(f"Erro ao obter avaliacao_pdf {pdf_id}: {e}")
             return None
 
     @staticmethod
     def create_avaliacao_pdf(nome: str, ficheiro: str, id_anocurricular: int, id_curso: int) -> Optional[int]:
-        """Cria um novo registro de PDF de avaliação. Retorna o id ou None."""
-        sql = """
-            INSERT INTO core_avaliacaopdf (nome, ficheiro, id_anocurricular, id_curso)
-            VALUES (%s, %s, %s, %s) RETURNING id
-        """
         try:
             with connection.cursor() as cursor:
-                cursor.execute(sql, [nome, ficheiro, id_anocurricular, id_curso])
+                cursor.execute(
+                    "SELECT fn_create_avaliacao_pdf(%s, %s, %s, %s)",
+                    [nome, ficheiro, id_anocurricular, id_curso],
+                )
                 row = cursor.fetchone()
-                return row[0] if row else None
+                return int(row[0]) if row and row[0] is not None else None
         except Exception as e:
             logger.error(f"Erro ao criar avaliacao_pdf: {e}")
             return None
 
     @staticmethod
     def update_avaliacao_pdf(pdf_id: int, nome: str, ficheiro: str, id_anocurricular: int, id_curso: int) -> bool:
-        """Atualiza um registro de PDF de avaliação."""
-        sql = """
-            UPDATE core_avaliacaopdf
-            SET nome = %s, ficheiro = %s, id_anocurricular = %s, id_curso = %s
-            WHERE id = %s
-        """
         try:
             with connection.cursor() as cursor:
-                cursor.execute(sql, [nome, ficheiro, id_anocurricular, id_curso, pdf_id])
-                return True
+                cursor.execute(
+                    "SELECT fn_update_avaliacao_pdf(%s, %s, %s, %s, %s)",
+                    [pdf_id, nome, ficheiro, id_anocurricular, id_curso],
+                )
+                row = cursor.fetchone()
+                return bool(row[0]) if row else False
         except Exception as e:
             logger.error(f"Erro ao atualizar avaliacao_pdf {pdf_id}: {e}")
             return False
 
     @staticmethod
     def delete_avaliacao_pdf(pdf_id: int) -> bool:
-        """Deleta um registro de PDF de avaliação."""
         try:
             with connection.cursor() as cursor:
-                cursor.execute("DELETE FROM core_avaliacaopdf WHERE id = %s", [pdf_id])
-                return True
+                cursor.execute("SELECT fn_delete_avaliacao_pdf(%s)", [pdf_id])
+                row = cursor.fetchone()
+                return bool(row[0]) if row else False
         except Exception as e:
             logger.error(f"Erro ao deletar avaliacao_pdf {pdf_id}: {e}")
             return False
 
     @staticmethod
     def list_avaliacao_pdfs() -> List[Dict[str, Any]]:
-        """Lista todos os PDFs de avaliação."""
-        sql = """
-            SELECT id, nome, ficheiro, id_anocurricular, id_curso, atualizado_em
-            FROM core_avaliacaopdf
-            ORDER BY atualizado_em DESC
-        """
         try:
             with connection.cursor() as cursor:
-                cursor.execute(sql)
+                cursor.execute("SELECT * FROM fn_list_avaliacao_pdfs()")
                 cols = [col[0] for col in cursor.description]
                 return [dict(zip(cols, row)) for row in cursor.fetchall()]
         except Exception as e:
@@ -818,35 +625,23 @@ class PostgreSQLConsultas:
 
     @staticmethod
     def get_uc_by_id(uc_id: int) -> Optional[Dict[str, Any]]:
-        """Obtém uma UC pelo ID."""
-        sql = """
-            SELECT id_unidadecurricular, nome, id_curso, id_anocurricular, id_semestre, ects
-            FROM unidade_curricular
-            WHERE id_unidadecurricular = %s
-        """
         try:
             with connection.cursor() as cursor:
-                cursor.execute(sql, [uc_id])
+                cursor.execute("SELECT * FROM fn_get_uc_by_id(%s)", [uc_id])
                 row = cursor.fetchone()
-                if row:
-                    cols = [col[0] for col in cursor.description]
-                    return dict(zip(cols, row))
-                return None
+                if not row:
+                    return None
+                cols = [col[0] for col in cursor.description]
+                return dict(zip(cols, row))
         except Exception as e:
             logger.error(f"Erro ao obter UC {uc_id}: {e}")
             return None
 
     @staticmethod
     def list_all_ucs() -> List[Dict[str, Any]]:
-        """Lista todas as UCs."""
-        sql = """
-            SELECT id_unidadecurricular, nome, id_curso, id_anocurricular, id_semestre, ects
-            FROM unidade_curricular
-            ORDER BY id_unidadecurricular
-        """
         try:
             with connection.cursor() as cursor:
-                cursor.execute(sql)
+                cursor.execute("SELECT * FROM fn_list_all_ucs()")
                 cols = [col[0] for col in cursor.description]
                 return [dict(zip(cols, row)) for row in cursor.fetchall()]
         except Exception as e:
@@ -855,60 +650,48 @@ class PostgreSQLConsultas:
 
     @staticmethod
     def create_uc(nome: str, id_curso: int, id_anocurricular: int, id_semestre: int, ects: float) -> Optional[int]:
-        """Cria uma nova UC. Retorna o id_unidadecurricular ou None."""
-        sql = """
-            INSERT INTO unidade_curricular (nome, id_curso, id_anocurricular, id_semestre, ects)
-            VALUES (%s, %s, %s, %s, %s) RETURNING id_unidadecurricular
-        """
         try:
             with connection.cursor() as cursor:
-                cursor.execute(sql, [nome, id_curso, id_anocurricular, id_semestre, ects])
+                cursor.execute(
+                    "SELECT fn_create_uc(%s, %s, %s, %s, %s)",
+                    [nome, id_curso, id_anocurricular, id_semestre, ects],
+                )
                 row = cursor.fetchone()
-                return row[0] if row else None
+                return int(row[0]) if row and row[0] is not None else None
         except Exception as e:
             logger.error(f"Erro ao criar UC: {e}")
             return None
 
     @staticmethod
     def update_uc(uc_id: int, nome: str, id_curso: int, id_anocurricular: int, id_semestre: int, ects: float) -> bool:
-        """Atualiza uma UC."""
-        sql = """
-            UPDATE unidade_curricular
-            SET nome = %s, id_curso = %s, id_anocurricular = %s, id_semestre = %s, ects = %s
-            WHERE id_unidadecurricular = %s
-        """
         try:
             with connection.cursor() as cursor:
-                cursor.execute(sql, [nome, id_curso, id_anocurricular, id_semestre, ects, uc_id])
-                return True
+                cursor.execute(
+                    "SELECT fn_update_uc(%s, %s, %s, %s, %s, %s)",
+                    [uc_id, nome, id_curso, id_anocurricular, id_semestre, ects],
+                )
+                row = cursor.fetchone()
+                return bool(row[0]) if row else False
         except Exception as e:
             logger.error(f"Erro ao atualizar UC {uc_id}: {e}")
             return False
 
     @staticmethod
     def delete_uc(uc_id: int) -> bool:
-        """Deleta uma UC."""
         try:
             with connection.cursor() as cursor:
-                cursor.execute("DELETE FROM unidade_curricular WHERE id_unidadecurricular = %s", [uc_id])
-                return True
+                cursor.execute("SELECT fn_delete_uc(%s)", [uc_id])
+                row = cursor.fetchone()
+                return bool(row[0]) if row else False
         except Exception as e:
             logger.error(f"Erro ao deletar UC {uc_id}: {e}")
             return False
 
     @staticmethod
     def get_turnos_uc_by_uc_id(uc_id: int) -> List[Dict[str, Any]]:
-        """Lista os turnos associados a uma UC."""
-        sql = """
-            SELECT tu.id_turno, t.n_turno, t.tipo, t.capacidade, tu.hora_inicio, tu.hora_fim
-            FROM turno_uc tu
-            JOIN turno t ON t.id_turno = tu.id_turno
-            WHERE tu.id_unidadecurricular = %s
-            ORDER BY t.n_turno
-        """
         try:
             with connection.cursor() as cursor:
-                cursor.execute(sql, [uc_id])
+                cursor.execute("SELECT * FROM fn_get_turnos_uc_by_uc_id(%s)", [uc_id])
                 cols = [col[0] for col in cursor.description]
                 return [dict(zip(cols, row)) for row in cursor.fetchall()]
         except Exception as e:
@@ -917,37 +700,34 @@ class PostgreSQLConsultas:
 
     @staticmethod
     def delete_turnos_uc_by_uc_id(uc_id: int) -> int:
-        """Deleta todos os turnos_uc associados a uma UC. Retorna número de registos deletados."""
         try:
             with connection.cursor() as cursor:
-                cursor.execute("DELETE FROM turno_uc WHERE id_unidadecurricular = %s", [uc_id])
-                return cursor.rowcount
+                cursor.execute("SELECT fn_delete_turnos_uc_by_uc_id(%s)", [uc_id])
+                row = cursor.fetchone()
+                return int(row[0]) if row and row[0] is not None else 0
         except Exception as e:
             logger.error(f"Erro ao deletar turnos_uc da UC {uc_id}: {e}")
             return 0
 
     @staticmethod
     def create_turno_uc(id_turno: int, id_uc: int, hora_inicio: str, hora_fim: str) -> bool:
-        """Cria um turno_uc (associação turno-UC)."""
-        sql = """
-            INSERT INTO turno_uc (id_turno, id_unidadecurricular, hora_inicio, hora_fim)
-            VALUES (%s, %s, %s, %s)
-        """
         try:
             with connection.cursor() as cursor:
-                cursor.execute(sql, [id_turno, id_uc, hora_inicio, hora_fim])
-                return True
+                cursor.execute(
+                    "SELECT fn_create_turno_uc(%s, %s, %s, %s)",
+                    [id_turno, id_uc, hora_inicio, hora_fim],
+                )
+                row = cursor.fetchone()
+                return bool(row[0]) if row else False
         except Exception as e:
             logger.error(f"Erro ao criar turno_uc: {e}")
             return False
 
     @staticmethod
     def get_semestres() -> List[Dict[str, Any]]:
-        """Lista todos os semestres."""
-        sql = "SELECT id_semestre, semestre FROM semestre ORDER BY id_semestre"
         try:
             with connection.cursor() as cursor:
-                cursor.execute(sql)
+                cursor.execute("SELECT * FROM fn_get_semestres()")
                 cols = [col[0] for col in cursor.description]
                 return [dict(zip(cols, row)) for row in cursor.fetchall()]
         except Exception as e:
