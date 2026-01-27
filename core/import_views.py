@@ -75,3 +75,25 @@ def importar_alunos_json(request):
     except Exception as exc:
         messages.error(request, f"Erro na importação JSON: {exc}")
     return render(request, "admin/import_data.html")
+
+@admin_required
+@require_http_methods(["POST"])
+def importar_alunos_xml(request):
+    if 'file' not in request.FILES:
+        messages.error(request, "Ficheiro não enviado.")
+        return render(request, "admin/import_data.html")
+    file = request.FILES['file']
+    try:
+        conteudo_xml = file.read().decode('utf-8')
+    except UnicodeDecodeError:
+        file.seek(0)
+        conteudo_xml = file.read().decode('latin1')
+    print('--- XML LIDO ---')
+    print(conteudo_xml)
+    try:
+        with connections["admin"].cursor() as cursor:
+            cursor.execute("SELECT importar_alunos_xml(%s)", [conteudo_xml])
+        messages.success(request, "Importação de alunos (XML) concluída com sucesso!")
+    except Exception as exc:
+        messages.error(request, f"Erro na importação XML: {exc}")
+    return render(request, "admin/import_data.html")
