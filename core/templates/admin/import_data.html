@@ -1,0 +1,27 @@
+{% extends "../home/base.html" %}
+{% load static %}
+{% block title %}Importar Dados - Admin{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/admin/import_data.css' %}">
+{% endblock %}
+{% block content %}
+<div class="admin-import-page">
+    <h1 class="page-title">Importação de Dados (CSV)</h1>
+    <p class="page-subtitle">Importe um ficheiro CSV com os dados dos alunos.</p>
+    <form method="post" enctype="multipart/form-data" class="import-form">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="file">Ficheiro CSV:</label>
+            <input type="file" name="file" id="file" accept=".csv" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Importar</button>
+    </form>
+    {% if messages %}
+        <ul class="messages">
+            {% for message in messages %}
+                <li>{{ message }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+</div>
+{% endblock %}
