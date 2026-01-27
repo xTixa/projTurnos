@@ -164,6 +164,27 @@ def inscricao_turno(request):
             return redirect("home:inscricao_turno_tdm")
         return redirect("home:index")
 
+    # Buscar horários dos turnos já inscritos
+    horarios_ocupados = []
+    try:
+        with connection.cursor() as cursor:
+            sql = """
+                SELECT DISTINCT tu.hora_inicio, tu.hora_fim
+                FROM inscricao_turno it
+                JOIN turno_uc tu ON tu.id_turno = it.id_turno
+                WHERE it.n_mecanografico = %s
+            """
+            cursor.execute(sql, [n_meca])
+            cols = [col[0] for col in cursor.description]
+            for row in cursor.fetchall():
+                row_dict = dict(zip(cols, row))
+                horarios_ocupados.append({
+                    'hora_inicio': row_dict.get('hora_inicio'),
+                    'hora_fim': row_dict.get('hora_fim')
+                })
+    except Exception as e:
+        logger.error(f"Erro ao buscar horários: {e}")
+    
     turnos_inscritos_rows = PostgreSQLTurnos.inscricoes_turno_por_aluno(n_meca)
     turnos_inscritos = {row.get("id_turno") for row in turnos_inscritos_rows}
 
@@ -194,7 +215,19 @@ def inscricao_turno(request):
         turnos = []
         for tu in turnos_uc:
             turno_id = tu.get("id_turno")
-            ocupados = PostgreSQLTurnos.count_inscritos(turno_id, uc_id)
+            # Contar TODOS os inscritos no turno (globalmente)
+            sql = """
+                SELECT COUNT(*) FROM inscricao_turno
+                WHERE id_turno = %s
+            """
+            try:
+                with connection.cursor() as cursor:
+                    cursor.execute(sql, [turno_id])
+                    ocupados = cursor.fetchone()[0]
+            except Exception as e:
+                logger.error(f"Erro ao contar inscritos: {e}")
+                ocupados = 0
+            
             capacidade = tu.get("capacidade") or 0
             vagas = capacidade - ocupados
             if vagas < 0:
@@ -207,6 +240,25 @@ def inscricao_turno(request):
             dia_semana = _mapear_dia_semana(hora_inicio) if hora_inicio else "?"
 
             ja_inscrito = turno_id in turnos_inscritos
+            
+            # Verificar conflito de horário com turnos já inscritos
+            tem_conflito = False
+            if not ja_inscrito and hora_inicio and hora_fim:
+                for horario in horarios_ocupados:
+                    if horario['hora_inicio'] and horario['hora_fim']:
+                        # Conflito se os horários se sobrepõem
+                        inicio_ocupado = horario['hora_inicio']
+                        fim_ocupado = horario['hora_fim']
+                        
+                        # Converter para time objects se necessário
+                        if hasattr(inicio_ocupado, 'time'):
+                            inicio_ocupado = inicio_ocupado.time()
+                        if hasattr(fim_ocupado, 'time'):
+                            fim_ocupado = fim_ocupado.time()
+                        
+                        if not (hora_fim <= inicio_ocupado or hora_inicio >= fim_ocupado):
+                            tem_conflito = True
+                            break
 
             turno_info = {
                 "id": turno_id,
@@ -214,8 +266,10 @@ def inscricao_turno(request):
                 "tipo": tu.get("tipo"),
                 "capacidade": capacidade,
                 "vagas": vagas,
+                "tem_vagas": vagas > 0 and not tem_conflito,  # Só tem vagas se > 0 E sem conflito
                 "horario": f"{dia_semana} {hora_inicio_str}-{hora_fim_str}",
                 "ja_inscrito": ja_inscrito,
+                "tem_conflito": tem_conflito,  # Novo campo
                 "dia": dia_semana,
                 "hora_inicio": hora_inicio_str,
                 "hora_fim": hora_fim_str,
@@ -405,10 +459,18 @@ def inscrever_turno(request, turno_id, uc_id):
         resultado = "erro_sistema"
         motivo = str(e)
         tempo_ms = int((time.time() - inicio_tempo) * 1000)
+        
+        # Extrair mensagem de erro do trigger (PostgreSQL)
+        error_msg = str(e)
+        if "Conflito de horário" in error_msg:
+            messages.error(request, "❌ Não podes inscrever-te! Conflito de horário com outro turno.")
+        elif "está cheio" in error_msg or "Turno" in error_msg and "ocupado" in error_msg:
+            messages.error(request, "❌ Este turno já está cheio. Nenhuma vaga disponível.")
+        else:
+            messages.error(request, f"❌ Erro na inscrição: {error_msg}")
 
         registar_erro("inscrever_turno", str(e), {"turno_id": turno_id, "uc_id": uc_id})
         registar_auditoria_inscricao(request.session.get("user_id"), turno_id, uc_id, "desconhecido",  resultado, motivo, tempo_ms)
-        messages.error(request, "Erro ao processar inscrição. Tente novamente.")
         return redirect("home:inscricao_turno")
 
 #view para remover a inscriçao do turno

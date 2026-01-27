@@ -124,40 +124,59 @@ RETURNS TABLE(
 LANGUAGE plpgsql
 AS $$
 DECLARE
-    v_dia VARCHAR;
     v_hora_inicio TIME;
     v_hora_fim TIME;
     v_conflitos TEXT[];
     v_tem_conflito BOOLEAN := FALSE;
+    v_count INTEGER := 0;
 BEGIN
-    SELECT dia_semana, hora_inicio, hora_fim
-    INTO v_dia, v_hora_inicio, v_hora_fim
-    FROM turno
-    WHERE id_turno = p_id_turno_novo;
+    -- Obter horários do turno novo
+    SELECT tu.hora_inicio, tu.hora_fim
+    INTO v_hora_inicio, v_hora_fim
+    FROM turno_uc tu
+    WHERE tu.id_turno = p_id_turno_novo;
 
-    SELECT ARRAY_AGG(
-        'Turno ' || t.id_turno || ' - ' || uc.nome || ' (' || 
-        t.hora_inicio::TEXT || '-' || t.hora_fim::TEXT || ')'
-    )
-    INTO v_conflitos
+    -- Se o turno não tem horários, não há conflito
+    IF v_hora_inicio IS NULL OR v_hora_fim IS NULL THEN
+        RETURN QUERY SELECT FALSE, 'Turno sem horário configurado', ARRAY[]::TEXT[];
+        RETURN;
+    END IF;
+
+    -- Verificar conflitos com ANY turno já inscrito (qualquer UC)
+    SELECT COUNT(*)
+    INTO v_count
     FROM inscricao_turno it
     JOIN turno t ON it.id_turno = t.id_turno
-    JOIN unidade_curricular uc ON it.id_unidadecurricular = uc.id_unidadecurricular
+    JOIN turno_uc tu ON tu.id_turno = t.id_turno
     WHERE it.n_mecanografico = p_n_mecanografico
-      AND t.dia_semana = v_dia
       AND (
-          (t.hora_inicio <= v_hora_inicio AND t.hora_fim > v_hora_inicio) OR
-          (t.hora_inicio < v_hora_fim AND t.hora_fim >= v_hora_fim) OR
-          (t.hora_inicio >= v_hora_inicio AND t.hora_fim <= v_hora_fim)
+          (tu.hora_inicio <= v_hora_inicio AND tu.hora_fim > v_hora_inicio) OR
+          (tu.hora_inicio < v_hora_fim AND tu.hora_fim >= v_hora_fim) OR
+          (tu.hora_inicio >= v_hora_inicio AND tu.hora_fim <= v_hora_fim)
       );
 
-    v_tem_conflito := v_conflitos IS NOT NULL;
-
-    RETURN QUERY
-    SELECT 
-        v_tem_conflito,
-        CASE WHEN v_tem_conflito THEN 'Existem conflitos de horário' ELSE 'Sem conflitos' END::TEXT,
-        COALESCE(v_conflitos, ARRAY[]::TEXT[]);
+    -- Se encontrou conflitos, agregar informações
+    IF v_count > 0 THEN
+        SELECT ARRAY_AGG(
+            'Turno ' || t.id_turno || ' - ' || uc.nome || ' (' || 
+            tu.hora_inicio::TEXT || '-' || tu.hora_fim::TEXT || ')'
+        )
+        INTO v_conflitos
+        FROM inscricao_turno it
+        JOIN turno t ON it.id_turno = t.id_turno
+        JOIN turno_uc tu ON tu.id_turno = t.id_turno
+        JOIN unidade_curricular uc ON it.id_unidadecurricular = uc.id_unidadecurricular
+        WHERE it.n_mecanografico = p_n_mecanografico
+          AND (
+              (tu.hora_inicio <= v_hora_inicio AND tu.hora_fim > v_hora_inicio) OR
+              (tu.hora_inicio < v_hora_fim AND tu.hora_fim >= v_hora_fim) OR
+              (tu.hora_inicio >= v_hora_inicio AND tu.hora_fim <= v_hora_fim)
+          );
+        
+        RETURN QUERY SELECT TRUE, 'Conflito de horário detectado: ' || v_count::TEXT || ' turno(s) em conflito', COALESCE(v_conflitos, ARRAY[]::TEXT[]);
+    ELSE
+        RETURN QUERY SELECT FALSE, 'Sem conflitos de horário', ARRAY[]::TEXT[];
+    END IF;
 END;
 $$;
 
