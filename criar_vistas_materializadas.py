@@ -13,7 +13,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'bd2_projeto.settings')
 django.setup()
 
-from django.db import connection
+from django.db import connection, connections
 from pathlib import Path
 
 
@@ -64,7 +64,7 @@ def atualizar_vistas():
         'mv_conflitos_horario'
     ]
     
-    with connection.cursor() as cursor:
+    with connections["admin"].cursor() as cursor:
         for vista in vistas:
             try:
                 print(f"Atualizando {vista}...")
@@ -105,7 +105,7 @@ def mostrar_estatisticas():
     print("\nEstatísticas das Vistas:")
     
     try:
-        with connection.cursor() as cursor:
+        with connections["admin"].cursor() as cursor:
             # Estatísticas de turnos
             cursor.execute("SELECT COUNT(*) FROM mv_estatisticas_turno")
             total_turnos = cursor.fetchone()[0]
