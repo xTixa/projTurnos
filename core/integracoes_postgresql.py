@@ -476,9 +476,58 @@ class PostgreSQLConsultas:
             with connections["admin"].cursor() as cursor:
                 cursor.execute("SELECT fn_delete_turno(%s)", [turno_id])
                 row = cursor.fetchone()
-                return bool(row[0]) if row else False
+                result = bool(row[0]) if row else False
+                
+                # Commit explícito para garantir que a transação é confirmada
+                if result:
+                    connections["admin"].commit()
+                    logger.info(f"Turno {turno_id} deletado com sucesso")
+                else:
+                    logger.warning(f"Função fn_delete_turno retornou False para turno {turno_id}")
+                
+                return result
         except Exception as e:
             logger.error(f"Erro ao deletar turno {turno_id}: {e}")
+            connections["admin"].rollback()
+            return False
+
+    @staticmethod
+    def delete_turno_from_uc(turno_id: int, uc_id: int) -> bool:
+        """Remove apenas a associação turno-UC, não o turno em si"""
+        try:
+            logger.info(f"Tentando remover turno {turno_id} da UC {uc_id}")
+            with connections["admin"].cursor() as cursor:
+                # Primeiro verifica se existe
+                cursor.execute(
+                    "SELECT COUNT(*) FROM turno_uc WHERE id_turno = %s AND id_unidadecurricular = %s",
+                    [turno_id, uc_id]
+                )
+                count_before = cursor.fetchone()[0]
+                logger.info(f"Registros antes de deletar: {count_before}")
+                
+                # Executa a função de delete
+                cursor.execute("SELECT fn_delete_turno_from_uc(%s, %s)", [turno_id, uc_id])
+                row = cursor.fetchone()
+                result = bool(row[0]) if row else False
+                
+                if result:
+                    connections["admin"].commit()
+                    
+                    # Verifica se realmente foi deletado
+                    cursor.execute(
+                        "SELECT COUNT(*) FROM turno_uc WHERE id_turno = %s AND id_unidadecurricular = %s",
+                        [turno_id, uc_id]
+                    )
+                    count_after = cursor.fetchone()[0]
+                    logger.info(f"Registros depois de deletar: {count_after}")
+                    logger.info(f"Turno {turno_id} removido da UC {uc_id} com sucesso")
+                else:
+                    logger.warning(f"Função fn_delete_turno_from_uc retornou False para turno {turno_id} e UC {uc_id}")
+                
+                return result
+        except Exception as e:
+            logger.error(f"Erro ao remover turno {turno_id} da UC {uc_id}: {e}")
+            connections["admin"].rollback()
             return False
 
     @staticmethod
@@ -710,17 +759,22 @@ class PostgreSQLConsultas:
             return 0
 
     @staticmethod
-    def create_turno_uc(id_turno: int, id_uc: int, hora_inicio: str, hora_fim: str) -> bool:
+    def create_turno_uc(id_turno: int, id_uc: int, dia_semana: str, hora_inicio: str, hora_fim: str) -> bool:
         try:
             with connections["admin"].cursor() as cursor:
                 cursor.execute(
-                    "SELECT fn_create_turno_uc(%s, %s, %s, %s)",
-                    [id_turno, id_uc, hora_inicio, hora_fim],
+                    "SELECT fn_create_turno_uc(%s, %s, %s, %s, %s)",
+                    [id_turno, id_uc, dia_semana, hora_inicio, hora_fim],
                 )
                 row = cursor.fetchone()
-                return bool(row[0]) if row else False
+                result = bool(row[0]) if row else False
+                if result:
+                    connections["admin"].commit()
+                    logger.info(f"Turno {id_turno} associado à UC {id_uc} no dia {dia_semana}")
+                return result
         except Exception as e:
             logger.error(f"Erro ao criar turno_uc: {e}")
+            connections["admin"].rollback()
             return False
 
     @staticmethod

@@ -104,6 +104,27 @@
             <option value="TP" {% if turno.tipo == 'TP' %}selected{% endif %}>TP - Teórico Prático</option>
             <option value="P" {% if turno.tipo == 'P' %}selected{% endif %}>P - Prático</option>
         </select>
+        <label>Associar a UC (opcional):</label>
+        <select name="uc_id">
+            <option value="">-- Selecionar UC --</option>
+            {% for uc in ucs %}
+            <option value="{{ uc.id_unidadecurricular }}">{{ uc.nome }}</option>
+            {% endfor %}
+        </select>
+        <label>Dia da Semana (opcional):</label>
+        <select name="dia_semana">
+            <option value="">-- Selecionar dia --</option>
+            <option value="Segunda-feira">Segunda-feira</option>
+            <option value="Terça-feira">Terça-feira</option>
+            <option value="Quarta-feira">Quarta-feira</option>
+            <option value="Quinta-feira">Quinta-feira</option>
+            <option value="Sexta-feira">Sexta-feira</option>
+            <option value="Sábado">Sábado</option>
+        </select>
+        <label>Hora Início (opcional):</label>
+        <input type="time" name="hora_inicio" value="">
+        <label>Hora Fim (opcional):</label>
+        <input type="time" name="hora_fim" value="">
         <button class="btn-save">Guardar</button>
     </form>
     <a href="{% url 'home:admin_turnos_list' %}" class="btn-back">&larr; Voltar</a>
