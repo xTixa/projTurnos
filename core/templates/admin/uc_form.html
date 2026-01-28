@@ -92,6 +92,7 @@
 						<th>Nº</th>
 						<th>Tipo</th>
 						<th>Cap.</th>
+						<th>Dia</th>
 						<th>Horário</th>
 						<th></th>
 					</tr>
@@ -99,16 +100,17 @@
 				<tbody>
 					{% for t in turnos_uc %}
 					<tr>
-						<td><strong>{{ t.id_turno.n_turno }}</strong></td>
-						<td><span class="badge badge-tipo">{{ t.id_turno.tipo }}</span></td>
-						<td>{{ t.id_turno.capacidade }}</td>
+						<td><strong>{{ t.n_turno }}</strong></td>
+						<td><span class="badge badge-tipo">{{ t.tipo }}</span></td>
+						<td>{{ t.capacidade }}</td>
+						<td>{{ t.dia_semana|default_if_none:"—" }}</td>
 						<td>{{ t.hora_inicio|default_if_none:"—" }} - {{ t.hora_fim|default_if_none:"—" }}</td>
 						<td class="actions-cell">
 							<form method="post" style="display:inline;">
 								{% csrf_token %}
 								<input type="hidden" name="action" value="delete_turno">
-								<input type="hidden" name="turno_id" value="{{ t.id_turno.id_turno }}">
-								<button type="submit" class="btn btn-danger" onclick="return confirm('Remover este turno?');">
+								<input type="hidden" name="turno_id" value="{{ t.id_turno }}">
+								<button type="submit" class="btn btn-danger" onclick="return confirm('Remover este turno da UC?');">
 									<i class="fa-solid fa-trash"></i>
 								</button>
 							</form>
@@ -148,10 +150,23 @@
 					</div>
 					
 					<div class="form-group">
+						<label for="dia_semana">Dia da Semana</label>
+						<select name="dia_semana" id="dia_semana" required>
+							<option value="">Selecionar dia</option>
+							<option value="Segunda-feira">Segunda-feira</option>
+							<option value="Terça-feira">Terça-feira</option>
+							<option value="Quarta-feira">Quarta-feira</option>
+							<option value="Quinta-feira">Quinta-feira</option>
+							<option value="Sexta-feira">Sexta-feira</option>
+							<option value="Sábado">Sábado</option>
+						</select>
+					</div>
+				
+					<div class="form-group">
 						<label for="hora_inicio">Hora Início</label>
 						<input type="time" name="hora_inicio" id="hora_inicio" required>
 					</div>
-					
+				
 					<div class="form-group">
 						<label for="hora_fim">Hora Fim</label>
 						<input type="time" name="hora_fim" id="hora_fim" required>
