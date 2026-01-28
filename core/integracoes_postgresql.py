@@ -254,7 +254,7 @@ class PostgreSQLConsultas:
     @staticmethod
     def cursos_list() -> List[Dict[str, Any]]:
         try:
-            with connection.cursor() as cursor:
+            with connections["admin"].cursor() as cursor:
                 cursor.execute("SELECT * FROM fn_cursos_list()")
                 cols = [col[0] for col in cursor.description]
                 return [dict(zip(cols, row)) for row in cursor.fetchall()]
