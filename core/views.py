@@ -1885,7 +1885,7 @@ def atualizar_proposta_estagio_view(request, titulo):
             updates["orientador_empresa"] = request.POST.get("orientador")
         
         # Atualiza a proposta via PostgreSQL
-        sucesso = PostgreSQLDAPE.dape_atualizar_proposta(aluno_id, titulo, updates)
+        sucesso = PostgreSQLDAPE.dape_admin_atualizar_proposta(aluno_id, titulo, updates)
         
         if sucesso:
             # Regista log da atualização
@@ -1900,7 +1900,7 @@ def atualizar_proposta_estagio_view(request, titulo):
         
         return redirect("home:listar_propostas_estagio")
     
-    # Busca a proposta atual para preencher o formulário
+    # Procura a proposta atual para preencher o formulário
     propostas = PostgreSQLDAPE.dape_listar_propostas({"aluno_id": aluno_id, "titulo": titulo})
     if not propostas:
         messages.error(request, "Proposta não encontrada.")
@@ -1910,27 +1910,25 @@ def atualizar_proposta_estagio_view(request, titulo):
     return render(request, "dape/dape.html", {"proposta": proposta})
 
 @user_required
-def deletar_proposta_estagio_view(request, titulo):
-    """View para deletar uma proposta de estágio"""
+def eliminar_proposta_estagio_view(request, titulo):
+    """View para eliminar uma proposta de estágio"""
     if request.session.get("user_tipo") != "aluno":
-        messages.error(request, "Apenas alunos podem deletar propostas de estágio.")
+        messages.error(request, "Apenas alunos podem eliminar propostas de estágio.")
         return redirect("home:index")
     
     aluno_id = request.session.get("user_id")
     
-    # Deleta a proposta via PostgreSQL
-    sucesso = PostgreSQLDAPE.dape_eliminar_proposta(aluno_id, titulo)
+    sucesso = PostgreSQLDAPE.dape_admin_eliminar_proposta(aluno_id, titulo)
     
     if sucesso:
-        # Regista log da deleção
         adicionar_log(
-            "deletar_proposta_estagio",
+            "eliminar_proposta_estagio",
             {"aluno_id": aluno_id, "titulo": titulo},
             request
         )
-        messages.success(request, "Proposta de estágio deletada com sucesso!")
+        messages.success(request, "Proposta de estágio eliminada com sucesso!")
     else:
-        messages.error(request, "Erro ao deletar proposta de estágio.")
+        messages.error(request, "Erro ao eliminar proposta de estágio.")
     
     return redirect("home:listar_propostas_estagio")
 
@@ -1939,21 +1937,17 @@ def deletar_proposta_estagio_view(request, titulo):
 # ==========================================
 
 def favoritos_view(request):
-    """View para mostrar as propostas favoritas do aluno"""
     if request.session.get("user_tipo") != "aluno":
         messages.error(request, "Apenas alunos podem ver seus favoritos.")
         return redirect("home:index")
     
     aluno_id = request.session.get("user_id")
     
-    # Busca propostas favoritas via PostgreSQL
     propostas_favoritas = PostgreSQLDAPE.dape_listar_favoritos(aluno_id)
     
-    # Adiciona proposta_id para cada proposta
     for proposta in propostas_favoritas:
         proposta["proposta_id"] = str(proposta.get("id_proposta", ""))
     
-    # Regista consulta
     adicionar_log(
         "visualizar_favoritos",
         {"aluno_id": aluno_id, "total_favoritos": len(propostas_favoritas)},
@@ -1966,7 +1960,6 @@ def favoritos_view(request):
     })
 
 def toggle_favorito_view(request):
-    """View para adicionar/remover favorito via AJAX"""
     print("toggle_favorito_view called")
     try:
         if request.method == "POST" and request.session.get("user_tipo") == "aluno":
@@ -1989,27 +1982,22 @@ def toggle_favorito_view(request):
 from django.http import Http404
 
 def proposta_detalhes(request, id_proposta):
-    """
-    View para mostrar os detalhes de uma proposta de estágio
-    (dados vêm do PostgreSQL)
-    """
 
-    # Buscar proposta por ID
     proposta = PostgreSQLDAPE.dape_obter_proposta_por_id(id_proposta)
 
     if not proposta:
         raise Http404("Proposta não encontrada")
 
-    # Normalizar ID
     proposta["proposta_id"] = str(proposta.get("id_proposta", ""))
 
-    # Verificar favorito (se aluno)
     if request.session.get("user_tipo") == "aluno":
         aluno_id = request.session.get("user_id")
         proposta["is_favorito"] = PostgreSQLDAPE.dape_verificar_favorito(aluno_id, proposta["id_proposta"])
 
-    # Obter aluno atribuído (se existir) - FUNCIONALIDADE AINDA NÃO IMPLEMENTADA
-    aluno_atribuido = None  # obter_aluno_atribuido(proposta["proposta_id"])
+    # Obter aluno atribuído (se existir)
+    aluno_atribuido = PostgreSQLDAPE.dape_obter_aluno_atribuido(id_proposta)
+    if aluno_atribuido and aluno_atribuido.get("data_atribuicao"):
+        aluno_atribuido["data_formatada"] = aluno_atribuido["data_atribuicao"].strftime("%d/%m/%Y")
     
     # Registar acesso
     adicionar_log(
@@ -2025,73 +2013,73 @@ def proposta_detalhes(request, id_proposta):
     })
 
 def atribuir_aluno_view(request, id_proposta):
-    """
-    View para atribuir um aluno a uma proposta de estágio (apenas admin)
-    FUNCIONALIDADE AINDA NÃO IMPLEMENTADA
-    """
-    messages.error(request, "Funcionalidade de atribuir aluno ainda não implementada.")
-    return redirect("home:proposta_detalhes", id_proposta=id_proposta)
+    """View para atribuir um aluno a uma proposta de estágio (apenas admin)"""
     
-    # TODO: Descomentar quando implementar as funções de atribuição
     # Verificar se é admin
-    # if request.session.get("user_tipo") != "admin":
-    #     messages.error(request, "Apenas administradores podem atribuir alunos a propostas.")
-    #     return redirect("home:proposta_detalhes", id_proposta=id_proposta)
-    # 
-    # if request.method == "POST":
-    #     n_mecanografico = request.POST.get("n_mecanografico", "").strip()
-    #     acao = request.POST.get("acao", "atribuir")
-    #     
-    #     if acao == "remover":
-    #         # Remover atribuição
-    #         sucesso = remover_atribuicao_proposta(id_proposta)
-    #         if sucesso:
-    #             adicionar_log(
-    #                 "remover_atribuicao_proposta",
-    #                 {"proposta_id": id_proposta},
-    #                 request
-    #             )
-    #             messages.success(request, "Atribuição removida com sucesso!")
-    #         else:
-    #             messages.error(request, "Erro ao remover atribuição.")
-    #     elif n_mecanografico:
-    #         # Buscar nome do aluno
-    #         try:
-    #             aluno = Aluno.objects.get(n_mecanografico=n_mecanografico)
-    #             aluno_nome = aluno.nome
-    #         except Aluno.DoesNotExist:
-    #             messages.error(request, f"Aluno com número mecanográfico {n_mecanografico} não encontrado.")
-    #             return redirect("home:proposta_detalhes", id_proposta=id_proposta)
-    #         
-    #         # Verificar se o aluno já tem uma proposta atribuída
-    #         proposta_existente = verificar_aluno_tem_proposta(n_mecanografico)
-    #         if proposta_existente:
-    #             messages.error(
-    #                 request, 
-    #                 f"O aluno {aluno_nome} já tem uma proposta atribuída: '{proposta_existente.get('titulo')}' ({proposta_existente.get('entidade')}). "
-    #                 f"Remova essa atribuição primeiro antes de atribuir uma nova proposta."
-    #             )
-    #             return redirect("home:proposta_detalhes", id_proposta=id_proposta)
-    #         
-    #         # Atribuir aluno à proposta
-    #         sucesso = atribuir_aluno_proposta(id_proposta, n_mecanografico, aluno_nome)
-    #         if sucesso:
-    #             adicionar_log(
-    #                 "atribuir_aluno_proposta",
-    #                 {
-    #                     "proposta_id": id_proposta,
-    #                     "aluno_n_mecanografico": n_mecanografico,
-    #                     "aluno_nome": aluno_nome
-    #                 },
-    #                 request
-    #             )
-    #             messages.success(request, f"Aluno {aluno_nome} atribuído com sucesso!")
-    #         else:
-    #             messages.error(request, "Erro ao atribuir aluno à proposta.")
-    #     else:
-    #         messages.error(request, "Número mecanográfico é obrigatório.")
-    # 
-    # return redirect("home:proposta_detalhes", id_proposta=id_proposta)
+    if request.session.get("user_tipo") != "admin":
+        messages.error(request, "Apenas administradores podem atribuir alunos a propostas.")
+        return redirect("home:proposta_detalhes", id_proposta=id_proposta)
+    
+    if request.method == "POST":
+        n_mecanografico = request.POST.get("n_mecanografico", "").strip()
+        acao = request.POST.get("acao", "atribuir")
+        
+        if acao == "remover":
+            # Remover atribuição
+            sucesso = PostgreSQLDAPE.dape_remover_atribuicao(id_proposta)
+            if sucesso:
+                adicionar_log(
+                    "remover_atribuicao_proposta",
+                    {"proposta_id": id_proposta},
+                    request
+                )
+                messages.success(request, "Atribuição removida com sucesso!")
+            else:
+                messages.error(request, "Erro ao remover atribuição.")
+        elif n_mecanografico:
+            try:
+                n_mec_int = int(n_mecanografico)
+            except ValueError:
+                messages.error(request, "Número mecanográfico inválido.")
+                return redirect("home:proposta_detalhes", id_proposta=id_proposta)
+            
+            # Obter dados do aluno
+            aluno = PostgreSQLDAPE.dape_obter_aluno_por_mecanografico(n_mec_int)
+            if not aluno:
+                messages.error(request, f"Aluno com número mecanográfico {n_mecanografico} não encontrado.")
+                return redirect("home:proposta_detalhes", id_proposta=id_proposta)
+            
+            aluno_nome = aluno.get("nome", "Desconhecido")
+            
+            # Verificar se o aluno já tem uma proposta atribuída
+            proposta_existente = PostgreSQLDAPE.dape_aluno_tem_proposta(n_mec_int)
+            if proposta_existente:
+                messages.error(
+                    request, 
+                    f"O aluno {aluno_nome} já tem uma proposta atribuída: '{proposta_existente.get('titulo')}' ({proposta_existente.get('entidade')}). "
+                    f"Remova essa atribuição primeiro antes de atribuir uma nova proposta."
+                )
+                return redirect("home:proposta_detalhes", id_proposta=id_proposta)
+            
+            # Atribuir aluno à proposta
+            sucesso = PostgreSQLDAPE.dape_atribuir_aluno(id_proposta, n_mec_int)
+            if sucesso:
+                adicionar_log(
+                    "atribuir_aluno_proposta",
+                    {
+                        "proposta_id": id_proposta,
+                        "aluno_n_mecanografico": n_mecanografico,
+                        "aluno_nome": aluno_nome
+                    },
+                    request
+                )
+                messages.success(request, f"Aluno {aluno_nome} atribuído com sucesso!")
+            else:
+                messages.error(request, "Erro ao atribuir aluno à proposta.")
+        else:
+            messages.error(request, "Número mecanográfico é obrigatório.")
+    
+    return redirect("home:proposta_detalhes", id_proposta=id_proposta)
 
 
 # ==========================================
@@ -2181,7 +2169,7 @@ def admin_dape_edit(request, id):
             "logo": request.POST.get("logo"),
         }
 
-        sucesso = PostgreSQLDAPE.admin_atualizar_proposta(pid, updates)
+        sucesso = PostgreSQLDAPE.dape_admin_atualizar_proposta(pid, updates)
         if sucesso:
             adicionar_log("admin_editar_proposta", {"id": pid, "updates": updates}, request)
             messages.success(request, f"Proposta '{updates.get('titulo') or proposta.get('titulo')}' atualizada com sucesso!")
@@ -2207,9 +2195,9 @@ def admin_dape_delete(request, id):
         return redirect("home:admin_dape_list")
 
     titulo = proposta.get("titulo", "Desconhecido")
-    sucesso = PostgreSQLDAPE.admin_eliminar_proposta(pid)
+    sucesso = PostgreSQLDAPE.dape_admin_eliminar_proposta(pid)
     if sucesso:
-        adicionar_log("admin_deletar_proposta", {"id": pid, "titulo": titulo}, request)
+        adicionar_log("admin_eliminar_proposta", {"id": pid, "titulo": titulo}, request)
         messages.success(request, f"Proposta '{titulo}' eliminada com sucesso!")
     else:
         messages.error(request, "Erro ao eliminar proposta.")

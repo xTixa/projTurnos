@@ -188,15 +188,15 @@ body .main-content {
 
 /* Minha Proposta - Destaque */
 .ei-card.minha-proposta {
-    background: #10b981 !important;
-    border: 2px solid #059669 !important;
+    background: #e0f2fe !important;
+    border: 2px solid #0ea5e9 !important;
     position: relative;
 }
 
 .ei-card.minha-proposta:hover {
-    border-color: #047857;
+    border-color: #0284c7;
     transform: translateY(-5px);
-    box-shadow: 0 20px 30px -5px rgba(16, 185, 129, 0.35);
+    box-shadow: 0 20px 30px -5px rgba(14, 165, 233, 0.35);
 }
 
 .ei-card.minha-proposta h3,
@@ -205,29 +205,29 @@ body .main-content {
 .ei-card.minha-proposta .modelo,
 .ei-card.minha-proposta .requisitos strong,
 .ei-card.minha-proposta .modelo strong {
-    color: white;
+    color: #0c4a6e;
 }
 
 .ei-card.minha-proposta .entidade {
-    color: rgba(255, 255, 255, 0.9);
+    color: #075985;
 }
 
 .ei-card.minha-proposta .requisitos,
 .ei-card.minha-proposta .modelo {
-    color: rgba(255, 255, 255, 0.85);
+    color: #0369a1;
 }
 
 .ei-card.minha-proposta .logo-placeholder {
-    background: rgba(255, 255, 255, 0.2);
-    color: white;
+    background: rgba(14, 165, 233, 0.2);
+    color: #0284c7;
 }
 
 .minha-proposta-badge {
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    background: white;
-    color: #059669;
+    background: #0ea5e9;
+    color: white;
     padding: 6px 12px;
     border-radius: 50px;
     font-size: 0.8rem;

@@ -756,8 +756,8 @@ class PostgreSQLDAPE:
     @staticmethod
     def dape_obter_proposta_por_id(id_proposta: int) -> Optional[Dict[str, Any]]:
         try:
-            with connection.cursor() as cursor:
-                cursor.execute("SELECT * FROM fn_dape_obter_proposta(%s)", [id_proposta])
+            with connections["admin"].cursor() as cursor:
+                cursor.execute("SELECT * FROM fn_dape_obter_proposta_por_id(%s)", [id_proposta])
                 row = cursor.fetchone()
                 if not row:
                     return None
@@ -773,7 +773,7 @@ class PostgreSQLDAPE:
                        modelo: Optional[str], orientador_empresa: Optional[str],
                        telefone: Optional[str], email: Optional[str], logo: Optional[str]) -> Optional[int]:
         try:
-            with connection.cursor() as cursor:
+            with connections["admin"].cursor() as cursor:
                 cursor.execute(
                     "SELECT dape_criar_proposta(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)",
                     [aluno_id, titulo, entidade, descricao, requisitos, modelo,
@@ -788,7 +788,7 @@ class PostgreSQLDAPE:
     @staticmethod
     def dape_atualizar_proposta(aluno_id: int, titulo_atual: str, updates: Dict[str, Any]) -> bool:
         try:
-            with connection.cursor() as cursor:
+            with connections["admin"].cursor() as cursor:
                 cursor.execute(
                     "CALL dape_atualizar_proposta(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)",
                     [aluno_id,
@@ -805,7 +805,7 @@ class PostgreSQLDAPE:
     @staticmethod
     def dape_eliminar_proposta(aluno_id: int, titulo: str) -> bool:
         try:
-            with connection.cursor() as cursor:
+            with connections["admin"].cursor() as cursor:
                 cursor.execute("CALL dape_eliminar_proposta(%s,%s)", [aluno_id, titulo])
                 return True
         except Exception as e:
@@ -818,7 +818,7 @@ class PostgreSQLDAPE:
     @staticmethod
     def dape_admin_atualizar_proposta(id_proposta: int, updates: Dict[str, Any]) -> bool:
         try:
-            with connection.cursor() as cursor:
+            with connections["admin"].cursor() as cursor:
                 cursor.execute(
                     "CALL dape_admin_atualizar_proposta(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)",
                     [id_proposta,
@@ -834,7 +834,7 @@ class PostgreSQLDAPE:
     @staticmethod
     def dape_admin_eliminar_proposta(id_proposta: int) -> bool:
         try:
-            with connection.cursor() as cursor:
+            with connections["admin"].cursor() as cursor:
                 cursor.execute("CALL dape_admin_eliminar_proposta(%s)", [id_proposta])
                 return True
         except Exception as e:
@@ -877,6 +877,71 @@ class PostgreSQLDAPE:
         except Exception as e:
             logger.error(f"Erro a toggle favorito DAPE: {e}")
             return {"added": False}
+
+    # =============================
+    # ATRIBUIÇÃO DE ALUNOS
+    # =============================
+    @staticmethod
+    def dape_obter_aluno_por_mecanografico(n_mecanografico: int) -> Optional[Dict[str, Any]]:
+        try:
+            with connection.cursor() as cursor:
+                cursor.execute("SELECT * FROM dape_obter_aluno_por_mecanografico(%s)", [n_mecanografico])
+                row = cursor.fetchone()
+                if not row:
+                    return None
+                cols = [col[0] for col in cursor.description]
+                return dict(zip(cols, row))
+        except Exception as e:
+            logger.error(f"Erro a obter aluno por mecanográfico: {e}")
+            return None
+
+    @staticmethod
+    def dape_aluno_tem_proposta(n_mecanografico: int) -> Optional[Dict[str, Any]]:
+        try:
+            with connection.cursor() as cursor:
+                cursor.execute("SELECT * FROM dape_aluno_tem_proposta(%s)", [n_mecanografico])
+                row = cursor.fetchone()
+                if not row:
+                    return None
+                cols = [col[0] for col in cursor.description]
+                return dict(zip(cols, row))
+        except Exception as e:
+            logger.error(f"Erro a verificar se aluno tem proposta: {e}")
+            return None
+
+    @staticmethod
+    def dape_atribuir_aluno(id_proposta: int, n_mecanografico: int) -> bool:
+        try:
+            with connection.cursor() as cursor:
+                cursor.execute("CALL dape_atribuir_aluno(%s, %s)", [id_proposta, n_mecanografico])
+                return True
+        except Exception as e:
+            logger.error(f"Erro a atribuir aluno a proposta: {e}")
+            return False
+
+    @staticmethod
+    def dape_remover_atribuicao(id_proposta: int) -> bool:
+        try:
+            with connection.cursor() as cursor:
+                cursor.execute("CALL dape_remover_atribuicao(%s)", [id_proposta])
+                return True
+        except Exception as e:
+            logger.error(f"Erro a remover atribuição: {e}")
+            return False
+
+    @staticmethod
+    def dape_obter_aluno_atribuido(id_proposta: int) -> Optional[Dict[str, Any]]:
+        try:
+            with connection.cursor() as cursor:
+                cursor.execute("SELECT * FROM dape_obter_aluno_atribuido(%s)", [id_proposta])
+                row = cursor.fetchone()
+                if not row:
+                    return None
+                cols = [col[0] for col in cursor.description]
+                return dict(zip(cols, row))
+        except Exception as e:
+            logger.error(f"Erro a obter aluno atribuído: {e}")
+            return None
 
 
 class PostgreSQLAuth:
