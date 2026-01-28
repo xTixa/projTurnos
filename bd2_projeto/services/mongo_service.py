@@ -2,6 +2,17 @@ from ..mongodb import db
 from datetime import datetime
 import time
 import json
+from bd2_projeto.mongodb import db, db_admin
+
+colecao_admin = db_admin["erros"]
+colecao_admin = db_admin["auditoria_inscricoes"]
+colecao_admin = db_admin["auditoria_users"]
+colecao_admin = db_admin["avaliacoes_pdf.chunks"]
+colecao_admin = db_admin["avaliacoes_pdf.files"]
+colecao_admin = db_admin["consultas_alunos"]
+colecao_admin = db_admin["horarios_pdf.chunks"]
+colecao_admin = db_admin["horarios_pdf.files"]
+colecao_admin = db_admin["logs"]
 
 def criar_indices():
     try:
@@ -129,7 +140,7 @@ def criar_proposta_estagio(aluno_id, aluno_nome, titulo, descricao, empresa, ori
         "timestamp": datetime.now(),
         "data_formatada": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     }
-    result = db.proposta_estagio.insert_one(proposta)
+    result = db_admin.proposta_estagio.insert_one(proposta)
     proposta["_id"] = result.inserted_id
     return proposta
 
@@ -140,14 +151,14 @@ def atualizar_proposta_estagio(aluno_id, titulo, updates):
     updates["timestamp"] = datetime.now()
     updates["data_formatada"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     
-    result = db.proposta_estagio.update_one(
+    result = db_admin.proposta_estagio.update_one(
         {"aluno_id": aluno_id, "titulo": titulo},
         {"$set": updates}
     )
     return result.modified_count > 0
 
 def eliminar_proposta_estagio(aluno_id, titulo):
-    result = db.proposta_estagio.delete_one({"aluno_id": aluno_id, "titulo": titulo})
+    result = db_admin.proposta_estagio.delete_one({"aluno_id": aluno_id, "titulo": titulo})
     return result.deleted_count > 0
 
 def adicionar_favorito(aluno_id, proposta_id):
@@ -204,7 +215,7 @@ def analisar_taxa_sucesso_inscricoes(filtro_uc_id=None):
     if filtro_uc_id:
         pipeline.insert(0, {"$match": {"uc_id": filtro_uc_id}})
     
-    return list(db.auditoria_inscricoes.aggregate(pipeline))
+    return list(db_admin.auditoria_inscricoes.aggregate(pipeline))
 
 def analisar_inscricoes_por_dia():
     pipeline = [
@@ -228,7 +239,7 @@ def analisar_inscricoes_por_dia():
             "$sort": {"_id": 1}
         }
     ]
-    return list(db.auditoria_inscricoes.aggregate(pipeline))
+    return list(db_admin.auditoria_inscricoes.aggregate(pipeline))
 
 def analisar_alunos_mais_ativos():
     pipeline = [
@@ -255,7 +266,7 @@ def analisar_alunos_mais_ativos():
             "$limit": 20
         }
     ]
-    return list(db.auditoria_inscricoes.aggregate(pipeline))
+    return list(db_admin.auditoria_inscricoes.aggregate(pipeline))
 
 def analisar_ucs_mais_procuradas():
     pipeline = [
@@ -277,7 +288,7 @@ def analisar_ucs_mais_procuradas():
             "$sort": {"sucessos": -1}
         }
     ]
-    return list(db.auditoria_inscricoes.aggregate(pipeline))
+    return list(db_admin.auditoria_inscricoes.aggregate(pipeline))
 
 def analisar_turnos_sobrecarregados():
     pipeline = [
@@ -294,7 +305,7 @@ def analisar_turnos_sobrecarregados():
             "$sort": {"rejeicoes_por_limite": -1}
         }
     ]
-    return list(db.auditoria_inscricoes.aggregate(pipeline))
+    return list(db_admin.auditoria_inscricoes.aggregate(pipeline))
 
 def registar_erro(funcao, erro_msg, detalhes=None):
     erro = {
@@ -304,7 +315,7 @@ def registar_erro(funcao, erro_msg, detalhes=None):
         "timestamp": datetime.now(),
         "data_formatada": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     }
-    db.erros.insert_one(erro)
+    db_admin.erros.insert_one(erro)
     return erro
 
 def _parse_ts(doc):
@@ -415,7 +426,7 @@ def listar_eventos_mongo(filtro_acao=None, filtro_entidade=None, limite=500):
         )
 
     # Erros
-    for doc in db.erros.find({}, {"_id": 0}).sort("timestamp", -1).limit(limite):
+    for doc in db_admin.erros.find({}, {"_id": 0}).sort("timestamp", -1).limit(limite):
         add_evento(
             doc,
             fonte="Mongo",
