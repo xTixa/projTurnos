@@ -2,11 +2,22 @@ import csv
 import json
 import xml.etree.ElementTree as ET
 from xml.dom import minidom
-from datetime import datetime
+from datetime import datetime, date, time
+from decimal import Decimal
 from django.http import HttpResponse, JsonResponse
 from django.views.decorators.http import require_http_methods
 from django.db import connection, connections
 from core.utils import admin_required
+
+
+class DecimalEncoder(json.JSONEncoder):
+    """Custom JSON encoder para lidar com tipos Decimal, datetime, date, time e outros tipos do Python/DB"""
+    def default(self, obj):
+        if isinstance(obj, Decimal):
+            return float(obj)
+        if isinstance(obj, (datetime, date, time)):
+            return obj.isoformat()
+        return super().default(obj)
 
 def criar_xml_formatado(root):
     """Formata XML de forma legível"""
@@ -60,7 +71,7 @@ def exportar_alunos_json(request):
     
     data = [dict(zip(cols, row)) for row in rows]
     response = HttpResponse(
-        json.dumps(data, ensure_ascii=False, indent=2),
+        json.dumps(data, ensure_ascii=False, indent=2, cls=DecimalEncoder),
         content_type="application/json; charset=utf-8",
     )
     response["Content-Disposition"] = (
@@ -105,7 +116,7 @@ def exportar_turnos_json(request):
     
     data = [dict(zip(cols, row)) for row in rows]
     response = HttpResponse(
-        json.dumps(data, ensure_ascii=False, indent=2),
+        json.dumps(data, ensure_ascii=False, indent=2, cls=DecimalEncoder),
         content_type="application/json; charset=utf-8",
     )
     response["Content-Disposition"] = (
@@ -158,7 +169,7 @@ def exportar_inscricoes_json(request):
     
     data = [dict(zip(cols, row)) for row in rows]
     response = HttpResponse(
-        json.dumps(data, ensure_ascii=False, indent=2),
+        json.dumps(data, ensure_ascii=False, indent=2, cls=DecimalEncoder),
         content_type="application/json; charset=utf-8",
     )
     response["Content-Disposition"] = (
@@ -202,7 +213,7 @@ def exportar_ucs_json(request):
     
     data = [dict(zip(cols, row)) for row in rows]
     response = HttpResponse(
-        json.dumps(data, ensure_ascii=False, indent=2),
+        json.dumps(data, ensure_ascii=False, indent=2, cls=DecimalEncoder),
         content_type="application/json; charset=utf-8",
     )
     response["Content-Disposition"] = (
@@ -527,7 +538,7 @@ def exportar_mv_ucs_preenchidas_json(request):
     
     data = [dict(zip(cols, row)) for row in rows]
     response = HttpResponse(
-        json.dumps(data, ensure_ascii=False, indent=2),
+        json.dumps(data, ensure_ascii=False, indent=2, cls=DecimalEncoder),
         content_type="application/json; charset=utf-8",
     )
     response["Content-Disposition"] = (
@@ -588,7 +599,7 @@ def exportar_mv_resumo_alunos_json(request):
     
     data = [dict(zip(cols, row)) for row in rows]
     response = HttpResponse(
-        json.dumps(data, ensure_ascii=False, indent=2),
+        json.dumps(data, ensure_ascii=False, indent=2, cls=DecimalEncoder),
         content_type="application/json; charset=utf-8",
     )
     response["Content-Disposition"] = (
