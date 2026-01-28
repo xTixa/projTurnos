@@ -1,5 +1,5 @@
 from gridfs import GridFS
-from ..mongodb import db, client
+from ..mongodb import db
 from datetime import datetime
 from bson.objectid import ObjectId
 import io
