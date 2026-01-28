@@ -581,7 +581,12 @@ def exportar_mv_resumo_alunos_csv(request):
 
 @admin_required
 def exportar_mv_resumo_alunos_json(request):
-    data = _fetch_dicts("SELECT * FROM fn_export_mv_resumo_alunos()")
+    with connections["admin"].cursor() as cursor:
+        cursor.execute("SELECT * FROM fn_export_mv_resumo_alunos()")
+        cols = [col[0] for col in cursor.description]
+        rows = cursor.fetchall()
+    
+    data = [dict(zip(cols, row)) for row in rows]
     response = HttpResponse(
         json.dumps(data, ensure_ascii=False, indent=2),
         content_type="application/json; charset=utf-8",

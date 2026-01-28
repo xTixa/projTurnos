@@ -752,15 +752,31 @@ def admin_turnos_list(request):
 
 #view para criar um novo turno
 def admin_turnos_create(request):
+    ucs = PostgreSQLConsultas.list_all_ucs()
     if request.method == "POST":
         n_turno = request.POST.get("n_turno")
         capacidade = request.POST.get("capacidade")
         tipo = request.POST.get("tipo")
+        uc_id = request.POST.get("uc_id")
+        dia_semana = request.POST.get("dia_semana")
+        hora_inicio = request.POST.get("hora_inicio")
+        hora_fim = request.POST.get("hora_fim")
 
         # SQL: Cria o turno
         turno_id = PostgreSQLConsultas.create_turno(n_turno, int(capacidade), tipo)
         
         if turno_id:
+            # Se tiver UC/hora, criar associação turno_uc
+            if uc_id or dia_semana or hora_inicio or hora_fim:
+                if not (uc_id and dia_semana and hora_inicio and hora_fim):
+                    messages.error(request, "Para associar a uma UC, tem de indicar UC, dia e horas.")
+                    return render(request, "admin/turnos_form.html", {"ucs": ucs})
+
+                assoc_ok = PostgreSQLConsultas.create_turno_uc(turno_id, int(uc_id), dia_semana, hora_inicio, hora_fim)
+                if not assoc_ok:
+                    messages.error(request, "Turno criado, mas falhou a associação à UC.")
+                    return redirect("home:admin_turnos_list")
+
             registar_log(request, operacao="CREATE", entidade="turno", chave=str(turno_id), detalhes=f"Turno criado: {tipo} (nº {n_turno})")
             messages.success(request, "Turno criado com sucesso!")
         else:
@@ -768,10 +784,11 @@ def admin_turnos_create(request):
         
         return redirect("home:admin_turnos_list")
 
-    return render(request, "admin/turnos_form.html")
+    return render(request, "admin/turnos_form.html", {"ucs": ucs})
 
 #view para editar turno
 def admin_turnos_edit(request, id):
+    ucs = PostgreSQLConsultas.list_all_ucs()
     # SQL: Obtém o turno
     turno = PostgreSQLConsultas.get_turno_by_id(id)
     
@@ -784,11 +801,21 @@ def admin_turnos_edit(request, id):
         n_turno = request.POST.get("n_turno")
         capacidade = request.POST.get("capacidade")
         tipo = request.POST.get("tipo")
+        uc_id = request.POST.get("uc_id")
+        dia_semana = request.POST.get("dia_semana")
+        hora_inicio = request.POST.get("hora_inicio")
+        hora_fim = request.POST.get("hora_fim")
         
         # SQL: Atualiza o turno
         success = PostgreSQLConsultas.update_turno(id, n_turno, int(capacidade), tipo)
         
         if success:
+            if uc_id or dia_semana or hora_inicio or hora_fim:
+                if not (uc_id and dia_semana and hora_inicio and hora_fim):
+                    messages.error(request, "Para associar a uma UC, tem de indicar UC, dia e horas.")
+                    return render(request, "admin/turnos_form.html", {"turno": turno, "ucs": ucs})
+
+                PostgreSQLConsultas.create_turno_uc(int(id), int(uc_id), dia_semana, hora_inicio, hora_fim)
             registar_log(request, operacao="UPDATE", entidade="turno", chave=str(id), detalhes=f"Turno atualizado: {tipo} (nº {n_turno})")
             messages.success(request, "Turno atualizado!")
         else:
@@ -797,7 +824,7 @@ def admin_turnos_edit(request, id):
         return redirect("home:admin_turnos_list")
 
     # GET: Mostra o form preenchido
-    return render(request, "admin/turnos_form.html", {"turno": turno})
+    return render(request, "admin/turnos_form.html", {"turno": turno, "ucs": ucs})
 
 #view para eliminar turno
 def admin_turnos_delete(request, id):
@@ -1500,6 +1527,11 @@ def admin_uc_edit(request, id):
             ano = request.POST.get("ano")
             semestre = request.POST.get("semestre")
             
+            # Validar campos obrigatórios
+            if not curso or not ano or not semestre:
+                messages.error(request, "Curso, Ano e Semestre são obrigatórios.")
+                return redirect("home:admin_uc_edit", id=id)
+            
             # SQL: Atualiza UC
             success = PostgreSQLConsultas.update_uc(
                 id, nome, int(curso), int(ano), int(semestre), float(ects) if ects else 0.0
@@ -1518,15 +1550,21 @@ def admin_uc_edit(request, id):
             n_turno = request.POST.get("n_turno")
             tipo = request.POST.get("tipo")
             capacidade = request.POST.get("capacidade")
+            dia_semana = request.POST.get("dia_semana")
             hora_inicio = request.POST.get("hora_inicio")
             hora_fim = request.POST.get("hora_fim")
             
+            # Validar campos obrigatórios
+            if not capacidade or not tipo or not dia_semana or not hora_inicio or not hora_fim:
+                messages.error(request, "Todos os campos são obrigatórios.")
+                return redirect("home:admin_uc_edit", id=id)
+            
             # SQL: Cria turno
-            novo_turno_id = PostgreSQLConsultas.create_turno(n_turno or "0", int(capacidade) if capacidade else 0, tipo or "")
+            novo_turno_id = PostgreSQLConsultas.create_turno(n_turno or "0", int(capacidade), tipo)
             
             if novo_turno_id:
-                # SQL: Associa turno à UC
-                success = PostgreSQLConsultas.create_turno_uc(novo_turno_id, id, hora_inicio or "", hora_fim or "")
+                # SQL: Associa turno à UC com dia da semana
+                success = PostgreSQLConsultas.create_turno_uc(novo_turno_id, id, dia_semana, hora_inicio, hora_fim)
                 
                 if success:
                     registar_log(request, operacao="CREATE", entidade="turno", chave=str(novo_turno_id), detalhes=f"Turno criado para UC {uc['nome']}")
@@ -1547,8 +1585,13 @@ def admin_uc_edit(request, id):
             hora_inicio = request.POST.get("hora_inicio")
             hora_fim = request.POST.get("hora_fim")
             
+            # Validar campos obrigatórios
+            if not turno_id or not capacidade or not tipo:
+                messages.error(request, "Todos os campos são obrigatórios.")
+                return redirect("home:admin_uc_edit", id=id)
+            
             # SQL: Atualiza turno
-            success = PostgreSQLConsultas.update_turno(int(turno_id), n_turno or "0", int(capacidade) if capacidade else 0, tipo or "")
+            success = PostgreSQLConsultas.update_turno(int(turno_id), n_turno or "0", int(capacidade), tipo)
             
             if success:
                 registar_log(request, operacao="UPDATE", entidade="turno", chave=str(turno_id), detalhes=f"Turno atualizado para UC {uc['nome']}")
@@ -1562,14 +1605,22 @@ def admin_uc_edit(request, id):
         if action == "delete_turno":
             turno_id = request.POST.get("turno_id")
             
-            # SQL: Deleta turno_uc e turno
-            success = PostgreSQLConsultas.delete_turno(int(turno_id))
+            # Validar campo obrigatório
+            if not turno_id:
+                messages.error(request, "ID do turno não fornecido.")
+                return redirect("home:admin_uc_edit", id=id)
             
-            if success:
-                registar_log(request, operacao="DELETE", entidade="turno", chave=str(turno_id), detalhes=f"Turno removido da UC {uc['nome']}")
-                messages.success(request, "Turno removido!")
-            else:
-                messages.error(request, "Erro ao remover turno.")
+            try:
+                # SQL: Remove apenas a associação turno-UC
+                success = PostgreSQLConsultas.delete_turno_from_uc(int(turno_id), int(id))
+                
+                if success:
+                    registar_log(request, operacao="DELETE", entidade="turno_uc", chave=f"{turno_id}-{id}", detalhes=f"Turno {turno_id} removido da UC {uc['nome']}")
+                    messages.success(request, f"Turno removido da UC com sucesso!")
+                else:
+                    messages.error(request, f"Erro ao remover turno da UC. A função retornou False.")
+            except Exception as e:
+                messages.error(request, f"Erro ao remover turno: {str(e)}")
             
             return redirect("home:admin_uc_edit", id=id)
 

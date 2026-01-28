@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect
 from huggingface_hub import login
-from bd2_projeto.mongodb import db  # importa o db do mongodb.py
-from bson.objectid import ObjectId
+from bd2_projeto.mongodb import db_admin  # importa o db do mongodb.py
+from extra_app.mongo_sugestoes import Sugestao
 from django.contrib import messages
 from bson.errors import InvalidId
 from django.core.paginator import Paginator
@@ -12,11 +12,11 @@ def caixa_sugestoes(request):
         return redirect("home:login")
     
     mensagem = None
-    colecao = db["sugestao"]
 
     if request.method == "POST":
         texto = request.POST.get("texto", "").strip()
         print("VIEW FEEDBACK", texto, request.POST)
+        
         if texto:
             if request.user.is_authenticated:
                 autor_id = str(request.user.id)
@@ -26,28 +26,18 @@ def caixa_sugestoes(request):
                 autor_id = request.session.get("user_id")
                 autor_nome = request.session.get("user_nome")
                 autor_email = request.session.get("user_email")
-            colecao.insert_one({
-                "texto": texto,
-                "autor_id": autor_id,
-                "autor_nome": autor_nome,
-                "auto_email": autor_email,
-                "Like" : [],
-                "Dislike" : [],
-            })
+            
+            # Usa a classe Sugestao para inserir
+            Sugestao.inserir_sugestao(texto, autor_id, autor_nome, autor_email)
             mensagem = "Sugestão gravada com sucesso."
         else:
             mensagem = "Escreve alguma coisa antes de enviar."
-            
-    ##lista todas as sugestões ###
     
+    # Lista todas as sugestões
+    sugestoes = Sugestao.listar_sugestoes_ordenadas()
     
-    sugestoes = list(colecao.find().sort("_id", -1))  # Ordena por mais recente
-    
-    sugestoes_top = sorted(
-    sugestoes,
-    key=lambda s: len(s.get("Like", [])),
-    reverse=True
-    )[:5]
+    # Top 5 com mais likes (usa aggregate no Mongo!)
+    sugestoes_top = Sugestao.listar_top5_por_like()
     
     if request.user.is_authenticated:
         user_id = str(request.user.id)
@@ -56,23 +46,28 @@ def caixa_sugestoes(request):
 
     print("USER_ID:", user_id)
     
+    # Adiciona campos para o template
     for s in sugestoes:
-        s["id"] = str(s["_id"]) # Converte ObjectId para string para uso no template
+        s["id"] = str(s["_id"])
         s["user_liked"] = user_id in s.get("Like", [])
         s["user_disliked"] = user_id in s.get("Dislike", [])
         print("DEBUG:", s["id"], s["user_liked"], s["user_disliked"])
 
+    # Converte top5 também
+    for s in sugestoes_top:
+        s["id"] = str(s["_id"])
+        s["user_liked"] = user_id in s.get("Like", [])
+        s["user_disliked"] = user_id in s.get("Dislike", [])
+
     return render(request, 'extra_app/sugestoes.html', {
-    'sugestoes': sugestoes,       # todas, para o scroll normal
-    'sugestoes_top': sugestoes_top,  # top 5
-    'mensagem': mensagem,
-    'area': 'extra',    
+        'sugestoes': sugestoes,
+        'sugestoes_top': sugestoes_top,
+        'mensagem': mensagem,
+        'area': 'extra',    
     })
 
-## Like ou Dislike nas sugestões ###
+
 def feedback_sugestao(request, sugestao_id):
-    colecao = db["sugestao"]
-    
     print("ID DA VIEW:", repr(sugestao_id))
 
     if request.user.is_authenticated:
@@ -87,71 +82,33 @@ def feedback_sugestao(request, sugestao_id):
     print("acao", acao, request.POST)
     
     if acao == "dislike":
-        doc = colecao.find_one({"_id": ObjectId(sugestao_id)})
-        if user_id in doc.get("Dislike", []):
-            # já tinha like → remove
-            colecao.update_one(
-            {"_id": ObjectId(sugestao_id)},
-            {"$pull": {"Dislike": user_id}}
-            )
-        else:
-            # não tinha like → adiciona e tira de dislike
-            colecao.update_one(
-                {"_id": ObjectId(sugestao_id)},
-                {
-                    "$addToSet": {"Dislike": user_id},
-                    "$pull": {"Like": user_id},
-                }
-            )
+        Sugestao.toggle_dislike(sugestao_id, user_id)
     elif acao == "like":
-        doc = colecao.find_one({"_id": ObjectId(sugestao_id)})
-        if user_id in doc.get("Like", []):
-            colecao.update_one(
-            {"_id": ObjectId(sugestao_id)},
-            {"$pull": {"Like": user_id}}
-            )
-        else: 
-            colecao.update_one(
-                {"_id": ObjectId(sugestao_id)},
-                {
-                    "$addToSet": {"Like": user_id},
-                    "$pull": {"Dislike": user_id},
-                }
-            )
+        Sugestao.toggle_like(sugestao_id, user_id)
+    
     return redirect("extra_app:sugestoes_todas")
+
 
 def sugestoes_eliminar(request, sugestao_id):
     """
     Elimina uma sugestão apenas para users staff.
     Redireciona para lista após delete ou erro.
     """
-    # Verifica staff (superuser ou is_staff=True no user)
+    # Verifica staff
     if not request.user.is_staff:
         messages.error(request, "Sem permissão para eliminar sugestões.")
         return redirect("extra_app:sugestoes_todas")
     
-    try:
-        # Converte str para ObjectId (24 chars hex)
-        if len(sugestao_id) != 24 or not all(c in '0123456789abcdefABCDEF' for c in sugestao_id):
-            raise InvalidId("ID inválido")
-        
-        oid = ObjectId(sugestao_id)
-        colecao = db["sugestao"]
-        result = colecao.delete_one({"_id": oid})
-        
-        if result.deleted_count == 0:
-            messages.warning(request, "Sugestão não encontrada ou já eliminada.")
-        else:
-            messages.success(request, "Sugestão eliminada com sucesso!")
-            
-    except (InvalidId, Exception) as e:
-        messages.error(request, f"Erro ao eliminar: ID inválido.")
+    # Usa o método da classe Sugestao
+    if Sugestao.eliminar_sugestao(sugestao_id):
+        messages.success(request, "Sugestão eliminada com sucesso!")
+    else:
+        messages.error(request, "Erro ao eliminar: ID inválido ou sugestão não existe.")
     
     return redirect("extra_app:sugestoes_todas")
 
+
 def sugestoes_todas(request):
-    colecao = db["sugestao"]
-    
     if request.user.is_authenticated:
         user_id = str(request.user.id)
     else:
@@ -160,16 +117,17 @@ def sugestoes_todas(request):
     if not user_id:
         return redirect("home:login")
     
-    sugestoes = list(colecao.find({}).sort("_id", -1))
+    # Lista todas as sugestões
+    sugestoes = Sugestao.listar_sugestoes_todas()
+    
+    # Adiciona campos para o template
     for s in sugestoes:
         s["id"] = str(s["_id"])
         s["user_liked"] = user_id in s.get("Like", [])
         s["user_disliked"] = user_id in s.get("Dislike", [])
-    
 
     context = {
         "area": "extra",
         "sugestoes": sugestoes,
     }
     return render(request, "extra_app/sugestoes_todas.html", context)
-
