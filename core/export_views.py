@@ -477,7 +477,7 @@ def exportar_mv_estatisticas_turno_json(request):
     
     data = [dict(zip(cols, row)) for row in rows]
     response = HttpResponse(
-        json.dumps(data, ensure_ascii=False, indent=2),
+        json.dumps(data, ensure_ascii=False, indent=2, cls=DecimalEncoder),
         content_type="application/json; charset=utf-8",
     )
     response["Content-Disposition"] = (
